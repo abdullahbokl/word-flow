@@ -1,0 +1,38 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "WordFlow (dev)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "debug",
+      "preLaunchTask": "doppler: sync dev env",
+      "args": [
+        "--dart-define-from-file=.vscode/.secrets/dev.json"
+      ]
+    },
+    {
+      "name": "WordFlow (profile)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "profile",
+      "preLaunchTask": "doppler: sync dev env",
+      "args": [
+        "--dart-define-from-file=.vscode/.secrets/dev.json"
+      ]
+    },
+    {
+      "name": "WordFlow (release)",
+      "request": "launch",
+      "type": "dart",
+      "program": "lib/main.dart",
+      "flutterMode": "release",
+      "preLaunchTask": "doppler: sync prod env",
+      "args": [
+        "--dart-define-from-file=.vscode/.secrets/prod.json"
+      ]
+    }
+  ]
+}

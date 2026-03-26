@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "doppler: sync dev env",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "mkdir -p .vscode/.secrets && doppler secrets download --no-file --format=json --project word-flow --config dev > .vscode/.secrets/dev.json"
+      ],
+      "problemMatcher": []
+    },
+    {
+      "label": "doppler: sync prod env",
+      "type": "shell",
+      "command": "bash",
+      "args": [
+        "-lc",
+        "mkdir -p .vscode/.secrets && doppler secrets download --no-file --format=json --project word-flow --config prd > .vscode/.secrets/prod.json"
+      ],
+      "problemMatcher": []
+    }
+  ]
+}
