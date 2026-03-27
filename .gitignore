@@ -81,3 +81,9 @@ android/key.properties
 pubspec.lock
 
 implementation_plan.md
+
+# Generated files
+*.g.dart
+*.freezed.dart
+*.config.dart
+*.injectable.dart
