@@ -7,6 +7,10 @@ part 'workspace_state.freezed.dart';
 sealed class WorkspaceState with _$WorkspaceState {
   const factory WorkspaceState.initial() = _Initial;
   const factory WorkspaceState.processing() = _Processing;
-  const factory WorkspaceState.results(List<ProcessedWord> words) = _Results;
+  const factory WorkspaceState.results({
+    required List<ProcessedWord> words,
+    required List<ProcessedWord> unknownWords,
+    required List<ProcessedWord> knownWords,
+  }) = _Results;
   const factory WorkspaceState.error(String message) = _Error;
 }

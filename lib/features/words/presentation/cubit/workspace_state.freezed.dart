@@ -21,21 +21,36 @@ mixin _$WorkspaceState {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() processing,
-    required TResult Function(List<ProcessedWord> words) results,
+    required TResult Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )
+    results,
     required TResult Function(String message) error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? processing,
-    TResult? Function(List<ProcessedWord> words)? results,
+    TResult? Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )?
+    results,
     TResult? Function(String message)? error,
   }) => throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? processing,
-    TResult Function(List<ProcessedWord> words)? results,
+    TResult Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )?
+    results,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) => throw _privateConstructorUsedError;
@@ -130,7 +145,12 @@ class _$InitialImpl implements _Initial {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() processing,
-    required TResult Function(List<ProcessedWord> words) results,
+    required TResult Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )
+    results,
     required TResult Function(String message) error,
   }) {
     return initial();
@@ -141,7 +161,12 @@ class _$InitialImpl implements _Initial {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? processing,
-    TResult? Function(List<ProcessedWord> words)? results,
+    TResult? Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )?
+    results,
     TResult? Function(String message)? error,
   }) {
     return initial?.call();
@@ -152,7 +177,12 @@ class _$InitialImpl implements _Initial {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? processing,
-    TResult Function(List<ProcessedWord> words)? results,
+    TResult Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )?
+    results,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -249,7 +279,12 @@ class _$ProcessingImpl implements _Processing {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() processing,
-    required TResult Function(List<ProcessedWord> words) results,
+    required TResult Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )
+    results,
     required TResult Function(String message) error,
   }) {
     return processing();
@@ -260,7 +295,12 @@ class _$ProcessingImpl implements _Processing {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? processing,
-    TResult? Function(List<ProcessedWord> words)? results,
+    TResult? Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )?
+    results,
     TResult? Function(String message)? error,
   }) {
     return processing?.call();
@@ -271,7 +311,12 @@ class _$ProcessingImpl implements _Processing {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? processing,
-    TResult Function(List<ProcessedWord> words)? results,
+    TResult Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )?
+    results,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
@@ -330,7 +375,11 @@ abstract class _$$ResultsImplCopyWith<$Res> {
     $Res Function(_$ResultsImpl) then,
   ) = __$$ResultsImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({List<ProcessedWord> words});
+  $Res call({
+    List<ProcessedWord> words,
+    List<ProcessedWord> unknownWords,
+    List<ProcessedWord> knownWords,
+  });
 }
 
 /// @nodoc
@@ -346,12 +395,24 @@ class __$$ResultsImplCopyWithImpl<$Res>
   /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
-  $Res call({Object? words = null}) {
+  $Res call({
+    Object? words = null,
+    Object? unknownWords = null,
+    Object? knownWords = null,
+  }) {
     return _then(
       _$ResultsImpl(
-        null == words
+        words: null == words
             ? _value._words
             : words // ignore: cast_nullable_to_non_nullable
+                  as List<ProcessedWord>,
+        unknownWords: null == unknownWords
+            ? _value._unknownWords
+            : unknownWords // ignore: cast_nullable_to_non_nullable
+                  as List<ProcessedWord>,
+        knownWords: null == knownWords
+            ? _value._knownWords
+            : knownWords // ignore: cast_nullable_to_non_nullable
                   as List<ProcessedWord>,
       ),
     );
@@ -361,7 +422,13 @@ class __$$ResultsImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$ResultsImpl implements _Results {
-  const _$ResultsImpl(final List<ProcessedWord> words) : _words = words;
+  const _$ResultsImpl({
+    required final List<ProcessedWord> words,
+    required final List<ProcessedWord> unknownWords,
+    required final List<ProcessedWord> knownWords,
+  }) : _words = words,
+       _unknownWords = unknownWords,
+       _knownWords = knownWords;
 
   final List<ProcessedWord> _words;
   @override
@@ -371,9 +438,25 @@ class _$ResultsImpl implements _Results {
     return EqualUnmodifiableListView(_words);
   }
 
+  final List<ProcessedWord> _unknownWords;
+  @override
+  List<ProcessedWord> get unknownWords {
+    if (_unknownWords is EqualUnmodifiableListView) return _unknownWords;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_unknownWords);
+  }
+
+  final List<ProcessedWord> _knownWords;
+  @override
+  List<ProcessedWord> get knownWords {
+    if (_knownWords is EqualUnmodifiableListView) return _knownWords;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_knownWords);
+  }
+
   @override
   String toString() {
-    return 'WorkspaceState.results(words: $words)';
+    return 'WorkspaceState.results(words: $words, unknownWords: $unknownWords, knownWords: $knownWords)';
   }
 
   @override
@@ -381,12 +464,24 @@ class _$ResultsImpl implements _Results {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ResultsImpl &&
-            const DeepCollectionEquality().equals(other._words, _words));
+            const DeepCollectionEquality().equals(other._words, _words) &&
+            const DeepCollectionEquality().equals(
+              other._unknownWords,
+              _unknownWords,
+            ) &&
+            const DeepCollectionEquality().equals(
+              other._knownWords,
+              _knownWords,
+            ));
   }
 
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, const DeepCollectionEquality().hash(_words));
+  int get hashCode => Object.hash(
+    runtimeType,
+    const DeepCollectionEquality().hash(_words),
+    const DeepCollectionEquality().hash(_unknownWords),
+    const DeepCollectionEquality().hash(_knownWords),
+  );
 
   /// Create a copy of WorkspaceState
   /// with the given fields replaced by the non-null parameter values.
@@ -401,10 +496,15 @@ class _$ResultsImpl implements _Results {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() processing,
-    required TResult Function(List<ProcessedWord> words) results,
+    required TResult Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )
+    results,
     required TResult Function(String message) error,
   }) {
-    return results(words);
+    return results(words, unknownWords, knownWords);
   }
 
   @override
@@ -412,10 +512,15 @@ class _$ResultsImpl implements _Results {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? processing,
-    TResult? Function(List<ProcessedWord> words)? results,
+    TResult? Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )?
+    results,
     TResult? Function(String message)? error,
   }) {
-    return results?.call(words);
+    return results?.call(words, unknownWords, knownWords);
   }
 
   @override
@@ -423,12 +528,17 @@ class _$ResultsImpl implements _Results {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? processing,
-    TResult Function(List<ProcessedWord> words)? results,
+    TResult Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )?
+    results,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
     if (results != null) {
-      return results(words);
+      return results(words, unknownWords, knownWords);
     }
     return orElse();
   }
@@ -472,9 +582,15 @@ class _$ResultsImpl implements _Results {
 }
 
 abstract class _Results implements WorkspaceState {
-  const factory _Results(final List<ProcessedWord> words) = _$ResultsImpl;
+  const factory _Results({
+    required final List<ProcessedWord> words,
+    required final List<ProcessedWord> unknownWords,
+    required final List<ProcessedWord> knownWords,
+  }) = _$ResultsImpl;
 
   List<ProcessedWord> get words;
+  List<ProcessedWord> get unknownWords;
+  List<ProcessedWord> get knownWords;
 
   /// Create a copy of WorkspaceState
   /// with the given fields replaced by the non-null parameter values.
@@ -555,7 +671,12 @@ class _$ErrorImpl implements _Error {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() processing,
-    required TResult Function(List<ProcessedWord> words) results,
+    required TResult Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )
+    results,
     required TResult Function(String message) error,
   }) {
     return error(message);
@@ -566,7 +687,12 @@ class _$ErrorImpl implements _Error {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? processing,
-    TResult? Function(List<ProcessedWord> words)? results,
+    TResult? Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )?
+    results,
     TResult? Function(String message)? error,
   }) {
     return error?.call(message);
@@ -577,7 +703,12 @@ class _$ErrorImpl implements _Error {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? processing,
-    TResult Function(List<ProcessedWord> words)? results,
+    TResult Function(
+      List<ProcessedWord> words,
+      List<ProcessedWord> unknownWords,
+      List<ProcessedWord> knownWords,
+    )?
+    results,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {

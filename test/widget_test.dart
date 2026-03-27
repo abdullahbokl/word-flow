@@ -9,6 +9,7 @@ import 'package:word_flow/core/widgets/app_button.dart';
 import 'package:word_flow/core/widgets/empty_state_view.dart';
 import 'package:word_flow/core/widgets/section_card.dart';
 import 'package:word_flow/core/utils/script_analysis.dart';
+import 'package:word_flow/core/utils/script_processor.dart';
 import 'package:word_flow/features/words/presentation/cubit/workspace_cubit.dart';
 import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
 import 'package:word_flow/features/words/presentation/pages/workspace_page.dart';
@@ -39,7 +40,9 @@ void main() {
       initialState: const AuthState.guest(),
     );
 
-    when(() => syncCubit.state).thenReturn(const SyncState.idle(pendingCount: 0));
+    when(
+      () => syncCubit.state,
+    ).thenReturn(const SyncState.idle(pendingCount: 0));
     whenListen(
       syncCubit,
       Stream<SyncState>.fromIterable([const SyncState.idle(pendingCount: 0)]),
@@ -58,6 +61,9 @@ void main() {
     final workspaceCubit = MockWorkspaceCubit();
     when(() => workspaceCubit.state).thenReturn(const WorkspaceState.initial());
     when(() => workspaceCubit.summary).thenReturn(const ScriptSummary.empty());
+    when(() => workspaceCubit.words).thenReturn(const <ProcessedWord>[]);
+    when(() => workspaceCubit.pendingKnownWords).thenReturn(const <String>{});
+    when(() => workspaceCubit.isProcessing).thenReturn(false);
     whenListen(
       workspaceCubit,
       Stream<WorkspaceState>.fromIterable([const WorkspaceState.initial()]),

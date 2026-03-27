@@ -9,30 +9,27 @@ import 'workspace_header.dart';
 class WorkspaceBody extends StatelessWidget {
   final WorkspaceState state;
   final ScriptSummary summary;
+  final List<ProcessedWord> words;
+  final Set<String> pendingWordTexts;
+  final bool isProcessing;
   final TextEditingController controller;
   final VoidCallback onAnalyze;
   final VoidCallback onClear;
-  final Function(String wordText) onToggle;
 
   const WorkspaceBody({
     super.key,
     required this.state,
     required this.summary,
+    required this.words,
+    required this.pendingWordTexts,
+    required this.isProcessing,
     required this.controller,
     required this.onAnalyze,
     required this.onClear,
-    required this.onToggle,
   });
 
   @override
   Widget build(BuildContext context) {
-    final words = state.map(
-      initial: (_) => <ProcessedWord>[],
-      processing: (_) => <ProcessedWord>[],
-      results: (res) => res.words,
-      error: (_) => <ProcessedWord>[],
-    );
-
     return LayoutBuilder(
       builder: (context, constraints) {
         return Center(
@@ -40,27 +37,33 @@ class WorkspaceBody extends StatelessWidget {
             constraints: BoxConstraints(
               maxWidth: constraints.maxWidth > 980 ? 980 : constraints.maxWidth,
             ),
-            child: ListView(
-              padding: const EdgeInsets.fromLTRB(20, 14, 20, 28),
-              children: [
-                WorkspaceHeader(
-                  summary: summary,
-                ),
-                const SizedBox(height: 18),
-                ScriptInputSection(
-                  controller: controller,
-                  isProcessing: state.maybeMap(
-                    processing: (_) => true,
-                    orElse: () => false,
+            child: CustomScrollView(
+              slivers: [
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 14, 20, 18),
+                  sliver: SliverToBoxAdapter(
+                    child: WorkspaceHeader(summary: summary),
                   ),
-                  onAnalyze: onAnalyze,
-                  onClear: onClear,
                 ),
-                const SizedBox(height: 18),
-                ResultsSection(
-                  state: state,
-                  words: words,
-                  onToggle: onToggle,
+                SliverPadding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  sliver: SliverToBoxAdapter(
+                    child: ScriptInputSection(
+                      controller: controller,
+                      isProcessing: isProcessing,
+                      onAnalyze: onAnalyze,
+                      onClear: onClear,
+                    ),
+                  ),
+                ),
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                  sliver: ResultsSection(
+                    state: state,
+                    words: words,
+                    isProcessing: isProcessing,
+                    pendingWordTexts: pendingWordTexts,
+                  ),
                 ),
               ],
             ),

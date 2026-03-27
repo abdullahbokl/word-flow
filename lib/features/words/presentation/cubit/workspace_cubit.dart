@@ -1,6 +1,7 @@
+import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/utils/script_processor.dart';
 import '../../../../core/utils/script_analysis.dart';
+import '../../../../core/utils/script_processor.dart';
 import '../../domain/usecases/process_script.dart';
 import '../../domain/usecases/save_processed_words.dart';
 import '../../domain/usecases/toggle_known_word.dart';
@@ -12,71 +13,87 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
   final ProcessScript _processScript;
   final SaveProcessedWords _saveProcessedWords;
   final ToggleKnownWord _toggleKnownWord;
-  ScriptSummary _summary = const ScriptSummary.empty();
 
-  WorkspaceCubit(
-    this._processScript,
-    this._saveProcessedWords,
-    this._toggleKnownWord,
-  ) : super(const WorkspaceState.initial());
+  final List<ProcessedWord> _words = [];
+  final Set<String> _pendingKnownWords = <String>{};
+  ScriptSummary _summary = const ScriptSummary.empty();
+  int _revision = 0;
+
+  WorkspaceCubit(this._processScript, this._saveProcessedWords, this._toggleKnownWord) 
+    : super(const WorkspaceState.initial());
 
   ScriptSummary get summary => _summary;
+  List<ProcessedWord> get words => List.unmodifiable(_words);
+  Set<String> get pendingKnownWords => Set.unmodifiable(_pendingKnownWords);
+  bool get isProcessing => state.maybeMap(processing: (_) => true, orElse: () => false);
 
   Future<void> analyze(String text, {String? userId}) async {
-    if (text.trim().isEmpty) {
-      _summary = const ScriptSummary.empty();
-      emit(const WorkspaceState.initial());
-      return;
-    }
+    if (text.trim().isEmpty) return _reset();
     emit(const WorkspaceState.processing());
     final result = await _processScript(text, userId: userId);
     result.fold(
-      (failure) {
-        _summary = const ScriptSummary.empty();
-        emit(WorkspaceState.error(failure.message));
-      },
-      (analysis) {
-        _summary = analysis.summary;
-        emit(WorkspaceState.results(analysis.words));
+      (f) => emit(WorkspaceState.error(f.message)),
+      (a) {
+        _words..clear()..addAll(a.words);
+        _summary = a.summary;
+        _revision++;
+        _pendingKnownWords.clear();
+        _emitResults();
+        unawaited(_saveProcessedWords(a.words, userId: userId));
       },
     );
   }
 
-  Future<void> save(List<ProcessedWord> words, {String? userId}) async {
-    final result = await _saveProcessedWords(words, userId: userId);
-    result.fold(
-      (failure) => emit(WorkspaceState.error(failure.message)),
-      (_) {
-        _summary = const ScriptSummary.empty();
-        emit(const WorkspaceState.initial());
-      },
-    );
+  void _reset() {
+    _words.clear();
+    _pendingKnownWords.clear();
+    _summary = const ScriptSummary.empty();
+    _revision++;
+    emit(const WorkspaceState.initial());
+  }
+
+  void _emitResults() {
+    final unknown = _words.where((w) => !w.isKnown).toList();
+    final known = _words.where((w) => w.isKnown).toList();
+    emit(WorkspaceState.results(words: List.from(_words), unknownWords: unknown, knownWords: known));
   }
 
   Future<void> toggleKnown(String wordText, {String? userId}) async {
-    final result = await _toggleKnownWord(wordText, userId: userId);
+    if (isProcessing || _pendingKnownWords.contains(wordText)) return;
+    final currentRevision = _revision;
+    _pendingKnownWords.add(wordText);
+    _summary = _rebuildSummary(_words);
+    _emitResults(); // This triggers UI update immediately to show animation
     
+    // We delay the heavy DB operation to the next event loop tick to let the UI start its animation smoothly
+    unawaited(Future.delayed(Duration.zero, () => _persistToggle(wordText, currentRevision, userId)));
+  }
+
+  Future<void> _persistToggle(String text, int revision, String? userId) async {
+    final result = await _toggleKnownWord(text, userId: userId);
+    if (isClosed) return;
+
     result.fold(
-      (failure) => emit(WorkspaceState.error(failure.message)),
-      (_) {
-        // Optimistically remove from result list and update summary
-        state.maybeMap(
-          results: (res) {
-            final updatedWords = res.words
-                .where((w) => w.wordText != wordText)
-                .toList();
-            
-            _summary = ScriptSummary(
-              totalWords: _summary.totalWords,
-              uniqueWords: _summary.uniqueWords,
-              newWords: updatedWords.length,
-            );
-            
-            emit(WorkspaceState.results(updatedWords));
-          },
-          orElse: () {},
-        );
+      (f) {
+        _pendingKnownWords.remove(text);
+        emit(WorkspaceState.error(f.message));
+        _emitResults();
+      },
+      (_) async {
+        // Additional delay for animation to complete before removing from list
+        await Future.delayed(const Duration(milliseconds: 280));
+        if (isClosed) return;
+        _pendingKnownWords.remove(text);
+        if (revision == _revision) _words.removeWhere((w) => w.wordText == text);
+        _summary = _rebuildSummary(_words);
+        _emitResults();
       },
     );
   }
+
+  ScriptSummary _rebuildSummary(Iterable<ProcessedWord> ws) => ScriptSummary(
+    totalWords: _summary.totalWords,
+    uniqueWords: _summary.uniqueWords,
+    newWords: ws.where((w) => !w.isKnown && !_pendingKnownWords.contains(w.wordText)).length,
+  );
 }

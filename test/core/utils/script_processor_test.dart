@@ -18,7 +18,7 @@ void main() {
       expect(result.words.any((w) => w.wordText == 'again' && w.totalCount == 1), true);
     });
 
-    test('should filter out known words', () async {
+    test('should tag known words without filtering them out', () async {
       const text = 'Apple banana apple cherry';
       final result = await ScriptProcessor.process(
         rawText: text,
@@ -26,10 +26,10 @@ void main() {
       );
 
       expect(result.summary, const ScriptSummary(totalWords: 4, uniqueWords: 3, newWords: 2));
-      expect(result.words.length, 2);
-      expect(result.words.any((w) => w.wordText == 'apple'), false);
-      expect(result.words.any((w) => w.wordText == 'banana'), true);
-      expect(result.words.any((w) => w.wordText == 'cherry'), true);
+      expect(result.words.length, 3);
+      expect(result.words.any((w) => w.wordText == 'apple' && w.isKnown == true), true);
+      expect(result.words.any((w) => w.wordText == 'banana' && w.isKnown == false), true);
+      expect(result.words.any((w) => w.wordText == 'cherry' && w.isKnown == false), true);
     });
 
     test('should handle punctuation and case', () async {

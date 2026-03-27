@@ -5,14 +5,16 @@ import 'script_analysis.dart';
 class ProcessedWord extends Equatable {
   final String wordText;
   final int totalCount;
+  final bool isKnown;
 
   const ProcessedWord({
     required this.wordText,
     required this.totalCount,
+    this.isKnown = false,
   });
 
   @override
-  List<Object?> get props => [wordText, totalCount];
+  List<Object?> get props => [wordText, totalCount, isKnown];
 }
 
 class ScriptProcessor {
@@ -42,26 +44,36 @@ class ScriptProcessor {
         wordCounts[normalized] = (wordCounts[normalized] ?? 0) + 1;
       }
 
-      // 3. Filter known words and convert to ProcessedWord
+      // 3. Convert to ProcessedWord and tag known status
       final processed = <ProcessedWord>[];
+      int newWordCount = 0;
+      
       for (final entry in wordCounts.entries) {
-        final word = entry.key;
-        if (!knownWords.contains(word)) {
-          processed.add(ProcessedWord(
-            wordText: word,
-            totalCount: entry.value,
-          ));
-        }
+        final wordText = entry.key;
+        final isKnown = knownWords.contains(wordText);
+        
+        if (!isKnown) newWordCount++;
+
+        processed.add(ProcessedWord(
+          wordText: wordText,
+          totalCount: entry.value,
+          isKnown: isKnown,
+        ));
       }
 
-      // 4. Sort by frequency descending
-      processed.sort((a, b) => b.totalCount.compareTo(a.totalCount));
+      // 4. Sort: Known at bottom, then by frequency descending
+      processed.sort((a, b) {
+        if (a.isKnown != b.isKnown) {
+          return a.isKnown ? 1 : -1;
+        }
+        return b.totalCount.compareTo(a.totalCount);
+      });
 
       return ScriptAnalysis(
         summary: ScriptSummary(
           totalWords: matches.length,
           uniqueWords: wordCounts.length,
-          newWords: processed.length,
+          newWords: newWordCount,
         ),
         words: processed,
       );
