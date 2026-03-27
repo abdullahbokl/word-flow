@@ -3,67 +3,125 @@ import 'package:flutter/material.dart';
 class WordCard extends StatelessWidget {
   final String text;
   final int count;
-  final VoidCallback? onToggle;
   final bool isKnown;
+  final bool isPending;
+  final VoidCallback? onToggle;
+  final List<Widget>? actions;
 
   const WordCard({
     super.key,
     required this.text,
     required this.count,
-    required this.onToggle,
     this.isKnown = false,
+    this.isPending = false,
+    this.onToggle,
+    this.actions,
   });
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    final statusColor = isKnown ? colorScheme.primary : colorScheme.secondary;
+    final scheme = Theme.of(context).colorScheme;
+    final statusColor = isKnown ? scheme.primary : scheme.secondary;
+
     return Card(
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: onToggle,
+      child: AnimatedOpacity(
+        duration: const Duration(milliseconds: 180),
+        opacity: isPending ? 0.35 : 1,
         child: Padding(
-          padding: const EdgeInsets.all(18),
+          padding: const EdgeInsets.all(12),
           child: Row(
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Icon(
-                  isKnown ? Icons.check_rounded : Icons.auto_awesome_rounded,
-                  color: statusColor,
-                ),
-              ),
+              _StatusIndicator(isKnown: isKnown, color: statusColor),
               const SizedBox(width: 14),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(text, style: Theme.of(context).textTheme.titleMedium),
-                    const SizedBox(height: 6),
-                    Text(
-                      '$count ${count == 1 ? 'occurrence' : 'occurrences'}',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
+                child: _WordInfo(text: text, count: count, isKnown: isKnown),
               ),
-              const SizedBox(width: 12),
-              IconButton.filledTonal(
-                onPressed: onToggle,
-                tooltip: isKnown ? 'Mark as unknown' : 'Mark as known',
-                icon: Icon(
-                  isKnown ? Icons.remove_done_rounded : Icons.check_rounded,
+              if (onToggle != null)
+                _ToggleButton(
+                  isKnown: isKnown,
+                  isPending: isPending,
+                  onToggle: onToggle!,
+                  statusColor: statusColor,
                 ),
-              ),
+              if (actions != null) ...actions!,
+              if (isPending && onToggle == null) _InlineLoading(color: statusColor),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+class _StatusIndicator extends StatelessWidget {
+  final bool isKnown;
+  final Color color;
+  const _StatusIndicator({required this.isKnown, required this.color});
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 40,
+        height: 40,
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(12),
+        ),
+        child: Icon(
+          isKnown ? Icons.verified_rounded : Icons.auto_awesome_rounded,
+          color: color,
+          size: 20,
+        ),
+      );
+}
+
+class _WordInfo extends StatelessWidget {
+  final String text;
+  final int count;
+  final bool isKnown;
+  const _WordInfo({required this.text, required this.count, required this.isKnown});
+  @override
+  Widget build(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(text, style: textTheme.titleMedium),
+        const SizedBox(height: 2),
+        Text(
+          'Count: $count • ${isKnown ? "Known" : "Unknown"}',
+          style: textTheme.bodySmall,
+        ),
+      ],
+    );
+  }
+}
+
+class _ToggleButton extends StatelessWidget {
+  final bool isKnown;
+  final bool isPending;
+  final VoidCallback onToggle;
+  final Color statusColor;
+  const _ToggleButton({required this.isKnown, required this.isPending, required this.onToggle, required this.statusColor});
+  @override
+  Widget build(BuildContext context) => IconButton(
+        icon: isPending
+            ? _InlineLoading(color: statusColor)
+            : Icon(
+                isKnown ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
+                color: isKnown ? Theme.of(context).colorScheme.primary : null,
+              ),
+        onPressed: isPending ? null : onToggle,
+        tooltip: 'Toggle status',
+      );
+}
+
+class _InlineLoading extends StatelessWidget {
+  final Color color;
+  const _InlineLoading({required this.color});
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        height: 16,
+        width: 16,
+        child: CircularProgressIndicator(strokeWidth: 2, color: color),
+      );
 }
