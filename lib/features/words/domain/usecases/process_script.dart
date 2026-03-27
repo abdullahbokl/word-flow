@@ -16,10 +16,10 @@ class ProcessScript {
     String? userId,
   }) async {
     try {
-      final wordsResult = await _repository.getKnownWords(userId: userId);
+      final wordsResult = await _repository.getKnownWordTexts(userId: userId);
       final Set<String> knownWordTexts = wordsResult.fold(
         (failure) => {},
-        (words) => words.map((e) => e.wordText).toSet(),
+        (texts) => texts.toSet(),
       );
 
       final processed = await ScriptProcessor.process(

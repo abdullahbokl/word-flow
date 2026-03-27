@@ -7,30 +7,21 @@ import 'sync_state.dart';
 @injectable
 class SyncCubit extends Cubit<SyncState> {
   final SyncRepository _syncRepository;
-  Timer? _refreshTimer;
+  StreamSubscription<int>? _pendingSub;
 
   SyncCubit(this._syncRepository)
       : super(const SyncState.idle(pendingCount: 0)) {
-    _startPolling();
+    _startWatching();
   }
 
-  void _startPolling() {
-    _refreshTimer = Timer.periodic(const Duration(seconds: 10), (_) => refresh());
-    refresh();
-  }
-
-  Future<void> refresh() async {
-    final result = await _syncRepository.getPendingCount();
-    result.fold(
-      (failure) => emit(SyncState.error(
-        pendingCount: state.pendingCount,
-        message: failure.message,
-      )),
-      (count) => emit(SyncState.idle(
+  void _startWatching() {
+    _pendingSub?.cancel();
+    _pendingSub = _syncRepository.watchPendingCount().listen((count) {
+      emit(SyncState.idle(
         pendingCount: count,
         lastSyncTime: state.maybeMap(idle: (s) => s.lastSyncTime, orElse: () => null),
-      )),
-    );
+      ));
+    });
   }
 
   Future<void> syncNow() async {
@@ -46,12 +37,11 @@ class SyncCubit extends Cubit<SyncState> {
         lastSyncTime: DateTime.now(),
       )),
     );
-    await refresh();
   }
 
   @override
   Future<void> close() {
-    _refreshTimer?.cancel();
+    _pendingSub?.cancel();
     return super.close();
   }
 }
