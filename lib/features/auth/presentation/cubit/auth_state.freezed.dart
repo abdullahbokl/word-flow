@@ -22,6 +22,7 @@ mixin _$AuthState {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserEntity user) authenticated,
+    required TResult Function(UserEntity user, int guestWordCount) pendingMerge,
     required TResult Function() guest,
     required TResult Function(String message) error,
   }) => throw _privateConstructorUsedError;
@@ -30,6 +31,7 @@ mixin _$AuthState {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserEntity user)? authenticated,
+    TResult? Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult? Function()? guest,
     TResult? Function(String message)? error,
   }) => throw _privateConstructorUsedError;
@@ -38,6 +40,7 @@ mixin _$AuthState {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserEntity user)? authenticated,
+    TResult Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult Function()? guest,
     TResult Function(String message)? error,
     required TResult orElse(),
@@ -47,6 +50,7 @@ mixin _$AuthState {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_PendingMerge value) pendingMerge,
     required TResult Function(_Guest value) guest,
     required TResult Function(_Error value) error,
   }) => throw _privateConstructorUsedError;
@@ -55,6 +59,7 @@ mixin _$AuthState {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_PendingMerge value)? pendingMerge,
     TResult? Function(_Guest value)? guest,
     TResult? Function(_Error value)? error,
   }) => throw _privateConstructorUsedError;
@@ -63,6 +68,7 @@ mixin _$AuthState {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_PendingMerge value)? pendingMerge,
     TResult Function(_Guest value)? guest,
     TResult Function(_Error value)? error,
     required TResult orElse(),
@@ -135,6 +141,7 @@ class _$InitialImpl implements _Initial {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserEntity user) authenticated,
+    required TResult Function(UserEntity user, int guestWordCount) pendingMerge,
     required TResult Function() guest,
     required TResult Function(String message) error,
   }) {
@@ -147,6 +154,7 @@ class _$InitialImpl implements _Initial {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserEntity user)? authenticated,
+    TResult? Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult? Function()? guest,
     TResult? Function(String message)? error,
   }) {
@@ -159,6 +167,7 @@ class _$InitialImpl implements _Initial {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserEntity user)? authenticated,
+    TResult Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult Function()? guest,
     TResult Function(String message)? error,
     required TResult orElse(),
@@ -175,6 +184,7 @@ class _$InitialImpl implements _Initial {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_PendingMerge value) pendingMerge,
     required TResult Function(_Guest value) guest,
     required TResult Function(_Error value) error,
   }) {
@@ -187,6 +197,7 @@ class _$InitialImpl implements _Initial {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_PendingMerge value)? pendingMerge,
     TResult? Function(_Guest value)? guest,
     TResult? Function(_Error value)? error,
   }) {
@@ -199,6 +210,7 @@ class _$InitialImpl implements _Initial {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_PendingMerge value)? pendingMerge,
     TResult Function(_Guest value)? guest,
     TResult Function(_Error value)? error,
     required TResult orElse(),
@@ -260,6 +272,7 @@ class _$LoadingImpl implements _Loading {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserEntity user) authenticated,
+    required TResult Function(UserEntity user, int guestWordCount) pendingMerge,
     required TResult Function() guest,
     required TResult Function(String message) error,
   }) {
@@ -272,6 +285,7 @@ class _$LoadingImpl implements _Loading {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserEntity user)? authenticated,
+    TResult? Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult? Function()? guest,
     TResult? Function(String message)? error,
   }) {
@@ -284,6 +298,7 @@ class _$LoadingImpl implements _Loading {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserEntity user)? authenticated,
+    TResult Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult Function()? guest,
     TResult Function(String message)? error,
     required TResult orElse(),
@@ -300,6 +315,7 @@ class _$LoadingImpl implements _Loading {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_PendingMerge value) pendingMerge,
     required TResult Function(_Guest value) guest,
     required TResult Function(_Error value) error,
   }) {
@@ -312,6 +328,7 @@ class _$LoadingImpl implements _Loading {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_PendingMerge value)? pendingMerge,
     TResult? Function(_Guest value)? guest,
     TResult? Function(_Error value)? error,
   }) {
@@ -324,6 +341,7 @@ class _$LoadingImpl implements _Loading {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_PendingMerge value)? pendingMerge,
     TResult Function(_Guest value)? guest,
     TResult Function(_Error value)? error,
     required TResult orElse(),
@@ -412,6 +430,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserEntity user) authenticated,
+    required TResult Function(UserEntity user, int guestWordCount) pendingMerge,
     required TResult Function() guest,
     required TResult Function(String message) error,
   }) {
@@ -424,6 +443,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserEntity user)? authenticated,
+    TResult? Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult? Function()? guest,
     TResult? Function(String message)? error,
   }) {
@@ -436,6 +456,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserEntity user)? authenticated,
+    TResult Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult Function()? guest,
     TResult Function(String message)? error,
     required TResult orElse(),
@@ -452,6 +473,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_PendingMerge value) pendingMerge,
     required TResult Function(_Guest value) guest,
     required TResult Function(_Error value) error,
   }) {
@@ -464,6 +486,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_PendingMerge value)? pendingMerge,
     TResult? Function(_Guest value)? guest,
     TResult? Function(_Error value)? error,
   }) {
@@ -476,6 +499,7 @@ class _$AuthenticatedImpl implements _Authenticated {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_PendingMerge value)? pendingMerge,
     TResult Function(_Guest value)? guest,
     TResult Function(_Error value)? error,
     required TResult orElse(),
@@ -496,6 +520,182 @@ abstract class _Authenticated implements AuthState {
   /// with the given fields replaced by the non-null parameter values.
   @JsonKey(includeFromJson: false, includeToJson: false)
   _$$AuthenticatedImplCopyWith<_$AuthenticatedImpl> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class _$$PendingMergeImplCopyWith<$Res> {
+  factory _$$PendingMergeImplCopyWith(
+    _$PendingMergeImpl value,
+    $Res Function(_$PendingMergeImpl) then,
+  ) = __$$PendingMergeImplCopyWithImpl<$Res>;
+  @useResult
+  $Res call({UserEntity user, int guestWordCount});
+}
+
+/// @nodoc
+class __$$PendingMergeImplCopyWithImpl<$Res>
+    extends _$AuthStateCopyWithImpl<$Res, _$PendingMergeImpl>
+    implements _$$PendingMergeImplCopyWith<$Res> {
+  __$$PendingMergeImplCopyWithImpl(
+    _$PendingMergeImpl _value,
+    $Res Function(_$PendingMergeImpl) _then,
+  ) : super(_value, _then);
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({Object? user = null, Object? guestWordCount = null}) {
+    return _then(
+      _$PendingMergeImpl(
+        null == user
+            ? _value.user
+            : user // ignore: cast_nullable_to_non_nullable
+                  as UserEntity,
+        null == guestWordCount
+            ? _value.guestWordCount
+            : guestWordCount // ignore: cast_nullable_to_non_nullable
+                  as int,
+      ),
+    );
+  }
+}
+
+/// @nodoc
+
+class _$PendingMergeImpl implements _PendingMerge {
+  const _$PendingMergeImpl(this.user, this.guestWordCount);
+
+  @override
+  final UserEntity user;
+  @override
+  final int guestWordCount;
+
+  @override
+  String toString() {
+    return 'AuthState.pendingMerge(user: $user, guestWordCount: $guestWordCount)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$PendingMergeImpl &&
+            (identical(other.user, user) || other.user == user) &&
+            (identical(other.guestWordCount, guestWordCount) ||
+                other.guestWordCount == guestWordCount));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, user, guestWordCount);
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$PendingMergeImplCopyWith<_$PendingMergeImpl> get copyWith =>
+      __$$PendingMergeImplCopyWithImpl<_$PendingMergeImpl>(this, _$identity);
+
+  @override
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>({
+    required TResult Function() initial,
+    required TResult Function() loading,
+    required TResult Function(UserEntity user) authenticated,
+    required TResult Function(UserEntity user, int guestWordCount) pendingMerge,
+    required TResult Function() guest,
+    required TResult Function(String message) error,
+  }) {
+    return pendingMerge(user, guestWordCount);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>({
+    TResult? Function()? initial,
+    TResult? Function()? loading,
+    TResult? Function(UserEntity user)? authenticated,
+    TResult? Function(UserEntity user, int guestWordCount)? pendingMerge,
+    TResult? Function()? guest,
+    TResult? Function(String message)? error,
+  }) {
+    return pendingMerge?.call(user, guestWordCount);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>({
+    TResult Function()? initial,
+    TResult Function()? loading,
+    TResult Function(UserEntity user)? authenticated,
+    TResult Function(UserEntity user, int guestWordCount)? pendingMerge,
+    TResult Function()? guest,
+    TResult Function(String message)? error,
+    required TResult orElse(),
+  }) {
+    if (pendingMerge != null) {
+      return pendingMerge(user, guestWordCount);
+    }
+    return orElse();
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>({
+    required TResult Function(_Initial value) initial,
+    required TResult Function(_Loading value) loading,
+    required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_PendingMerge value) pendingMerge,
+    required TResult Function(_Guest value) guest,
+    required TResult Function(_Error value) error,
+  }) {
+    return pendingMerge(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>({
+    TResult? Function(_Initial value)? initial,
+    TResult? Function(_Loading value)? loading,
+    TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_PendingMerge value)? pendingMerge,
+    TResult? Function(_Guest value)? guest,
+    TResult? Function(_Error value)? error,
+  }) {
+    return pendingMerge?.call(this);
+  }
+
+  @override
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>({
+    TResult Function(_Initial value)? initial,
+    TResult Function(_Loading value)? loading,
+    TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_PendingMerge value)? pendingMerge,
+    TResult Function(_Guest value)? guest,
+    TResult Function(_Error value)? error,
+    required TResult orElse(),
+  }) {
+    if (pendingMerge != null) {
+      return pendingMerge(this);
+    }
+    return orElse();
+  }
+}
+
+abstract class _PendingMerge implements AuthState {
+  const factory _PendingMerge(final UserEntity user, final int guestWordCount) =
+      _$PendingMergeImpl;
+
+  UserEntity get user;
+  int get guestWordCount;
+
+  /// Create a copy of AuthState
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$PendingMergeImplCopyWith<_$PendingMergeImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }
 
@@ -545,6 +745,7 @@ class _$GuestImpl implements _Guest {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserEntity user) authenticated,
+    required TResult Function(UserEntity user, int guestWordCount) pendingMerge,
     required TResult Function() guest,
     required TResult Function(String message) error,
   }) {
@@ -557,6 +758,7 @@ class _$GuestImpl implements _Guest {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserEntity user)? authenticated,
+    TResult? Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult? Function()? guest,
     TResult? Function(String message)? error,
   }) {
@@ -569,6 +771,7 @@ class _$GuestImpl implements _Guest {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserEntity user)? authenticated,
+    TResult Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult Function()? guest,
     TResult Function(String message)? error,
     required TResult orElse(),
@@ -585,6 +788,7 @@ class _$GuestImpl implements _Guest {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_PendingMerge value) pendingMerge,
     required TResult Function(_Guest value) guest,
     required TResult Function(_Error value) error,
   }) {
@@ -597,6 +801,7 @@ class _$GuestImpl implements _Guest {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_PendingMerge value)? pendingMerge,
     TResult? Function(_Guest value)? guest,
     TResult? Function(_Error value)? error,
   }) {
@@ -609,6 +814,7 @@ class _$GuestImpl implements _Guest {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_PendingMerge value)? pendingMerge,
     TResult Function(_Guest value)? guest,
     TResult Function(_Error value)? error,
     required TResult orElse(),
@@ -697,6 +903,7 @@ class _$ErrorImpl implements _Error {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserEntity user) authenticated,
+    required TResult Function(UserEntity user, int guestWordCount) pendingMerge,
     required TResult Function() guest,
     required TResult Function(String message) error,
   }) {
@@ -709,6 +916,7 @@ class _$ErrorImpl implements _Error {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserEntity user)? authenticated,
+    TResult? Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult? Function()? guest,
     TResult? Function(String message)? error,
   }) {
@@ -721,6 +929,7 @@ class _$ErrorImpl implements _Error {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserEntity user)? authenticated,
+    TResult Function(UserEntity user, int guestWordCount)? pendingMerge,
     TResult Function()? guest,
     TResult Function(String message)? error,
     required TResult orElse(),
@@ -737,6 +946,7 @@ class _$ErrorImpl implements _Error {
     required TResult Function(_Initial value) initial,
     required TResult Function(_Loading value) loading,
     required TResult Function(_Authenticated value) authenticated,
+    required TResult Function(_PendingMerge value) pendingMerge,
     required TResult Function(_Guest value) guest,
     required TResult Function(_Error value) error,
   }) {
@@ -749,6 +959,7 @@ class _$ErrorImpl implements _Error {
     TResult? Function(_Initial value)? initial,
     TResult? Function(_Loading value)? loading,
     TResult? Function(_Authenticated value)? authenticated,
+    TResult? Function(_PendingMerge value)? pendingMerge,
     TResult? Function(_Guest value)? guest,
     TResult? Function(_Error value)? error,
   }) {
@@ -761,6 +972,7 @@ class _$ErrorImpl implements _Error {
     TResult Function(_Initial value)? initial,
     TResult Function(_Loading value)? loading,
     TResult Function(_Authenticated value)? authenticated,
+    TResult Function(_PendingMerge value)? pendingMerge,
     TResult Function(_Guest value)? guest,
     TResult Function(_Error value)? error,
     required TResult orElse(),

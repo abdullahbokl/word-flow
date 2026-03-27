@@ -7,6 +7,7 @@ import '../../domain/usecases/sign_up_with_email.dart';
 import '../../domain/usecases/sign_out.dart';
 import '../../../../features/words/domain/repositories/word_repository.dart';
 import '../../../../features/words/domain/usecases/adopt_guest_words.dart';
+import '../../domain/entities/user_entity.dart';
 import 'auth_state.dart';
 
 @injectable
@@ -46,10 +47,28 @@ class AuthCubit extends Cubit<AuthState> {
     result.fold(
       (failure) => emit(AuthState.error(failure.message)),
       (user) async {
-        await _adoptGuestWords(user.id);
-        emit(AuthState.authenticated(user));
+        final guestCountResult = await _wordRepository.getGuestWordsCount();
+        final guestCount = guestCountResult.fold((_) => 0, (count) => count);
+
+        if (guestCount > 0) {
+          emit(AuthState.pendingMerge(user, guestCount));
+        } else {
+          emit(AuthState.authenticated(user));
+        }
       },
     );
+  }
+
+  Future<void> mergeAndSignIn(UserEntity user) async {
+    emit(const AuthState.loading());
+    await _adoptGuestWords(user.id);
+    emit(AuthState.authenticated(user));
+  }
+
+  Future<void> discardGuestAndSignIn(UserEntity user) async {
+    emit(const AuthState.loading());
+    await _wordRepository.clearLocalWords(userId: null);
+    emit(AuthState.authenticated(user));
   }
 
   Future<void> signUp(String email, String password) async {
