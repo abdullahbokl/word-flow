@@ -23,29 +23,43 @@ class WordResultsAnimatedItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: animation,
-      child: SizeTransition(
-        sizeFactor: animation,
-        axisAlignment: -1,
-        child: Padding(
-          key: ValueKey('item_${word.wordText}'),
-          padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
-          child: WordCard(
-            key: ValueKey('card_${word.wordText}'),
-            text: word.wordText,
-            count: word.totalCount,
-            isKnown: word.isKnown,
-            isPending: isPending,
-            onToggle: enabled
-                ? () {
-                    final userId = context.read<AuthCubit>().state.maybeMap(
-                          authenticated: (s) => s.user.id,
-                          orElse: () => null,
-                        );
-                    context.read<WorkspaceCubit>().toggleKnown(word.wordText, userId: userId);
-                  }
-                : null,
+   
+    final curvedAnimation = CurvedAnimation(
+      parent: animation,
+      curve: Curves.easeInOutCubic,
+    );
+
+    return SlideTransition(
+     
+     
+      position: Tween<Offset>(
+        begin: const Offset(-1, 0),
+        end: Offset.zero,
+      ).animate(curvedAnimation),
+      child: FadeTransition(
+        opacity: curvedAnimation,
+        child: SizeTransition(
+          sizeFactor: curvedAnimation,
+          axisAlignment: -1,
+          child: Padding(
+            key: ValueKey('item_${word.wordText}'),
+            padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
+            child: WordCard(
+              key: ValueKey('card_${word.wordText}'),
+              text: word.wordText,
+              count: word.totalCount,
+              isKnown: word.isKnown,
+              isPending: isPending,
+              onToggle: enabled
+                  ? () {
+                      final userId = context.read<AuthCubit>().state.maybeMap(
+                            authenticated: (s) => s.user.id,
+                            orElse: () => null,
+                          );
+                      context.read<WorkspaceCubit>().toggleKnown(word.wordText, userId: userId);
+                    }
+                  : null,
+            ),
           ),
         ),
       ),

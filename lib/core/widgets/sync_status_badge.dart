@@ -71,7 +71,7 @@ class _Badge extends StatelessWidget {
           children: [
             if (isRotating)
               RotationTransition(
-                turns: const AlwaysStoppedAnimation(0.5), // Placeholder for animation
+                turns: const AlwaysStoppedAnimation(0.5),
                 child: Icon(icon, size: 14, color: color),
               )
             else
