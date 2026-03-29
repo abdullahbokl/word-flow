@@ -27,4 +27,5 @@ class WordSyncQueue extends Table {
       integer().named('retry_count').withDefault(const Constant(0))();
   TextColumn get lastError => text().named('last_error').nullable()();
   DateTimeColumn get createdAt => dateTime().named('created_at')();
+  DateTimeColumn get updatedAt => dateTime().named('updated_at')();
 }

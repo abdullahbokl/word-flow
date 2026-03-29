@@ -145,7 +145,7 @@ void main() {
   );
 
   blocTest<WorkspaceCubit, WorkspaceState>(
-    'toggleKnown failure emits error and keeps original results',
+    'toggleKnown failure stores recoverable error and keeps original results',
     build: () {
       when(
         () => processScript.call(any(), userId: any(named: 'userId')),
@@ -175,13 +175,14 @@ void main() {
         pendingKnownWords: <String>{'hello'},
         revision: 1,
       ),
-      const WorkspaceState.error('update failed'),
       const WorkspaceState.results(
         words: words,
         summary: summary,
         pendingKnownWords: <String>{},
         revision: 1,
+        lastError: 'update failed',
       ),
     ],
   );
+
 }

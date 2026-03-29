@@ -33,6 +33,7 @@ class SyncRepositoryImpl implements SyncRepository {
     try {
       final queueItems = await _syncSource.getSyncQueue(20);
       int successCount = 0;
+      final now = DateTime.now().toUtc();
 
       for (final item in queueItems) {
         final wordId = item.wordId;
@@ -40,7 +41,22 @@ class SyncRepositoryImpl implements SyncRepository {
         final queueId = item.id;
         final retryCount = item.retryCount;
 
-        if (retryCount > 5) continue;
+        // Dead letter: skip items that have failed too many times
+        if (retryCount > 10) {
+          await _syncSource.removeFromSyncQueue(queueId);
+          continue;
+        }
+
+        // Exponential backoff: skip items that haven't waited long enough
+        // Backoff seconds: 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024
+        if (retryCount > 0) {
+          final backoffSeconds = (1 << retryCount).clamp(0, 1024); // 2^retryCount, max 1024s
+          final lastAttempt = item.updatedAt;
+          final timeSinceLastAttempt = now.difference(lastAttempt).inSeconds;
+          if (timeSinceLastAttempt < backoffSeconds) {
+            continue; // Not enough time has passed, skip for now
+          }
+        }
 
         try {
           switch (operation) {

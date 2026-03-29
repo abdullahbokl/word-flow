@@ -14,7 +14,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   WordFlowDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
  
  
@@ -33,6 +33,11 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   ''');
             await customStatement(
               'CREATE UNIQUE INDEX IF NOT EXISTS idx_words_user_word ON words(user_id, word_text)',
+            );
+          }
+          if (from < 4) {
+            await customStatement(
+              'ALTER TABLE word_sync_queue ADD COLUMN updated_at TEXT NOT NULL DEFAULT (datetime(\'now\'))',
             );
           }
         },
@@ -180,6 +185,7 @@ FROM words_dedup
       wordId: wordId,
       operation: operation,
       createdAt: DateTime.now().toUtc(),
+      updatedAt: DateTime.now().toUtc(),
     ));
   }
 

@@ -61,8 +61,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       (f) {
         _unmarkPending(word.id);
         _optimisticallyReplace(prev);
-        emit(LibraryState.error(f.message));
-        _reEmitLoaded();
+        _emitLoadedError(f.message);
       },
       (_) => _unmarkPending(word.id),
     );
@@ -86,8 +85,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       (f) {
         _unmarkPending(id);
         if (prevWord != null) _optimisticallyUpsert(prevWord);
-        emit(LibraryState.error(f.message));
-        _reEmitLoaded();
+        _emitLoadedError(f.message);
       },
       (_) => _unmarkPending(id),
     );
@@ -108,8 +106,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       (f) {
         _unmarkPending(word.id);
         _optimisticallyRemove(word.id);
-        emit(LibraryState.error(f.message));
-        _reEmitLoaded();
+        _emitLoadedError(f.message);
       },
       (_) => _unmarkPending(word.id),
     );
@@ -129,28 +126,45 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       (f) {
         _unmarkPending(word.id);
         _optimisticallyReplace(prev);
-        emit(LibraryState.error(f.message));
-        _reEmitLoaded();
+        _emitLoadedError(f.message);
       },
       (_) => _unmarkPending(word.id),
     );
   }
 
+  void clearError() {
+    state.maybeMap(
+      loaded: (s) {
+        if (s.lastError != null) {
+          emit(s.copyWith(lastError: null));
+        }
+      },
+      orElse: () {},
+    );
+  }
+
   void _markPending(String id) {
     _pendingWordIds = {..._pendingWordIds, id};
-    _reEmitLoaded();
+    _emitLoadedWithPendingState();
   }
 
   void _unmarkPending(String id) {
     if (!_pendingWordIds.contains(id)) return;
     _pendingWordIds = {..._pendingWordIds}..remove(id);
-    _reEmitLoaded();
+    _emitLoadedWithPendingState();
   }
 
-  void _reEmitLoaded() {
+  void _emitLoadedWithPendingState() {
     state.maybeMap(
       loaded: (s) => emit(s.copyWith(pendingWordIds: _pendingWordIds)),
       orElse: () {},
+    );
+  }
+
+  void _emitLoadedError(String message) {
+    state.maybeMap(
+      loaded: (s) => emit(s.copyWith(lastError: message)),
+      orElse: () => emit(LibraryState.error(message)),
     );
   }
 

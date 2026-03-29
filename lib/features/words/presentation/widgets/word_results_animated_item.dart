@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:word_flow/core/widgets/word_card.dart';
+import 'package:word_flow/shared/widgets/word_card_base.dart';
 import 'package:word_flow/features/words/domain/entities/processed_word.dart';
-import 'package:word_flow/features/words/presentation/cubit/workspace_cubit.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
 
 class WordResultsAnimatedItem extends StatelessWidget {
 
@@ -44,21 +41,12 @@ class WordResultsAnimatedItem extends StatelessWidget {
           child: Padding(
             key: ValueKey('item_${word.wordText}'),
             padding: EdgeInsets.only(bottom: isLast ? 0 : 12),
-            child: WordCard(
+            child: WordCardBase(
               key: ValueKey('card_${word.wordText}'),
-              text: word.wordText,
-              count: word.totalCount,
-              isKnown: word.isKnown,
+              word: word,
+              mode: WordCardMode.workspace,
               isPending: isPending,
-              onToggle: enabled
-                  ? () {
-                      final userId = context.read<AuthCubit>().state.maybeMap(
-                            authenticated: (s) => s.user.id,
-                            orElse: () => null,
-                          );
-                      context.read<WorkspaceCubit>().toggleKnown(word.wordText, userId: userId);
-                    }
-                  : null,
+              enabled: enabled,
             ),
           ),
         ),

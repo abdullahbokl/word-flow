@@ -26,6 +26,7 @@ mixin _$WorkspaceState {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )
     results,
     required TResult Function(String message) error,
@@ -39,6 +40,7 @@ mixin _$WorkspaceState {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )?
     results,
     TResult? Function(String message)? error,
@@ -52,6 +54,7 @@ mixin _$WorkspaceState {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )?
     results,
     TResult Function(String message)? error,
@@ -153,6 +156,7 @@ class _$InitialImpl implements _Initial {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )
     results,
     required TResult Function(String message) error,
@@ -170,6 +174,7 @@ class _$InitialImpl implements _Initial {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )?
     results,
     TResult? Function(String message)? error,
@@ -187,6 +192,7 @@ class _$InitialImpl implements _Initial {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )?
     results,
     TResult Function(String message)? error,
@@ -290,6 +296,7 @@ class _$ProcessingImpl implements _Processing {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )
     results,
     required TResult Function(String message) error,
@@ -307,6 +314,7 @@ class _$ProcessingImpl implements _Processing {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )?
     results,
     TResult? Function(String message)? error,
@@ -324,6 +332,7 @@ class _$ProcessingImpl implements _Processing {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )?
     results,
     TResult Function(String message)? error,
@@ -389,6 +398,7 @@ abstract class _$$ResultsImplCopyWith<$Res> {
     ScriptSummary summary,
     Set<String> pendingKnownWords,
     int revision,
+    String? lastError,
   });
 }
 
@@ -410,6 +420,7 @@ class __$$ResultsImplCopyWithImpl<$Res>
     Object? summary = null,
     Object? pendingKnownWords = null,
     Object? revision = null,
+    Object? lastError = freezed,
   }) {
     return _then(
       _$ResultsImpl(
@@ -429,6 +440,10 @@ class __$$ResultsImplCopyWithImpl<$Res>
             ? _value.revision
             : revision // ignore: cast_nullable_to_non_nullable
                   as int,
+        lastError: freezed == lastError
+            ? _value.lastError
+            : lastError // ignore: cast_nullable_to_non_nullable
+                  as String?,
       ),
     );
   }
@@ -442,6 +457,7 @@ class _$ResultsImpl implements _Results {
     required this.summary,
     final Set<String> pendingKnownWords = const <String>{},
     this.revision = 0,
+    this.lastError,
   }) : _words = words,
        _pendingKnownWords = pendingKnownWords;
 
@@ -468,10 +484,12 @@ class _$ResultsImpl implements _Results {
   @override
   @JsonKey()
   final int revision;
+  @override
+  final String? lastError;
 
   @override
   String toString() {
-    return 'WorkspaceState.results(words: $words, summary: $summary, pendingKnownWords: $pendingKnownWords, revision: $revision)';
+    return 'WorkspaceState.results(words: $words, summary: $summary, pendingKnownWords: $pendingKnownWords, revision: $revision, lastError: $lastError)';
   }
 
   @override
@@ -486,7 +504,9 @@ class _$ResultsImpl implements _Results {
               _pendingKnownWords,
             ) &&
             (identical(other.revision, revision) ||
-                other.revision == revision));
+                other.revision == revision) &&
+            (identical(other.lastError, lastError) ||
+                other.lastError == lastError));
   }
 
   @override
@@ -496,6 +516,7 @@ class _$ResultsImpl implements _Results {
     summary,
     const DeepCollectionEquality().hash(_pendingKnownWords),
     revision,
+    lastError,
   );
 
   /// Create a copy of WorkspaceState
@@ -516,11 +537,12 @@ class _$ResultsImpl implements _Results {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )
     results,
     required TResult Function(String message) error,
   }) {
-    return results(words, summary, pendingKnownWords, revision);
+    return results(words, summary, pendingKnownWords, revision, lastError);
   }
 
   @override
@@ -533,11 +555,18 @@ class _$ResultsImpl implements _Results {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )?
     results,
     TResult? Function(String message)? error,
   }) {
-    return results?.call(words, summary, pendingKnownWords, revision);
+    return results?.call(
+      words,
+      summary,
+      pendingKnownWords,
+      revision,
+      lastError,
+    );
   }
 
   @override
@@ -550,13 +579,14 @@ class _$ResultsImpl implements _Results {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )?
     results,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
     if (results != null) {
-      return results(words, summary, pendingKnownWords, revision);
+      return results(words, summary, pendingKnownWords, revision, lastError);
     }
     return orElse();
   }
@@ -605,12 +635,14 @@ abstract class _Results implements WorkspaceState {
     required final ScriptSummary summary,
     final Set<String> pendingKnownWords,
     final int revision,
+    final String? lastError,
   }) = _$ResultsImpl;
 
   List<ProcessedWord> get words;
   ScriptSummary get summary;
   Set<String> get pendingKnownWords;
   int get revision;
+  String? get lastError;
 
   /// Create a copy of WorkspaceState
   /// with the given fields replaced by the non-null parameter values.
@@ -696,6 +728,7 @@ class _$ErrorImpl implements _Error {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )
     results,
     required TResult Function(String message) error,
@@ -713,6 +746,7 @@ class _$ErrorImpl implements _Error {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )?
     results,
     TResult? Function(String message)? error,
@@ -730,6 +764,7 @@ class _$ErrorImpl implements _Error {
       ScriptSummary summary,
       Set<String> pendingKnownWords,
       int revision,
+      String? lastError,
     )?
     results,
     TResult Function(String message)? error,

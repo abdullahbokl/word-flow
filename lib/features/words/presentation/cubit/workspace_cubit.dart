@@ -48,6 +48,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
             summary: a.summary,
             pendingKnownWords: const <String>{},
             revision: nextRevision,
+            lastError: null,
           ),
         );
         unawaited(_saveProcessedWords(a.words, userId: userId));
@@ -101,12 +102,11 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
         if (snapshot == null || snapshot.revision != revision) return;
 
         final nextPending = <String>{...snapshot.pendingKnownWords}..remove(text);
-        final restored = snapshot.copyWith(
+        emit(snapshot.copyWith(
           pendingKnownWords: nextPending,
           summary: _rebuildSummary(fallbackSummary, snapshot.words, nextPending),
-        );
-        emit(WorkspaceState.error(f.message));
-        emit(restored);
+          lastError: f.message,
+        ));
       },
       (_) async {
         await Future.delayed(const Duration(milliseconds: 280));
@@ -124,9 +124,21 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
             words: nextWords,
             pendingKnownWords: nextPending,
             summary: _rebuildSummary(fallbackSummary, nextWords, nextPending),
+            lastError: null,
           ),
         );
       },
+    );
+  }
+
+  void clearError() {
+    state.maybeMap(
+      results: (s) {
+        if (s.lastError != null) {
+          emit(s.copyWith(lastError: null));
+        }
+      },
+      orElse: () {},
     );
   }
 

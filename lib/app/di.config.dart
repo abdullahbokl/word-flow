@@ -172,17 +172,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i915.AdoptGuestWords>(),
       ),
     );
+    gh.factory<_i557.SyncCubit>(
+      () => _i557.SyncCubit(
+        gh<_i613.WatchPendingCount>(),
+        gh<_i796.SyncPendingWords>(),
+        gh<_i862.ConnectivityMonitor>(),
+      ),
+    );
     gh.factory<_i996.WorkspaceCubit>(
       () => _i996.WorkspaceCubit(
         gh<_i69.ProcessScript>(),
         gh<_i455.SaveProcessedWords>(),
         gh<_i646.ToggleKnownWord>(),
-      ),
-    );
-    gh.factory<_i557.SyncCubit>(
-      () => _i557.SyncCubit(
-        gh<_i613.WatchPendingCount>(),
-        gh<_i796.SyncPendingWords>(),
       ),
     );
     gh.factory<_i7.LibraryCubit>(

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:word_flow/core/widgets/app_button.dart';
 import 'package:word_flow/core/widgets/section_card.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:word_flow/features/words/presentation/cubit/workspace_cubit.dart';
 import 'package:word_flow/features/words/presentation/widgets/script_input_field.dart';
 
 class ScriptInputSection extends StatelessWidget {
@@ -9,13 +12,9 @@ class ScriptInputSection extends StatelessWidget {
     super.key,
     required this.controller,
     required this.isProcessing,
-    required this.onAnalyze,
-    required this.onClear,
   });
   final TextEditingController controller;
   final bool isProcessing;
-  final VoidCallback onAnalyze;
-  final VoidCallback onClear;
 
   @override
   Widget build(BuildContext context) {
@@ -37,7 +36,13 @@ class ScriptInputSection extends StatelessWidget {
                   label: isProcessing ? 'Analyzing...' : 'Analyze script',
                   icon: Icons.auto_awesome_rounded,
                   isLoading: isProcessing,
-                  onPressed: onAnalyze,
+                  onPressed: () {
+                    final userId = context.read<AuthCubit>().state.maybeMap(
+                          authenticated: (s) => s.user.id,
+                          orElse: () => null,
+                        );
+                    context.read<WorkspaceCubit>().analyze(controller.text, userId: userId);
+                  },
                 ),
               ),
               SizedBox(
@@ -46,7 +51,10 @@ class ScriptInputSection extends StatelessWidget {
                   label: 'Clear text',
                   icon: Icons.clear_all_rounded,
                   variant: AppButtonVariant.outline,
-                  onPressed: onClear,
+                  onPressed: () {
+                    controller.clear();
+                    context.read<WorkspaceCubit>().analyze('');
+                  },
                 ),
               ),
             ],

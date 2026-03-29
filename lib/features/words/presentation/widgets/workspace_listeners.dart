@@ -28,10 +28,32 @@ class WorkspaceListeners extends StatelessWidget {
           },
         ),
         BlocListener<WorkspaceCubit, WorkspaceState>(
-          listenWhen: (prev, current) => current.maybeMap(error: (_) => true, orElse: () => false),
+          listenWhen: (previous, current) {
+            final previousLoadedError = previous.maybeMap(results: (s) => s.lastError, orElse: () => null);
+            final currentLoadedError = current.maybeMap(results: (s) => s.lastError, orElse: () => null);
+            final hasNewLoadedError = currentLoadedError != null && currentLoadedError != previousLoadedError;
+            final hasCatastrophicError = current.maybeMap(error: (_) => true, orElse: () => false);
+            return hasNewLoadedError || hasCatastrophicError;
+          },
           listener: (context, state) {
             state.maybeMap(
-              error: (e) => ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.message))),
+              results: (s) {
+                if (s.lastError != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(s.lastError!),
+                      action: SnackBarAction(
+                        label: 'Dismiss',
+                        onPressed: () => context.read<WorkspaceCubit>().clearError(),
+                      ),
+                    ),
+                  );
+                  context.read<WorkspaceCubit>().clearError();
+                }
+              },
+              error: (e) => ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(e.message)),
+              ),
               orElse: () {},
             );
           },

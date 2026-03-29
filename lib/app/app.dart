@@ -14,7 +14,7 @@ class WordFlowApp extends StatelessWidget {
     return MultiBlocProvider(
       providers: [
         BlocProvider(create: (_) => getIt<AuthCubit>()..init()),
-        BlocProvider(create: (_) => getIt<SyncCubit>()),
+        BlocProvider(create: (_) => getIt<SyncCubit>()..init()),
       ],
       child: MaterialApp.router(
         title: 'WordFlow',

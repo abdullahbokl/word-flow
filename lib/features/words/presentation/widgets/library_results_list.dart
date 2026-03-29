@@ -1,86 +1,90 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:word_flow/core/widgets/app_loader.dart';
-import 'package:word_flow/core/widgets/word_card.dart';
+import 'package:go_router/go_router.dart';
+import 'package:word_flow/features/words/presentation/widgets/add_edit_word_sheet.dart';
 import 'package:word_flow/features/words/domain/entities/word.dart';
 import 'package:word_flow/features/words/presentation/cubit/library_cubit.dart';
 import 'package:word_flow/features/words/presentation/cubit/library_state.dart';
+import 'package:word_flow/shared/widgets/word_card_base.dart';
 
 class LibraryResultsList extends StatelessWidget {
 
   const LibraryResultsList({
     super.key,
-    required this.state,
-    required this.onDelete,
-    required this.onEdit,
+    required this.words,
+    required this.filter,
+    required this.searchQuery,
+    required this.pendingWordIds,
   });
-  final LibraryState state;
-  final Function(WordEntity) onDelete;
-  final Function(WordEntity) onEdit;
+  final List<WordEntity> words;
+  final WordsFilter filter;
+  final String searchQuery;
+  final Set<String> pendingWordIds;
 
   @override
   Widget build(BuildContext context) {
-    return state.when(
-      initial: () => const _LoadingView(),
-      loading: () => const _LoadingView(),
-      error: (msg) => _ErrorView(message: msg),
-      loaded: (words, filter, searchQuery, pendingWordIds, _) {
-        final filtered = words.where((w) {
-          final matchesFilter = switch (filter) {
-            WordsFilter.all => true,
-            WordsFilter.known => w.isKnown,
-            WordsFilter.unknown => !w.isKnown,
-          };
-          final matchesSearch = w.wordText.toLowerCase().contains(searchQuery.toLowerCase());
-          return matchesFilter && matchesSearch;
-        }).toList();
+    final filtered = words.where((w) {
+      final matchesFilter = switch (filter) {
+        WordsFilter.all => true,
+        WordsFilter.known => w.isKnown,
+        WordsFilter.unknown => !w.isKnown,
+      };
+      final matchesSearch = w.wordText.toLowerCase().contains(searchQuery.toLowerCase());
+      return matchesFilter && matchesSearch;
+    }).toList(growable: false);
 
-        if (filtered.isEmpty) return const _EmptySearchResultsView();
+    if (filtered.isEmpty) return const _EmptySearchResultsView();
 
-        return ListView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          itemCount: filtered.length,
-          itemBuilder: (context, index) {
-            final word = filtered[index];
-            final isPending = pendingWordIds.contains(word.id);
-            return WordCard(
-              key: ValueKey(word.id),
-              text: word.wordText,
-              count: word.totalCount,
-              isKnown: word.isKnown,
-              isPending: isPending,
-              onToggle: () => context.read<LibraryCubit>().toggleKnown(word),
-              actions: [
-                IconButton(
-                  icon: const Icon(Icons.edit_rounded, size: 20),
-                  onPressed: isPending ? null : () => onEdit(word),
-                  tooltip: 'Edit word',
-                ),
-                IconButton(
-                  icon: Icon(Icons.delete_outline_rounded, size: 20, color: Theme.of(context).colorScheme.error),
-                  onPressed: isPending ? null : () => onDelete(word),
-                  tooltip: 'Delete word',
-                ),
-              ],
-            );
-          },
+    return ListView.builder(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      itemCount: filtered.length,
+      itemBuilder: (context, index) {
+        final word = filtered[index];
+        final isPending = pendingWordIds.contains(word.id);
+        return WordCardBase(
+          key: ValueKey(word.id),
+          word: word,
+          mode: WordCardMode.library,
+          isPending: isPending,
+          onEdit: () => _showAddEditSheet(context, word: word),
+          onDelete: () => _confirmDelete(context, word),
         );
       },
     );
   }
-}
 
-class _LoadingView extends StatelessWidget {
-  const _LoadingView();
-  @override
-  Widget build(BuildContext context) => const Center(child: AppLoader());
-}
+  void _showAddEditSheet(BuildContext outerContext, {required WordEntity word}) {
+    showModalBottomSheet(
+      context: outerContext,
+      isScrollControlled: true,
+      builder: (context) => AddEditWordSheet(
+        word: word,
+        onSave: (text, isKnown) {
+          outerContext.read<LibraryCubit>().updateWord(word, text, isKnown);
+        },
+      ),
+    );
+  }
 
-class _ErrorView extends StatelessWidget {
-  const _ErrorView({required this.message});
-  final String message;
-  @override
-  Widget build(BuildContext context) => Center(child: Text('Error: $message', style: const TextStyle(color: Colors.red)));
+  void _confirmDelete(BuildContext outerContext, WordEntity word) {
+    showDialog(
+      context: outerContext,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete word?'),
+        content: Text('Are you sure you want to delete "${word.wordText}"?'),
+        actions: [
+          TextButton(onPressed: () => context.pop(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              outerContext.read<LibraryCubit>().deleteWord(word.id, userId: word.userId);
+              context.pop();
+            },
+            child: const Text('Delete', style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class _EmptySearchResultsView extends StatelessWidget {

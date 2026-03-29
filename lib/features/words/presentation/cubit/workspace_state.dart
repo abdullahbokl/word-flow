@@ -13,6 +13,7 @@ sealed class WorkspaceState with _$WorkspaceState {
     required ScriptSummary summary,
     @Default(<String>{}) Set<String> pendingKnownWords,
     @Default(0) int revision,
+    String? lastError,
   }) = _Results;
   const factory WorkspaceState.error(String message) = _Error;
 }

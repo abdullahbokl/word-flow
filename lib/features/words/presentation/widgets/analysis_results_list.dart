@@ -3,7 +3,7 @@ import 'package:word_flow/features/words/domain/entities/processed_word.dart';
 import 'package:word_flow/features/words/presentation/widgets/word_results_list.dart';
 import 'package:word_flow/features/words/presentation/widgets/known_words_header.dart';
 
-class AnalysisResultsList extends StatelessWidget {
+class AnalysisResultsList extends StatefulWidget {
 
   const AnalysisResultsList({
     super.key,
@@ -11,21 +11,24 @@ class AnalysisResultsList extends StatelessWidget {
     required this.knownWords,
     required this.isRefreshing,
     required this.isProcessing,
-    required this.isKnownExpanded,
     required this.pendingWordTexts,
-    required this.onToggleKnown,
   });
   final List<ProcessedWord> unknownWords;
   final List<ProcessedWord> knownWords;
   final bool isRefreshing;
   final bool isProcessing;
-  final bool isKnownExpanded;
   final Set<String> pendingWordTexts;
-  final VoidCallback onToggleKnown;
+
+  @override
+  State<AnalysisResultsList> createState() => _AnalysisResultsListState();
+}
+
+class _AnalysisResultsListState extends State<AnalysisResultsList> {
+  bool _isKnownExpanded = false;
 
   @override
   Widget build(BuildContext context) {
-    if (unknownWords.isEmpty && knownWords.isEmpty) {
+    if (widget.unknownWords.isEmpty && widget.knownWords.isEmpty) {
       return const SliverToBoxAdapter(child: SizedBox.shrink());
     }
 
@@ -34,29 +37,29 @@ class AnalysisResultsList extends StatelessWidget {
 
     return SliverMainAxisGroup(
       slivers: [
-        if (isRefreshing) _RefreshingIndicator(scheme: scheme, textTheme: textTheme),
-        if (unknownWords.isNotEmpty) ...[
-          _SectionTitle(title: 'Unknown (${unknownWords.length})', color: scheme.primary),
+        if (widget.isRefreshing) _RefreshingIndicator(scheme: scheme, textTheme: textTheme),
+        if (widget.unknownWords.isNotEmpty) ...[
+          _SectionTitle(title: 'Unknown (${widget.unknownWords.length})', color: scheme.primary),
           WordResultsList(
-            words: unknownWords,
-            pendingWordTexts: pendingWordTexts,
-            enabled: !isProcessing,
+            words: widget.unknownWords,
+            pendingWordTexts: widget.pendingWordTexts,
+            enabled: !widget.isProcessing,
           ),
         ],
-        if (unknownWords.isNotEmpty && knownWords.isNotEmpty) _Divider(),
-        if (knownWords.isNotEmpty) ...[
+        if (widget.unknownWords.isNotEmpty && widget.knownWords.isNotEmpty) _Divider(),
+        if (widget.knownWords.isNotEmpty) ...[
           SliverToBoxAdapter(
             child: KnownWordsHeader(
-              count: knownWords.length,
-              isExpanded: isKnownExpanded,
-              onToggle: onToggleKnown,
+              count: widget.knownWords.length,
+              isExpanded: _isKnownExpanded,
+              onToggle: () => setState(() => _isKnownExpanded = !_isKnownExpanded),
             ),
           ),
-          if (isKnownExpanded)
+          if (_isKnownExpanded)
             WordResultsList(
-              words: knownWords,
-              pendingWordTexts: pendingWordTexts,
-              enabled: !isProcessing,
+              words: widget.knownWords,
+              pendingWordTexts: widget.pendingWordTexts,
+              enabled: !widget.isProcessing,
             ),
         ],
         const SliverToBoxAdapter(child: SizedBox(height: 32)),
