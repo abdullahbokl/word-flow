@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../../../core/widgets/app_loader.dart';
 
 class ProcessingView extends StatelessWidget {
   const ProcessingView({super.key});
@@ -9,7 +10,7 @@ class ProcessingView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
         children: [
-          CircularProgressIndicator(
+          AppLoader(
             color: Theme.of(context).colorScheme.primary,
           ),
           const SizedBox(height: 16),

@@ -63,9 +63,9 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     final currentRevision = _revision;
     _pendingKnownWords.add(wordText);
     _summary = _rebuildSummary(_words);
-    _emitResults(); // This triggers UI update immediately to show animation
+    _emitResults();
     
-    // We delay the heavy DB operation to the next event loop tick to let the UI start its animation smoothly
+   
     unawaited(Future.delayed(Duration.zero, () => _persistToggle(wordText, currentRevision, userId)));
   }
 
@@ -80,7 +80,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
         _emitResults();
       },
       (_) async {
-        // Additional delay for animation to complete before removing from list
+       
         await Future.delayed(const Duration(milliseconds: 280));
         if (isClosed) return;
         _pendingKnownWords.remove(text);

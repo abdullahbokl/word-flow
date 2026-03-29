@@ -75,7 +75,7 @@ class _LibraryViewState extends State<LibraryView> {
     context.read<LibraryCubit>().setSearch('');
   }
 
-  void _showAddEditSheet(BuildContext outerContext, {Word? word}) {
+  void _showAddEditSheet(BuildContext outerContext, {WordEntity? word}) {
     final userId = outerContext.read<AuthCubit>().state.maybeMap(authenticated: (s) => s.user.id, orElse: () => null);
     showModalBottomSheet(
       context: outerContext,
@@ -93,7 +93,7 @@ class _LibraryViewState extends State<LibraryView> {
     );
   }
 
-  void _confirmDelete(BuildContext outerContext, Word word) {
+  void _confirmDelete(BuildContext outerContext, WordEntity word) {
     showDialog(
       context: outerContext,
       builder: (context) => AlertDialog(

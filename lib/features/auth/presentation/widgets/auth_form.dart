@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/widgets/app_loader.dart';
+import '../../../../core/widgets/app_text_field.dart';
 import '../cubit/auth_cubit.dart';
 import '../cubit/auth_state.dart';
 
@@ -22,21 +24,17 @@ class AuthForm extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        TextField(
+        AppTextField(
           controller: emailController,
-          decoration: const InputDecoration(
-            hintText: 'Email address',
-            prefixIcon: Icon(Icons.email_outlined),
-          ),
+          hint: 'Email address',
+          prefixIcon: const Icon(Icons.email_outlined),
           keyboardType: TextInputType.emailAddress,
         ),
         const SizedBox(height: 16),
-        TextField(
+        AppTextField(
           controller: passwordController,
-          decoration: const InputDecoration(
-            hintText: 'Password',
-            prefixIcon: Icon(Icons.lock_outline_rounded),
-          ),
+          hint: 'Password',
+          prefixIcon: const Icon(Icons.lock_outline_rounded),
           obscureText: true,
         ),
         const SizedBox(height: 32),
@@ -59,14 +57,7 @@ class AuthForm extends StatelessWidget {
             return FilledButton(
               onPressed: isLoading ? null : onSubmit,
               child: isLoading
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
+                  ? const AppLoader(size: 20, color: Colors.white)
                   : Text(isSignUp ? 'Create Account' : 'Sign In'),
             );
           },

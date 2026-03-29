@@ -10,7 +10,7 @@ class LibraryState with _$LibraryState {
   const factory LibraryState.initial() = _Initial;
   const factory LibraryState.loading() = _Loading;
   const factory LibraryState.loaded({
-    required List<Word> words,
+    required List<WordEntity> words,
     @Default(WordsFilter.all) WordsFilter filter,
     @Default('') String searchQuery,
     @Default(<String>{}) Set<String> pendingWordIds,

@@ -7,9 +7,10 @@ import '../../domain/usecases/delete_word.dart';
 import '../../domain/usecases/update_word.dart';
 import '../../domain/usecases/watch_words.dart';
 import 'library_state.dart';
+import 'library_optimistic_updates.dart';
 
 @injectable
-class LibraryCubit extends Cubit<LibraryState> {
+class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   final WatchWords _watchWords;
   final UpdateWord _updateWord;
   final DeleteWord _deleteWord;
@@ -47,7 +48,7 @@ class LibraryCubit extends Cubit<LibraryState> {
     );
   }
 
-  Future<void> toggleKnown(Word word) async {
+  Future<void> toggleKnown(WordEntity word) async {
     final updatedWord = word.copyWith(
       isKnown: !word.isKnown,
       lastUpdated: DateTime.now().toUtc(),
@@ -69,7 +70,7 @@ class LibraryCubit extends Cubit<LibraryState> {
 
   Future<void> deleteWord(String id, {String? userId}) async {
     final loaded = state.maybeMap(loaded: (s) => s, orElse: () => null);
-    Word? prevWord;
+    WordEntity? prevWord;
     if (loaded != null) {
       for (final w in loaded.words) {
         if (w.id == id) {
@@ -79,16 +80,12 @@ class LibraryCubit extends Cubit<LibraryState> {
       }
     }
     _markPending(id);
-    if (prevWord != null) {
-      _optimisticallyRemove(id);
-    }
+    if (prevWord != null) _optimisticallyRemove(id);
     final result = await _deleteWord(id, userId: userId);
     result.fold(
       (f) {
         _unmarkPending(id);
-        if (prevWord != null) {
-          _optimisticallyUpsert(prevWord);
-        }
+        if (prevWord != null) _optimisticallyUpsert(prevWord);
         emit(LibraryState.error(f.message));
         _reEmitLoaded();
       },
@@ -97,7 +94,7 @@ class LibraryCubit extends Cubit<LibraryState> {
   }
 
   Future<void> addWord(String text, bool isKnown, {String? userId}) async {
-    final word = Word(
+    final word = WordEntity(
       id: UuidGenerator.generate(),
       userId: userId,
       wordText: text,
@@ -118,7 +115,7 @@ class LibraryCubit extends Cubit<LibraryState> {
     );
   }
 
-  Future<void> updateWord(Word word, String newText, bool newIsKnown) async {
+  Future<void> updateWord(WordEntity word, String newText, bool newIsKnown) async {
     final prev = word;
     final updatedWord = word.copyWith(
       wordText: newText,
@@ -157,40 +154,14 @@ class LibraryCubit extends Cubit<LibraryState> {
     );
   }
 
-  void _optimisticallyReplace(Word word) {
-    state.maybeMap(
-      loaded: (s) {
-        final updated = s.words
-            .map((w) => w.id == word.id ? word : w)
-            .toList(growable: false);
-        emit(s.copyWith(words: updated, pendingWordIds: _pendingWordIds));
-      },
-      orElse: () {},
-    );
-  }
+  void _optimisticallyReplace(WordEntity word) => 
+    emit(applyOptimisticReplace(state, word, _pendingWordIds));
 
-  void _optimisticallyUpsert(Word word) {
-    state.maybeMap(
-      loaded: (s) {
-        final exists = s.words.any((w) => w.id == word.id);
-        final next = exists
-            ? s.words.map((w) => w.id == word.id ? word : w).toList(growable: false)
-            : <Word>[word, ...s.words];
-        emit(s.copyWith(words: next, pendingWordIds: _pendingWordIds));
-      },
-      orElse: () {},
-    );
-  }
+  void _optimisticallyUpsert(WordEntity word) => 
+    emit(applyOptimisticUpsert(state, word, _pendingWordIds));
 
-  void _optimisticallyRemove(String id) {
-    state.maybeMap(
-      loaded: (s) {
-        final next = s.words.where((w) => w.id != id).toList(growable: false);
-        emit(s.copyWith(words: next, pendingWordIds: _pendingWordIds));
-      },
-      orElse: () {},
-    );
-  }
+  void _optimisticallyRemove(String id) => 
+    emit(applyOptimisticRemove(state, id, _pendingWordIds));
 
   @override
   Future<void> close() {
@@ -198,3 +169,4 @@ class LibraryCubit extends Cubit<LibraryState> {
     return super.close();
   }
 }
+

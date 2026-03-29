@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/word_card.dart';
 import '../../domain/entities/word.dart';
 import '../cubit/library_cubit.dart';
@@ -7,8 +8,8 @@ import '../cubit/library_state.dart';
 
 class LibraryResultsList extends StatelessWidget {
   final LibraryState state;
-  final Function(Word) onDelete;
-  final Function(Word) onEdit;
+  final Function(WordEntity) onDelete;
+  final Function(WordEntity) onEdit;
 
   const LibraryResultsList({
     super.key,
@@ -72,7 +73,7 @@ class LibraryResultsList extends StatelessWidget {
 class _LoadingView extends StatelessWidget {
   const _LoadingView();
   @override
-  Widget build(BuildContext context) => const Center(child: CircularProgressIndicator());
+  Widget build(BuildContext context) => const Center(child: AppLoader());
 }
 
 class _ErrorView extends StatelessWidget {

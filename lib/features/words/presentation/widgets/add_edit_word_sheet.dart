@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import '../../domain/entities/word.dart';
 import '../../../../core/widgets/app_button.dart';
+import '../../../../core/widgets/app_text_field.dart';
 
 class AddEditWordSheet extends StatefulWidget {
-  final Word? word;
+  final WordEntity? word;
   final Function(String text, bool isKnown) onSave;
 
   const AddEditWordSheet({
@@ -61,16 +62,11 @@ class _AddEditWordSheetState extends State<AddEditWordSheet> {
             ],
           ),
           const SizedBox(height: 18),
-          TextField(
+          AppTextField(
             controller: _controller,
             autofocus: true,
-            decoration: InputDecoration(
-              labelText: 'The word',
-              hintText: 'Enter the word here...',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              filled: true,
-              fillColor: scheme.surfaceContainerHighest.withValues(alpha: 0.3),
-            ),
+            label: 'The word',
+            hint: 'Enter the word here...',
           ),
           const SizedBox(height: 16),
           SwitchListTile(
