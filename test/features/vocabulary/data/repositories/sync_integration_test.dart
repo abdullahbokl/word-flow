@@ -19,7 +19,13 @@ class MockAppLogger extends Mock implements AppLogger {}
 
 class _TestWriteQueue implements LocalWriteQueue {
   @override
-  Future<T> enqueue<T>(Future<T> Function() job) => job();
+  Future<void> enqueue(Future<void> Function() job) => job();
+
+  @override
+  Future<void> close() async {}
+
+  @override
+  int get pendingCount => 0;
 }
 
 void main() {

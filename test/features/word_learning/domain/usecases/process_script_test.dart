@@ -32,8 +32,8 @@ void main() {
       when(() => mockRepository.getKnownWordTexts(userId: any(named: 'userId')))
           .thenAnswer((_) async => Right(knownWords.toList()));
       
-      final tAnalysis = ScriptAnalysis(
-        summary: const ScriptSummary(totalWords: 3, uniqueWords: 2, newWords: 1),
+      const tAnalysis = ScriptAnalysis(
+        summary: ScriptSummary(totalWords: 3, uniqueWords: 2, newWords: 1),
         words: [
           ProcessedWord(wordText: 'world', totalCount: 1, isKnown: false),
           ProcessedWord(wordText: 'hello', totalCount: 2, isKnown: true),
@@ -59,7 +59,7 @@ void main() {
     });
 
     test('should return empty analysis when script is empty', () async {
-      final tEmptyAnalysis = const ScriptAnalysis(
+      const tEmptyAnalysis = ScriptAnalysis(
         summary: ScriptSummary.empty(),
         words: [],
       );
@@ -71,7 +71,7 @@ void main() {
 
       final result = await useCase('', userId: tUserId);
 
-      expect(result, Right(tEmptyAnalysis));
+      expect(result, const Right(tEmptyAnalysis));
     });
 
     test('should return correct summary and 0 newWords when all words are known', () async {
@@ -79,8 +79,8 @@ void main() {
        when(() => mockRepository.getKnownWordTexts(userId: any(named: 'userId')))
           .thenAnswer((_) async => Right(knownWords.toList()));
 
-      final tAnalysis = ScriptAnalysis(
-        summary: const ScriptSummary(totalWords: 2, uniqueWords: 2, newWords: 0),
+      const tAnalysis = ScriptAnalysis(
+        summary: ScriptSummary(totalWords: 2, uniqueWords: 2, newWords: 0),
         words: [
           ProcessedWord(wordText: 'hello', totalCount: 1, isKnown: true),
           ProcessedWord(wordText: 'world', totalCount: 1, isKnown: true),
@@ -131,10 +131,10 @@ void main() {
     test('should ensure words are sorted by frequency descending with known words last', () async {
       // Create unsorted words
       final words = [
-        ProcessedWord(wordText: 'common', totalCount: 5, isKnown: true),
-        ProcessedWord(wordText: 'rare-new', totalCount: 1, isKnown: false),
-        ProcessedWord(wordText: 'common-new', totalCount: 10, isKnown: false),
-        ProcessedWord(wordText: 'rare', totalCount: 2, isKnown: true),
+        const ProcessedWord(wordText: 'common', totalCount: 5, isKnown: true),
+        const ProcessedWord(wordText: 'rare-new', totalCount: 1, isKnown: false),
+        const ProcessedWord(wordText: 'common-new', totalCount: 10, isKnown: false),
+        const ProcessedWord(wordText: 'rare', totalCount: 2, isKnown: true),
       ];
 
       when(() => mockRepository.getKnownWordTexts(userId: any(named: 'userId')))

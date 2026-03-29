@@ -157,8 +157,8 @@ void main() {
       final result = await service.process(rawText: text, knownWords: {});
       
       expect(result.words.map((w) => w.wordText), contains("he's"));
-      expect(result.words.map((w) => w.wordText), contains("reading"));
-      expect(result.words.map((w) => w.wordText), contains("book"));
+      expect(result.words.map((w) => w.wordText), contains('reading'));
+      expect(result.words.map((w) => w.wordText), contains('book'));
     });
   });
 }

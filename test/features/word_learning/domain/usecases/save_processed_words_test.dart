@@ -36,8 +36,8 @@ void main() {
     test('should properly map ProcessedWord entries to WordEntity and call repository', () async {
       // arrange
       final tProcessed = [
-        ProcessedWord(wordText: 'hello', totalCount: 5, isKnown: true),
-        ProcessedWord(wordText: 'world', totalCount: 2, isKnown: false),
+        const ProcessedWord(wordText: 'hello', totalCount: 5, isKnown: true),
+        const ProcessedWord(wordText: 'world', totalCount: 2, isKnown: false),
       ];
       
       when(() => mockRepository.saveWords(any()))
@@ -69,7 +69,7 @@ void main() {
 
     test('should propagate repository failure wrapped in Left(DatabaseFailure)', () async {
       // arrange
-      final tProcessed = [ProcessedWord(wordText: 'hello', totalCount: 5, isKnown: true)];
+      final tProcessed = [const ProcessedWord(wordText: 'hello', totalCount: 5, isKnown: true)];
       when(() => mockRepository.saveWords(any()))
           .thenAnswer((_) async => const Left(DatabaseFailure('save error')));
 

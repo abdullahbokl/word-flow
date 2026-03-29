@@ -11,33 +11,43 @@ import 'package:word_flow/features/vocabulary/domain/usecases/toggle_known_word.
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cubit.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_state.dart';
 
+import 'package:word_flow/core/logging/app_logger.dart';
+
 class MockProcessScript extends Mock implements ProcessScript {}
+
 class MockSaveProcessedWords extends Mock implements SaveProcessedWords {}
 class MockToggleKnownWord extends Mock implements ToggleKnownWord {}
+class MockAppLogger extends Mock implements AppLogger {}
+
 
 void main() {
   late WorkspaceCubit cubit;
   late MockProcessScript mockProcessScript;
   late MockSaveProcessedWords mockSaveProcessedWords;
   late MockToggleKnownWord mockToggleKnownWord;
+  late MockAppLogger mockAppLogger;
+
 
   setUp(() {
     mockProcessScript = MockProcessScript();
     mockSaveProcessedWords = MockSaveProcessedWords();
     mockToggleKnownWord = MockToggleKnownWord();
+    mockAppLogger = MockAppLogger();
 
     cubit = WorkspaceCubit(
       mockProcessScript,
       mockSaveProcessedWords,
       mockToggleKnownWord,
+      mockAppLogger,
     );
+
 
     registerFallbackValue(<ProcessedWord>[]);
   });
 
   const tUserId = 'user-123';
   final tProcessedWords = [
-    ProcessedWord(wordText: 'hello', totalCount: 2, isKnown: false),
+    const ProcessedWord(wordText: 'hello', totalCount: 2, isKnown: false),
   ];
   final tAnalysis = ScriptAnalysis(
     summary: const ScriptSummary(totalWords: 2, uniqueWords: 1, newWords: 1),
