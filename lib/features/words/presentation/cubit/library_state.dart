@@ -14,6 +14,7 @@ class LibraryState with _$LibraryState {
     @Default(WordsFilter.all) WordsFilter filter,
     @Default('') String searchQuery,
     @Default(<String>{}) Set<String> pendingWordIds,
+    String? lastError,
   }) = _Loaded;
   const factory LibraryState.error(String message) = _Error;
 }

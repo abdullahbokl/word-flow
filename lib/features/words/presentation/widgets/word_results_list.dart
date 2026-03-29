@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
-import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/domain/entities/processed_word.dart';
 import 'package:word_flow/features/words/presentation/widgets/word_results_animated_item.dart';
 
 class WordResultsList extends StatefulWidget {

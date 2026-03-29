@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/domain/entities/script_analysis.dart';
+import 'package:word_flow/features/words/domain/entities/processed_word.dart';
 
 part 'workspace_state.freezed.dart';
 
@@ -9,8 +10,9 @@ sealed class WorkspaceState with _$WorkspaceState {
   const factory WorkspaceState.processing() = _Processing;
   const factory WorkspaceState.results({
     required List<ProcessedWord> words,
-    required List<ProcessedWord> unknownWords,
-    required List<ProcessedWord> knownWords,
+    required ScriptSummary summary,
+    @Default(<String>{}) Set<String> pendingKnownWords,
+    @Default(0) int revision,
   }) = _Results;
   const factory WorkspaceState.error(String message) = _Error;
 }

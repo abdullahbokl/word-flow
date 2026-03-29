@@ -6,6 +6,7 @@ import 'package:drift/drift.dart' show Value;
 abstract class WordLocalSource {
   Future<void> saveWord(WordModel word);
   Future<void> saveWords(List<WordModel> words);
+  Future<Map<String, WordModel>> getWordTextMap({String? userId});
   Future<List<WordModel>> getWords({String? userId});
   Future<List<String>> getKnownWordTexts({String? userId});
   Future<WordModel?> getWordById(String id);
@@ -31,6 +32,18 @@ class WordLocalSourceImpl implements WordLocalSource {
   @override
   Future<void> saveWords(List<WordModel> words) async {
     await _db.upsertWords(words.map(_toCompanion).toList(growable: false));
+  }
+
+  @override
+  Future<Map<String, WordModel>> getWordTextMap({String? userId}) async {
+    final query = _db.select(_db.words);
+    if (userId != null) {
+      query.where((t) => t.userId.equals(userId));
+    } else {
+      query.where((t) => t.userId.isNull());
+    }
+    final rows = await query.get();
+    return {for (final row in rows) row.wordText: _fromRow(row)};
   }
 
   @override

@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:word_flow/core/widgets/empty_state_view.dart';
 import 'package:word_flow/core/widgets/section_card.dart';
 import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
-import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/domain/entities/processed_word.dart';
 import 'package:word_flow/features/words/presentation/widgets/analysis_chip.dart';
 import 'package:word_flow/features/words/presentation/widgets/processing_view.dart';
 import 'package:word_flow/features/words/presentation/widgets/analysis_results_header.dart';

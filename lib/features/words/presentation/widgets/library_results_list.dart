@@ -24,7 +24,7 @@ class LibraryResultsList extends StatelessWidget {
       initial: () => const _LoadingView(),
       loading: () => const _LoadingView(),
       error: (msg) => _ErrorView(message: msg),
-      loaded: (words, filter, searchQuery, pendingWordIds) {
+      loaded: (words, filter, searchQuery, pendingWordIds, _) {
         final filtered = words.where((w) {
           final matchesFilter = switch (filter) {
             WordsFilter.all => true,

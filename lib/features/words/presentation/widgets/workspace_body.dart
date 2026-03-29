@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:word_flow/core/utils/script_processor.dart';
-import 'package:word_flow/core/utils/script_analysis.dart';
+import 'package:word_flow/features/words/domain/entities/script_analysis.dart';
 import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
 import 'package:word_flow/features/words/presentation/widgets/results_section.dart';
 import 'package:word_flow/features/words/presentation/widgets/script_input_section.dart';
@@ -11,25 +10,26 @@ class WorkspaceBody extends StatelessWidget {
   const WorkspaceBody({
     super.key,
     required this.state,
-    required this.summary,
-    required this.words,
-    required this.pendingWordTexts,
-    required this.isProcessing,
     required this.controller,
     required this.onAnalyze,
     required this.onClear,
   });
   final WorkspaceState state;
-  final ScriptSummary summary;
-  final List<ProcessedWord> words;
-  final Set<String> pendingWordTexts;
-  final bool isProcessing;
   final TextEditingController controller;
   final VoidCallback onAnalyze;
   final VoidCallback onClear;
 
   @override
   Widget build(BuildContext context) {
+    final summary = state.maybeMap(
+      results: (s) => s.summary,
+      orElse: () => const ScriptSummary.empty(),
+    );
+    final isProcessing = state.maybeMap(
+      processing: (_) => true,
+      orElse: () => false,
+    );
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return Center(
@@ -60,9 +60,6 @@ class WorkspaceBody extends StatelessWidget {
                   padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
                   sliver: ResultsSection(
                     state: state,
-                    words: words,
-                    isProcessing: isProcessing,
-                    pendingWordTexts: pendingWordTexts,
                   ),
                 ),
               ],

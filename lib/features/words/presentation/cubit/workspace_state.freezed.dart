@@ -23,8 +23,9 @@ mixin _$WorkspaceState {
     required TResult Function() processing,
     required TResult Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )
     results,
     required TResult Function(String message) error,
@@ -35,8 +36,9 @@ mixin _$WorkspaceState {
     TResult? Function()? processing,
     TResult? Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )?
     results,
     TResult? Function(String message)? error,
@@ -47,8 +49,9 @@ mixin _$WorkspaceState {
     TResult Function()? processing,
     TResult Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )?
     results,
     TResult Function(String message)? error,
@@ -147,8 +150,9 @@ class _$InitialImpl implements _Initial {
     required TResult Function() processing,
     required TResult Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )
     results,
     required TResult Function(String message) error,
@@ -163,8 +167,9 @@ class _$InitialImpl implements _Initial {
     TResult? Function()? processing,
     TResult? Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )?
     results,
     TResult? Function(String message)? error,
@@ -179,8 +184,9 @@ class _$InitialImpl implements _Initial {
     TResult Function()? processing,
     TResult Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )?
     results,
     TResult Function(String message)? error,
@@ -281,8 +287,9 @@ class _$ProcessingImpl implements _Processing {
     required TResult Function() processing,
     required TResult Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )
     results,
     required TResult Function(String message) error,
@@ -297,8 +304,9 @@ class _$ProcessingImpl implements _Processing {
     TResult? Function()? processing,
     TResult? Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )?
     results,
     TResult? Function(String message)? error,
@@ -313,8 +321,9 @@ class _$ProcessingImpl implements _Processing {
     TResult Function()? processing,
     TResult Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )?
     results,
     TResult Function(String message)? error,
@@ -377,8 +386,9 @@ abstract class _$$ResultsImplCopyWith<$Res> {
   @useResult
   $Res call({
     List<ProcessedWord> words,
-    List<ProcessedWord> unknownWords,
-    List<ProcessedWord> knownWords,
+    ScriptSummary summary,
+    Set<String> pendingKnownWords,
+    int revision,
   });
 }
 
@@ -397,8 +407,9 @@ class __$$ResultsImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? words = null,
-    Object? unknownWords = null,
-    Object? knownWords = null,
+    Object? summary = null,
+    Object? pendingKnownWords = null,
+    Object? revision = null,
   }) {
     return _then(
       _$ResultsImpl(
@@ -406,14 +417,18 @@ class __$$ResultsImplCopyWithImpl<$Res>
             ? _value._words
             : words // ignore: cast_nullable_to_non_nullable
                   as List<ProcessedWord>,
-        unknownWords: null == unknownWords
-            ? _value._unknownWords
-            : unknownWords // ignore: cast_nullable_to_non_nullable
-                  as List<ProcessedWord>,
-        knownWords: null == knownWords
-            ? _value._knownWords
-            : knownWords // ignore: cast_nullable_to_non_nullable
-                  as List<ProcessedWord>,
+        summary: null == summary
+            ? _value.summary
+            : summary // ignore: cast_nullable_to_non_nullable
+                  as ScriptSummary,
+        pendingKnownWords: null == pendingKnownWords
+            ? _value._pendingKnownWords
+            : pendingKnownWords // ignore: cast_nullable_to_non_nullable
+                  as Set<String>,
+        revision: null == revision
+            ? _value.revision
+            : revision // ignore: cast_nullable_to_non_nullable
+                  as int,
       ),
     );
   }
@@ -424,11 +439,11 @@ class __$$ResultsImplCopyWithImpl<$Res>
 class _$ResultsImpl implements _Results {
   const _$ResultsImpl({
     required final List<ProcessedWord> words,
-    required final List<ProcessedWord> unknownWords,
-    required final List<ProcessedWord> knownWords,
+    required this.summary,
+    final Set<String> pendingKnownWords = const <String>{},
+    this.revision = 0,
   }) : _words = words,
-       _unknownWords = unknownWords,
-       _knownWords = knownWords;
+       _pendingKnownWords = pendingKnownWords;
 
   final List<ProcessedWord> _words;
   @override
@@ -438,25 +453,25 @@ class _$ResultsImpl implements _Results {
     return EqualUnmodifiableListView(_words);
   }
 
-  final List<ProcessedWord> _unknownWords;
   @override
-  List<ProcessedWord> get unknownWords {
-    if (_unknownWords is EqualUnmodifiableListView) return _unknownWords;
+  final ScriptSummary summary;
+  final Set<String> _pendingKnownWords;
+  @override
+  @JsonKey()
+  Set<String> get pendingKnownWords {
+    if (_pendingKnownWords is EqualUnmodifiableSetView)
+      return _pendingKnownWords;
     // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_unknownWords);
+    return EqualUnmodifiableSetView(_pendingKnownWords);
   }
 
-  final List<ProcessedWord> _knownWords;
   @override
-  List<ProcessedWord> get knownWords {
-    if (_knownWords is EqualUnmodifiableListView) return _knownWords;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableListView(_knownWords);
-  }
+  @JsonKey()
+  final int revision;
 
   @override
   String toString() {
-    return 'WorkspaceState.results(words: $words, unknownWords: $unknownWords, knownWords: $knownWords)';
+    return 'WorkspaceState.results(words: $words, summary: $summary, pendingKnownWords: $pendingKnownWords, revision: $revision)';
   }
 
   @override
@@ -465,22 +480,22 @@ class _$ResultsImpl implements _Results {
         (other.runtimeType == runtimeType &&
             other is _$ResultsImpl &&
             const DeepCollectionEquality().equals(other._words, _words) &&
+            (identical(other.summary, summary) || other.summary == summary) &&
             const DeepCollectionEquality().equals(
-              other._unknownWords,
-              _unknownWords,
+              other._pendingKnownWords,
+              _pendingKnownWords,
             ) &&
-            const DeepCollectionEquality().equals(
-              other._knownWords,
-              _knownWords,
-            ));
+            (identical(other.revision, revision) ||
+                other.revision == revision));
   }
 
   @override
   int get hashCode => Object.hash(
     runtimeType,
     const DeepCollectionEquality().hash(_words),
-    const DeepCollectionEquality().hash(_unknownWords),
-    const DeepCollectionEquality().hash(_knownWords),
+    summary,
+    const DeepCollectionEquality().hash(_pendingKnownWords),
+    revision,
   );
 
   /// Create a copy of WorkspaceState
@@ -498,13 +513,14 @@ class _$ResultsImpl implements _Results {
     required TResult Function() processing,
     required TResult Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )
     results,
     required TResult Function(String message) error,
   }) {
-    return results(words, unknownWords, knownWords);
+    return results(words, summary, pendingKnownWords, revision);
   }
 
   @override
@@ -514,13 +530,14 @@ class _$ResultsImpl implements _Results {
     TResult? Function()? processing,
     TResult? Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )?
     results,
     TResult? Function(String message)? error,
   }) {
-    return results?.call(words, unknownWords, knownWords);
+    return results?.call(words, summary, pendingKnownWords, revision);
   }
 
   @override
@@ -530,15 +547,16 @@ class _$ResultsImpl implements _Results {
     TResult Function()? processing,
     TResult Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )?
     results,
     TResult Function(String message)? error,
     required TResult orElse(),
   }) {
     if (results != null) {
-      return results(words, unknownWords, knownWords);
+      return results(words, summary, pendingKnownWords, revision);
     }
     return orElse();
   }
@@ -584,13 +602,15 @@ class _$ResultsImpl implements _Results {
 abstract class _Results implements WorkspaceState {
   const factory _Results({
     required final List<ProcessedWord> words,
-    required final List<ProcessedWord> unknownWords,
-    required final List<ProcessedWord> knownWords,
+    required final ScriptSummary summary,
+    final Set<String> pendingKnownWords,
+    final int revision,
   }) = _$ResultsImpl;
 
   List<ProcessedWord> get words;
-  List<ProcessedWord> get unknownWords;
-  List<ProcessedWord> get knownWords;
+  ScriptSummary get summary;
+  Set<String> get pendingKnownWords;
+  int get revision;
 
   /// Create a copy of WorkspaceState
   /// with the given fields replaced by the non-null parameter values.
@@ -673,8 +693,9 @@ class _$ErrorImpl implements _Error {
     required TResult Function() processing,
     required TResult Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )
     results,
     required TResult Function(String message) error,
@@ -689,8 +710,9 @@ class _$ErrorImpl implements _Error {
     TResult? Function()? processing,
     TResult? Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )?
     results,
     TResult? Function(String message)? error,
@@ -705,8 +727,9 @@ class _$ErrorImpl implements _Error {
     TResult Function()? processing,
     TResult Function(
       List<ProcessedWord> words,
-      List<ProcessedWord> unknownWords,
-      List<ProcessedWord> knownWords,
+      ScriptSummary summary,
+      Set<String> pendingKnownWords,
+      int revision,
     )?
     results,
     TResult Function(String message)? error,

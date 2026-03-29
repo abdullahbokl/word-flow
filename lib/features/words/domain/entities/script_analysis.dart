@@ -1,16 +1,20 @@
 import 'package:equatable/equatable.dart';
-
-import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/domain/entities/processed_word.dart';
 
 class ScriptSummary extends Equatable {
-
   const ScriptSummary({
     required this.totalWords,
     required this.uniqueWords,
     required this.newWords,
   });
 
-  const ScriptSummary.empty() : this(totalWords: 0, uniqueWords: 0, newWords: 0);
+  const ScriptSummary.empty()
+      : this(
+          totalWords: 0,
+          uniqueWords: 0,
+          newWords: 0,
+        );
+
   final int totalWords;
   final int uniqueWords;
   final int newWords;
@@ -20,8 +24,8 @@ class ScriptSummary extends Equatable {
 }
 
 class ScriptAnalysis extends Equatable {
-
   const ScriptAnalysis({required this.summary, required this.words});
+
   final ScriptSummary summary;
   final List<ProcessedWord> words;
 

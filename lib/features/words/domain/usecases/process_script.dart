@@ -1,15 +1,16 @@
-import 'package:dartz/dartz.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:word_flow/core/error/failures.dart';
-import 'package:word_flow/core/utils/script_analysis.dart';
-import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/domain/entities/script_analysis.dart';
 import 'package:word_flow/features/words/domain/repositories/word_repository.dart';
+import 'package:word_flow/features/words/domain/services/text_analysis_service.dart';
 import 'package:injectable/injectable.dart';
 
 @lazySingleton
 class ProcessScript {
 
-  ProcessScript(this._repository);
+  ProcessScript(this._repository, this._textAnalysisService);
   final WordRepository _repository;
+  final TextAnalysisService _textAnalysisService;
 
   Future<Either<Failure, ScriptAnalysis>> call(
     String rawText, {
@@ -22,7 +23,7 @@ class ProcessScript {
         (texts) => texts.toSet(),
       );
 
-      final processed = await ScriptProcessor.process(
+      final processed = await _textAnalysisService.process(
         rawText: rawText,
         knownWords: knownWordTexts,
       );

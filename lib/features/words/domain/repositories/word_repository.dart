@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:word_flow/core/error/failures.dart';
 import 'package:word_flow/features/words/domain/entities/word.dart';
 

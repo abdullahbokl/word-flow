@@ -30,8 +30,11 @@ import '../features/words/data/datasources/word_local_source.dart' as _i621;
 import '../features/words/data/datasources/word_remote_source.dart' as _i224;
 import '../features/words/data/repositories/sync_repository_impl.dart' as _i107;
 import '../features/words/data/repositories/word_repository_impl.dart' as _i296;
+import '../features/words/data/services/isolate_text_analysis_service.dart'
+    as _i694;
 import '../features/words/domain/repositories/sync_repository.dart' as _i899;
 import '../features/words/domain/repositories/word_repository.dart' as _i994;
+import '../features/words/domain/services/text_analysis_service.dart' as _i311;
 import '../features/words/domain/usecases/adopt_guest_words.dart' as _i915;
 import '../features/words/domain/usecases/clear_local_words.dart' as _i535;
 import '../features/words/domain/usecases/delete_word.dart' as _i774;
@@ -65,6 +68,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i935.WordFlowDatabase>(() => _i935.WordFlowDatabase());
     gh.lazySingleton<_i470.LocalWriteQueue>(() => _i470.LocalWriteQueue());
+    gh.lazySingleton<_i311.TextAnalysisService>(
+      () => _i694.IsolateTextAnalysisService(),
+    );
     gh.lazySingleton<_i1011.SyncLocalSource>(
       () => _i1011.SyncLocalSourceImpl(gh<_i935.WordFlowDatabase>()),
     );
@@ -112,6 +118,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i588.SignUpWithEmail>(
       () => _i588.SignUpWithEmail(gh<_i869.AuthRepository>()),
     );
+    gh.lazySingleton<_i69.ProcessScript>(
+      () => _i69.ProcessScript(
+        gh<_i994.WordRepository>(),
+        gh<_i311.TextAnalysisService>(),
+      ),
+    );
     gh.lazySingleton<_i915.AdoptGuestWords>(
       () => _i915.AdoptGuestWords(gh<_i994.WordRepository>()),
     );
@@ -126,9 +138,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i552.GetKnownWords>(
       () => _i552.GetKnownWords(gh<_i994.WordRepository>()),
-    );
-    gh.lazySingleton<_i69.ProcessScript>(
-      () => _i69.ProcessScript(gh<_i994.WordRepository>()),
     );
     gh.lazySingleton<_i455.SaveProcessedWords>(
       () => _i455.SaveProcessedWords(gh<_i994.WordRepository>()),

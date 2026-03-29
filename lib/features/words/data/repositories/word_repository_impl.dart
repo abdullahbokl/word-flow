@@ -1,4 +1,4 @@
-import 'package:dartz/dartz.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/error/failures.dart';
 import 'package:word_flow/core/database/write_queue.dart';
@@ -31,13 +31,20 @@ class WordRepositoryImpl implements WordRepository {
   Future<Either<Failure, void>> saveWords(List<WordEntity> words) => _try(() async {
     await _writeQueue.enqueue(() async {
       final now = DateTime.now().toUtc();
-      final List<WordModel> models = [];
-      for (final word in words) {
-        final candidate = WordMapper.fromEntityToModel(word);
-        final existing = await _localSource.getWordByText(
-          candidate.wordText,
-          userId: candidate.userId,
+      final candidates = words
+          .map(WordMapper.fromEntityToModel)
+          .toList(growable: false);
+
+      final existingMapsByUserId = <String?, Map<String, WordModel>>{};
+      for (final userId in candidates.map((w) => w.userId).toSet()) {
+        existingMapsByUserId[userId] = await _localSource.getWordTextMap(
+          userId: userId,
         );
+      }
+
+      final List<WordModel> models = [];
+      for (final candidate in candidates) {
+        final existing = existingMapsByUserId[candidate.userId]?[candidate.wordText];
         if (existing == null) {
           models.add(WordModel(
             id: candidate.id,

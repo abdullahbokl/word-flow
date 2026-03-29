@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:word_flow/core/widgets/word_card.dart';
-import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/domain/entities/processed_word.dart';
 import 'package:word_flow/features/words/presentation/cubit/workspace_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';

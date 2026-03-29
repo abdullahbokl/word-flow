@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:word_flow/core/utils/script_analysis.dart';
+import 'package:word_flow/features/words/domain/entities/script_analysis.dart';
 import 'package:word_flow/core/widgets/sync_status_badge.dart';
 import 'package:word_flow/features/auth/presentation/widgets/auth_status_bar.dart';
 import 'package:word_flow/app/router/routes.dart';

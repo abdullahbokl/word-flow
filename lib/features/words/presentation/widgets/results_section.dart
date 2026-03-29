@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/domain/entities/processed_word.dart';
 import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
 import 'package:word_flow/features/words/presentation/widgets/results_state_switcher.dart';
 import 'package:word_flow/features/words/presentation/widgets/analysis_results_list.dart';
@@ -9,14 +9,8 @@ class ResultsSection extends StatefulWidget {
   const ResultsSection({
     super.key,
     required this.state,
-    required this.words,
-    required this.isProcessing,
-    required this.pendingWordTexts,
   });
   final WorkspaceState state;
-  final List<ProcessedWord> words;
-  final bool isProcessing;
-  final Set<String> pendingWordTexts;
 
   @override
   State<ResultsSection> createState() => _ResultsSectionState();
@@ -27,31 +21,54 @@ class _ResultsSectionState extends State<ResultsSection> {
 
   @override
   Widget build(BuildContext context) {
+    final words = widget.state.maybeMap(
+      results: (s) => s.words,
+      orElse: () => const <ProcessedWord>[],
+    );
+    final pendingWordTexts = widget.state.maybeMap(
+      results: (s) => s.pendingKnownWords,
+      orElse: () => const <String>{},
+    );
+    final isProcessing = widget.state.maybeMap(
+      processing: (_) => true,
+      orElse: () => false,
+    );
+
     return SliverMainAxisGroup(
       slivers: [
         ResultsStateSwitcher(
           state: widget.state,
-          words: widget.words,
-          isProcessing: widget.isProcessing,
+          words: words,
+          isProcessing: isProcessing,
         ),
         ...widget.state.maybeWhen(
-          processing: () => _buildList(widget.words, [], true),
-          results: (all, unknown, known) => _buildList(unknown, known, false),
+          processing: () => _buildList(words, const <ProcessedWord>[], true, pendingWordTexts, isProcessing),
+          results: (all, _, __, ___) {
+            final unknown = all.where((w) => !w.isKnown).toList(growable: false);
+            final known = all.where((w) => w.isKnown).toList(growable: false);
+            return _buildList(unknown, known, false, pendingWordTexts, isProcessing);
+          },
           orElse: () => [],
         ),
       ],
     );
   }
 
-  List<Widget> _buildList(List<ProcessedWord> unknown, List<ProcessedWord> known, bool isRefreshing) {
+  List<Widget> _buildList(
+    List<ProcessedWord> unknown,
+    List<ProcessedWord> known,
+    bool isRefreshing,
+    Set<String> pendingWordTexts,
+    bool isProcessing,
+  ) {
     return [
       AnalysisResultsList(
         unknownWords: unknown,
         knownWords: known,
         isRefreshing: isRefreshing,
-        isProcessing: widget.isProcessing,
+        isProcessing: isProcessing,
         isKnownExpanded: _isKnownExpanded,
-        pendingWordTexts: widget.pendingWordTexts,
+        pendingWordTexts: pendingWordTexts,
         onToggleKnown: () => setState(() => _isKnownExpanded = !_isKnownExpanded),
       ),
     ];

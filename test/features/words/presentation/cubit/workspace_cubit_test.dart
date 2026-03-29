@@ -1,10 +1,10 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:dartz/dartz.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/core/error/failures.dart';
-import 'package:word_flow/core/utils/script_analysis.dart';
-import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/domain/entities/script_analysis.dart';
+import 'package:word_flow/features/words/domain/entities/processed_word.dart';
 import 'package:word_flow/features/words/domain/usecases/process_script.dart';
 import 'package:word_flow/features/words/domain/usecases/save_processed_words.dart';
 import 'package:word_flow/features/words/domain/usecases/toggle_known_word.dart';
@@ -68,8 +68,9 @@ void main() {
       const WorkspaceState.processing(),
       const WorkspaceState.results(
         words: words,
-        unknownWords: words,
-        knownWords: [],
+        summary: summary,
+        pendingKnownWords: <String>{},
+        revision: 1,
       ),
     ],
     verify: (cubit) {
@@ -118,17 +119,23 @@ void main() {
       const WorkspaceState.processing(),
       const WorkspaceState.results(
         words: words,
-        unknownWords: words,
-        knownWords: [],
+        summary: summary,
+        pendingKnownWords: <String>{},
+        revision: 1,
+      ),
+      const WorkspaceState.results(
+        words: words,
+        summary: ScriptSummary(totalWords: 4, uniqueWords: 2, newWords: 1),
+        pendingKnownWords: <String>{'hello'},
+        revision: 1,
       ),
       const WorkspaceState.results(
         words: [
           ProcessedWord(wordText: 'world', totalCount: 1, isKnown: false),
         ],
-        unknownWords: [
-          ProcessedWord(wordText: 'world', totalCount: 1, isKnown: false),
-        ],
-        knownWords: [],
+        summary: ScriptSummary(totalWords: 4, uniqueWords: 2, newWords: 1),
+        pendingKnownWords: <String>{},
+        revision: 1,
       ),
     ],
     verify: (_) {
@@ -158,14 +165,22 @@ void main() {
       const WorkspaceState.processing(),
       const WorkspaceState.results(
         words: words,
-        unknownWords: words,
-        knownWords: [],
+        summary: summary,
+        pendingKnownWords: <String>{},
+        revision: 1,
+      ),
+      const WorkspaceState.results(
+        words: words,
+        summary: ScriptSummary(totalWords: 4, uniqueWords: 2, newWords: 1),
+        pendingKnownWords: <String>{'hello'},
+        revision: 1,
       ),
       const WorkspaceState.error('update failed'),
       const WorkspaceState.results(
         words: words,
-        unknownWords: words,
-        knownWords: [],
+        summary: summary,
+        pendingKnownWords: <String>{},
+        revision: 1,
       ),
     ],
   );

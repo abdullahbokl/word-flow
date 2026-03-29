@@ -57,10 +57,6 @@ class _WorkspaceContent extends StatelessWidget {
     return BlocBuilder<WorkspaceCubit, WorkspaceState>(
       builder: (context, state) => WorkspaceBody(
         state: state,
-        summary: cubit.summary,
-        words: cubit.words,
-        pendingWordTexts: cubit.pendingKnownWords,
-        isProcessing: cubit.isProcessing,
         controller: controller,
         onAnalyze: () => cubit.analyze(controller.text, userId: userId),
         onClear: () {

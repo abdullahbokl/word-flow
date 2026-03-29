@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:word_flow/core/utils/script_analysis.dart';
-import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/domain/entities/script_analysis.dart';
+import 'package:word_flow/features/words/domain/entities/processed_word.dart';
 import 'package:word_flow/features/words/domain/usecases/process_script.dart';
 import 'package:word_flow/features/words/domain/usecases/save_processed_words.dart';
 import 'package:word_flow/features/words/domain/usecases/toggle_known_word.dart';
@@ -17,87 +17,129 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
   final SaveProcessedWords _saveProcessedWords;
   final ToggleKnownWord _toggleKnownWord;
 
-  final List<ProcessedWord> _words = [];
-  final Set<String> _pendingKnownWords = <String>{};
-  ScriptSummary _summary = const ScriptSummary.empty();
-  int _revision = 0;
-
-  ScriptSummary get summary => _summary;
-  List<ProcessedWord> get words => List.unmodifiable(_words);
-  Set<String> get pendingKnownWords => Set.unmodifiable(_pendingKnownWords);
+  ScriptSummary get summary => state.maybeMap(
+        results: (s) => s.summary,
+        orElse: () => const ScriptSummary.empty(),
+      );
+  List<ProcessedWord> get words => state.maybeMap(
+        results: (s) => s.words,
+        orElse: () => const <ProcessedWord>[],
+      );
+  Set<String> get pendingKnownWords => state.maybeMap(
+        results: (s) => s.pendingKnownWords,
+        orElse: () => const <String>{},
+      );
   bool get isProcessing => state.maybeMap(processing: (_) => true, orElse: () => false);
 
   Future<void> analyze(String text, {String? userId}) async {
     if (text.trim().isEmpty) return _reset();
+    final nextRevision = state.maybeMap(
+      results: (s) => s.revision + 1,
+      orElse: () => 1,
+    );
     emit(const WorkspaceState.processing());
     final result = await _processScript(text, userId: userId);
     result.fold(
       (f) => emit(WorkspaceState.error(f.message)),
       (a) {
-        _words..clear()..addAll(a.words);
-        _summary = a.summary;
-        _revision++;
-        _pendingKnownWords.clear();
-        _emitResults();
+        emit(
+          WorkspaceState.results(
+            words: a.words,
+            summary: a.summary,
+            pendingKnownWords: const <String>{},
+            revision: nextRevision,
+          ),
+        );
         unawaited(_saveProcessedWords(a.words, userId: userId));
       },
     );
   }
 
   void _reset() {
-    _words.clear();
-    _pendingKnownWords.clear();
-    _summary = const ScriptSummary.empty();
-    _revision++;
     emit(const WorkspaceState.initial());
   }
 
-  void _emitResults() {
-    final unknown = _words.where((w) => !w.isKnown).toList();
-    final known = _words.where((w) => w.isKnown).toList();
-    emit(WorkspaceState.results(words: List.from(_words), unknownWords: unknown, knownWords: known));
-  }
-
   Future<void> toggleKnown(String wordText, {String? userId}) async {
-    if (isProcessing || _pendingKnownWords.contains(wordText)) return;
-    final currentRevision = _revision;
-    _pendingKnownWords.add(wordText);
-    _summary = _rebuildSummary(_words);
-    _emitResults();
-    
-   
-    unawaited(() async {
-      await Future<void>.delayed(Duration.zero);
-      await _persistToggle(wordText, currentRevision, userId);
-    }());
+    state.maybeMap(
+      results: (s) {
+        if (s.pendingKnownWords.contains(wordText)) return;
+
+        final nextPending = <String>{...s.pendingKnownWords, wordText};
+        emit(
+          s.copyWith(
+            pendingKnownWords: nextPending,
+            summary: _rebuildSummary(s.summary, s.words, nextPending),
+          ),
+        );
+
+        unawaited(() async {
+          await Future<void>.delayed(Duration.zero);
+          await _persistToggle(
+            wordText,
+            revision: s.revision,
+            fallbackSummary: s.summary,
+            userId: userId,
+          );
+        }());
+      },
+      orElse: () {},
+    );
   }
 
-  Future<void> _persistToggle(String text, int revision, String? userId) async {
+  Future<void> _persistToggle(
+    String text, {
+    required int revision,
+    required ScriptSummary fallbackSummary,
+    String? userId,
+  }) async {
     final result = await _toggleKnownWord(text, userId: userId);
     if (isClosed) return;
 
     await result.fold<Future<void>>(
       (f) async {
-        _pendingKnownWords.remove(text);
+        final snapshot = state.maybeMap(results: (s) => s, orElse: () => null);
+        if (snapshot == null || snapshot.revision != revision) return;
+
+        final nextPending = <String>{...snapshot.pendingKnownWords}..remove(text);
+        final restored = snapshot.copyWith(
+          pendingKnownWords: nextPending,
+          summary: _rebuildSummary(fallbackSummary, snapshot.words, nextPending),
+        );
         emit(WorkspaceState.error(f.message));
-        _emitResults();
+        emit(restored);
       },
       (_) async {
         await Future.delayed(const Duration(milliseconds: 280));
         if (isClosed) return;
-        _pendingKnownWords.remove(text);
-        if (revision == _revision) {
-          _words.removeWhere((w) => w.wordText == text);
-        }
-        _summary = _rebuildSummary(_words);
-        _emitResults();
+
+        final snapshot = state.maybeMap(results: (s) => s, orElse: () => null);
+        if (snapshot == null || snapshot.revision != revision) return;
+
+        final nextPending = <String>{...snapshot.pendingKnownWords}..remove(text);
+        final nextWords = snapshot.words
+            .where((w) => w.wordText != text)
+            .toList(growable: false);
+        emit(
+          snapshot.copyWith(
+            words: nextWords,
+            pendingKnownWords: nextPending,
+            summary: _rebuildSummary(fallbackSummary, nextWords, nextPending),
+          ),
+        );
       },
     );
   }
 
-  ScriptSummary _rebuildSummary(Iterable<ProcessedWord> ws) => ScriptSummary(
-    totalWords: _summary.totalWords,
-    uniqueWords: _summary.uniqueWords,
-    newWords: ws.where((w) => !w.isKnown && !_pendingKnownWords.contains(w.wordText)).length,
-  );
+  ScriptSummary _rebuildSummary(
+    ScriptSummary base,
+    Iterable<ProcessedWord> ws,
+    Set<String> pending,
+  ) =>
+      ScriptSummary(
+        totalWords: base.totalWords,
+        uniqueWords: base.uniqueWords,
+        newWords: ws
+            .where((w) => !w.isKnown && !pending.contains(w.wordText))
+            .length,
+      );
 }
