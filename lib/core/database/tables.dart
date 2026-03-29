@@ -28,4 +28,9 @@ class WordSyncQueue extends Table {
   TextColumn get lastError => text().named('last_error').nullable()();
   DateTimeColumn get createdAt => dateTime().named('created_at')();
   DateTimeColumn get updatedAt => dateTime().named('updated_at')();
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {wordId, operation},
+      ];
 }

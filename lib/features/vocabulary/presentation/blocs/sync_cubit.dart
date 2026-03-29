@@ -23,9 +23,13 @@ class SyncCubit extends Cubit<SyncState> {
   StreamSubscription<Either<Failure, int>>? _pendingSub;
   StreamSubscription<ConnectivityStatus>? _connectivitySub;
   Timer? _syncDebounce;
+  Timer? _periodicTimer;
+  bool _isInitialized = false;
 
   /// Initialize connectivity and pending count listeners
   void init() {
+    if (_isInitialized) return;
+    _isInitialized = true;
     _startWatching();
   }
 
@@ -51,6 +55,10 @@ class SyncCubit extends Cubit<SyncState> {
         _debouncedSync();
       }
     });
+
+    // Start 5-minute periodic background sync
+    _periodicTimer?.cancel();
+    _periodicTimer = Timer.periodic(const Duration(minutes: 5), (_) => syncNow());
   }
 
   void _debouncedSync() {
@@ -92,6 +100,7 @@ class SyncCubit extends Cubit<SyncState> {
     _pendingSub?.cancel();
     _connectivitySub?.cancel();
     _syncDebounce?.cancel();
+    _periodicTimer?.cancel();
     return super.close();
   }
 }

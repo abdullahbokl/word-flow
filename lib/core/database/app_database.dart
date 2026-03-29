@@ -16,8 +16,27 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   // Test constructor: allow passing a custom QueryExecutor (e.g. in-memory DB)
   WordFlowDatabase.test(super.executor);
 
+  static final Map<int, Future<void> Function(WordFlowDatabase)> _migrationSteps = {
+    2: _migrate1To2,
+    3: _migrate2To3,
+    4: _migrate3To4,
+    5: _migrate4To5,
+  };
+
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion {
+    const expectedVersion = 5;
+    assert(() {
+      final maxStep = _migrationSteps.keys.reduce((a, b) => a > b ? a : b);
+      if (maxStep != expectedVersion) {
+        throw AssertionError(
+          'Developer mistake: schemaVersion is $expectedVersion but max migration step is $maxStep. Please add a migration step.',
+        );
+      }
+      return true;
+    }());
+    return expectedVersion;
+  }
 
  
  
@@ -25,74 +44,24 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async => m.createAll(),
         onUpgrade: (m, from, to) async {
-          if (from < 2) {
-            await _deduplicateWordsTable();
-          }
-          if (from < 3) {
-            await customStatement('''
-    DELETE FROM words WHERE rowid NOT IN (
-      SELECT MIN(rowid) FROM words GROUP BY user_id, word_text
-    )
-  ''');
-            await customStatement(
-              'CREATE UNIQUE INDEX IF NOT EXISTS idx_words_user_word ON words(user_id, word_text)',
-            );
-          }
-          if (from < 4) {
-            await customStatement(
-              'ALTER TABLE word_sync_queue ADD COLUMN updated_at TEXT NOT NULL DEFAULT (datetime(\'now\'))',
-            );
-          }
+          await transaction(() async {
+            for (var target = from + 1; target <= to; target++) {
+              final step = _migrationSteps[target];
+              if (step != null) {
+                await step(this);
+              } else {
+                throw Exception('Unhandled upgrade step: $target');
+              }
+            }
+          });
+          assert(() {
+            if (to != 5) {
+              throw AssertionError('Missing migration steps or wrong target schema version');
+            }
+            return true;
+          }());
         },
       );
-
-  Future<void> _deduplicateWordsTable() async {
-    await transaction(() async {
-      await customStatement('''
-CREATE TABLE IF NOT EXISTS words_dedup (
-  id TEXT PRIMARY KEY,
-  user_id TEXT,
-  word_text TEXT NOT NULL,
-  total_count INTEGER DEFAULT 1,
-  is_known INTEGER DEFAULT 0,
-  last_updated TEXT NOT NULL
-)
-''');
-
-      await customStatement('DELETE FROM words_dedup');
-      await customStatement('''
-INSERT INTO words_dedup (id, user_id, word_text, total_count, is_known, last_updated)
-SELECT
-  (
-    SELECT w2.id
-    FROM words w2
-    WHERE
-      (w2.user_id = w.user_id OR (w2.user_id IS NULL AND w.user_id IS NULL))
-      AND w2.word_text = w.word_text
-    ORDER BY w2.last_updated DESC, w2.id DESC
-    LIMIT 1
-  ) AS id,
-  w.user_id,
-  w.word_text,
-  SUM(w.total_count) AS total_count,
-  MAX(w.is_known) AS is_known,
-  MAX(w.last_updated) AS last_updated
-FROM words w
-GROUP BY w.user_id, w.word_text
-''');
-
-      await customStatement('DELETE FROM words');
-      await customStatement('''
-INSERT INTO words (id, user_id, word_text, total_count, is_known, last_updated)
-SELECT id, user_id, word_text, total_count, is_known, last_updated
-FROM words_dedup
-''');
-      await customStatement('DROP TABLE words_dedup');
-
-     
-      await clearOrphanedSyncEntries();
-    });
-  }
 
  
 
@@ -162,51 +131,48 @@ FROM words_dedup
 
       int adoptedCount = 0;
       final now = DateTime.now().toUtc();
+      final Set<String> changedWordIds = {};
 
-      // 3. Merge logic: for each guest word
+      // 3. Merge Strategy:
+      // - If user DOES NOT have the word: reassign guest word to user (keeps local UUID).
+      // - If user DOES have the word: merge guest stats (highest count, union isKnown) 
+      //   into the existing user word and delete the guest duplicate.
+      // - To save bandwidth, only the IDs in changedWordIds are enqueued for sync.
       for (final guest in guestWords) {
         final existing = existingMap[guest.wordText];
 
         if (existing != null) {
-          // CONFLICT: User already has this word from cloud
-          // Merge: take highest count, set isKnown if either is true
+          // CONFLICT: User already has this word from cloud. Merge into user row.
           await (update(words)..where((t) => t.id.equals(existing.id)))
               .write(WordsCompanion(
-                totalCount: Value(
-                  existing.totalCount > guest.totalCount
-                      ? existing.totalCount
-                      : guest.totalCount,
-                ),
-                isKnown: Value(existing.isKnown || guest.isKnown),
-                lastUpdated: Value(now),
-              ));
+            totalCount: Value(
+              existing.totalCount > guest.totalCount
+                  ? existing.totalCount
+                  : guest.totalCount,
+            ),
+            isKnown: Value(existing.isKnown || guest.isKnown),
+            lastUpdated: Value(now),
+          ));
+          changedWordIds.add(existing.id);
 
-          // Delete the guest duplicate
+          // Delete the now-redundant guest duplicate
           await (delete(words)..where((t) => t.id.equals(guest.id))).go();
         } else {
-          // No conflict: just reassign the userId
+          // ADOPT: No conflict. Reassign the existing guest word to the new userId.
           await (update(words)..where((t) => t.id.equals(guest.id))).write(
             WordsCompanion(
               userId: Value(userId),
               lastUpdated: Value(now),
             ),
           );
+          changedWordIds.add(guest.id);
         }
         adoptedCount++;
       }
 
-      // 4. Enqueue ALL user words for cloud sync
-      final finalUserWords = await (select(words)
-            ..where((t) => t.userId.equals(userId)))
-          .get();
-
-      for (final word in finalUserWords) {
-        await into(wordSyncQueue).insert(WordSyncQueueCompanion.insert(
-          wordId: word.id,
-          operation: 'upsert',
-          createdAt: now,
-          updatedAt: now,
-        ));
+      // 4. Enqueue ONLY the migrated/merged items for cloud sync
+      for (final wordId in changedWordIds) {
+        await enqueueSyncOperation(wordId, 'upsert');
       }
 
       return adoptedCount;
@@ -245,12 +211,33 @@ FROM words_dedup
   }
 
   Future<void> enqueueSyncOperation(String wordId, String operation) async {
-    await into(wordSyncQueue).insert(WordSyncQueueCompanion.insert(
-      wordId: wordId,
-      operation: operation,
-      createdAt: DateTime.now().toUtc(),
-      updatedAt: DateTime.now().toUtc(),
-    ));
+    final now = DateTime.now().toUtc();
+    await transaction(() async {
+      // 1. Cross-operation idempotency: replace pending conflicts
+      // If we are upserting and have a pending delete, or vice versa
+      final otherOperation = operation == 'upsert' ? 'delete' : 'upsert';
+      await (delete(wordSyncQueue)
+            ..where((t) => t.wordId.equals(wordId) & t.operation.equals(otherOperation)))
+          .go();
+
+      // 2. Upsert same-operation: update timestamp and reset retry count
+      final companion = WordSyncQueueCompanion.insert(
+        wordId: wordId,
+        operation: operation,
+        createdAt: now,
+        updatedAt: now,
+        retryCount: const Value(0),
+        lastError: const Value(null),
+      );
+
+      await into(wordSyncQueue).insert(
+        companion,
+        onConflict: DoUpdate(
+          (old) => companion,
+          target: [wordSyncQueue.wordId, wordSyncQueue.operation],
+        ),
+      );
+    });
   }
 
   Future<List<WordSyncQueueData>> getSyncQueue(int limit) async {
@@ -281,6 +268,106 @@ DELETE FROM word_sync_queue
 WHERE word_id NOT IN (SELECT id FROM words)
 ''');
   }
+}
+
+Future<void> _migrate1To2(WordFlowDatabase db) async {
+  await db.transaction(() async {
+    await db.customStatement('''
+CREATE TABLE IF NOT EXISTS words_dedup (
+  id TEXT PRIMARY KEY,
+  user_id TEXT,
+  word_text TEXT NOT NULL,
+  total_count INTEGER DEFAULT 1,
+  is_known INTEGER DEFAULT 0,
+  last_updated TEXT NOT NULL
+)
+''');
+
+    await db.customStatement('DELETE FROM words_dedup');
+    await db.customStatement('''
+INSERT INTO words_dedup (id, user_id, word_text, total_count, is_known, last_updated)
+SELECT
+  (
+    SELECT w2.id
+    FROM words w2
+    WHERE
+      (w2.user_id = w.user_id OR (w2.user_id IS NULL AND w.user_id IS NULL))
+      AND w2.word_text = w.word_text
+    ORDER BY w2.last_updated DESC, w2.id DESC
+    LIMIT 1
+  ) AS id,
+  w.user_id,
+  w.word_text,
+  SUM(w.total_count) AS total_count,
+  MAX(w.is_known) AS is_known,
+  MAX(w.last_updated) AS last_updated
+FROM words w
+GROUP BY w.user_id, w.word_text
+''');
+
+    await db.customStatement('DELETE FROM words');
+    await db.customStatement('''
+INSERT INTO words (id, user_id, word_text, total_count, is_known, last_updated)
+SELECT id, user_id, word_text, total_count, is_known, last_updated
+FROM words_dedup
+''');
+    await db.customStatement('DROP TABLE words_dedup');
+
+    await db.clearOrphanedSyncEntries();
+  });
+}
+
+Future<void> _migrate2To3(WordFlowDatabase db) async {
+  await db.customStatement('''
+    DELETE FROM words WHERE rowid NOT IN (
+      SELECT MIN(rowid) FROM words GROUP BY user_id, word_text
+    )
+  ''');
+  await db.customStatement(
+    'CREATE UNIQUE INDEX IF NOT EXISTS idx_words_user_word ON words(user_id, word_text)',
+  );
+}
+
+Future<void> _migrate3To4(WordFlowDatabase db) async {
+  try {
+    await db.customStatement(
+      'ALTER TABLE word_sync_queue ADD COLUMN updated_at TEXT NOT NULL DEFAULT (datetime(\'now\'))',
+    );
+  } catch (e) {
+    if (!e.toString().contains('duplicate column name')) {
+      rethrow;
+    }
+  }
+}
+
+Future<void> _migrate4To5(WordFlowDatabase db) async {
+  await db.transaction(() async {
+    // 1. Create temporary table with unique constraint
+    await db.customStatement('''
+      CREATE TABLE word_sync_queue_new (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        word_id TEXT NOT NULL,
+        operation TEXT NOT NULL,
+        retry_count INTEGER DEFAULT 0,
+        last_error TEXT,
+        created_at TEXT NOT NULL,
+        updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+        UNIQUE(word_id, operation)
+      );
+    ''');
+
+    // 2. Map existing data, grouping to avoid unique violations (keep latest)
+    await db.customStatement('''
+      INSERT INTO word_sync_queue_new (word_id, operation, retry_count, last_error, created_at, updated_at)
+      SELECT word_id, operation, MAX(retry_count), MAX(last_error), MIN(created_at), MAX(updated_at)
+      FROM word_sync_queue
+      GROUP BY word_id, operation;
+    ''');
+
+    // 3. Swap tables
+    await db.customStatement('DROP TABLE word_sync_queue;');
+    await db.customStatement('ALTER TABLE word_sync_queue_new RENAME TO word_sync_queue;');
+  });
 }
 
 QueryExecutor _openConnection() {
