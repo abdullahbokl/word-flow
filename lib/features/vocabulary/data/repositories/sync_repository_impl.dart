@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/sync/sync_operation.dart';
+import 'package:word_flow/core/sync/sync_preferences.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/sync_repository.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/word_local_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/word_remote_source.dart';
@@ -13,10 +14,18 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 @LazySingleton(as: SyncRepository)
 class SyncRepositoryImpl implements SyncRepository {
 
-  SyncRepositoryImpl(this._localSource, this._syncSource, this._remoteSource, this._logger);
+  SyncRepositoryImpl(
+    this._localSource,
+    this._syncSource,
+    this._remoteSource,
+    this._preferences,
+    this._logger,
+  );
+
   final WordLocalSource _localSource;
   final SyncLocalSource _syncSource;
   final WordRemoteSource _remoteSource;
+  final SyncPreferences _preferences;
   final AppLogger _logger;
 
   @override
@@ -99,6 +108,54 @@ class SyncRepositoryImpl implements SyncRepository {
       try {
         await Sentry.captureException(e, stackTrace: stackTrace);
       } catch (_) {}
+      return Left(SyncFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, int>> pullRemoteChanges(String userId) async {
+    try {
+      _logger.syncEvent('Starting pull of remote changes for user: $userId');
+      final lastPull = await _preferences.getLastPullTimestamp(userId);
+      final now = DateTime.now().toUtc();
+
+      final remoteBatchResult = lastPull == null
+          ? await _remoteSource.fetchUserWords(userId)
+          : await _remoteSource.fetchWordsUpdatedSince(userId, lastPull);
+
+      return await remoteBatchResult.fold(
+        (failure) async {
+           _logger.error('Failed fetching remote changes', failure);
+           return Left(failure);
+        },
+        (remoteWords) async {
+          _logger.syncEvent('Fetched ${remoteWords.length} updated words from remote');
+          int pulledCount = 0;
+
+          for (final remoteDto in remoteWords) {
+            final localWord = await _localSource.getWordById(remoteDto.id);
+            
+            // Merge strategy: incoming remote wins if:
+            // - It doesn't exist locally
+            // - OR it's strictly newer than the local version
+            final isLocalOutdated = localWord == null || 
+                remoteDto.lastUpdated.isAfter(localWord.lastUpdated);
+
+            if (isLocalOutdated) {
+              final companion = WordMapper.toCompanion(WordMapper.fromRemoteDto(remoteDto));
+              // Note: We use saveWord directly to avoid triggering the sync queue
+              await _localSource.saveWord(companion);
+              pulledCount++;
+            }
+          }
+
+          await _preferences.setLastPullTimestamp(userId, now);
+          _logger.syncEvent('Successfully completed pull sync of $pulledCount words');
+          return Right(pulledCount);
+        },
+      );
+    } catch (e, stackTrace) {
+      _logger.error('Unexpected error during pull sync', e, stackTrace);
       return Left(SyncFailure(e.toString()));
     }
   }

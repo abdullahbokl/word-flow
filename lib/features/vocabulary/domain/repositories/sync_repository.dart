@@ -5,4 +5,5 @@ abstract class SyncRepository {
   Future<Either<Failure, int>> getPendingCount();
   Stream<int> watchPendingCount();
   Future<Either<Failure, int>> syncPendingWords();
+  Future<Either<Failure, int>> pullRemoteChanges(String userId);
 }
