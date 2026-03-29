@@ -5,7 +5,6 @@ import '../config/env_config.dart';
 import 'auth_interceptor.dart';
 import 'error_interceptor.dart';
 import 'header_interceptor.dart';
-import 'logging_interceptor.dart';
 
 @lazySingleton
 class DioClient {
@@ -23,7 +22,6 @@ class DioClient {
       HeaderInterceptor(),
       AuthInterceptor(_supabaseClient),
       ErrorInterceptor(),
-      LoggingInterceptor(),
     ]);
   }
 

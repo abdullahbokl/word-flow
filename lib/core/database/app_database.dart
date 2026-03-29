@@ -3,31 +3,10 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:injectable/injectable.dart';
+import 'tables.dart';
 
 part 'app_database.g.dart';
 
-class Words extends Table {
-  TextColumn get id => text()();
-  TextColumn get userId => text().nullable().named('user_id')();
-  TextColumn get wordText => text().named('word_text')();
-  IntColumn get totalCount => integer().named('total_count').withDefault(const Constant(1))();
-  BoolColumn get isKnown =>
-      boolean().named('is_known').withDefault(const Constant(false))();
-  DateTimeColumn get lastUpdated => dateTime().named('last_updated')();
-
-  @override
-  Set<Column> get primaryKey => {id};
-}
-
-class WordSyncQueue extends Table {
-  IntColumn get id => integer().autoIncrement()();
-  TextColumn get wordId => text().named('word_id')();
-  TextColumn get operation => text()();
-  IntColumn get retryCount =>
-      integer().named('retry_count').withDefault(const Constant(0))();
-  TextColumn get lastError => text().named('last_error').nullable()();
-  DateTimeColumn get createdAt => dateTime().named('created_at')();
-}
 
 @DriftDatabase(tables: [Words, WordSyncQueue])
 @lazySingleton
@@ -37,8 +16,8 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   @override
   int get schemaVersion => 2;
 
-  /// Keep schema compatible with the existing `sqflite` tables.
-  /// If the app already created `words` and `word_sync_queue`, Drift will open them.
+ 
+ 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (m) async => m.createAll(),
@@ -92,14 +71,14 @@ FROM words_dedup
 ''');
       await customStatement('DROP TABLE words_dedup');
 
-      // Remove queue entries that referenced rows removed during deduplication.
+     
       await clearOrphanedSyncEntries();
     });
   }
 
-  // ----- Words
+ 
 
-  Stream<List<Word>> watchWords({String? userId}) {
+  Stream<List<WordRow>> watchWords({String? userId}) {
     final query = select(words)
       ..where((t) =>
           userId == null ? t.userId.isNull() : t.userId.equals(userId));
@@ -115,12 +94,12 @@ FROM words_dedup
     return rows.map((r) => r.read(words.wordText)!).toList(growable: false);
   }
 
-  Future<Word?> getWordById(String id) async {
+  Future<WordRow?> getWordById(String id) async {
     final query = select(words)..where((t) => t.id.equals(id));
     return query.getSingleOrNull();
   }
 
-  Future<Word?> getWordByText(String text, {String? userId}) async {
+  Future<WordRow?> getWordByText(String text, {String? userId}) async {
     final query = select(words)
       ..where((t) => t.wordText.equals(text))
       ..where((t) =>
@@ -171,7 +150,7 @@ FROM words_dedup
     return row.read(countExp) ?? 0;
   }
 
-  // ----- Sync queue
+ 
 
   Stream<int> watchPendingSyncCount() {
     final countExp = wordSyncQueue.id.count();

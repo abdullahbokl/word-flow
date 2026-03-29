@@ -12,9 +12,9 @@ abstract class RegisterModule {
     try {
       return Supabase.instance.client;
     } catch (e) {
-      // In tests or if not initialized, we shouldn't crash here.
-      // But for production, this should only happen if main() failed to initialize.
-      // We return a "dummy" or throw a more informative error.
+     
+     
+     
       throw Exception('SupabaseClient requested but Supabase is NOT initialized. '
           'Ensure Supabase.initialize is called in main(). Error: $e');
     }

@@ -30,7 +30,7 @@ class ScriptProcessor {
         );
       }
 
-      // 1. Normalize and tokenize
+     
       final wordRegExp = RegExp(r"[a-zA-Z']+");
       final matches = wordRegExp.allMatches(rawText);
 
@@ -40,11 +40,11 @@ class ScriptProcessor {
         final original = match.group(0)!;
         final normalized = original.toLowerCase();
 
-        // 2. Count frequencies
+       
         wordCounts[normalized] = (wordCounts[normalized] ?? 0) + 1;
       }
 
-      // 3. Convert to ProcessedWord and tag known status
+     
       final processed = <ProcessedWord>[];
       int newWordCount = 0;
       
@@ -61,7 +61,7 @@ class ScriptProcessor {
         ));
       }
 
-      // 4. Sort: Known at bottom, then by frequency descending
+     
       processed.sort((a, b) {
         if (a.isKnown != b.isKnown) {
           return a.isKnown ? 1 : -1;

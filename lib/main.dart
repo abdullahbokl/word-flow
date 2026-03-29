@@ -8,7 +8,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
   try {
-    // Only initialize if we have credentials
+   
     if (EnvConfig.isConfigured) {
       await Supabase.initialize(
         url: EnvConfig.supabaseUrl,
@@ -16,13 +16,13 @@ void main() async {
       );
     } else {
       debugPrint('Warning: Supabase credentials not found. Remote sync will be disabled.');
-      // Special flag for dev with missing credentials might be needed
+     
     }
   } catch (e) {
     debugPrint('Supabase initialization failed: $e');
   }
 
-  // Initialize DI
+ 
   configureDependencies();
   
   runApp(const WordFlowApp());
