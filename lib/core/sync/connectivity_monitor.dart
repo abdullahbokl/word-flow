@@ -47,7 +47,6 @@ class ConnectivityMonitor {
       _debounceTimer?.cancel();
       _emitIfChanged(ConnectivityStatus.offline);
     } else {
-      // If we were offline or initial, and now interface is up, debounce the "online" event
       if (_lastStatus != ConnectivityStatus.online && !(_debounceTimer?.isActive ?? false)) {
         _debounceTimer = Timer(reconnectDebounce, () async {
           if (await _checker.hasInternetAccess) {
@@ -65,8 +64,6 @@ class ConnectivityMonitor {
     }
   }
 
-  /// Verifies actual reachability to the Supabase health endpoint.
-  /// Useful for detecting captive portals or domain-specific blocks.
   Future<bool> checkReachability() async {
     if (!EnvConfig.isConfigured) return false;
     
@@ -81,8 +78,6 @@ class ConnectivityMonitor {
     }
   }
 
-  /// Returns true if the device has a network interface and internet access.
-  /// Uses cached status from InternetConnectionCheckerPlus for speed.
   Future<bool> get isOnline async {
     final results = await _connectivity.checkConnectivity();
     if (results.contains(ConnectivityResult.none)) return false;
