@@ -1,12 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/core/database/write_queue.dart';
 import 'package:word_flow/core/error/failures.dart';
 import 'package:word_flow/core/sync/sync_operation.dart';
-import 'package:word_flow/features/words/data/datasources/sync_local_source.dart';
-import 'package:word_flow/features/words/data/datasources/word_local_source.dart';
-import 'package:word_flow/features/words/data/mappers/word_mapper.dart';
 import 'package:word_flow/features/words/data/models/word_model.dart';
 import 'package:word_flow/features/words/data/repositories/word_repository_impl.dart';
 
@@ -23,6 +19,7 @@ class _TestWriteQueue implements LocalWriteQueue {
 void main() {
   late MockWordLocalSource mockLocal;
   late MockSyncLocalSource mockSync;
+  late MockAppLogger mockLogger;
   late LocalWriteQueue writeQueue; // Use real implementation
   late WordRepositoryImpl repo;
 
@@ -34,8 +31,9 @@ void main() {
   setUp(() {
     mockLocal = MockWordLocalSource();
     mockSync = MockSyncLocalSource();
+    mockLogger = MockAppLogger();
     writeQueue = _TestWriteQueue(); // Real queue for testing
-    repo = WordRepositoryImpl(mockLocal, mockSync, writeQueue);
+    repo = WordRepositoryImpl(mockLocal, mockSync, writeQueue, mockLogger);
   });
 
   tearDown(() {
@@ -392,7 +390,7 @@ void main() {
       final stream = repo.watchWords(userId: 'user-1');
 
       expect(stream, isA<Stream<List>>());
-      expectLater(
+      await expectLater(
         stream,
         emits(predicate<List>((words) => words.length == 3)),
       );

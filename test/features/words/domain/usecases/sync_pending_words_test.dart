@@ -58,9 +58,9 @@ void main() {
 
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
-      final failure = const SyncFailure('Failed to sync pending words');
+      const failure = SyncFailure('Failed to sync pending words');
       when(() => mockRepository.syncPendingWords())
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase();
@@ -71,9 +71,9 @@ void main() {
 
     test('should return Left(Failure) on server error', () async {
       // Arrange
-      final failure = const ServerFailure('Server error during sync');
+      const failure = ServerFailure('Server error during sync');
       when(() => mockRepository.syncPendingWords())
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase();

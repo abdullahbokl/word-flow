@@ -14,6 +14,7 @@ import 'package:word_flow/features/words/data/datasources/sync_local_source.dart
 
 // Core
 import 'package:word_flow/core/database/write_queue.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
 
 // Use Cases
 import 'package:word_flow/features/words/domain/usecases/adopt_guest_words.dart';
@@ -71,3 +72,9 @@ class MockToggleKnownWord extends Mock implements ToggleKnownWord {}
 class MockUpdateWord extends Mock implements UpdateWord {}
 class MockWatchPendingCount extends Mock implements WatchPendingCount {}
 class MockWatchWords extends Mock implements WatchWords {}
+
+// ============================================================================
+// CORE MOCKS
+// ============================================================================
+
+class MockAppLogger extends Mock implements AppLogger {}

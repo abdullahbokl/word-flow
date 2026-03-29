@@ -1,22 +1,21 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/core/database/app_database.dart';
 import 'package:word_flow/core/error/failures.dart';
 import 'package:word_flow/core/sync/sync_operation.dart';
-import 'package:word_flow/features/words/data/datasources/sync_local_source.dart';
-import 'package:word_flow/features/words/data/datasources/word_local_source.dart';
-import 'package:word_flow/features/words/data/datasources/word_remote_source.dart';
-import 'package:word_flow/features/words/data/models/word_model.dart';
 import 'package:word_flow/features/words/data/repositories/sync_repository_impl.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
 
 import '../../../../helpers/fakes.dart';
 import '../../../../helpers/mock_data.dart';
+
+class MockAppLogger extends Mock implements AppLogger {}
 
 void main() {
   late MockWordLocalSource mockLocal;
   late MockSyncLocalSource mockSync;
   late MockWordRemoteSource mockRemote;
+  late MockAppLogger mockLogger;
   late SyncRepositoryImpl repo;
 
   setUpAll(() {
@@ -28,7 +27,8 @@ void main() {
     mockLocal = MockWordLocalSource();
     mockSync = MockSyncLocalSource();
     mockRemote = MockWordRemoteSource();
-    repo = SyncRepositoryImpl(mockLocal, mockSync, mockRemote);
+    mockLogger = MockAppLogger();
+    repo = SyncRepositoryImpl(mockLocal, mockSync, mockRemote, mockLogger);
   });
 
   group('getPendingCount', () {
@@ -78,7 +78,7 @@ void main() {
       final stream = repo.watchPendingCount();
 
       expect(stream, isA<Stream<int>>());
-      expectLater(stream, emitsInOrder([1, 2, 3]));
+      await expectLater(stream, emitsInOrder([1, 2, 3]));
     });
   });
 
@@ -114,8 +114,8 @@ void main() {
           .thenAnswer((_) async => testWordModel);
       when(() => mockLocal.getWordById('word-2'))
           .thenAnswer((_) async => testWordModel2);
-      when(() => mockRemote.upsertWord(any())).thenAnswer((_) async => null);
-      when(() => mockSync.removeFromSyncQueue(any())).thenAnswer((_) async => null);
+      when(() => mockRemote.upsertWord(any())).thenAnswer((_) async {});
+      when(() => mockSync.removeFromSyncQueue(any())).thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();
 
@@ -138,8 +138,8 @@ void main() {
           .thenAnswer((_) async => [queueItem]);
       when(() => mockLocal.getWordById('test-id-1'))
           .thenAnswer((_) async => testWordModel);
-      when(() => mockRemote.upsertWord(any())).thenAnswer((_) async => null);
-      when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async => null);
+      when(() => mockRemote.upsertWord(any())).thenAnswer((_) async {});
+      when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();
 
@@ -159,8 +159,8 @@ void main() {
       );
       when(() => mockSync.getSyncQueue(20))
           .thenAnswer((_) async => [queueItem]);
-      when(() => mockRemote.deleteWord('test-id-1')).thenAnswer((_) async => null);
-      when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async => null);
+      when(() => mockRemote.deleteWord('test-id-1')).thenAnswer((_) async {});
+      when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();
 
@@ -186,7 +186,7 @@ void main() {
       when(() => mockRemote.upsertWord(any()))
           .thenThrow(Exception('Network error'));
       when(() => mockSync.updateSyncQueueRetry(any(), any()))
-          .thenAnswer((_) async => null);
+          .thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();
 
@@ -206,7 +206,7 @@ void main() {
       );
       when(() => mockSync.getSyncQueue(20))
           .thenAnswer((_) async => [queueItem]);
-      when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async => null);
+      when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();
 
@@ -239,7 +239,7 @@ void main() {
         wordId: 'test-id-1',
         operation: SyncOperation.upsert.value,
         retryCount: 3,
-        updatedAt: now.subtract(Duration(seconds: 5)), // Only 5 seconds passed
+        updatedAt: now.subtract(const Duration(seconds: 5)), // Only 5 seconds passed
       );
       when(() => mockSync.getSyncQueue(20))
           .thenAnswer((_) async => [queueItem]);
@@ -262,14 +262,14 @@ void main() {
         wordId: 'test-id-1',
         operation: SyncOperation.upsert.value,
         retryCount: 2,
-        updatedAt: now.subtract(Duration(seconds: 5)), // 5 seconds passed > 4
+        updatedAt: now.subtract(const Duration(seconds: 5)), // 5 seconds passed > 4
       );
       when(() => mockSync.getSyncQueue(20))
           .thenAnswer((_) async => [queueItem]);
       when(() => mockLocal.getWordById('test-id-1'))
           .thenAnswer((_) async => testWordModel);
-      when(() => mockRemote.upsertWord(any())).thenAnswer((_) async => null);
-      when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async => null);
+      when(() => mockRemote.upsertWord(any())).thenAnswer((_) async {});
+      when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();
 
@@ -293,7 +293,7 @@ void main() {
       when(() => mockRemote.upsertWord(any()))
           .thenThrow(Exception('Network error'));
       when(() => mockSync.updateSyncQueueRetry(any(), any()))
-          .thenAnswer((_) async => null);
+          .thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();
 
@@ -329,7 +329,7 @@ void main() {
           .thenAnswer((_) async => [queueItem]);
       when(() => mockLocal.getWordById('missing-id'))
           .thenAnswer((_) async => null);
-      when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async => null);
+      when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();
 

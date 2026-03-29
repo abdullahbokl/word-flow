@@ -58,9 +58,9 @@ void main() {
 
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
-      final failure = const SyncFailure('Failed to get pending count');
+      const failure = SyncFailure('Failed to get pending count');
       when(() => mockRepository.getPendingCount())
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase();

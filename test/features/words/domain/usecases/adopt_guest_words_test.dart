@@ -46,9 +46,9 @@ void main() {
 
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
-      final failure = const ServerFailure('Adoption failed');
+      const failure = ServerFailure('Adoption failed');
       when(() => mockRepository.adoptGuestWords(any()))
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(testUserId);

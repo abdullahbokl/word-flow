@@ -57,9 +57,9 @@ void main() {
 
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
-      final failure = const DatabaseFailure('Failed to delete word');
+      const failure = DatabaseFailure('Failed to delete word');
       when(() => mockRepository.deleteWord(any(), userId: any(named: 'userId')))
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(testWordId, userId: testUserId);

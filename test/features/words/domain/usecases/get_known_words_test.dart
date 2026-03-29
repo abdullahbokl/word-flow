@@ -75,9 +75,9 @@ void main() {
 
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
-      final failure = const DatabaseFailure('Failed to fetch known words');
+      const failure = DatabaseFailure('Failed to fetch known words');
       when(() => mockRepository.getKnownWords(userId: any(named: 'userId')))
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(userId: testUserId);
