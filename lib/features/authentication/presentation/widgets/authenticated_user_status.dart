@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:word_flow/features/authentication/domain/entities/user_entity.dart';
 import 'package:word_flow/features/authentication/presentation/widgets/auth_status_widgets.dart';
+import 'package:word_flow/app/router/routes.dart';
 
 class AuthenticatedUserStatus extends StatelessWidget {
 
@@ -48,15 +49,16 @@ class AuthenticatedUserStatus extends StatelessWidget {
       );
     }
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(Icons.person_outline_rounded, size: 16, color: scheme.primary),
-        const SizedBox(width: 8),
-        Flexible(child: emailText),
-        const SizedBox(width: 12),
-        ActionButton(label: 'Log out', onTap: onLogOut, isDestructive: true),
-      ],
+    return GestureDetector(
+      onTap: () => const ProfileRoute().push(context),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.person_outline_rounded, size: 16, color: scheme.primary),
+          const SizedBox(width: 8),
+          Flexible(child: emailText),
+        ],
+      ),
     );
   }
 }

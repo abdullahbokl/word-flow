@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:word_flow/core/di/injection.config.dart';
@@ -19,6 +20,15 @@ abstract class RegisterModule {
           'Ensure Supabase.initialize is called in main(). Error: $e');
     }
   }
+
+  @lazySingleton
+  @Named('secure_storage')
+  FlutterSecureStorage get secureStorage => const FlutterSecureStorage(
+        aOptions: AndroidOptions(),
+        iOptions: IOSOptions(
+          accessibility: KeychainAccessibility.first_unlock,
+        ),
+      );
 }
 
 @InjectableInit(

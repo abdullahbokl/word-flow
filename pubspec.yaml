@@ -51,6 +51,9 @@ dependencies:
   talker_bloc_logger: ^5.1.16
   shimmer: ^3.0.0
   sentry_flutter: ^9.16.0
+  flutter_secure_storage: ^10.0.0
+  sqlite3_flutter_libs: ^0.5.42
+  sqlite3: ^2.9.4
 
 dev_dependencies:
   flutter_test:

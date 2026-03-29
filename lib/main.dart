@@ -9,6 +9,8 @@ import 'package:word_flow/app/app.dart';
 import 'package:word_flow/core/di/injection.dart';
 import 'package:word_flow/core/config/env_config.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
+import 'package:word_flow/core/security/security_service.dart';
+import 'package:word_flow/core/security/supabase_secure_storage.dart';
 
 Future<void> main() async {
   await SentryFlutter.init(
@@ -27,9 +29,13 @@ Future<void> main() async {
 
       try {
         if (EnvConfig.isConfigured) {
+          final securityService = getIt<SecurityService>();
           await Supabase.initialize(
             url: EnvConfig.supabaseUrl,
             anonKey: EnvConfig.supabaseAnonKey,
+            authOptions: FlutterAuthClientOptions(
+              localStorage: SupabaseSecureStorage(securityService),
+            ),
           );
         } else {
           logger.warning(

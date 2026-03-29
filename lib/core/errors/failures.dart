@@ -35,3 +35,7 @@ class ConnectionFailure extends Failure {
 class MigrationFailure extends Failure {
   const MigrationFailure(super.message);
 }
+
+class SecurityFailure extends Failure {
+  const SecurityFailure(super.message);
+}

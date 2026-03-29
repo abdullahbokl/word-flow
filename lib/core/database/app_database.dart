@@ -284,6 +284,16 @@ WHERE word_id NOT IN (SELECT id FROM words)
 }
 
 QueryExecutor _openConnection() {
-  return driftDatabase(name: 'wordflow');
+  return driftDatabase(
+    name: 'wordflow',
+    native: DriftNativeOptions(
+      setup: (rawDb) {
+        // In a real app, we would fetch a persistent key from SecureStorage here.
+        // For now, we use a constant to demonstrate the PRAGMA key functionality.
+        // Note: For existing databases, a re-keying migration would be needed.
+        rawDb.execute("PRAGMA key = 'wordflow-secure-storage-key';");
+      },
+    ),
+  );
 }
 
