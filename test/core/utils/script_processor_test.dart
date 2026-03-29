@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:word_flow/features/words/data/services/isolate_text_analysis_service.dart';
-import 'package:word_flow/features/words/domain/entities/script_analysis.dart';
+import 'package:word_flow/features/vocabulary/data/services/isolate_text_analysis_service.dart';
+import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
 
 void main() {
   group('IsolateTextAnalysisService', () {

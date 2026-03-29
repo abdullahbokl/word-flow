@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:word_flow/features/words/presentation/pages/workspace_page.dart';
-import 'package:word_flow/features/words/presentation/pages/library_page.dart';
+import 'package:word_flow/features/word_learning/presentation/pages/workspace_page.dart';
+import 'package:word_flow/features/vocabulary/presentation/pages/library_page.dart';
 
 part 'routes.g.dart';
 

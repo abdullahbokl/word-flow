@@ -8,15 +8,15 @@ import 'package:word_flow/core/theme/app_theme.dart';
 import 'package:word_flow/core/widgets/app_button.dart';
 import 'package:word_flow/core/widgets/empty_state_view.dart';
 import 'package:word_flow/core/widgets/section_card.dart';
-import 'package:word_flow/features/words/domain/entities/script_analysis.dart';
-import 'package:word_flow/features/words/domain/entities/processed_word.dart';
-import 'package:word_flow/features/words/presentation/cubit/workspace_cubit.dart';
-import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
-import 'package:word_flow/features/words/presentation/pages/workspace_page.dart';
-import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:word_flow/features/auth/presentation/cubit/auth_state.dart';
-import 'package:word_flow/features/words/presentation/cubit/sync_cubit.dart';
-import 'package:word_flow/features/words/presentation/cubit/sync_state.dart';
+import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
+import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
+import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cubit.dart';
+import 'package:word_flow/features/word_learning/presentation/blocs/workspace_state.dart';
+import 'package:word_flow/features/word_learning/presentation/pages/workspace_page.dart';
+import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit.dart';
+import 'package:word_flow/features/authentication/presentation/blocs/auth_state.dart';
+import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart';
+import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart';
 
 class MockWorkspaceCubit extends MockCubit<WorkspaceState>
     implements WorkspaceCubit {}

@@ -6,7 +6,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger.dart';
 
 import 'package:word_flow/app/app.dart';
-import 'package:word_flow/app/di.dart';
+import 'package:word_flow/core/di/injection.dart';
 import 'package:word_flow/core/config/env_config.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 

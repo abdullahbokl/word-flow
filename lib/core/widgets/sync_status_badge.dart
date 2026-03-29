@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:word_flow/features/words/presentation/cubit/sync_cubit.dart';
-import 'package:word_flow/features/words/presentation/cubit/sync_state.dart';
+import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart';
+import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart';
 
 class SyncStatusBadge extends StatelessWidget {
   const SyncStatusBadge({super.key});

@@ -1,36 +1,36 @@
 import 'package:mocktail/mocktail.dart';
 
 // Repositories
-import 'package:word_flow/features/words/domain/repositories/word_repository.dart';
-import 'package:word_flow/features/words/domain/repositories/sync_repository.dart';
+import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
+import 'package:word_flow/features/vocabulary/domain/repositories/sync_repository.dart';
 
 // Domain Services
-import 'package:word_flow/features/words/domain/services/text_analysis_service.dart';
+import 'package:word_flow/features/vocabulary/domain/services/text_analysis_service.dart';
 
 // Data Sources
-import 'package:word_flow/features/words/data/datasources/word_local_source.dart';
-import 'package:word_flow/features/words/data/datasources/word_remote_source.dart';
-import 'package:word_flow/features/words/data/datasources/sync_local_source.dart';
+import 'package:word_flow/features/vocabulary/data/datasources/word_local_source.dart';
+import 'package:word_flow/features/vocabulary/data/datasources/word_remote_source.dart';
+import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source.dart';
 
 // Core
 import 'package:word_flow/core/database/write_queue.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 
 // Use Cases
-import 'package:word_flow/features/words/domain/usecases/adopt_guest_words.dart';
-import 'package:word_flow/features/words/domain/usecases/clear_local_words.dart';
-import 'package:word_flow/features/words/domain/usecases/delete_word.dart';
-import 'package:word_flow/features/words/domain/usecases/get_guest_words_count.dart';
-import 'package:word_flow/features/words/domain/usecases/get_known_words.dart';
-import 'package:word_flow/features/words/domain/usecases/get_known_word_texts.dart';
-import 'package:word_flow/features/words/domain/usecases/get_pending_count.dart';
-import 'package:word_flow/features/words/domain/usecases/process_script.dart';
-import 'package:word_flow/features/words/domain/usecases/save_processed_words.dart';
-import 'package:word_flow/features/words/domain/usecases/sync_pending_words.dart';
-import 'package:word_flow/features/words/domain/usecases/toggle_known_word.dart';
-import 'package:word_flow/features/words/domain/usecases/update_word.dart';
-import 'package:word_flow/features/words/domain/usecases/watch_pending_count.dart';
-import 'package:word_flow/features/words/domain/usecases/watch_words.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/adopt_guest_words.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/clear_local_words.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/delete_word.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/get_guest_words_count.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/get_known_words.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/get_known_word_texts.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/get_pending_count.dart';
+import 'package:word_flow/features/word_learning/domain/usecases/process_script.dart';
+import 'package:word_flow/features/word_learning/domain/usecases/save_processed_words.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/sync_pending_words.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/toggle_known_word.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/update_word.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/watch_pending_count.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/watch_words.dart';
 
 // ============================================================================
 // REPOSITORY MOCKS

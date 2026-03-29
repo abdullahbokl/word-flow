@@ -1,7 +1,7 @@
-import 'package:word_flow/features/words/domain/entities/word.dart';
-import 'package:word_flow/features/words/domain/entities/processed_word.dart';
-import 'package:word_flow/features/words/domain/entities/script_analysis.dart';
-import 'package:word_flow/features/words/data/models/word_model.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
+import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
+import 'package:word_flow/features/vocabulary/data/models/word_model.dart';
 
 // ============================================================================
 // WORD ENTITY TEST FIXTURES

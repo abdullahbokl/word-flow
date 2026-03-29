@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'package:injectable/injectable.dart';
-import 'package:word_flow/features/words/domain/repositories/sync_repository.dart';
+import 'package:word_flow/features/vocabulary/domain/repositories/sync_repository.dart';
 import 'package:word_flow/core/sync/connectivity_monitor.dart';
 
 @lazySingleton
