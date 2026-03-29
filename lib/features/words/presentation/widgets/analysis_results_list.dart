@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:word_flow/features/words/domain/entities/processed_word.dart';
 import 'package:word_flow/features/words/presentation/widgets/word_results_list.dart';
 import 'package:word_flow/features/words/presentation/widgets/known_words_header.dart';
+import 'package:word_flow/shared/widgets/word_card_shimmer.dart';
+import 'package:word_flow/shared/widgets/empty_state.dart';
+import 'package:word_flow/core/widgets/section_card.dart';
+import 'package:word_flow/features/words/presentation/widgets/analysis_chip.dart';
+import 'package:word_flow/features/words/presentation/widgets/analysis_results_list_helpers.dart';
 
 class AnalysisResultsList extends StatefulWidget {
-
   const AnalysisResultsList({
     super.key,
     required this.unknownWords,
@@ -13,6 +17,7 @@ class AnalysisResultsList extends StatefulWidget {
     required this.isProcessing,
     required this.pendingWordTexts,
   });
+
   final List<ProcessedWord> unknownWords;
   final List<ProcessedWord> knownWords;
   final bool isRefreshing;
@@ -29,7 +34,27 @@ class _AnalysisResultsListState extends State<AnalysisResultsList> {
   @override
   Widget build(BuildContext context) {
     if (widget.unknownWords.isEmpty && widget.knownWords.isEmpty) {
-      return const SliverToBoxAdapter(child: SizedBox.shrink());
+      if (widget.isProcessing) {
+        return const SliverToBoxAdapter(
+          child: SectionCard(
+            title: 'Analysis results',
+            subtitle: 'New and recognized words from your text.',
+            trailing: AnalysisChip(icon: Icons.hourglass_top_rounded, label: 'Analyzing'),
+            child: SizedBox(height: 220, child: ShimmerList(count: 4)),
+          ),
+        );
+      }
+      return const SliverToBoxAdapter(
+        child: SectionCard(
+          title: 'Analysis results',
+          subtitle: 'New and recognized words from your text.',
+          child: EmptyState(
+            icon: Icons.auto_awesome_rounded,
+            title: 'No words found',
+            subtitle: 'Analyze a script to surface unfamiliar words.',
+          ),
+        ),
+      );
     }
 
     final scheme = Theme.of(context).colorScheme;
@@ -37,16 +62,16 @@ class _AnalysisResultsListState extends State<AnalysisResultsList> {
 
     return SliverMainAxisGroup(
       slivers: [
-        if (widget.isRefreshing) _RefreshingIndicator(scheme: scheme, textTheme: textTheme),
+        if (widget.isRefreshing) RefreshingIndicator(scheme: scheme, textTheme: textTheme),
         if (widget.unknownWords.isNotEmpty) ...[
-          _SectionTitle(title: 'Unknown (${widget.unknownWords.length})', color: scheme.primary),
+          SectionTitle(title: 'Unknown (${widget.unknownWords.length})', color: scheme.primary),
           WordResultsList(
             words: widget.unknownWords,
             pendingWordTexts: widget.pendingWordTexts,
             enabled: !widget.isProcessing,
           ),
         ],
-        if (widget.unknownWords.isNotEmpty && widget.knownWords.isNotEmpty) _Divider(),
+        if (widget.unknownWords.isNotEmpty && widget.knownWords.isNotEmpty) const AnalysisDivider(),
         if (widget.knownWords.isNotEmpty) ...[
           SliverToBoxAdapter(
             child: KnownWordsHeader(
@@ -66,43 +91,4 @@ class _AnalysisResultsListState extends State<AnalysisResultsList> {
       ],
     );
   }
-}
-
-class _RefreshingIndicator extends StatelessWidget {
-  const _RefreshingIndicator({required this.scheme, required this.textTheme});
-  final ColorScheme scheme;
-  final TextTheme textTheme;
-  @override
-  Widget build(BuildContext context) => SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              LinearProgressIndicator(minHeight: 3, borderRadius: BorderRadius.circular(999)),
-              const SizedBox(height: 8),
-              Text('Refreshing results...', style: textTheme.labelSmall?.copyWith(color: scheme.primary)),
-            ],
-          ),
-        ),
-      );
-}
-
-class _SectionTitle extends StatelessWidget {
-  const _SectionTitle({required this.title, required this.color});
-  final String title;
-  final Color color;
-  @override
-  Widget build(BuildContext context) => SliverToBoxAdapter(
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 12),
-          child: Text(title, style: Theme.of(context).textTheme.titleSmall?.copyWith(color: color)),
-        ),
-      );
-}
-
-class _Divider extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) => const SliverToBoxAdapter(
-          child: Padding(padding: EdgeInsets.symmetric(vertical: 20), child: Divider()));
 }
