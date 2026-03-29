@@ -12,7 +12,7 @@ import 'package:word_flow/features/authentication/presentation/blocs/auth_state.
 import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit_actions.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
-@injectable
+@lazySingleton
 class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
   AuthCubit(
     this.authRepository,
@@ -36,7 +36,9 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
   bool _isInitialized = false;
 
   Future<void> init() async {
-    if (_isInitialized) return;
+    if (_isInitialized) {
+      return;
+    }
     _isInitialized = true;
     emit(const AuthState.loading());
     _checkInitialSession();
@@ -52,7 +54,7 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
       } else {
         emit(const AuthState.guest());
       }
-    } catch (_) {
+    } catch (e) {
       emit(const AuthState.guest());
     }
   }

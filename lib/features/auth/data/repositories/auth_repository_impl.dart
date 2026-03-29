@@ -1,13 +1,11 @@
 import 'dart:async';
 import 'package:fpdart/fpdart.dart';
-import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_state_change.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 
-@LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   AuthRepositoryImpl(this._supabase);
   final supabase.SupabaseClient _supabase;
