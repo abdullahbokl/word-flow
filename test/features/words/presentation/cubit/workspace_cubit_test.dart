@@ -185,4 +185,106 @@ void main() {
     ],
   );
 
+  blocTest<WorkspaceCubit, WorkspaceState>(
+    'analyze with empty text resets to initial state',
+    build: () => buildCubit(),
+    seed: () => const WorkspaceState.results(
+      words: words,
+      summary: summary,
+      pendingKnownWords: <String>{},
+      revision: 1,
+    ),
+    act: (cubit) async => cubit.analyze('   '),
+    expect: () => [
+      const WorkspaceState.initial(),
+    ],
+  );
+
+  blocTest<WorkspaceCubit, WorkspaceState>(
+    'multiple analyzes track revision correctly',
+    build: () {
+      when(
+        () => processScript.call(any(), userId: any(named: 'userId')),
+      ).thenAnswer(
+        (_) async => const Right(ScriptAnalysis(summary: summary, words: words)),
+      );
+      when(
+        () => toggleKnownWord.call(any(), userId: any(named: 'userId')),
+      ).thenAnswer((_) async => const Right(null));
+      return buildCubit();
+    },
+    act: (cubit) async {
+      await cubit.analyze('hello world');
+      await cubit.analyze('hello world hello');
+    },
+    expect: () => [
+      const WorkspaceState.processing(),
+      const WorkspaceState.results(
+        words: words,
+        summary: summary,
+        pendingKnownWords: <String>{},
+        revision: 1,
+      ),
+      const WorkspaceState.processing(),
+      const WorkspaceState.results(
+        words: words,
+        summary: summary,
+        pendingKnownWords: <String>{},
+        revision: 2,
+      ),
+    ],
+    verify: (cubit) {
+      verify(
+        () => saveProcessedWords.call(any(), userId: any(named: 'userId')),
+      ).called(2);
+    },
+  );
+
+  blocTest<WorkspaceCubit, WorkspaceState>(
+    'toggleKnown ignores if not in results state',
+    build: () => buildCubit(),
+    seed: () => const WorkspaceState.initial(),
+    act: (cubit) => cubit.toggleKnown('hello'),
+    expect: () => [],
+  );
+
+  blocTest<WorkspaceCubit, WorkspaceState>(
+    'toggleKnown ignores duplicate request (already pending)',
+    build: () {
+      when(
+        () => toggleKnownWord.call('hello', userId: any(named: 'userId')),
+      ).thenAnswer((_) async => const Right(null));
+      return buildCubit();
+    },
+    seed: () => const WorkspaceState.results(
+      words: words,
+      summary: summary,
+      pendingKnownWords: <String>{'hello'},
+      revision: 1,
+    ),
+    act: (cubit) => cubit.toggleKnown('hello'),
+    expect: () => [],
+  );
+
+  blocTest<WorkspaceCubit, WorkspaceState>(
+    'analyze with userId passes it to processScript',
+    build: () {
+      when(
+        () => processScript.call(any(), userId: any(named: 'userId')),
+      ).thenAnswer(
+        (_) async => const Right(ScriptAnalysis(summary: summary, words: words)),
+      );
+      when(
+        () => toggleKnownWord.call(any(), userId: any(named: 'userId')),
+      ).thenAnswer((_) async => const Right(null));
+      return buildCubit();
+    },
+    act: (cubit) async => cubit.analyze('hello world', userId: 'user-123'),
+    verify: (cubit) {
+      verify(
+        () => processScript.call(any(), userId: 'user-123'),
+      ).called(1);
+    },
+  );
+
 }
