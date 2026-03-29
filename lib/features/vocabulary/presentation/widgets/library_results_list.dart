@@ -5,11 +5,10 @@ import 'package:word_flow/features/vocabulary/presentation/widgets/add_edit_word
 import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_state.dart';
-import 'package:word_flow/shared/widgets/word_card_base.dart';
+import 'package:word_flow/features/vocabulary/presentation/widgets/library_animated_item.dart';
 import 'package:word_flow/shared/widgets/empty_state.dart';
 
-class LibraryResultsList extends StatelessWidget {
-
+class LibraryResultsList extends StatefulWidget {
   const LibraryResultsList({
     super.key,
     required this.words,
@@ -17,14 +16,101 @@ class LibraryResultsList extends StatelessWidget {
     required this.searchQuery,
     required this.pendingWordIds,
   });
+
   final List<WordEntity> words;
   final WordsFilter filter;
   final String searchQuery;
   final Set<String> pendingWordIds;
 
   @override
+  State<LibraryResultsList> createState() => _LibraryResultsListState();
+}
+
+class _LibraryResultsListState extends State<LibraryResultsList> {
+  static const _exitDuration = Duration(milliseconds: 450);
+  static const _insertDuration = Duration(milliseconds: 400);
+
+  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  late List<WordEntity> _visibleItems;
+
+  @override
+  void initState() {
+    super.initState();
+    _visibleItems = _computeFilteredItems();
+  }
+
+  List<WordEntity> _computeFilteredItems() {
+    return widget.words.where((w) {
+      final matchesFilter = switch (widget.filter) {
+        WordsFilter.all => true,
+        WordsFilter.known => w.isKnown,
+        WordsFilter.unknown => !w.isKnown,
+      };
+      final matchesSearch = w.wordText.toLowerCase().contains(widget.searchQuery.toLowerCase());
+      return matchesFilter && matchesSearch;
+    }).toList();
+  }
+
+  @override
+  void didUpdateWidget(covariant LibraryResultsList oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final targetItems = _computeFilteredItems();
+
+    // Check for "hard reset" (e.g. search changed or list length changed drastically)
+    // For small changes, animate. For large ones, just rebuild.
+    if (widget.searchQuery != oldWidget.searchQuery || 
+        widget.filter != oldWidget.filter ||
+        (targetItems.length - _visibleItems.length).abs() > 5) {
+      _visibleItems = targetItems;
+      return;
+    }
+
+    final oldSet = _visibleItems.toSet();
+    final newSet = targetItems.toSet();
+
+    // Handle removals
+    final toRemove = _visibleItems.where((item) => !newSet.contains(item)).toList();
+    for (final item in toRemove) {
+      final index = _visibleItems.indexOf(item);
+      if (index != -1) {
+        _removeItem(index, item);
+      }
+    }
+
+    // Handle insertions
+    final toAdd = targetItems.where((item) => !oldSet.contains(item)).toList();
+    for (final item in toAdd) {
+      final targetIndex = targetItems.indexOf(item);
+      _insertItem(targetIndex, item);
+    }
+  }
+
+  void _removeItem(int index, WordEntity item) {
+    _visibleItems.removeAt(index);
+    _listKey.currentState?.removeItem(
+      index,
+      (context, animation) => LibraryAnimatedItem(
+        animation: animation,
+        word: item,
+        isPending: widget.pendingWordIds.contains(item.id),
+      ),
+      duration: _exitDuration,
+    );
+  }
+
+  void _insertItem(int index, WordEntity item) {
+    // Ensure index is valid for current visible state
+    final safeIndex = index > _visibleItems.length ? _visibleItems.length : index;
+    _visibleItems.insert(safeIndex, item);
+    _listKey.currentState?.insertItem(
+      safeIndex,
+      duration: _insertDuration,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (words.isEmpty) {
+    if (widget.words.isEmpty && widget.searchQuery.isEmpty) {
       return EmptyState(
         icon: Icons.library_books_outlined,
         title: 'No words yet',
@@ -36,44 +122,27 @@ class LibraryResultsList extends StatelessWidget {
       );
     }
 
-    final filtered = words.where((w) {
-      final matchesFilter = switch (filter) {
-        WordsFilter.all => true,
-        WordsFilter.known => w.isKnown,
-        WordsFilter.unknown => !w.isKnown,
-      };
-      final matchesSearch = w.wordText.toLowerCase().contains(searchQuery.toLowerCase());
-      return matchesFilter && matchesSearch;
-    }).toList(growable: false);
-
-    if (filtered.isEmpty) {
-      if (searchQuery.isNotEmpty) {
-        return const EmptyState(
-          icon: Icons.search_off,
-          title: 'No matches',
-          subtitle: 'Try a different search term',
-        );
-      }
+    if (_visibleItems.isEmpty) {
       return const EmptyState(
-        icon: Icons.filter_list_off,
-        title: 'No words match filter',
-        subtitle: 'Try changing the filter',
+        icon: Icons.search_off,
+        title: 'No matches',
+        subtitle: 'Try a different search term or filter',
       );
     }
 
-    return ListView.builder(
+    return AnimatedList(
+      key: _listKey,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      itemCount: filtered.length,
-      itemBuilder: (context, index) {
-        final word = filtered[index];
-        final isPending = pendingWordIds.contains(word.id);
-        return WordCardBase(
-          key: ValueKey(word.id),
-          word: word,
-          mode: WordCardMode.library,
-          isPending: isPending,
-          onEdit: () => _showAddEditSheet(context, word: word),
-          onDelete: () => _confirmDelete(context, word),
+      initialItemCount: _visibleItems.length,
+      itemBuilder: (context, index, animation) {
+        final item = _visibleItems[index];
+        return LibraryAnimatedItem(
+          key: ValueKey(item.id),
+          animation: animation,
+          word: item,
+          isPending: widget.pendingWordIds.contains(item.id),
+          onEdit: () => _showAddEditSheet(context, word: item),
+          onDelete: () => _confirmDelete(context, item),
         );
       },
     );

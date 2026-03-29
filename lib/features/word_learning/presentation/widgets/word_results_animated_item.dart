@@ -23,14 +23,12 @@ class WordResultsAnimatedItem extends StatelessWidget {
    
     final curvedAnimation = CurvedAnimation(
       parent: animation,
-      curve: Curves.easeInOutCubic,
+      curve: Curves.easeOutCubic,
     );
 
     return SlideTransition(
-     
-     
       position: Tween<Offset>(
-        begin: const Offset(-1, 0),
+        begin: const Offset(-0.4, 0), // Moderate slide from left
         end: Offset.zero,
       ).animate(curvedAnimation),
       child: FadeTransition(

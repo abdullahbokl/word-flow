@@ -20,8 +20,8 @@ class WordResultsList extends StatefulWidget {
 }
 
 class _WordResultsListState extends State<WordResultsList> {
-  static const _exitDuration = Duration(milliseconds: 260);
-  static const _insertDuration = Duration(milliseconds: 220);
+  static const _exitDuration = Duration(milliseconds: 450);
+  static const _insertDuration = Duration(milliseconds: 400);
 
   GlobalKey<SliverAnimatedListState> _listKey = GlobalKey<SliverAnimatedListState>();
   late List<ProcessedWord> _visibleWords;
@@ -119,5 +119,5 @@ class _WordResultsListState extends State<WordResultsList> {
   }
 
   List<ProcessedWord> _targetWords(List<ProcessedWord> source, Set<String> pending) =>
-      source.where((w) => !pending.contains(w.wordText)).toList(growable: false);
+      source.where((w) => !pending.contains(w.wordText)).toList(growable: true);
 }

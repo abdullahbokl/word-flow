@@ -23,9 +23,8 @@ class _ResultsSectionState extends State<ResultsSection> {
           slivers: [
             state.maybeMap(
               results: (resultsState) => SliverToBoxAdapter(
-                // Using uniquely identifiable keys for every state
                 child: AnalysisResultsHeader(
-                  key: ValueKey('analysis_header_${resultsState.revision}'),
+                  // We still provide progress state but avoid key reset
                   isProcessing: resultsState.pendingKnownWords.isNotEmpty,
                 ),
               ),
@@ -43,17 +42,15 @@ class _ResultsSectionState extends State<ResultsSection> {
               results: (resultsState) {
                 final unknown = resultsState.words
                     .where((w) => !w.isKnown)
-                    .toList(growable: false);
+                    .toList();
                 final known = resultsState.words
                     .where((w) => w.isKnown)
-                    .toList(growable: false);
+                    .toList();
 
                 return AnalysisResultsList(
-                  // Key incorporates revision/pending count to ensure fresh building
-                  // when fundamental state changes, avoiding stale list state
-                  key: ValueKey(
-                    'results_list_${resultsState.revision}_${resultsState.pendingKnownWords.length}',
-                  ),
+                  // Stabilized key to allow AnimatedList to persist and animate.
+                  // We only force a reset if the revision changes (new analysis).
+                  key: ValueKey('results_list_stable_${resultsState.revision}'),
                   unknownWords: unknown,
                   knownWords: known,
                   isRefreshing: resultsState.pendingKnownWords.isNotEmpty,
