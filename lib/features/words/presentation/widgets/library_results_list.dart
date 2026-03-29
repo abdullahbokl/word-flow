@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/word_card.dart';
-import '../../domain/entities/word.dart';
-import '../cubit/library_cubit.dart';
-import '../cubit/library_state.dart';
+import 'package:word_flow/core/widgets/app_loader.dart';
+import 'package:word_flow/core/widgets/word_card.dart';
+import 'package:word_flow/features/words/domain/entities/word.dart';
+import 'package:word_flow/features/words/presentation/cubit/library_cubit.dart';
+import 'package:word_flow/features/words/presentation/cubit/library_state.dart';
 
 class LibraryResultsList extends StatelessWidget {
-  final LibraryState state;
-  final Function(WordEntity) onDelete;
-  final Function(WordEntity) onEdit;
 
   const LibraryResultsList({
     super.key,
@@ -17,6 +14,9 @@ class LibraryResultsList extends StatelessWidget {
     required this.onDelete,
     required this.onEdit,
   });
+  final LibraryState state;
+  final Function(WordEntity) onDelete;
+  final Function(WordEntity) onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -77,8 +77,8 @@ class _LoadingView extends StatelessWidget {
 }
 
 class _ErrorView extends StatelessWidget {
-  final String message;
   const _ErrorView({required this.message});
+  final String message;
   @override
   Widget build(BuildContext context) => Center(child: Text('Error: $message', style: const TextStyle(color: Colors.red)));
 }

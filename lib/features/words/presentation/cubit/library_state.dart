@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../domain/entities/word.dart';
+import 'package:word_flow/features/words/domain/entities/word.dart';
 
 part 'library_state.freezed.dart';
 

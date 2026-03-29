@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../core/theme/app_theme.dart';
-import '../features/auth/presentation/cubit/auth_cubit.dart';
-import '../features/words/presentation/cubit/sync_cubit.dart';
-import 'router/app_router.dart';
-import 'di.dart';
+import 'package:word_flow/core/theme/app_theme.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:word_flow/features/words/presentation/cubit/sync_cubit.dart';
+import 'package:word_flow/app/router/app_router.dart';
+import 'package:word_flow/app/di.dart';
 
 class WordFlowApp extends StatelessWidget {
   const WordFlowApp({super.key});
@@ -13,7 +13,7 @@ class WordFlowApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(create: (_) => getIt<AuthCubit>()),
+        BlocProvider(create: (_) => getIt<AuthCubit>()..init()),
         BlocProvider(create: (_) => getIt<SyncCubit>()),
       ],
       child: MaterialApp.router(

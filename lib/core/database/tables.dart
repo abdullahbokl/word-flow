@@ -12,6 +12,11 @@ class Words extends Table {
 
   @override
   Set<Column> get primaryKey => {id};
+
+  @override
+  List<Set<Column>> get uniqueKeys => [
+        {userId, wordText},
+      ];
 }
 
 class WordSyncQueue extends Table {

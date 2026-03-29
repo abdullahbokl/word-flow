@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import 'auth_status_widgets.dart';
+import 'package:word_flow/features/auth/presentation/widgets/auth_status_widgets.dart';
 
 class GuestUserStatus extends StatelessWidget {
-  final bool isCompact;
-  final VoidCallback onSignIn;
 
   const GuestUserStatus({
     super.key,
     required this.isCompact,
     required this.onSignIn,
   });
+  final bool isCompact;
+  final VoidCallback onSignIn;
 
   @override
   Widget build(BuildContext context) {

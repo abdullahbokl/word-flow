@@ -1,42 +1,73 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../../domain/usecases/sign_in_with_email.dart';
-import '../../domain/usecases/sign_up_with_email.dart';
-import '../../domain/usecases/sign_out.dart';
-import '../../../../features/words/domain/repositories/word_repository.dart';
-import '../../../../features/words/domain/usecases/adopt_guest_words.dart';
-import '../../domain/entities/user_entity.dart';
-import 'auth_state.dart';
+import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:word_flow/features/auth/domain/usecases/sign_in_with_email.dart';
+import 'package:word_flow/features/auth/domain/usecases/sign_up_with_email.dart';
+import 'package:word_flow/features/auth/domain/usecases/sign_out.dart';
+import 'package:word_flow/features/words/domain/repositories/word_repository.dart';
+import 'package:word_flow/features/words/domain/usecases/adopt_guest_words.dart';
+import 'package:word_flow/features/auth/domain/entities/user_entity.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_state.dart';
 
 @injectable
 class AuthCubit extends Cubit<AuthState> {
-  final SignInWithEmail _signIn;
-  final SignUpWithEmail _signUp;
-  final SignOut _signOut;
-  final AuthRepository _repository;
-  final WordRepository _wordRepository;
-  final AdoptGuestWords _adoptGuestWords;
-  StreamSubscription? _authSubscription;
 
   AuthCubit(
     this._signIn,
     this._signUp,
     this._signOut,
-    this._repository,
     this._wordRepository,
     this._adoptGuestWords,
-  ) : super(const AuthState.initial()) {
-    _init();
-  }
+  ) : super(const AuthState.initial());
+  final SignInWithEmail _signIn;
+  final SignUpWithEmail _signUp;
+  final SignOut _signOut;
+  final WordRepository _wordRepository;
+  final AdoptGuestWords _adoptGuestWords;
+  StreamSubscription? _authSubscription;
+  bool _isInitialized = false;
 
-  void _init() {
-    _authSubscription = _repository.userStream.listen((user) {
-      if (user != null) {
-        emit(AuthState.authenticated(user));
+  Future<void> init() async {
+    if (_isInitialized) return;
+    _isInitialized = true;
+    emit(const AuthState.loading());
+
+    try {
+      final session = supabase.Supabase.instance.client.auth.currentSession;
+      final user = session?.user;
+      if (session != null && user != null) {
+        emit(AuthState.authenticated(UserEntity(id: user.id, email: user.email ?? '')));
       } else {
         emit(const AuthState.guest());
+      }
+    } catch (_) {
+      emit(const AuthState.guest());
+    }
+
+    await _authSubscription?.cancel();
+    _authSubscription = supabase.Supabase.instance.client.auth.onAuthStateChange
+        .listen((data) {
+      if (isClosed) return;
+
+      switch (data.event) {
+        case supabase.AuthChangeEvent.signedIn:
+        case supabase.AuthChangeEvent.tokenRefreshed:
+        case supabase.AuthChangeEvent.userUpdated:
+          final user = data.session?.user;
+          if (user != null) {
+            emit(
+              AuthState.authenticated(
+                UserEntity(id: user.id, email: user.email ?? ''),
+              ),
+            );
+          }
+          break;
+        case supabase.AuthChangeEvent.signedOut:
+          emit(const AuthState.guest());
+          break;
+        default:
+          break;
       }
     });
   }

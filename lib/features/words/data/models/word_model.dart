@@ -1,12 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class WordModel extends Equatable {
-  final String id;
-  final String? userId;
-  final String wordText;
-  final int totalCount;
-  final bool isKnown;
-  final DateTime lastUpdated;
 
   const WordModel({
     required this.id,
@@ -29,6 +23,12 @@ class WordModel extends Equatable {
       lastUpdated: DateTime.parse(map['last_updated'] as String).toUtc(),
     );
   }
+  final String id;
+  final String? userId;
+  final String wordText;
+  final int totalCount;
+  final bool isKnown;
+  final DateTime lastUpdated;
 
   Map<String, dynamic> toMap() {
     return {

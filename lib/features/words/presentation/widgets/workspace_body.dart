@@ -1,20 +1,12 @@
 import 'package:flutter/material.dart';
-import '../../../../core/utils/script_processor.dart';
-import '../../../../core/utils/script_analysis.dart';
-import '../cubit/workspace_state.dart';
-import 'results_section.dart';
-import 'script_input_section.dart';
-import 'workspace_header.dart';
+import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/core/utils/script_analysis.dart';
+import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
+import 'package:word_flow/features/words/presentation/widgets/results_section.dart';
+import 'package:word_flow/features/words/presentation/widgets/script_input_section.dart';
+import 'package:word_flow/features/words/presentation/widgets/workspace_header.dart';
 
 class WorkspaceBody extends StatelessWidget {
-  final WorkspaceState state;
-  final ScriptSummary summary;
-  final List<ProcessedWord> words;
-  final Set<String> pendingWordTexts;
-  final bool isProcessing;
-  final TextEditingController controller;
-  final VoidCallback onAnalyze;
-  final VoidCallback onClear;
 
   const WorkspaceBody({
     super.key,
@@ -27,6 +19,14 @@ class WorkspaceBody extends StatelessWidget {
     required this.onAnalyze,
     required this.onClear,
   });
+  final WorkspaceState state;
+  final ScriptSummary summary;
+  final List<ProcessedWord> words;
+  final Set<String> pendingWordTexts;
+  final bool isProcessing;
+  final TextEditingController controller;
+  final VoidCallback onAnalyze;
+  final VoidCallback onClear;
 
   @override
   Widget build(BuildContext context) {

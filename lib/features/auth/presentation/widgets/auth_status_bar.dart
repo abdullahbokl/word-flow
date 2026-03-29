@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubit/auth_cubit.dart';
-import '../cubit/auth_state.dart';
-import 'auth_bottom_sheet.dart';
-import 'auth_status_widgets.dart';
-import 'authenticated_user_status.dart';
-import 'guest_user_status.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_state.dart';
+import 'package:word_flow/features/auth/presentation/widgets/auth_bottom_sheet.dart';
+import 'package:word_flow/features/auth/presentation/widgets/auth_status_widgets.dart';
+import 'package:word_flow/features/auth/presentation/widgets/authenticated_user_status.dart';
+import 'package:word_flow/features/auth/presentation/widgets/guest_user_status.dart';
 
 class AuthStatusBar extends StatelessWidget {
   const AuthStatusBar({super.key});

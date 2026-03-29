@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../domain/entities/user_entity.dart';
-import 'auth_status_widgets.dart';
+import 'package:word_flow/features/auth/domain/entities/user_entity.dart';
+import 'package:word_flow/features/auth/presentation/widgets/auth_status_widgets.dart';
 
 class AuthenticatedUserStatus extends StatelessWidget {
-  final UserEntity user;
-  final bool isCompact;
-  final VoidCallback onLogOut;
 
   const AuthenticatedUserStatus({
     super.key,
@@ -13,6 +10,9 @@ class AuthenticatedUserStatus extends StatelessWidget {
     required this.isCompact,
     required this.onLogOut,
   });
+  final UserEntity user;
+  final bool isCompact;
+  final VoidCallback onLogOut;
 
   @override
   Widget build(BuildContext context) {

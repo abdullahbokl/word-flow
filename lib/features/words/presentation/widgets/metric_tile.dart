@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
 class MetricTile extends StatelessWidget {
-  final double width;
-  final String label;
-  final String value;
-  final IconData icon;
 
   const MetricTile({
     super.key,
@@ -13,6 +9,10 @@ class MetricTile extends StatelessWidget {
     required this.value,
     required this.icon,
   });
+  final double width;
+  final String label;
+  final String value;
+  final IconData icon;
 
   @override
   Widget build(BuildContext context) {

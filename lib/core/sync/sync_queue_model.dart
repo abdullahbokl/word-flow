@@ -1,10 +1,4 @@
 class SyncQueueModel {
-  final int id;
-  final String wordId;
-  final String operation;
-  final int retryCount;
-  final String? lastError;
-  final DateTime createdAt;
 
   SyncQueueModel({
     required this.id,
@@ -25,6 +19,12 @@ class SyncQueueModel {
       createdAt: DateTime.parse(map['created_at'] as String),
     );
   }
+  final int id;
+  final String wordId;
+  final String operation;
+  final int retryCount;
+  final String? lastError;
+  final DateTime createdAt;
 
   Map<String, dynamic> toMap() {
     return {

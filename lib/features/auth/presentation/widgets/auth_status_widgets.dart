@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
 class StatusBarWrapper extends StatelessWidget {
-  final Widget child;
   const StatusBarWrapper({super.key, required this.child});
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {
@@ -20,9 +20,6 @@ class StatusBarWrapper extends StatelessWidget {
 }
 
 class ActionButton extends StatelessWidget {
-  final String label;
-  final VoidCallback onTap;
-  final bool isDestructive;
 
   const ActionButton({
     super.key,
@@ -30,6 +27,9 @@ class ActionButton extends StatelessWidget {
     required this.onTap,
     this.isDestructive = false,
   });
+  final String label;
+  final VoidCallback onTap;
+  final bool isDestructive;
 
   @override
   Widget build(BuildContext context) {

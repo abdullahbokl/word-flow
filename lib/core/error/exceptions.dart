@@ -1,24 +1,24 @@
 class ServerException implements Exception {
-  final String? message;
   ServerException([this.message]);
+  final String? message;
 }
 
 class DatabaseException implements Exception {
-  final String? message;
   DatabaseException([this.message]);
+  final String? message;
 }
 
 class AuthException implements Exception {
-  final String? message;
   AuthException([this.message]);
+  final String? message;
 }
 
 class SyncException implements Exception {
-  final String? message;
   SyncException([this.message]);
+  final String? message;
 }
 
 class ProcessingException implements Exception {
-  final String? message;
   ProcessingException([this.message]);
+  final String? message;
 }

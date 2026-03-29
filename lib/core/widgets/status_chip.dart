@@ -3,9 +3,6 @@ import 'package:flutter/material.dart';
 enum StatusChipVariant { neutral, success, warning, info }
 
 class StatusChip extends StatelessWidget {
-  final String label;
-  final IconData icon;
-  final StatusChipVariant variant;
 
   const StatusChip({
     super.key,
@@ -13,6 +10,9 @@ class StatusChip extends StatelessWidget {
     required this.icon,
     this.variant = StatusChipVariant.neutral,
   });
+  final String label;
+  final IconData icon;
+  final StatusChipVariant variant;
 
   @override
   Widget build(BuildContext context) {

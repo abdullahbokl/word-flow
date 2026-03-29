@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class ScriptInputField extends StatelessWidget {
-  final TextEditingController controller;
 
   const ScriptInputField({super.key, required this.controller});
+  final TextEditingController controller;
 
   @override
   Widget build(BuildContext context) {

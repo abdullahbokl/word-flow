@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'app_color_scheme.dart';
-import 'app_text_styles.dart';
+import 'package:word_flow/core/theme/app_color_scheme.dart';
+import 'package:word_flow/core/theme/app_text_styles.dart';
 
 class AppTheme {
   static ThemeData get light => _theme(Brightness.light);

@@ -1,6 +1,6 @@
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../entities/word.dart';
+import 'package:word_flow/core/error/failures.dart';
+import 'package:word_flow/features/words/domain/entities/word.dart';
 
 abstract class WordRepository {
   Future<Either<Failure, void>> saveWords(List<WordEntity> words);

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../features/words/presentation/cubit/sync_cubit.dart';
-import '../../features/words/presentation/cubit/sync_state.dart';
+import 'package:word_flow/features/words/presentation/cubit/sync_cubit.dart';
+import 'package:word_flow/features/words/presentation/cubit/sync_state.dart';
 
 class SyncStatusBadge extends StatelessWidget {
   const SyncStatusBadge({super.key});
@@ -40,11 +40,6 @@ class SyncStatusBadge extends StatelessWidget {
 }
 
 class _Badge extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final String label;
-  final VoidCallback? onTap;
-  final bool isRotating;
 
   const _Badge({
     required this.icon,
@@ -53,6 +48,11 @@ class _Badge extends StatelessWidget {
     this.onTap,
     this.isRotating = false,
   });
+  final IconData icon;
+  final Color color;
+  final String label;
+  final VoidCallback? onTap;
+  final bool isRotating;
 
   @override
   Widget build(BuildContext context) {

@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:collection/collection.dart';
-import '../../../../core/utils/script_processor.dart';
-import 'word_results_animated_item.dart';
+import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/presentation/widgets/word_results_animated_item.dart';
 
 class WordResultsList extends StatefulWidget {
-  final List<ProcessedWord> words;
-  final Set<String> pendingWordTexts;
-  final bool enabled;
 
   const WordResultsList({
     super.key,
@@ -14,6 +11,9 @@ class WordResultsList extends StatefulWidget {
     required this.pendingWordTexts,
     this.enabled = true,
   });
+  final List<ProcessedWord> words;
+  final Set<String> pendingWordTexts;
+  final bool enabled;
 
   @override
   State<WordResultsList> createState() => _WordResultsListState();

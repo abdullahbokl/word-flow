@@ -1,14 +1,14 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/error/failures.dart';
-import '../entities/word.dart';
-import '../repositories/word_repository.dart';
+import 'package:word_flow/core/error/failures.dart';
+import 'package:word_flow/features/words/domain/entities/word.dart';
+import 'package:word_flow/features/words/domain/repositories/word_repository.dart';
 
 @lazySingleton
 class GetKnownWords {
-  final WordRepository _repository;
 
   GetKnownWords(this._repository);
+  final WordRepository _repository;
 
   Future<Either<Failure, List<WordEntity>>> call({String? userId}) {
     return _repository.getKnownWords(userId: userId);

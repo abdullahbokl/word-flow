@@ -1,20 +1,20 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import '../../domain/usecases/sync_pending_words.dart';
-import '../../domain/usecases/watch_pending_count.dart';
-import 'sync_state.dart';
+import 'package:word_flow/features/words/domain/usecases/sync_pending_words.dart';
+import 'package:word_flow/features/words/domain/usecases/watch_pending_count.dart';
+import 'package:word_flow/features/words/presentation/cubit/sync_state.dart';
 
 @injectable
 class SyncCubit extends Cubit<SyncState> {
-  final WatchPendingCount _watchPendingCount;
-  final SyncPendingWords _syncPendingWords;
-  StreamSubscription<int>? _pendingSub;
 
   SyncCubit(this._watchPendingCount, this._syncPendingWords)
       : super(const SyncState.idle(pendingCount: 0)) {
     _startWatching();
   }
+  final WatchPendingCount _watchPendingCount;
+  final SyncPendingWords _syncPendingWords;
+  StreamSubscription<int>? _pendingSub;
 
   void _startWatching() {
     _pendingSub?.cancel();

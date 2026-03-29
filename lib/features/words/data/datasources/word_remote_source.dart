@@ -1,7 +1,7 @@
 import 'package:injectable/injectable.dart';
-import '../../../../core/network/dio_client.dart';
-import '../models/word_model.dart';
-import '../../../../core/error/exceptions.dart';
+import 'package:word_flow/core/network/dio_client.dart';
+import 'package:word_flow/features/words/data/models/word_model.dart';
+import 'package:word_flow/core/error/exceptions.dart';
 
 abstract class WordRemoteSource {
   Future<void> upsertWord(WordModel word);
@@ -11,9 +11,9 @@ abstract class WordRemoteSource {
 
 @LazySingleton(as: WordRemoteSource)
 class WordRemoteSourceImpl implements WordRemoteSource {
-  final DioClient _dioClient;
 
   WordRemoteSourceImpl(this._dioClient);
+  final DioClient _dioClient;
 
   @override
   Future<void> upsertWord(WordModel word) async {

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/app_loader.dart';
+import 'package:word_flow/core/widgets/app_loader.dart';
 
 class ProcessingView extends StatelessWidget {
   const ProcessingView({super.key});

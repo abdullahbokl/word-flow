@@ -1,6 +1,6 @@
-import '../../domain/entities/word.dart';
-import '../models/word_model.dart';
-import '../../../../core/database/app_database.dart';
+import 'package:word_flow/features/words/domain/entities/word.dart';
+import 'package:word_flow/features/words/data/models/word_model.dart';
+import 'package:word_flow/core/database/app_database.dart';
 
 class WordMapper {
   static WordEntity toEntityFromModel(WordModel model) {

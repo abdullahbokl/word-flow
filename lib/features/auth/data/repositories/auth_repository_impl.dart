@@ -1,16 +1,16 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/error/exceptions.dart';
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/user_entity.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_remote_source.dart';
+import 'package:word_flow/core/error/exceptions.dart';
+import 'package:word_flow/core/error/failures.dart';
+import 'package:word_flow/features/auth/domain/entities/user_entity.dart';
+import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
+import 'package:word_flow/features/auth/data/datasources/auth_remote_source.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
-  final AuthRemoteSource remoteSource;
 
   AuthRepositoryImpl(this.remoteSource);
+  final AuthRemoteSource remoteSource;
 
   @override
   Future<Either<Failure, UserEntity>> signInWithEmail({

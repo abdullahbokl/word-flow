@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 
 class AnalysisChip extends StatelessWidget {
-  final IconData icon;
-  final String label;
 
   const AnalysisChip({
     super.key,
     required this.icon,
     required this.label,
   });
+  final IconData icon;
+  final String label;
 
   @override
   Widget build(BuildContext context) {

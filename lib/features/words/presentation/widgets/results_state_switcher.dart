@@ -1,16 +1,13 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/empty_state_view.dart';
-import '../../../../core/widgets/section_card.dart';
-import '../cubit/workspace_state.dart';
-import '../../../../core/utils/script_processor.dart';
-import 'analysis_chip.dart';
-import 'processing_view.dart';
-import 'analysis_results_header.dart';
+import 'package:word_flow/core/widgets/empty_state_view.dart';
+import 'package:word_flow/core/widgets/section_card.dart';
+import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
+import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/presentation/widgets/analysis_chip.dart';
+import 'package:word_flow/features/words/presentation/widgets/processing_view.dart';
+import 'package:word_flow/features/words/presentation/widgets/analysis_results_header.dart';
 
 class ResultsStateSwitcher extends StatelessWidget {
-  final WorkspaceState state;
-  final List<ProcessedWord> words;
-  final bool isProcessing;
 
   const ResultsStateSwitcher({
     super.key,
@@ -18,6 +15,9 @@ class ResultsStateSwitcher extends StatelessWidget {
     required this.words,
     required this.isProcessing,
   });
+  final WorkspaceState state;
+  final List<ProcessedWord> words;
+  final bool isProcessing;
 
   @override
   Widget build(BuildContext context) {
@@ -69,8 +69,8 @@ class _LoadingState extends StatelessWidget {
 }
 
 class _ErrorState extends StatelessWidget {
-  final String message;
   const _ErrorState({required this.message});
+  final String message;
   @override
   Widget build(BuildContext context) => SliverToBoxAdapter(
         child: SectionCard(

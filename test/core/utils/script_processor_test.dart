@@ -42,7 +42,7 @@ void main() {
       // words: it's, a, test, test, test, test
       expect(result.summary, const ScriptSummary(totalWords: 6, uniqueWords: 3, newWords: 3));
       expect(result.words.any((w) => w.wordText == "it's"), true);
-      expect(result.words.any((w) => w.wordText == "test" && w.totalCount == 4), true);
+      expect(result.words.any((w) => w.wordText == 'test' && w.totalCount == 4), true);
     });
   });
 }

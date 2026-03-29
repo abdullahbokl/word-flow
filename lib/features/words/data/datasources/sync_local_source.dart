@@ -1,9 +1,9 @@
 import 'package:injectable/injectable.dart';
-import '../../../../core/database/app_database.dart';
+import 'package:word_flow/core/database/app_database.dart';
 
 abstract class SyncLocalSource {
   Future<void> enqueueSyncOperation(String wordId, String operation);
-  Future<List<Map<String, dynamic>>> getSyncQueue(int limit);
+  Future<List<WordSyncQueueData>> getSyncQueue(int limit);
   Future<void> removeFromSyncQueue(int queueId);
   Future<void> updateSyncQueueRetry(int queueId, String error);
   Future<int> getSyncQueueCount();
@@ -13,9 +13,9 @@ abstract class SyncLocalSource {
 
 @LazySingleton(as: SyncLocalSource)
 class SyncLocalSourceImpl implements SyncLocalSource {
-  final WordFlowDatabase _db;
 
   SyncLocalSourceImpl(this._db);
+  final WordFlowDatabase _db;
 
   @override
   Future<void> enqueueSyncOperation(String wordId, String operation) async {
@@ -23,19 +23,8 @@ class SyncLocalSourceImpl implements SyncLocalSource {
   }
 
   @override
-  Future<List<Map<String, dynamic>>> getSyncQueue(int limit) async {
-    final rows = await _db.getSyncQueue(limit);
-    return rows
-        .map((r) => <String, dynamic>{
-              'id': r.id,
-              'word_id': r.wordId,
-              'operation': r.operation,
-              'retry_count': r.retryCount,
-              'last_error': r.lastError,
-              'created_at': r.createdAt.toUtc().toIso8601String(),
-            })
-        .toList(growable: false);
-  }
+  Future<List<WordSyncQueueData>> getSyncQueue(int limit) =>
+      _db.getSyncQueue(limit);
 
   @override
   Future<void> removeFromSyncQueue(int queueId) async {

@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
 class KnownWordsHeader extends StatelessWidget {
-  final int count;
-  final bool isExpanded;
-  final VoidCallback onToggle;
 
   const KnownWordsHeader({
     super.key,
@@ -11,6 +8,9 @@ class KnownWordsHeader extends StatelessWidget {
     required this.isExpanded,
     required this.onToggle,
   });
+  final int count;
+  final bool isExpanded;
+  final VoidCallback onToggle;
 
   @override
   Widget build(BuildContext context) {

@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../app/di.dart';
-import '../../../auth/presentation/cubit/auth_cubit.dart';
-import '../cubit/library_cubit.dart';
-import '../cubit/library_state.dart';
-import '../../domain/entities/word.dart';
-import '../widgets/add_edit_word_sheet.dart';
-import '../widgets/library_search_bar.dart';
-import '../widgets/library_filter_row.dart';
-import '../widgets/library_results_list.dart';
+import 'package:word_flow/app/di.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:word_flow/features/words/presentation/cubit/library_cubit.dart';
+import 'package:word_flow/features/words/presentation/cubit/library_state.dart';
+import 'package:word_flow/features/words/domain/entities/word.dart';
+import 'package:word_flow/features/words/presentation/widgets/add_edit_word_sheet.dart';
+import 'package:word_flow/features/words/presentation/widgets/library_search_bar.dart';
+import 'package:word_flow/features/words/presentation/widgets/library_filter_row.dart';
+import 'package:word_flow/features/words/presentation/widgets/library_results_list.dart';
 
 class LibraryPage extends StatelessWidget {
   const LibraryPage({super.key});

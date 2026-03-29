@@ -40,10 +40,10 @@ class WorkspaceBackground extends StatelessWidget {
 }
 
 class _Glow extends StatelessWidget {
-  final Color color;
-  final double size;
 
   const _Glow({required this.color, this.size = 220});
+  final Color color;
+  final double size;
 
   @override
   Widget build(BuildContext context) {

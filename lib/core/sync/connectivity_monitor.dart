@@ -6,12 +6,12 @@ enum ConnectivityStatus { online, offline }
 
 @lazySingleton
 class ConnectivityMonitor {
-  final Connectivity _connectivity = Connectivity();
-  final _controller = StreamController<ConnectivityStatus>.broadcast();
 
   ConnectivityMonitor() {
     _connectivity.onConnectivityChanged.listen(_updateStatus);
   }
+  final Connectivity _connectivity = Connectivity();
+  final _controller = StreamController<ConnectivityStatus>.broadcast();
 
   Stream<ConnectivityStatus> get statusStream => _controller.stream;
 

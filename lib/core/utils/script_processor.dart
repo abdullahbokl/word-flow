@@ -1,17 +1,17 @@
 import 'dart:isolate';
 import 'package:equatable/equatable.dart';
-import 'script_analysis.dart';
+import 'package:word_flow/core/utils/script_analysis.dart';
 
 class ProcessedWord extends Equatable {
-  final String wordText;
-  final int totalCount;
-  final bool isKnown;
 
   const ProcessedWord({
     required this.wordText,
     required this.totalCount,
     this.isKnown = false,
   });
+  final String wordText;
+  final int totalCount;
+  final bool isKnown;
 
   @override
   List<Object?> get props => [wordText, totalCount, isKnown];

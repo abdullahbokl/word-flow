@@ -1,14 +1,8 @@
 import 'package:flutter/material.dart';
-import 'app_loader.dart';
-import 'word_card_widgets.dart';
+import 'package:word_flow/core/widgets/app_loader.dart';
+import 'package:word_flow/core/widgets/word_card_widgets.dart';
 
 class WordCard extends StatelessWidget {
-  final String text;
-  final int count;
-  final bool isKnown;
-  final bool isPending;
-  final VoidCallback? onToggle;
-  final List<Widget>? actions;
 
   const WordCard({
     super.key,
@@ -19,6 +13,12 @@ class WordCard extends StatelessWidget {
     this.onToggle,
     this.actions,
   });
+  final String text;
+  final int count;
+  final bool isKnown;
+  final bool isPending;
+  final VoidCallback? onToggle;
+  final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context) {

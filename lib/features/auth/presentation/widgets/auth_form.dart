@@ -1,15 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/app_text_field.dart';
-import '../cubit/auth_cubit.dart';
-import '../cubit/auth_state.dart';
+import 'package:word_flow/core/widgets/app_loader.dart';
+import 'package:word_flow/core/widgets/app_text_field.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_state.dart';
 
 class AuthForm extends StatelessWidget {
-  final TextEditingController emailController;
-  final TextEditingController passwordController;
-  final bool isSignUp;
-  final VoidCallback onSubmit;
 
   const AuthForm({
     super.key,
@@ -18,6 +14,10 @@ class AuthForm extends StatelessWidget {
     required this.isSignUp,
     required this.onSubmit,
   });
+  final TextEditingController emailController;
+  final TextEditingController passwordController;
+  final bool isSignUp;
+  final VoidCallback onSubmit;
 
   @override
   Widget build(BuildContext context) {

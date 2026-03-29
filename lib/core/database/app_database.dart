@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:injectable/injectable.dart';
-import 'tables.dart';
+import 'package:word_flow/core/database/tables.dart';
 
 part 'app_database.g.dart';
 
@@ -14,7 +14,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   WordFlowDatabase() : super(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
  
  
@@ -24,6 +24,16 @@ class WordFlowDatabase extends _$WordFlowDatabase {
         onUpgrade: (m, from, to) async {
           if (from < 2) {
             await _deduplicateWordsTable();
+          }
+          if (from < 3) {
+            await customStatement('''
+    DELETE FROM words WHERE rowid NOT IN (
+      SELECT MIN(rowid) FROM words GROUP BY user_id, word_text
+    )
+  ''');
+            await customStatement(
+              'CREATE UNIQUE INDEX IF NOT EXISTS idx_words_user_word ON words(user_id, word_text)',
+            );
           }
         },
       );

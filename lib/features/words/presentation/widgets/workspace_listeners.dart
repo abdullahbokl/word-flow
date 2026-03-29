@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../auth/presentation/cubit/auth_cubit.dart';
-import '../../../auth/presentation/cubit/auth_state.dart';
-import '../../../auth/presentation/widgets/merge_conflict_dialog.dart';
-import '../cubit/workspace_cubit.dart';
-import '../cubit/workspace_state.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_state.dart';
+import 'package:word_flow/features/auth/presentation/widgets/merge_conflict_dialog.dart';
+import 'package:word_flow/features/words/presentation/cubit/workspace_cubit.dart';
+import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
 
 class WorkspaceListeners extends StatelessWidget {
-  final Widget child;
 
   const WorkspaceListeners({super.key, required this.child});
+  final Widget child;
 
   @override
   Widget build(BuildContext context) {

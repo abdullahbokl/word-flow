@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
-import '../cubit/library_state.dart';
+import 'package:word_flow/features/words/presentation/cubit/library_state.dart';
 
 class LibraryFilterRow extends StatelessWidget {
-  final WordsFilter selectedFilter;
-  final ValueChanged<WordsFilter> onFilterChanged;
 
   const LibraryFilterRow({
     super.key,
     required this.selectedFilter,
     required this.onFilterChanged,
   });
+  final WordsFilter selectedFilter;
+  final ValueChanged<WordsFilter> onFilterChanged;
 
   @override
   Widget build(BuildContext context) {
@@ -41,15 +41,15 @@ class LibraryFilterRow extends StatelessWidget {
 }
 
 class _StyledFilterChip extends StatelessWidget {
-  final String label;
-  final bool isSelected;
-  final VoidCallback onSelected;
 
   const _StyledFilterChip({
     required this.label,
     required this.isSelected,
     required this.onSelected,
   });
+  final String label;
+  final bool isSelected;
+  final VoidCallback onSelected;
 
   @override
   Widget build(BuildContext context) {

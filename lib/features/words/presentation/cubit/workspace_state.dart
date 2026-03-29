@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../../core/utils/script_processor.dart';
+import 'package:word_flow/core/utils/script_processor.dart';
 
 part 'workspace_state.freezed.dart';
 

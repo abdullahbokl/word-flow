@@ -1,15 +1,18 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/utils/script_analysis.dart';
-import '../../../../core/utils/script_processor.dart';
-import '../../domain/usecases/process_script.dart';
-import '../../domain/usecases/save_processed_words.dart';
-import '../../domain/usecases/toggle_known_word.dart';
-import 'workspace_state.dart';
+import 'package:word_flow/core/utils/script_analysis.dart';
+import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/domain/usecases/process_script.dart';
+import 'package:word_flow/features/words/domain/usecases/save_processed_words.dart';
+import 'package:word_flow/features/words/domain/usecases/toggle_known_word.dart';
+import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
 class WorkspaceCubit extends Cubit<WorkspaceState> {
+
+  WorkspaceCubit(this._processScript, this._saveProcessedWords, this._toggleKnownWord) 
+    : super(const WorkspaceState.initial());
   final ProcessScript _processScript;
   final SaveProcessedWords _saveProcessedWords;
   final ToggleKnownWord _toggleKnownWord;
@@ -18,9 +21,6 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
   final Set<String> _pendingKnownWords = <String>{};
   ScriptSummary _summary = const ScriptSummary.empty();
   int _revision = 0;
-
-  WorkspaceCubit(this._processScript, this._saveProcessedWords, this._toggleKnownWord) 
-    : super(const WorkspaceState.initial());
 
   ScriptSummary get summary => _summary;
   List<ProcessedWord> get words => List.unmodifiable(_words);
@@ -66,25 +66,29 @@ class WorkspaceCubit extends Cubit<WorkspaceState> {
     _emitResults();
     
    
-    unawaited(Future.delayed(Duration.zero, () => _persistToggle(wordText, currentRevision, userId)));
+    unawaited(() async {
+      await Future<void>.delayed(Duration.zero);
+      await _persistToggle(wordText, currentRevision, userId);
+    }());
   }
 
   Future<void> _persistToggle(String text, int revision, String? userId) async {
     final result = await _toggleKnownWord(text, userId: userId);
     if (isClosed) return;
 
-    result.fold(
-      (f) {
+    await result.fold<Future<void>>(
+      (f) async {
         _pendingKnownWords.remove(text);
         emit(WorkspaceState.error(f.message));
         _emitResults();
       },
       (_) async {
-       
         await Future.delayed(const Duration(milliseconds: 280));
         if (isClosed) return;
         _pendingKnownWords.remove(text);
-        if (revision == _revision) _words.removeWhere((w) => w.wordText == text);
+        if (revision == _revision) {
+          _words.removeWhere((w) => w.wordText == text);
+        }
         _summary = _rebuildSummary(_words);
         _emitResults();
       },

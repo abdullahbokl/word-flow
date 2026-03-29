@@ -1,7 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:injectable/injectable.dart';
-import '../../../../core/error/exceptions.dart';
-import '../../domain/entities/user_entity.dart';
+import 'package:word_flow/core/error/exceptions.dart';
+import 'package:word_flow/features/auth/domain/entities/user_entity.dart';
 
 abstract class AuthRemoteSource {
   Future<UserEntity> signUpWithEmail({
@@ -21,9 +21,9 @@ abstract class AuthRemoteSource {
 
 @LazySingleton(as: AuthRemoteSource)
 class AuthRemoteSourceImpl implements AuthRemoteSource {
-  final supabase.SupabaseClient _supabaseClient;
 
   AuthRemoteSourceImpl(this._supabaseClient);
+  final supabase.SupabaseClient _supabaseClient;
 
   @override
   Future<UserEntity> signInWithEmail({

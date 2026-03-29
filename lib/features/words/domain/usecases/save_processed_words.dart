@@ -1,17 +1,17 @@
 import 'package:flutter/foundation.dart';
 import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/utils/script_processor.dart';
-import '../entities/word.dart';
-import '../repositories/word_repository.dart';
+import 'package:word_flow/core/error/failures.dart';
+import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/domain/entities/word.dart';
+import 'package:word_flow/features/words/domain/repositories/word_repository.dart';
 import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 
 @lazySingleton
 class SaveProcessedWords {
-  final WordRepository _repository;
 
   SaveProcessedWords(this._repository);
+  final WordRepository _repository;
 
   Future<Either<Failure, void>> call(List<ProcessedWord> processedWords, {String? userId}) async {
     try {
@@ -25,9 +25,9 @@ class SaveProcessedWords {
 }
 
 class _MapParams {
+  _MapParams(this.processed, this.userId);
   final List<ProcessedWord> processed;
   final String? userId;
-  _MapParams(this.processed, this.userId);
 }
 
 List<WordEntity> _mapToWords(_MapParams params) {

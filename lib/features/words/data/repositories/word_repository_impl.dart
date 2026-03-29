@@ -1,22 +1,23 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/database/write_queue.dart';
-import '../../domain/entities/word.dart';
-import '../../domain/repositories/word_repository.dart';
-import '../datasources/word_local_source.dart';
-import '../datasources/sync_local_source.dart';
-import '../models/word_model.dart';
-import '../mappers/word_mapper.dart';
-import '../../../../core/utils/uuid_generator.dart';
+import 'package:word_flow/core/error/failures.dart';
+import 'package:word_flow/core/database/write_queue.dart';
+import 'package:word_flow/core/sync/sync_operation.dart';
+import 'package:word_flow/features/words/domain/entities/word.dart';
+import 'package:word_flow/features/words/domain/repositories/word_repository.dart';
+import 'package:word_flow/features/words/data/datasources/word_local_source.dart';
+import 'package:word_flow/features/words/data/datasources/sync_local_source.dart';
+import 'package:word_flow/features/words/data/models/word_model.dart';
+import 'package:word_flow/features/words/data/mappers/word_mapper.dart';
+import 'package:word_flow/core/utils/uuid_generator.dart';
 
 @LazySingleton(as: WordRepository)
 class WordRepositoryImpl implements WordRepository {
+
+  WordRepositoryImpl(this._localSource, this._syncSource, this._writeQueue);
   final WordLocalSource _localSource;
   final SyncLocalSource _syncSource;
   final LocalWriteQueue _writeQueue;
-
-  WordRepositoryImpl(this._localSource, this._syncSource, this._writeQueue);
 
   Future<Either<Failure, T>> _try<T>(Future<T> Function() call) async {
     try {
@@ -61,7 +62,10 @@ class WordRepositoryImpl implements WordRepository {
       await _localSource.saveWords(models);
       for (final model in models) {
         if (model.userId != null) {
-          await _syncSource.enqueueSyncOperation(model.id, 'upsert');
+          await _syncSource.enqueueSyncOperation(
+            model.id,
+            SyncOperation.upsert.value,
+          );
         }
       }
     });
@@ -92,7 +96,10 @@ class WordRepositoryImpl implements WordRepository {
             );
       await _localSource.saveWord(model);
       if (model.userId != null) {
-        await _syncSource.enqueueSyncOperation(model.id, 'upsert');
+        await _syncSource.enqueueSyncOperation(
+          model.id,
+          SyncOperation.upsert.value,
+        );
       }
     });
   });
@@ -130,7 +137,12 @@ class WordRepositoryImpl implements WordRepository {
   Future<Either<Failure, void>> deleteWord(String id, {String? userId}) => _try(() async {
     await _writeQueue.enqueue(() async {
       await _localSource.deleteWord(id);
-      if (userId != null) await _syncSource.enqueueSyncOperation(id, 'delete');
+      if (userId != null) {
+        await _syncSource.enqueueSyncOperation(
+          id,
+          SyncOperation.delete.value,
+        );
+      }
     });
   });
 
@@ -140,7 +152,10 @@ class WordRepositoryImpl implements WordRepository {
       final model = WordMapper.fromEntityToModel(word);
       await _localSource.saveWord(model);
       if (model.userId != null) {
-        await _syncSource.enqueueSyncOperation(model.id, 'upsert');
+        await _syncSource.enqueueSyncOperation(
+          model.id,
+          SyncOperation.upsert.value,
+        );
       }
     });
   });

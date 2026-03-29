@@ -1,27 +1,27 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/utils/uuid_generator.dart';
-import '../../domain/entities/word.dart';
-import '../../domain/usecases/delete_word.dart';
-import '../../domain/usecases/update_word.dart';
-import '../../domain/usecases/watch_words.dart';
-import 'library_state.dart';
-import 'library_optimistic_updates.dart';
+import 'package:word_flow/core/utils/uuid_generator.dart';
+import 'package:word_flow/features/words/domain/entities/word.dart';
+import 'package:word_flow/features/words/domain/usecases/delete_word.dart';
+import 'package:word_flow/features/words/domain/usecases/update_word.dart';
+import 'package:word_flow/features/words/domain/usecases/watch_words.dart';
+import 'package:word_flow/features/words/presentation/cubit/library_state.dart';
+import 'package:word_flow/features/words/presentation/cubit/library_optimistic_updates.dart';
 
 @injectable
 class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
-  final WatchWords _watchWords;
-  final UpdateWord _updateWord;
-  final DeleteWord _deleteWord;
-  StreamSubscription? _wordsSubscription;
-  Set<String> _pendingWordIds = <String>{};
 
   LibraryCubit(
     this._watchWords,
     this._updateWord,
     this._deleteWord,
   ) : super(const LibraryState.initial());
+  final WatchWords _watchWords;
+  final UpdateWord _updateWord;
+  final DeleteWord _deleteWord;
+  StreamSubscription? _wordsSubscription;
+  Set<String> _pendingWordIds = <String>{};
 
   void init(String? userId) {
     emit(const LibraryState.loading());

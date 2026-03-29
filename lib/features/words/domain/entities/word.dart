@@ -1,12 +1,6 @@
 import 'package:equatable/equatable.dart';
 
 class WordEntity extends Equatable {
-  final String id;
-  final String? userId;
-  final String wordText;
-  final int totalCount;
-  final bool isKnown;
-  final DateTime lastUpdated;
 
   const WordEntity({
     required this.id,
@@ -16,6 +10,12 @@ class WordEntity extends Equatable {
     this.isKnown = false,
     required this.lastUpdated,
   });
+  final String id;
+  final String? userId;
+  final String wordText;
+  final int totalCount;
+  final bool isKnown;
+  final DateTime lastUpdated;
 
   @override
   List<Object?> get props => [

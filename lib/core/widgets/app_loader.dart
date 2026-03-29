@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppLoader extends StatelessWidget {
-  final double size;
-  final double strokeWidth;
-  final Color? color;
 
   const AppLoader({
     super.key,
@@ -11,6 +8,9 @@ class AppLoader extends StatelessWidget {
     this.strokeWidth = 2,
     this.color,
   });
+  final double size;
+  final double strokeWidth;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {

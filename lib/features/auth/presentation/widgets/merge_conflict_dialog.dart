@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../domain/entities/user_entity.dart';
-import '../cubit/auth_cubit.dart';
+import 'package:word_flow/features/auth/domain/entities/user_entity.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
 
 class MergeConflictDialog extends StatelessWidget {
-  final UserEntity user;
-  final int guestCount;
 
   const MergeConflictDialog({
     super.key,
     required this.user,
     required this.guestCount,
   });
+  final UserEntity user;
+  final int guestCount;
 
   @override
   Widget build(BuildContext context) {

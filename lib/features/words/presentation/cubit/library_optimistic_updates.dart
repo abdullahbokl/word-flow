@@ -1,5 +1,5 @@
-import '../../domain/entities/word.dart';
-import 'library_state.dart';
+import 'package:word_flow/features/words/domain/entities/word.dart';
+import 'package:word_flow/features/words/presentation/cubit/library_state.dart';
 
 mixin LibraryOptimisticUpdates {
   LibraryState applyOptimisticReplace(LibraryState state, WordEntity word, Set<String> pendingIds) {

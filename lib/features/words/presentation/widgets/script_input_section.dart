@@ -1,13 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/section_card.dart';
-import 'script_input_field.dart';
+import 'package:word_flow/core/widgets/app_button.dart';
+import 'package:word_flow/core/widgets/section_card.dart';
+import 'package:word_flow/features/words/presentation/widgets/script_input_field.dart';
 
 class ScriptInputSection extends StatelessWidget {
-  final TextEditingController controller;
-  final bool isProcessing;
-  final VoidCallback onAnalyze;
-  final VoidCallback onClear;
 
   const ScriptInputSection({
     super.key,
@@ -16,6 +12,10 @@ class ScriptInputSection extends StatelessWidget {
     required this.onAnalyze,
     required this.onClear,
   });
+  final TextEditingController controller;
+  final bool isProcessing;
+  final VoidCallback onAnalyze;
+  final VoidCallback onClear;
 
   @override
   Widget build(BuildContext context) {

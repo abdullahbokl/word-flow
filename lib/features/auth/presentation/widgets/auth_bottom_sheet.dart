@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../cubit/auth_cubit.dart';
-import 'auth_form.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/widgets/auth_form.dart';
 
 class AuthBottomSheet extends StatefulWidget {
   const AuthBottomSheet({super.key});

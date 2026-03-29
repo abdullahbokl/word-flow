@@ -1,16 +1,9 @@
 import 'package:flutter/material.dart';
-import '../../../../core/utils/script_processor.dart';
-import 'word_results_list.dart';
-import 'known_words_header.dart';
+import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/presentation/widgets/word_results_list.dart';
+import 'package:word_flow/features/words/presentation/widgets/known_words_header.dart';
 
 class AnalysisResultsList extends StatelessWidget {
-  final List<ProcessedWord> unknownWords;
-  final List<ProcessedWord> knownWords;
-  final bool isRefreshing;
-  final bool isProcessing;
-  final bool isKnownExpanded;
-  final Set<String> pendingWordTexts;
-  final VoidCallback onToggleKnown;
 
   const AnalysisResultsList({
     super.key,
@@ -22,6 +15,13 @@ class AnalysisResultsList extends StatelessWidget {
     required this.pendingWordTexts,
     required this.onToggleKnown,
   });
+  final List<ProcessedWord> unknownWords;
+  final List<ProcessedWord> knownWords;
+  final bool isRefreshing;
+  final bool isProcessing;
+  final bool isKnownExpanded;
+  final Set<String> pendingWordTexts;
+  final VoidCallback onToggleKnown;
 
   @override
   Widget build(BuildContext context) {
@@ -66,9 +66,9 @@ class AnalysisResultsList extends StatelessWidget {
 }
 
 class _RefreshingIndicator extends StatelessWidget {
+  const _RefreshingIndicator({required this.scheme, required this.textTheme});
   final ColorScheme scheme;
   final TextTheme textTheme;
-  const _RefreshingIndicator({required this.scheme, required this.textTheme});
   @override
   Widget build(BuildContext context) => SliverToBoxAdapter(
         child: Padding(
@@ -86,9 +86,9 @@ class _RefreshingIndicator extends StatelessWidget {
 }
 
 class _SectionTitle extends StatelessWidget {
+  const _SectionTitle({required this.title, required this.color});
   final String title;
   final Color color;
-  const _SectionTitle({required this.title, required this.color});
   @override
   Widget build(BuildContext context) => SliverToBoxAdapter(
         child: Padding(

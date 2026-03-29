@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import '../config/env_config.dart';
+import 'package:word_flow/core/config/env_config.dart';
 
 class HeaderInterceptor extends Interceptor {
   @override

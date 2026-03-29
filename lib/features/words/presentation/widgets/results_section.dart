@@ -1,14 +1,10 @@
 import 'package:flutter/material.dart';
-import '../../../../core/utils/script_processor.dart';
-import '../cubit/workspace_state.dart';
-import 'results_state_switcher.dart';
-import 'analysis_results_list.dart';
+import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
+import 'package:word_flow/features/words/presentation/widgets/results_state_switcher.dart';
+import 'package:word_flow/features/words/presentation/widgets/analysis_results_list.dart';
 
 class ResultsSection extends StatefulWidget {
-  final WorkspaceState state;
-  final List<ProcessedWord> words;
-  final bool isProcessing;
-  final Set<String> pendingWordTexts;
 
   const ResultsSection({
     super.key,
@@ -17,6 +13,10 @@ class ResultsSection extends StatefulWidget {
     required this.isProcessing,
     required this.pendingWordTexts,
   });
+  final WorkspaceState state;
+  final List<ProcessedWord> words;
+  final bool isProcessing;
+  final Set<String> pendingWordTexts;
 
   @override
   State<ResultsSection> createState() => _ResultsSectionState();

@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
-import '../../../../core/utils/script_analysis.dart';
-import '../../../../core/widgets/sync_status_badge.dart';
-import '../../../../features/auth/presentation/widgets/auth_status_bar.dart';
-import '../../../../app/router/routes.dart';
-import 'metric_tile.dart';
+import 'package:word_flow/core/utils/script_analysis.dart';
+import 'package:word_flow/core/widgets/sync_status_badge.dart';
+import 'package:word_flow/features/auth/presentation/widgets/auth_status_bar.dart';
+import 'package:word_flow/app/router/routes.dart';
+import 'package:word_flow/features/words/presentation/widgets/metric_tile.dart';
 
 class WorkspaceHeader extends StatelessWidget {
-  final ScriptSummary summary;
 
   const WorkspaceHeader({super.key, required this.summary});
+  final ScriptSummary summary;
 
   @override
   Widget build(BuildContext context) {
@@ -52,8 +52,8 @@ class WorkspaceHeader extends StatelessWidget {
 }
 
 class _MetricsSection extends StatelessWidget {
-  final ScriptSummary summary;
   const _MetricsSection({required this.summary});
+  final ScriptSummary summary;
 
   @override
   Widget build(BuildContext context) {

@@ -14,7 +14,6 @@ import 'package:injectable/injectable.dart' as _i526;
 import 'package:supabase_flutter/supabase_flutter.dart' as _i454;
 
 import '../core/database/app_database.dart' as _i935;
-import '../core/database/database_helper.dart' as _i883;
 import '../core/database/write_queue.dart' as _i470;
 import '../core/network/dio_client.dart' as _i393;
 import '../core/sync/connectivity_monitor.dart' as _i862;
@@ -64,7 +63,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i862.ConnectivityMonitor>(
       () => _i862.ConnectivityMonitor(),
     );
-    gh.lazySingleton<_i883.DatabaseHelper>(() => _i883.DatabaseHelper());
     gh.lazySingleton<_i935.WordFlowDatabase>(() => _i935.WordFlowDatabase());
     gh.lazySingleton<_i470.LocalWriteQueue>(() => _i470.LocalWriteQueue());
     gh.lazySingleton<_i1011.SyncLocalSource>(
@@ -117,11 +115,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i915.AdoptGuestWords>(
       () => _i915.AdoptGuestWords(gh<_i994.WordRepository>()),
     );
+    gh.lazySingleton<_i902.GetKnownWordTexts>(
+      () => _i902.GetKnownWordTexts(gh<_i994.WordRepository>()),
+    );
     gh.lazySingleton<_i226.WatchWords>(
       () => _i226.WatchWords(gh<_i994.WordRepository>()),
     );
     gh.lazySingleton<_i774.DeleteWord>(
       () => _i774.DeleteWord(gh<_i994.WordRepository>()),
+    );
+    gh.lazySingleton<_i552.GetKnownWords>(
+      () => _i552.GetKnownWords(gh<_i994.WordRepository>()),
     );
     gh.lazySingleton<_i69.ProcessScript>(
       () => _i69.ProcessScript(gh<_i994.WordRepository>()),
@@ -129,48 +133,41 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i455.SaveProcessedWords>(
       () => _i455.SaveProcessedWords(gh<_i994.WordRepository>()),
     );
-    gh.lazySingleton<_i906.UpdateWord>(
-      () => _i906.UpdateWord(gh<_i994.WordRepository>()),
-    );
-    gh.lazySingleton<_i646.ToggleKnownWord>(
-      () => _i646.ToggleKnownWord(gh<_i994.WordRepository>()),
-    );
-    gh.lazySingleton<_i902.GetKnownWordTexts>(
-      () => _i902.GetKnownWordTexts(gh<_i994.WordRepository>()),
-    );
-    gh.lazySingleton<_i552.GetKnownWords>(
-      () => _i552.GetKnownWords(gh<_i994.WordRepository>()),
-    );
     gh.lazySingleton<_i535.ClearLocalWords>(
       () => _i535.ClearLocalWords(gh<_i994.WordRepository>()),
+    );
+    gh.lazySingleton<_i906.UpdateWord>(
+      () => _i906.UpdateWord(gh<_i994.WordRepository>()),
     );
     gh.lazySingleton<_i565.GetGuestWordsCount>(
       () => _i565.GetGuestWordsCount(gh<_i994.WordRepository>()),
     );
-    gh.lazySingleton<_i796.SyncPendingWords>(
-      () => _i796.SyncPendingWords(gh<_i899.SyncRepository>()),
+    gh.lazySingleton<_i646.ToggleKnownWord>(
+      () => _i646.ToggleKnownWord(gh<_i994.WordRepository>()),
     );
     gh.lazySingleton<_i613.WatchPendingCount>(
       () => _i613.WatchPendingCount(gh<_i899.SyncRepository>()),
     );
+    gh.lazySingleton<_i796.SyncPendingWords>(
+      () => _i796.SyncPendingWords(gh<_i899.SyncRepository>()),
+    );
     gh.lazySingleton<_i75.GetPendingCount>(
       () => _i75.GetPendingCount(gh<_i899.SyncRepository>()),
-    );
-    gh.factory<_i996.WorkspaceCubit>(
-      () => _i996.WorkspaceCubit(
-        gh<_i69.ProcessScript>(),
-        gh<_i455.SaveProcessedWords>(),
-        gh<_i646.ToggleKnownWord>(),
-      ),
     );
     gh.factory<_i70.AuthCubit>(
       () => _i70.AuthCubit(
         gh<_i33.SignInWithEmail>(),
         gh<_i588.SignUpWithEmail>(),
         gh<_i472.SignOut>(),
-        gh<_i869.AuthRepository>(),
         gh<_i994.WordRepository>(),
         gh<_i915.AdoptGuestWords>(),
+      ),
+    );
+    gh.factory<_i996.WorkspaceCubit>(
+      () => _i996.WorkspaceCubit(
+        gh<_i69.ProcessScript>(),
+        gh<_i455.SaveProcessedWords>(),
+        gh<_i646.ToggleKnownWord>(),
       ),
     );
     gh.factory<_i557.SyncCubit>(

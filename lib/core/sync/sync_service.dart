@@ -1,17 +1,17 @@
 import 'dart:async';
 import 'package:injectable/injectable.dart';
-import '../../features/words/domain/repositories/sync_repository.dart';
-import 'connectivity_monitor.dart';
+import 'package:word_flow/features/words/domain/repositories/sync_repository.dart';
+import 'package:word_flow/core/sync/connectivity_monitor.dart';
 
 @lazySingleton
 class SyncService {
-  final SyncRepository _syncRepository;
-  final ConnectivityMonitor _connectivityMonitor;
-  Timer? _syncTimer;
 
   SyncService(this._syncRepository, this._connectivityMonitor) {
     _init();
   }
+  final SyncRepository _syncRepository;
+  final ConnectivityMonitor _connectivityMonitor;
+  Timer? _syncTimer;
 
   void _init() {
     _connectivityMonitor.statusStream.listen((status) {

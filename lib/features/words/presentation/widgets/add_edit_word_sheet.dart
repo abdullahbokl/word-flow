@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import '../../domain/entities/word.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_text_field.dart';
+import 'package:word_flow/features/words/domain/entities/word.dart';
+import 'package:word_flow/core/widgets/app_button.dart';
+import 'package:word_flow/core/widgets/app_text_field.dart';
 
 class AddEditWordSheet extends StatefulWidget {
-  final WordEntity? word;
-  final Function(String text, bool isKnown) onSave;
 
   const AddEditWordSheet({
     super.key,
     this.word,
     required this.onSave,
   });
+  final WordEntity? word;
+  final Function(String text, bool isKnown) onSave;
 
   @override
   State<AddEditWordSheet> createState() => _AddEditWordSheetState();

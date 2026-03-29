@@ -1,16 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../../../core/widgets/word_card.dart';
-import '../../../../core/utils/script_processor.dart';
-import '../cubit/workspace_cubit.dart';
+import 'package:word_flow/core/widgets/word_card.dart';
+import 'package:word_flow/core/utils/script_processor.dart';
+import 'package:word_flow/features/words/presentation/cubit/workspace_cubit.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../auth/presentation/cubit/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
 
 class WordResultsAnimatedItem extends StatelessWidget {
-  final Animation<double> animation;
-  final ProcessedWord word;
-  final bool isPending;
-  final bool isLast;
-  final bool enabled;
 
   const WordResultsAnimatedItem({
     super.key,
@@ -20,6 +15,11 @@ class WordResultsAnimatedItem extends StatelessWidget {
     required this.isLast,
     this.enabled = true,
   });
+  final Animation<double> animation;
+  final ProcessedWord word;
+  final bool isPending;
+  final bool isLast;
+  final bool enabled;
 
   @override
   Widget build(BuildContext context) {

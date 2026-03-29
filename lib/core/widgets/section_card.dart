@@ -1,10 +1,6 @@
 import 'package:flutter/material.dart';
 
 class SectionCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final Widget child;
-  final Widget? trailing;
 
   const SectionCard({
     super.key,
@@ -13,6 +9,10 @@ class SectionCard extends StatelessWidget {
     required this.child,
     this.trailing,
   });
+  final String title;
+  final String subtitle;
+  final Widget child;
+  final Widget? trailing;
 
   @override
   Widget build(BuildContext context) {

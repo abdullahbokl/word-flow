@@ -1,14 +1,9 @@
 import 'package:flutter/material.dart';
-import 'app_loader.dart';
+import 'package:word_flow/core/widgets/app_loader.dart';
 
 enum AppButtonVariant { primary, secondary, outline }
 
 class AppButton extends StatelessWidget {
-  final String label;
-  final VoidCallback? onPressed;
-  final bool isLoading;
-  final IconData? icon;
-  final AppButtonVariant variant;
 
   const AppButton({
     super.key,
@@ -18,6 +13,11 @@ class AppButton extends StatelessWidget {
     this.icon,
     this.variant = AppButtonVariant.primary,
   });
+  final String label;
+  final VoidCallback? onPressed;
+  final bool isLoading;
+  final IconData? icon;
+  final AppButtonVariant variant;
 
   @override
   Widget build(BuildContext context) {

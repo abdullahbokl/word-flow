@@ -1,13 +1,13 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import '../../../../core/error/failures.dart';
-import '../repositories/auth_repository.dart';
+import 'package:word_flow/core/error/failures.dart';
+import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 
 @lazySingleton
 class SignOut {
-  final AuthRepository repository;
 
   SignOut(this.repository);
+  final AuthRepository repository;
 
   Future<Either<Failure, void>> call() async {
     return await repository.signOut();

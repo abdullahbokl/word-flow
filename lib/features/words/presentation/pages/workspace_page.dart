@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../app/di.dart';
-import '../cubit/workspace_cubit.dart';
-import '../cubit/workspace_state.dart';
-import '../widgets/workspace_background.dart';
-import '../widgets/workspace_body.dart';
-import '../widgets/workspace_listeners.dart';
-import '../../../auth/presentation/cubit/auth_cubit.dart';
+import 'package:word_flow/app/di.dart';
+import 'package:word_flow/features/words/presentation/cubit/workspace_cubit.dart';
+import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
+import 'package:word_flow/features/words/presentation/widgets/workspace_background.dart';
+import 'package:word_flow/features/words/presentation/widgets/workspace_body.dart';
+import 'package:word_flow/features/words/presentation/widgets/workspace_listeners.dart';
+import 'package:word_flow/features/auth/presentation/cubit/auth_cubit.dart';
 
 class WorkspacePage extends StatefulWidget {
-  final WorkspaceCubit? cubit;
   const WorkspacePage({super.key, this.cubit});
+  final WorkspaceCubit? cubit;
 
   @override
   State<WorkspacePage> createState() => _WorkspacePageState();
@@ -47,9 +47,9 @@ class _WorkspacePageState extends State<WorkspacePage> {
 }
 
 class _WorkspaceContent extends StatelessWidget {
+  const _WorkspaceContent({required this.cubit, required this.controller});
   final WorkspaceCubit cubit;
   final TextEditingController controller;
-  const _WorkspaceContent({required this.cubit, required this.controller});
 
   @override
   Widget build(BuildContext context) {

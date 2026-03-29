@@ -1,11 +1,8 @@
 import 'package:equatable/equatable.dart';
 
-import 'script_processor.dart';
+import 'package:word_flow/core/utils/script_processor.dart';
 
 class ScriptSummary extends Equatable {
-  final int totalWords;
-  final int uniqueWords;
-  final int newWords;
 
   const ScriptSummary({
     required this.totalWords,
@@ -14,16 +11,19 @@ class ScriptSummary extends Equatable {
   });
 
   const ScriptSummary.empty() : this(totalWords: 0, uniqueWords: 0, newWords: 0);
+  final int totalWords;
+  final int uniqueWords;
+  final int newWords;
 
   @override
   List<Object?> get props => [totalWords, uniqueWords, newWords];
 }
 
 class ScriptAnalysis extends Equatable {
-  final ScriptSummary summary;
-  final List<ProcessedWord> words;
 
   const ScriptAnalysis({required this.summary, required this.words});
+  final ScriptSummary summary;
+  final List<ProcessedWord> words;
 
   @override
   List<Object?> get props => [summary, words];

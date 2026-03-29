@@ -1,6 +1,6 @@
 import 'package:injectable/injectable.dart';
-import '../models/word_model.dart';
-import '../../../../core/database/app_database.dart';
+import 'package:word_flow/features/words/data/models/word_model.dart';
+import 'package:word_flow/core/database/app_database.dart';
 import 'package:drift/drift.dart' show Value;
 
 abstract class WordLocalSource {
@@ -19,9 +19,9 @@ abstract class WordLocalSource {
 
 @LazySingleton(as: WordLocalSource)
 class WordLocalSourceImpl implements WordLocalSource {
-  final WordFlowDatabase _db;
 
   WordLocalSourceImpl(this._db);
+  final WordFlowDatabase _db;
 
   @override
   Future<void> saveWord(WordModel word) async {

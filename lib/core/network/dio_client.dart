@@ -1,15 +1,13 @@
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import '../config/env_config.dart';
-import 'auth_interceptor.dart';
-import 'error_interceptor.dart';
-import 'header_interceptor.dart';
+import 'package:word_flow/core/config/env_config.dart';
+import 'package:word_flow/core/network/auth_interceptor.dart';
+import 'package:word_flow/core/network/error_interceptor.dart';
+import 'package:word_flow/core/network/header_interceptor.dart';
 
 @lazySingleton
 class DioClient {
-  final SupabaseClient _supabaseClient;
-  late final Dio _dio;
 
   DioClient(this._supabaseClient) {
     _dio = Dio(BaseOptions(
@@ -24,6 +22,8 @@ class DioClient {
       ErrorInterceptor(),
     ]);
   }
+  final SupabaseClient _supabaseClient;
+  late final Dio _dio;
 
   Dio get instance => _dio;
 }

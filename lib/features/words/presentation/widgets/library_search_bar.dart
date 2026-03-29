@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 
 class LibrarySearchBar extends StatelessWidget {
-  final TextEditingController controller;
-  final ValueChanged<String> onChanged;
-  final VoidCallback onClear;
 
   const LibrarySearchBar({
     super.key,
@@ -11,6 +8,9 @@ class LibrarySearchBar extends StatelessWidget {
     required this.onChanged,
     required this.onClear,
   });
+  final TextEditingController controller;
+  final ValueChanged<String> onChanged;
+  final VoidCallback onClear;
 
   @override
   Widget build(BuildContext context) {

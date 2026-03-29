@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
-import 'analysis_chip.dart';
+import 'package:word_flow/features/words/presentation/widgets/analysis_chip.dart';
 
 class AnalysisResultsHeader extends StatelessWidget {
-  final bool isProcessing;
 
   const AnalysisResultsHeader({
     super.key,
     required this.isProcessing,
   });
+  final bool isProcessing;
 
   @override
   Widget build(BuildContext context) {

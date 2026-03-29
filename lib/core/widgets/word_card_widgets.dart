@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'app_loader.dart';
+import 'package:word_flow/core/widgets/app_loader.dart';
 
 class StatusIndicator extends StatelessWidget {
+  const StatusIndicator({super.key, required this.isKnown, required this.color});
   final bool isKnown;
   final Color color;
-  const StatusIndicator({super.key, required this.isKnown, required this.color});
   @override
   Widget build(BuildContext context) => Container(
         width: 40,
@@ -22,10 +22,10 @@ class StatusIndicator extends StatelessWidget {
 }
 
 class WordInfo extends StatelessWidget {
+  const WordInfo({super.key, required this.text, required this.count, required this.isKnown});
   final String text;
   final int count;
   final bool isKnown;
-  const WordInfo({super.key, required this.text, required this.count, required this.isKnown});
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -44,11 +44,11 @@ class WordInfo extends StatelessWidget {
 }
 
 class ToggleButton extends StatelessWidget {
+  const ToggleButton({super.key, required this.isKnown, required this.isPending, required this.onToggle, required this.statusColor});
   final bool isKnown;
   final bool isPending;
   final VoidCallback onToggle;
   final Color statusColor;
-  const ToggleButton({super.key, required this.isKnown, required this.isPending, required this.onToggle, required this.statusColor});
   @override
   Widget build(BuildContext context) => IconButton(
         icon: isPending
