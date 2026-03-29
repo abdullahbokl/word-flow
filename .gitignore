@@ -82,8 +82,10 @@ pubspec.lock
 
 implementation_plan.md
 
-# Generated files
+# Generated files - do not commit
 *.g.dart
 *.freezed.dart
 *.config.dart
 *.injectable.dart
+lib/app/di.config.dart
+lib/app/router/routes.g.dart
