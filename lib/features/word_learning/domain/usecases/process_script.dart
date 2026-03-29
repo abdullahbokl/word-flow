@@ -1,6 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
+import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
 import 'package:word_flow/features/vocabulary/domain/services/text_analysis_service.dart';
 import 'package:injectable/injectable.dart';
@@ -27,8 +28,18 @@ class ProcessScript {
         rawText: rawText,
         knownWords: knownWordTexts,
       );
+      // Domain rule: sorting by frequency descending, known words last.
+      // We create a mutable copy to avoid errors on fixed-length or unmodifiable lists.
+      final sortedWords = List<ProcessedWord>.from(processed.words)
+        ..sort((a, b) {
+          if (a.isKnown != b.isKnown) return a.isKnown ? 1 : -1;
+          return b.totalCount.compareTo(a.totalCount);
+        });
 
-      return Right(processed);
+      return Right(ScriptAnalysis(
+        summary: processed.summary,
+        words: sortedWords,
+      ));
     } catch (e) {
       return Left(ProcessingFailure(e.toString()));
     }

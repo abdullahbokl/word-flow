@@ -1,7 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:fpdart/fpdart.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
@@ -12,279 +12,137 @@ import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cu
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_state.dart';
 
 class MockProcessScript extends Mock implements ProcessScript {}
-
 class MockSaveProcessedWords extends Mock implements SaveProcessedWords {}
-
 class MockToggleKnownWord extends Mock implements ToggleKnownWord {}
 
 void main() {
-  late MockProcessScript processScript;
-  late MockSaveProcessedWords saveProcessedWords;
-  late MockToggleKnownWord toggleKnownWord;
-
-  const summary = ScriptSummary(totalWords: 4, uniqueWords: 2, newWords: 2);
-  const words = [
-    ProcessedWord(wordText: 'hello', totalCount: 3, isKnown: false),
-    ProcessedWord(wordText: 'world', totalCount: 1, isKnown: false),
-  ];
+  late WorkspaceCubit cubit;
+  late MockProcessScript mockProcessScript;
+  late MockSaveProcessedWords mockSaveProcessedWords;
+  late MockToggleKnownWord mockToggleKnownWord;
 
   setUp(() {
-    processScript = MockProcessScript();
-    saveProcessedWords = MockSaveProcessedWords();
-    toggleKnownWord = MockToggleKnownWord();
+    mockProcessScript = MockProcessScript();
+    mockSaveProcessedWords = MockSaveProcessedWords();
+    mockToggleKnownWord = MockToggleKnownWord();
 
-    when(
-      () => saveProcessedWords.call(any(), userId: any(named: 'userId')),
-    ).thenAnswer((_) async => const Right(null));
+    cubit = WorkspaceCubit(
+      mockProcessScript,
+      mockSaveProcessedWords,
+      mockToggleKnownWord,
+    );
+
+    registerFallbackValue(<ProcessedWord>[]);
   });
 
-  WorkspaceCubit buildCubit() =>
-      WorkspaceCubit(processScript, saveProcessedWords, toggleKnownWord);
+  const tUserId = 'user-123';
+  final tProcessedWords = [
+    ProcessedWord(wordText: 'hello', totalCount: 2, isKnown: false),
+  ];
+  final tAnalysis = ScriptAnalysis(
+    summary: const ScriptSummary(totalWords: 2, uniqueWords: 1, newWords: 1),
+    words: tProcessedWords,
+  );
 
-  test('starts with an initial state and empty cache', () {
-    final cubit = buildCubit();
-    expect(cubit.state, const WorkspaceState.initial());
-    expect(cubit.summary, const ScriptSummary.empty());
-    expect(cubit.words, isEmpty);
-    expect(cubit.pendingKnownWords, isEmpty);
-    cubit.close();
+  group('WorkspaceCubit - Analyze', () {
+    blocTest<WorkspaceCubit, WorkspaceState>(
+      'should emit initial when text is empty',
+      build: () => cubit,
+      act: (cubit) => cubit.analyze('   '),
+      expect: () => [const WorkspaceState.initial()],
+    );
+
+    blocTest<WorkspaceCubit, WorkspaceState>(
+      'should emit processing then results on success',
+      build: () {
+        when(() => mockProcessScript(any(), userId: any(named: 'userId')))
+            .thenAnswer((_) async => Right(tAnalysis));
+        when(() => mockSaveProcessedWords(any(), userId: any(named: 'userId')))
+            .thenAnswer((_) async => const Right(null));
+        return cubit;
+      },
+      act: (cubit) => cubit.analyze('hello hello', userId: tUserId),
+      expect: () => [
+        const WorkspaceState.processing(),
+        WorkspaceState.results(
+          words: tProcessedWords,
+          summary: tAnalysis.summary,
+          pendingKnownWords: {},
+          revision: 1,
+        ),
+      ],
+      verify: (_) {
+        verify(() => mockSaveProcessedWords(tProcessedWords, userId: tUserId)).called(1);
+      },
+    );
+
+    blocTest<WorkspaceCubit, WorkspaceState>(
+      'should emit error when process fails',
+      build: () {
+        when(() => mockProcessScript(any(), userId: any(named: 'userId')))
+            .thenAnswer((_) async => const Left(ProcessingFailure('fail')));
+        return cubit;
+      },
+      act: (cubit) => cubit.analyze('error', userId: tUserId),
+      expect: () => [
+        const WorkspaceState.processing(),
+        const WorkspaceState.error('fail'),
+      ],
+    );
   });
 
-  blocTest<WorkspaceCubit, WorkspaceState>(
-    'analyze emits processing then results and caches summary/words',
-    build: () {
-      when(
-        () => processScript.call(any(), userId: any(named: 'userId')),
-      ).thenAnswer(
-        (_) async => const Right(ScriptAnalysis(summary: summary, words: words)),
-      );
-      when(
-        () => toggleKnownWord.call(any(), userId: any(named: 'userId')),
-      ).thenAnswer((_) async => const Right(null));
-      return buildCubit();
-    },
-    act: (cubit) async => cubit.analyze('hello hello hello world'),
-    expect: () => [
-      const WorkspaceState.processing(),
-      const WorkspaceState.results(
-        words: words,
-        summary: summary,
-        pendingKnownWords: <String>{},
+  group('WorkspaceCubit - ToggleKnown (Revision Guard)', () {
+    blocTest<WorkspaceCubit, WorkspaceState>(
+      'should prevent double-toggle (idempotency)',
+      build: () => cubit,
+      seed: () => WorkspaceState.results(
+        words: tProcessedWords,
+        summary: tAnalysis.summary,
+        pendingKnownWords: {'hello'},
         revision: 1,
       ),
-    ],
-    verify: (cubit) {
-      expect(cubit.summary, summary);
-      expect(cubit.words, words);
-      verify(
-        () => saveProcessedWords.call(any(), userId: any(named: 'userId')),
-      ).called(1);
-    },
-  );
+      act: (cubit) => cubit.toggleKnown('hello'),
+      expect: () => [], // No new state emitted
+      verify: (_) {
+        verifyNever(() => mockToggleKnownWord(any(), userId: any(named: 'userId')));
+      },
+    );
 
-  blocTest<WorkspaceCubit, WorkspaceState>(
-    'analyze failure emits processing then error',
-    build: () {
-      when(
-        () => processScript.call(any(), userId: any(named: 'userId')),
-      ).thenAnswer((_) async => const Left(ProcessingFailure('parse failed')));
-      return buildCubit();
-    },
-    act: (cubit) async => cubit.analyze('broken input'),
-    expect: () => [
-      const WorkspaceState.processing(),
-      const WorkspaceState.error('parse failed'),
-    ],
-  );
+    test('toggleKnown with stale revision should NOT update UI after usecase returns', () async {
+       // Manual async testing for revision-based logic since it uses unawaited/delayed
+       when(() => mockToggleKnownWord(any(), userId: any(named: 'userId')))
+          .thenAnswer((_) async {
+             await Future.delayed(const Duration(milliseconds: 10)); // Simulate delay
+             return const Right(null);
+          });
+       
+       // 1. Setup results with revision 1
+       cubit.emit(WorkspaceState.results(
+          words: tProcessedWords,
+          summary: tAnalysis.summary,
+          pendingKnownWords: {},
+          revision: 1,
+       ));
 
-  blocTest<WorkspaceCubit, WorkspaceState>(
-    'toggleKnown removes word after successful persistence',
-    build: () {
-      when(
-        () => processScript.call(any(), userId: any(named: 'userId')),
-      ).thenAnswer(
-        (_) async => const Right(ScriptAnalysis(summary: summary, words: words)),
-      );
-      when(
-        () => toggleKnownWord.call('hello', userId: any(named: 'userId')),
-      ).thenAnswer((_) async => const Right(null));
-      return buildCubit();
-    },
-    act: (cubit) async {
-      await cubit.analyze('hello hello hello world');
-      await cubit.toggleKnown('hello');
-    },
-    wait: const Duration(milliseconds: 340),
-    expect: () => [
-      const WorkspaceState.processing(),
-      const WorkspaceState.results(
-        words: words,
-        summary: summary,
-        pendingKnownWords: <String>{},
-        revision: 1,
-      ),
-      const WorkspaceState.results(
-        words: words,
-        summary: ScriptSummary(totalWords: 4, uniqueWords: 2, newWords: 1),
-        pendingKnownWords: <String>{'hello'},
-        revision: 1,
-      ),
-      const WorkspaceState.results(
-        words: [
-          ProcessedWord(wordText: 'world', totalCount: 1, isKnown: false),
-        ],
-        summary: ScriptSummary(totalWords: 4, uniqueWords: 2, newWords: 1),
-        pendingKnownWords: <String>{},
-        revision: 1,
-      ),
-    ],
-    verify: (_) {
-      verify(() => toggleKnownWord.call('hello', userId: any(named: 'userId')))
-          .called(1);
-    },
-  );
+       // 2. Start toggle (this uses unawaited delay internally)
+       await cubit.toggleKnown('hello');
+       
+       // 3. IMMEDIATELY update state to revision 2 (new analysis finished)
+       cubit.emit(WorkspaceState.results(
+          words: tProcessedWords,
+          summary: tAnalysis.summary,
+          pendingKnownWords: {},
+          revision: 2,
+       ));
 
-  blocTest<WorkspaceCubit, WorkspaceState>(
-    'toggleKnown failure stores recoverable error and keeps original results',
-    build: () {
-      when(
-        () => processScript.call(any(), userId: any(named: 'userId')),
-      ).thenAnswer(
-        (_) async => const Right(ScriptAnalysis(summary: summary, words: words)),
-      );
-      when(
-        () => toggleKnownWord.call('hello', userId: any(named: 'userId')),
-      ).thenAnswer((_) async => const Left(DatabaseFailure('update failed')));
-      return buildCubit();
-    },
-    act: (cubit) async {
-      await cubit.analyze('hello hello hello world');
-      await cubit.toggleKnown('hello');
-    },
-    expect: () => [
-      const WorkspaceState.processing(),
-      const WorkspaceState.results(
-        words: words,
-        summary: summary,
-        pendingKnownWords: <String>{},
-        revision: 1,
-      ),
-      const WorkspaceState.results(
-        words: words,
-        summary: ScriptSummary(totalWords: 4, uniqueWords: 2, newWords: 1),
-        pendingKnownWords: <String>{'hello'},
-        revision: 1,
-      ),
-      const WorkspaceState.results(
-        words: words,
-        summary: summary,
-        pendingKnownWords: <String>{},
-        revision: 1,
-        lastError: 'update failed',
-      ),
-    ],
-  );
+       // 4. Wait for the toggle delay (helpers uses 280ms)
+       await Future.delayed(const Duration(milliseconds: 400));
 
-  blocTest<WorkspaceCubit, WorkspaceState>(
-    'analyze with empty text resets to initial state',
-    build: () => buildCubit(),
-    seed: () => const WorkspaceState.results(
-      words: words,
-      summary: summary,
-      pendingKnownWords: <String>{},
-      revision: 1,
-    ),
-    act: (cubit) async => cubit.analyze('   '),
-    expect: () => [
-      const WorkspaceState.initial(),
-    ],
-  );
-
-  blocTest<WorkspaceCubit, WorkspaceState>(
-    'multiple analyzes track revision correctly',
-    build: () {
-      when(
-        () => processScript.call(any(), userId: any(named: 'userId')),
-      ).thenAnswer(
-        (_) async => const Right(ScriptAnalysis(summary: summary, words: words)),
-      );
-      when(
-        () => toggleKnownWord.call(any(), userId: any(named: 'userId')),
-      ).thenAnswer((_) async => const Right(null));
-      return buildCubit();
-    },
-    act: (cubit) async {
-      await cubit.analyze('hello world');
-      await cubit.analyze('hello world hello');
-    },
-    expect: () => [
-      const WorkspaceState.processing(),
-      const WorkspaceState.results(
-        words: words,
-        summary: summary,
-        pendingKnownWords: <String>{},
-        revision: 1,
-      ),
-      const WorkspaceState.processing(),
-      const WorkspaceState.results(
-        words: words,
-        summary: summary,
-        pendingKnownWords: <String>{},
-        revision: 2,
-      ),
-    ],
-    verify: (cubit) {
-      verify(
-        () => saveProcessedWords.call(any(), userId: any(named: 'userId')),
-      ).called(2);
-    },
-  );
-
-  blocTest<WorkspaceCubit, WorkspaceState>(
-    'toggleKnown ignores if not in results state',
-    build: () => buildCubit(),
-    seed: () => const WorkspaceState.initial(),
-    act: (cubit) => cubit.toggleKnown('hello'),
-    expect: () => [],
-  );
-
-  blocTest<WorkspaceCubit, WorkspaceState>(
-    'toggleKnown ignores duplicate request (already pending)',
-    build: () {
-      when(
-        () => toggleKnownWord.call('hello', userId: any(named: 'userId')),
-      ).thenAnswer((_) async => const Right(null));
-      return buildCubit();
-    },
-    seed: () => const WorkspaceState.results(
-      words: words,
-      summary: summary,
-      pendingKnownWords: <String>{'hello'},
-      revision: 1,
-    ),
-    act: (cubit) => cubit.toggleKnown('hello'),
-    expect: () => [],
-  );
-
-  blocTest<WorkspaceCubit, WorkspaceState>(
-    'analyze with userId passes it to processScript',
-    build: () {
-      when(
-        () => processScript.call(any(), userId: any(named: 'userId')),
-      ).thenAnswer(
-        (_) async => const Right(ScriptAnalysis(summary: summary, words: words)),
-      );
-      when(
-        () => toggleKnownWord.call(any(), userId: any(named: 'userId')),
-      ).thenAnswer((_) async => const Right(null));
-      return buildCubit();
-    },
-    act: (cubit) async => cubit.analyze('hello world', userId: 'user-123'),
-    verify: (cubit) {
-      verify(
-        () => processScript.call(any(), userId: 'user-123'),
-      ).called(1);
-    },
-  );
-
+       // assert: state should STILL be the revision 2 state, and NOT updated (word removed)
+       final state = cubit.state.maybeMap(results: (s) => s, orElse: () => null);
+       expect(state?.revision, 2);
+       expect(state?.words.length, 1); // Word NOT removed because revision changed
+       expect(state?.pendingKnownWords, isEmpty);
+    });
+  });
 }

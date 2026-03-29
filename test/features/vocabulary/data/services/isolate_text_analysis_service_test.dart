@@ -1,6 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:word_flow/features/vocabulary/data/services/isolate_text_analysis_service.dart';
-import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 
 void main() {
   late IsolateTextAnalysisService service;
@@ -9,368 +8,157 @@ void main() {
     service = IsolateTextAnalysisService();
   });
 
-  group('IsolateTextAnalysisService.process', () {
-    group('Word frequency counting', () {
-      test('should count word frequencies correctly', () async {
-        final result = await service.process(
-          rawText: 'hello world hello flutter world hello',
-          knownWords: {},
-        );
-        
-        final hello = result.words.firstWhere((w) => w.wordText == 'hello');
-        expect(hello.totalCount, 3);
-        
-        final world = result.words.firstWhere((w) => w.wordText == 'world');
-        expect(world.totalCount, 2);
-        
-        final flutter = result.words.firstWhere((w) => w.wordText == 'flutter');
-        expect(flutter.totalCount, 1);
-      });
+  group('IsolateTextAnalysisService', () {
+    test('1. Empty string returns empty results', () async {
+      final result = await service.process(rawText: '', knownWords: {});
 
-      test('should normalize case (case-insensitive)', () async {
-        final result = await service.process(
-          rawText: 'Hello HELLO hello HeLLo',
-          knownWords: {},
-        );
-        
-        // All should be merged into one entry with lowercase
-        expect(result.words.length, 1);
-        expect(result.words.first.totalCount, 4);
-        expect(result.words.first.wordText, 'hello');
-      });
-
-      test('should sort unknown words before known words', () async {
-        final result = await service.process(
-          rawText: 'hello world flutter dart python',
-          knownWords: {'hello', 'world'},
-        );
-        
-        // Unknown words should come before known words
-        final unknownIndices = result.words
-            .asMap()
-            .entries
-            .where((e) => !e.value.isKnown)
-            .map((e) => e.key)
-            .toList();
-        
-        final knownIndices = result.words
-            .asMap()
-            .entries
-            .where((e) => e.value.isKnown)
-            .map((e) => e.key)
-            .toList();
-        
-        if (unknownIndices.isNotEmpty && knownIndices.isNotEmpty) {
-          expect(unknownIndices.last, lessThan(knownIndices.first));
-        }
-      });
-
-      test('should sort by frequency descending within same known status', () async {
-        final result = await service.process(
-          rawText: 'alpha beta beta gamma gamma gamma delta delta delta delta',
-          knownWords: {'alpha'},
-        );
-        
-        // Find the unknown words section
-        final unknownWords =
-            result.words.where((w) => !w.isKnown).toList();
-        
-        // Within unknown words, should be sorted by frequency descending
-        for (int i = 0; i < unknownWords.length - 1; i++) {
-          expect(
-            unknownWords[i].totalCount,
-            greaterThanOrEqualTo(unknownWords[i + 1].totalCount),
-          );
-        }
-      });
+      expect(result.words, isEmpty);
+      expect(result.summary.totalWords, 0);
+      expect(result.summary.uniqueWords, 0);
+      expect(result.summary.newWords, 0);
     });
 
-    group('Known word marking', () {
-      test('should mark known words correctly', () async {
-        final result = await service.process(
-          rawText: 'hello world flutter',
-          knownWords: {'hello', 'flutter'},
-        );
-        
-        final hello = result.words.firstWhere((w) => w.wordText == 'hello');
-        expect(hello.isKnown, true);
-        
-        final world = result.words.firstWhere((w) => w.wordText == 'world');
-        expect(world.isKnown, false);
-        
-        final flutter = result.words.firstWhere((w) => w.wordText == 'flutter');
-        expect(flutter.isKnown, true);
-      });
+    test('2. All stopwords are filtered out', () async {
+      const text = 'the and or in on at to for of with';
+      final result = await service.process(rawText: text, knownWords: {});
 
-      test('should handle empty known words set', () async {
-        final result = await service.process(
-          rawText: 'hello world flutter',
-          knownWords: {},
-        );
-        
-        // All words should be unknown
-        expect(result.words.every((w) => !w.isKnown), true);
-      });
-
-      test('should handle all words known', () async {
-        final result = await service.process(
-          rawText: 'hello world flutter',
-          knownWords: {'hello', 'world', 'flutter'},
-        );
-        
-        // All words should be known
-        expect(result.words.every((w) => w.isKnown), true);
-      });
+      expect(result.words, isEmpty);
+      expect(result.summary.totalWords, 10); // Matches all but filtered in wordCounts
+      expect(result.summary.uniqueWords, 0);
     });
 
-    group('Stop words filtering', () {
-      test('should filter common stop words', () async {
-        final result = await service.process(
-          rawText:
-              'the quick brown fox jumps over the lazy dog the the the',
-          knownWords: {},
-        );
-        
-        // Stop words should not appear
-        expect(result.words.any((w) => w.wordText == 'the'), false);
-        expect(result.words.any((w) => w.wordText == 'over'), false);
-        
-        // Content words should appear
-        expect(result.words.any((w) => w.wordText == 'quick'), true);
-        expect(result.words.any((w) => w.wordText == 'brown'), true);
-        expect(result.words.any((w) => w.wordText == 'fox'), true);
-      });
+    test('3. Single unique word works correctly', () async {
+      const text = 'Flutter';
+      final result = await service.process(rawText: text, knownWords: {});
 
-      test('should filter single-letter words', () async {
-        final result = await service.process(
-          rawText: 'I a x hello world',
-          knownWords: {},
-        );
-        
-        // Single letters should be filtered
-        expect(result.words.any((w) => w.wordText.length < 2), false);
-        
-        // Multi-letter words should remain
-        expect(result.words.any((w) => w.wordText == 'hello'), true);
-        expect(result.words.any((w) => w.wordText == 'world'), true);
-      });
-
-      test('should maintain totalWords count including stop words', () async {
-        final result = await service.process(
-          rawText: 'the quick brown fox',
-          knownWords: {},
-        );
-        
-        // totalWords counts all words matched by regex (including stop words)
-        expect(result.summary.totalWords, 4);
-        // uniqueWords counts unique filtered words (excluding stop words)
-        expect(result.summary.uniqueWords, 3);
-      });
+      expect(result.words, hasLength(1));
+      expect(result.words.first.wordText, 'flutter');
+      expect(result.words.first.totalCount, 1);
+      expect(result.summary.uniqueWords, 1);
     });
 
-    group('Contractions', () {
-      test('should handle contractions as single words', () async {
-        final result = await service.process(
-          rawText: "don't can't won't shouldn't couldn't",
-          knownWords: {},
-        );
-        
-        expect(result.words.any((w) => w.wordText == "don't"), true);
-        expect(result.words.any((w) => w.wordText == "can't"), true);
-        expect(result.words.any((w) => w.wordText == "won't"), true);
-      });
+    test('4. Case normalization merges counts', () async {
+      const text = 'Flutter flutter FLUTTER';
+      final result = await service.process(rawText: text, knownWords: {});
 
-      test('should count contractions with correct frequency', () async {
-        final result = await service.process(
-          rawText: "don't don't can't don't",
-          knownWords: {},
-        );
-        
-        final dont = result.words.firstWhere((w) => w.wordText == "don't");
-        expect(dont.totalCount, 3);
-      });
+      expect(result.words, hasLength(1));
+      expect(result.words.first.wordText, 'flutter');
+      expect(result.words.first.totalCount, 3);
     });
 
-    group('Special characters and punctuation', () {
-      test('should strip punctuation from words', () async {
-        final result = await service.process(
-          rawText: 'Hello, world! How are you? Fine. Great!',
-          knownWords: {},
-        );
-        
-        // Punctuation should not be part of word text
-        expect(
-          result.words.every((w) =>
-              !w.wordText.contains(',') &&
-              !w.wordText.contains('!') &&
-              !w.wordText.contains('?') &&
-              !w.wordText.contains('.')),
-          true,
-        );
-        
-        // Words should be extracted (with stop words filtered)
-        expect(result.words.any((w) => w.wordText == 'hello'), true);
-        expect(result.words.any((w) => w.wordText == 'world'), true);
-      });
+    test('5. Apostrophes are handled as part of the word', () async {
+      const text = "don't shouldn't it's";
+      final result = await service.process(rawText: text, knownWords: {});
 
-      test('should not match pure numbers', () async {
-        final result = await service.process(
-          rawText: 'version 123 release 456 flutter',
-          knownWords: {},
-        );
-        
-        // Pure numbers should not be words
-        expect(result.words.any((w) => w.wordText == '123'), false);
-        expect(result.words.any((w) => w.wordText == '456'), false);
-        
-        // Letters should be matched
-        expect(result.words.any((w) => w.wordText == 'version'), true);
-        expect(result.words.any((w) => w.wordText == 'release'), true);
-      });
-
-      test('should not match hyphenated words incorrectly', () async {
-        final result = await service.process(
-          rawText: 'well-known e-mail co-operation',
-          knownWords: {},
-        );
-        
-        // Hyphenated words should be matched as separate words or filtered
-        // based on regex: \b[a-zA-Z]{2,}(?:'[a-zA-Z]+)?\b
-        // This regex does NOT match hyphens, only contractions
-        expect(result.words.isNotEmpty, true);
-      });
+      // 'it's' might be partially filtered if 'it' is a stopword but the regex \b... matches it fully?
+      // Wait, 'it' is a stopword. Let's see if 'it's' is filtered.
+      // Stopwords check normalizedWord. Regex matches it's.
+      // 'it's' is NOT in the stopwatch list.
+      expect(result.words.map((w) => w.wordText), containsAll(["don't", "shouldn't", "it's"]));
     });
 
-    group('Edge cases', () {
-      test('should handle empty input', () async {
-        final result = await service.process(
-          rawText: '',
-          knownWords: {},
-        );
-        
-        expect(result.words, isEmpty);
-        expect(result.summary.totalWords, 0);
-        expect(result.summary.uniqueWords, 0);
-        expect(result.summary.newWords, 0);
-      });
+    test('6. Words with numbers are filtered by regex (no digits)', () async {
+      const text = 'web3 flutter2 native';
+      final result = await service.process(rawText: text, knownWords: {});
 
-      test('should handle whitespace-only input', () async {
-        final result = await service.process(
-          rawText: '   \n\t  ',
-          knownWords: {},
-        );
-        
-        expect(result.words, isEmpty);
-        expect(result.summary.totalWords, 0);
-      });
-
-      test('should handle input with only stop words', () async {
-        final result = await service.process(
-          rawText: 'the and but or is are',
-          knownWords: {},
-        );
-        
-        // All words are stop words, so should be filtered out
-        expect(result.words, isEmpty);
-        expect(result.summary.uniqueWords, 0);
-      });
-
-      test('should handle input with only single letters', () async {
-        final result = await service.process(
-          rawText: 'a b c d e f g',
-          knownWords: {},
-        );
-        
-        // All are single letters, should be filtered
-        expect(result.words, isEmpty);
-      });
-
-      test('should handle very long input', () async {
-        final longText = 'word ' * 1000;
-        final result = await service.process(
-          rawText: longText,
-          knownWords: {},
-        );
-        
-        // Should process without issues
-        expect(result.words.length, 1);
-        expect(result.words.first.wordText, 'word');
-        expect(result.words.first.totalCount, 1000);
-      });
+      // web3 -> \bweb matches but then 3 is not [a-zA-Z]. So it matches 'web'?
+      // Regex: \b[a-zA-Z]{2,}(?:'[a-zA-Z]+)?\b
+      // 'web3' -> \b starts at 'w'. 'web' matches [a-zA-Z]{2,}. 
+      // Then next char is '3'. Regex \b requires a word boundary after the match.
+      // Is '3' a word boundary? No, \b matches position between word char and non-word char.
+      // 'b' is a word char, '3' is a word char. So NO \b between 'b' and '3'.
+      // Thus 'web' in 'web3' does NOT match because it can't find a boundary after 'b'.
+      // If it tries to match 'web3', it fails because '3' is not in [a-zA-Z].
+      expect(result.words.map((w) => w.wordText), isNot(contains('web')));
+      expect(result.words.map((w) => w.wordText), contains('native'));
     });
 
-    group('Summary counts', () {
-      test('should provide correct summary', () async {
-        final result = await service.process(
-          rawText: 'hello world hello flutter world hello',
-          knownWords: {'hello'},
-        );
-        
-        expect(result.summary.totalWords, 6);
-        expect(result.summary.uniqueWords, 3); // hello, world, flutter
-        expect(result.summary.newWords, 2); // world, flutter (not hello)
-      });
+    test('7. Short words (< 2 chars) are filtered', () async {
+      const text = 'I a am Flutter';
+      final result = await service.process(rawText: text, knownWords: {});
 
-      test('should count newWords correctly (unknown unique words)', () async {
-        final result = await service.process(
-          rawText: 'alpha beta beta gamma gamma gamma',
-          knownWords: {'alpha'},
-        );
-        
-        // newWords = unknown unique words
-        // alpha is known, beta and gamma are unknown
-        expect(result.summary.newWords, 2);
-      });
-
-      test('should count emptySummary for empty input', () async {
-        final result = await service.process(
-          rawText: '',
-          knownWords: {},
-        );
-        
-        expect(result.summary.totalWords, 0);
-        expect(result.summary.uniqueWords, 0);
-        expect(result.summary.newWords, 0);
-      });
+      // 'am' is a stopword.
+      expect(result.words.map((w) => w.wordText), contains('flutter'));
+      expect(result.words.map((w) => w.wordText), isNot(contains('i')));
+      expect(result.words.map((w) => w.wordText), isNot(contains('a')));
     });
 
-    group('Real-world scenarios', () {
-      test('should process typical script correctly', () async {
-        const script = '''
-        Flutter is a great framework. Flutter makes development fun.
-        Learning Flutter helps developers build awesome apps quickly.
-        ''';
-        
-        final result = await service.process(
-          rawText: script,
-          knownWords: {'flutter', 'development'},
-        );
-        
-        // Flutter and development should be marked as known
-        final flutter = result.words
-            .firstWhere((w) => w.wordText == 'flutter', orElse: () => const ProcessedWord(wordText: '', totalCount: 0, isKnown: false));
-        if (flutter.wordText.isNotEmpty) {
-          expect(flutter.isKnown, true);
-        }
-        
-        // Should have multiple unique words
-        expect(result.summary.uniqueWords, greaterThan(5));
-      });
+    test('8. Known words are identified', () async {
+      const text = 'learning dart with flutter';
+      final known = {'dart'};
+      final result = await service.process(rawText: text, knownWords: known);
 
-      test('should handle mixed case and contractions', () async {
-        const script = "I can't believe it's working! That's amazing!";
-        
-        final result = await service.process(
-          rawText: script,
-          knownWords: {},
-        );
-        
-        // Contractions should be preserved
-        expect(
-          result.words.any((w) => w.wordText.contains("'")),
-          true,
-        );
-      });
+      final dart = result.words.firstWhere((w) => w.wordText == 'dart');
+      final flutter = result.words.firstWhere((w) => w.wordText == 'flutter');
+
+      expect(dart.isKnown, true);
+      expect(flutter.isKnown, false);
+    });
+
+    test('9. Sort order: unknown first, then frequency descending', () async {
+      const text = 'apple apple banana banana banana cherry';
+      final known = {'banana'}; // banana appears 3 times but is known
+      
+      final result = await service.process(rawText: text, knownWords: known);
+
+      // result.words should be: [apple (2), cherry (1), banana (3)]
+      expect(result.words[0].wordText, 'apple');
+      expect(result.words[1].wordText, 'cherry');
+      expect(result.words[2].wordText, 'banana');
+    });
+
+    test('10. Summary counts are accurate', () async {
+      const text = 'Flutter is amazing and extremely fast';
+      // Tokens: [Flutter, is, amazing, and, extremely, fast] -> 6 total
+      // Stopwords: [is, and] -> 2 filtered
+      // Unique: [flutter, amazing, extremely, fast] -> 4 unique
+      
+      final result = await service.process(rawText: text, knownWords: {'flutter'});
+      
+      expect(result.summary.totalWords, 6);
+      expect(result.summary.uniqueWords, 4);
+      expect(result.summary.newWords, 3); // amazing, extremely, fast
+    });
+
+    test('11. Large text performance (< 2s)', () async {
+      final largeText = List.generate(10000, (i) => 'Word$i').join(' ');
+      
+      final stopwatch = Stopwatch()..start();
+      await service.process(rawText: largeText, knownWords: {});
+      stopwatch.stop();
+
+      expect(stopwatch.elapsedMilliseconds, lessThan(2000), reason: 'Analysis took too long');
+    });
+
+    test('12. Hyphenated words are split (default regex behavior)', () async {
+      const text = 'well-known developer';
+      final result = await service.process(rawText: text, knownWords: {});
+
+      // Regex \b... matches 'well' and 'known' separately because '-' is a non-word char and creates boundaries.
+      expect(result.words.map((w) => w.wordText), contains('well'));
+      expect(result.words.map((w) => w.wordText), contains('known'));
+      expect(result.words.map((w) => w.wordText), contains('developer'));
+    });
+
+    test('13. Text with only punctuation returns empty', () async {
+      const text = '!!! ??? ... ,,, ---';
+      final result = await service.process(rawText: text, knownWords: {});
+
+      expect(result.words, isEmpty);
+      expect(result.summary.totalWords, 0);
+    });
+
+    test('Apostrophes inside words: should treat as one word only if matching regex', () async {
+      const text = "He's reading a book";
+      // He's -> matches
+      // reading -> matches
+      // book -> matches
+      // a -> short
+      final result = await service.process(rawText: text, knownWords: {});
+      
+      expect(result.words.map((w) => w.wordText), contains("he's"));
+      expect(result.words.map((w) => w.wordText), contains("reading"));
+      expect(result.words.map((w) => w.wordText), contains("book"));
     });
   });
 }

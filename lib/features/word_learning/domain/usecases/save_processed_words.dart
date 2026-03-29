@@ -14,6 +14,7 @@ class SaveProcessedWords {
   final WordRepository _repository;
 
   Future<Either<Failure, void>> call(List<ProcessedWord> processedWords, {String? userId}) async {
+    if (processedWords.isEmpty) return const Right(null);
     try {
      
       final words = await compute(_mapToWords, _MapParams(processedWords, userId));

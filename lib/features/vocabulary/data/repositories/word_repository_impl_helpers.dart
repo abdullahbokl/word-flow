@@ -40,9 +40,7 @@ mixin WordRepositoryImplHelpers {
             // 2. Word is known if it was EVER marked known (logical OR).
             final existingEntity = WordMapper.fromRow(existing);
             final merged = existingEntity.copyWith(
-              totalCount: word.totalCount > existingEntity.totalCount
-                  ? word.totalCount
-                  : existingEntity.totalCount,
+              totalCount: existingEntity.totalCount + word.totalCount,
               isKnown: existingEntity.isKnown || word.isKnown,
               lastUpdated: now,
             );
@@ -70,14 +68,8 @@ mixin WordRepositoryImplHelpers {
         
         if (row != null) {
           final existing = WordMapper.fromRow(row);
-          // Applying the Sticky Known rule: a word is known if it was ever marked known.
-          // Toggle usually flips the bit, but if we follow Rule 3: "OR the isKnown flag".
-          // This implies if it's already true, it stays true? 
-          // However, for a toggle BUTTON, this would make it stuck true.
-          // I will use !isKnown as the 'new' value and then OR with existing for the merge logic.
-          final newIsKnown = !existing.isKnown;
           entity = existing.copyWith(
-            isKnown: existing.isKnown || newIsKnown,
+            isKnown: !existing.isKnown,
             lastUpdated: DateTime.now().toUtc(),
           );
         } else {
