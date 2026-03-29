@@ -9,6 +9,7 @@ abstract class WordRemoteSource {
   Future<void> upsertWord(WordRemoteDto word);
   Future<void> deleteWord(String id);
   Future<Either<Failure, List<WordRemoteDto>>> fetchUserWords(String userId);
+  Future<Either<Failure, List<WordRemoteDto>>> fetchWordsUpdatedSince(String userId, DateTime since);
 }
 
 @LazySingleton(as: WordRemoteSource)
@@ -20,13 +21,20 @@ class WordRemoteSourceImpl implements WordRemoteSource {
   @override
   Future<void> upsertWord(WordRemoteDto word) async {
     try {
-      // Sync uses Last-Writer-Wins (LWW) semantics based on 'id'.
-      // Row-Level Security (RLS) handles authorization on the backend.
-      await _client.from('words').upsert(
-            word.toJson(),
-            onConflict: 'id',
-            ignoreDuplicates: false,
-          );
+      // Sync uses Last-Writer-Wins (LWW) semantics.
+      // We use a custom RPC function to handle the LWW merge logic on the server.
+      final json = word.toJson();
+      await _client.rpc(
+        'upsert_word_lww',
+        params: {
+          'p_id': json['id'],
+          'p_user_id': json['user_id'],
+          'p_word_text': json['word_text'],
+          'p_total_count': json['total_count'],
+          'p_is_known': json['is_known'],
+          'p_last_updated': json['last_updated'],
+        },
+      );
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {
@@ -62,6 +70,32 @@ class WordRemoteSourceImpl implements WordRemoteSource {
         return Right(dtos);
       } catch (e) {
         return Left(ServerFailure('Invalid server response: $e'));
+      }
+    } on PostgrestException catch (e) {
+      return Left(ServerFailure(e.message));
+    } catch (e) {
+      return Left(ServerFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<WordRemoteDto>>> fetchWordsUpdatedSince(
+    String userId,
+    DateTime since,
+  ) async {
+    try {
+      final response = await _client
+          .from('words')
+          .select()
+          .eq('user_id', userId)
+          .gte('last_updated', since.toUtc().toIso8601String());
+
+      final data = response as List<dynamic>;
+      try {
+        final dtos = data.map((m) => WordRemoteDto.fromJson(m as Map<String, dynamic>)).toList();
+        return Right(dtos);
+      } catch (e) {
+        return Left(ServerFailure('Invalid server response during delta fetch: $e'));
       }
     } on PostgrestException catch (e) {
       return Left(ServerFailure(e.message));
