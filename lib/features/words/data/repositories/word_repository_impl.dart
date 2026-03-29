@@ -7,163 +7,81 @@ import 'package:word_flow/features/words/domain/entities/word.dart';
 import 'package:word_flow/features/words/domain/repositories/word_repository.dart';
 import 'package:word_flow/features/words/data/datasources/word_local_source.dart';
 import 'package:word_flow/features/words/data/datasources/sync_local_source.dart';
-import 'package:word_flow/features/words/data/models/word_model.dart';
 import 'package:word_flow/features/words/data/mappers/word_mapper.dart';
-import 'package:word_flow/core/utils/uuid_generator.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
+import 'package:word_flow/features/words/data/repositories/word_repository_impl_helpers.dart';
 
 @LazySingleton(as: WordRepository)
-class WordRepositoryImpl implements WordRepository {
+class WordRepositoryImpl with WordRepositoryImplHelpers implements WordRepository {
+  WordRepositoryImpl(this.localSource, this.syncSource, this.writeQueue, this.logger);
 
-  WordRepositoryImpl(this._localSource, this._syncSource, this._writeQueue);
-  final WordLocalSource _localSource;
-  final SyncLocalSource _syncSource;
-  final LocalWriteQueue _writeQueue;
+  @override final WordLocalSource localSource;
+  @override final SyncLocalSource syncSource;
+  @override final LocalWriteQueue writeQueue;
+  @override final AppLogger logger;
 
-  Future<Either<Failure, T>> _try<T>(Future<T> Function() call) async {
+  @override
+  Future<Either<Failure, void>> saveWords(List<WordEntity> words) => handleSaveWords(words);
+
+  @override
+  Future<Either<Failure, List<String>>> getKnownWordTexts({String? userId}) async {
     try {
-      return Right(await call());
+      return Right(await localSource.getKnownWordTexts(userId: userId));
     } catch (e) {
       return Left(DatabaseFailure(e.toString()));
     }
   }
 
   @override
-  Future<Either<Failure, void>> saveWords(List<WordEntity> words) => _try(() async {
-    await _writeQueue.enqueue(() async {
-      final now = DateTime.now().toUtc();
-      final candidates = words
-          .map(WordMapper.fromEntityToModel)
-          .toList(growable: false);
-
-      final existingMapsByUserId = <String?, Map<String, WordModel>>{};
-      for (final userId in candidates.map((w) => w.userId).toSet()) {
-        existingMapsByUserId[userId] = await _localSource.getWordTextMap(
-          userId: userId,
-        );
-      }
-
-      final List<WordModel> models = [];
-      for (final candidate in candidates) {
-        final existing = existingMapsByUserId[candidate.userId]?[candidate.wordText];
-        if (existing == null) {
-          models.add(WordModel(
-            id: candidate.id,
-            userId: candidate.userId,
-            wordText: candidate.wordText,
-            totalCount: candidate.totalCount,
-            isKnown: candidate.isKnown,
-            lastUpdated: now,
-          ));
-          continue;
-        }
-
-        models.add(WordModel(
-          id: existing.id,
-          userId: existing.userId,
-          wordText: existing.wordText,
-          totalCount: existing.totalCount + candidate.totalCount,
-          isKnown: existing.isKnown || candidate.isKnown,
-          lastUpdated: now,
-        ));
-      }
-      await _localSource.saveWords(models);
-      for (final model in models) {
-        if (model.userId != null) {
-          await _syncSource.enqueueSyncOperation(
-            model.id,
-            SyncOperation.upsert.value,
-          );
-        }
-      }
-    });
-  });
+  Future<Either<Failure, void>> toggleKnown(String text, {String? userId}) => handleToggleKnown(text, userId: userId);
 
   @override
-  Future<Either<Failure, List<String>>> getKnownWordTexts({String? userId}) => 
-    _try(() => _localSource.getKnownWordTexts(userId: userId));
-
-  @override
-  Future<Either<Failure, void>> toggleKnown(String text, {String? userId}) => _try(() async {
-    await _writeQueue.enqueue(() async {
-      final wordModel = await _localSource.getWordByText(text, userId: userId);
-      final model = wordModel != null
-          ? WordMapper.fromEntityToModel(
-              WordMapper.toEntityFromModel(wordModel).copyWith(
-                isKnown: !wordModel.isKnown,
-                lastUpdated: DateTime.now().toUtc(),
-              ),
-            )
-          : WordModel(
-              id: UuidGenerator.generate(),
-              userId: userId,
-              wordText: text,
-              totalCount: 1,
-              isKnown: true,
-              lastUpdated: DateTime.now().toUtc(),
-            );
-      await _localSource.saveWord(model);
-      if (model.userId != null) {
-        await _syncSource.enqueueSyncOperation(
-          model.id,
-          SyncOperation.upsert.value,
-        );
-      }
-    });
-  });
-
-  @override
-  Future<Either<Failure, List<WordEntity>>> getKnownWords({String? userId}) => 
-    _try(() async {
-      final models = await _localSource.getWords(userId: userId);
-      return models
-          .where((e) => e.isKnown)
-          .map(WordMapper.toEntityFromModel)
-          .toList();
-    });
-
-  @override
-  Stream<List<WordEntity>> watchWords({String? userId}) {
-    return _localSource.watchWords(userId: userId).map(
-          (models) => models.map(WordMapper.toEntityFromModel).toList(),
-        );
+  Future<Either<Failure, List<WordEntity>>> getKnownWords({String? userId}) async {
+    try {
+      final models = await localSource.getWords(userId: userId);
+      return Right(models.where((e) => e.isKnown).map(WordMapper.toEntityFromModel).toList());
+    } catch (e) {
+      return Left(DatabaseFailure(e.toString()));
+    }
   }
 
   @override
-  Future<Either<Failure, int>> adoptGuestWords(String userId) => 
-    _try(() => _localSource.adoptGuestWords(userId));
+  Stream<List<WordEntity>> watchWords({String? userId}) =>
+      localSource.watchWords(userId: userId).map((ms) => ms.map(WordMapper.toEntityFromModel).toList());
 
   @override
-  Future<Either<Failure, void>> clearLocalWords({String? userId}) => 
-    _try(() => _localSource.clearLocalWords(userId: userId));
+  Future<Either<Failure, int>> adoptGuestWords(String userId) => handleAdoptGuestWords(userId);
 
   @override
-  Future<Either<Failure, int>> getGuestWordsCount() => 
-    _try(() => _localSource.getGuestWordsCount());
+  Future<Either<Failure, void>> clearLocalWords({String? userId}) => handleClearLocalWords(userId: userId);
 
   @override
-  Future<Either<Failure, void>> deleteWord(String id, {String? userId}) => _try(() async {
-    await _writeQueue.enqueue(() async {
-      await _localSource.deleteWord(id);
-      if (userId != null) {
-        await _syncSource.enqueueSyncOperation(
-          id,
-          SyncOperation.delete.value,
-        );
-      }
-    });
-  });
+  Future<Either<Failure, int>> getGuestWordsCount() => handleGetGuestWordsCount();
 
   @override
-  Future<Either<Failure, void>> updateWord(WordEntity word) => _try(() async {
-    await _writeQueue.enqueue(() async {
-      final model = WordMapper.fromEntityToModel(word);
-      await _localSource.saveWord(model);
-      if (model.userId != null) {
-        await _syncSource.enqueueSyncOperation(
-          model.id,
-          SyncOperation.upsert.value,
-        );
-      }
-    });
-  });
+  Future<Either<Failure, void>> deleteWord(String id, {String? userId}) async {
+    try {
+      await writeQueue.enqueue(() async {
+        await localSource.deleteWord(id);
+        if (userId != null) await syncSource.enqueueSyncOperation(id, SyncOperation.delete.value);
+      });
+      return const Right(null);
+    } catch (e) {
+      return Left(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, void>> updateWord(WordEntity word) async {
+    try {
+      await writeQueue.enqueue(() async {
+        final model = WordMapper.fromEntityToModel(word);
+        await localSource.saveWord(model);
+        if (model.userId != null) await syncSource.enqueueSyncOperation(model.id, SyncOperation.upsert.value);
+      });
+      return const Right(null);
+    } catch (e) {
+      return Left(DatabaseFailure(e.toString()));
+    }
+  }
 }

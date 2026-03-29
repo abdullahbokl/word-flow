@@ -5,6 +5,7 @@ import 'package:word_flow/core/error/failures.dart';
 import 'package:word_flow/features/auth/domain/entities/user_entity.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/auth/data/datasources/auth_remote_source.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
@@ -25,7 +26,10 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(user);
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      try {
+        await Sentry.captureException(e, stackTrace: stackTrace);
+      } catch (_) {}
       return Left(AuthFailure(e.toString()));
     }
   }
@@ -43,7 +47,10 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(user);
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      try {
+        await Sentry.captureException(e, stackTrace: stackTrace);
+      } catch (_) {}
       return Left(AuthFailure(e.toString()));
     }
   }
@@ -55,7 +62,10 @@ class AuthRepositoryImpl implements AuthRepository {
       return const Right(null);
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
-    } catch (e) {
+    } catch (e, stackTrace) {
+      try {
+        await Sentry.captureException(e, stackTrace: stackTrace);
+      } catch (_) {}
       return Left(AuthFailure(e.toString()));
     }
   }
