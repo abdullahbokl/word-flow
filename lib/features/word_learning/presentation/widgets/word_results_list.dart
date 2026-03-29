@@ -79,9 +79,14 @@ class _WordResultsListState extends State<WordResultsList> {
     final index = _visibleWords.indexWhere((w) => w.wordText == text);
     if (index < 0) return;
     final removed = _visibleWords.removeAt(index);
-    _listKey.currentState?.removeItem(
+
+    final state = _listKey.currentState;
+    if (state == null) return;
+
+    state.removeItem(
       index,
-      (context, animation) => _buildItem(index, animation, wordOverride: removed),
+      (context, animation) =>
+          _buildItem(index, animation, wordOverride: removed),
       duration: animated ? _exitDuration : Duration.zero,
     );
   }
@@ -91,7 +96,11 @@ class _WordResultsListState extends State<WordResultsList> {
     final i = target.indexWhere((w) => w.wordText == word.wordText);
     final safeIndex = i < 0 ? _visibleWords.length : i;
     _visibleWords.insert(safeIndex, word);
-    _listKey.currentState?.insertItem(safeIndex, duration: _insertDuration);
+
+    final state = _listKey.currentState;
+    if (state == null) return;
+
+    state.insertItem(safeIndex, duration: _insertDuration);
   }
 
   bool _shouldHardReset(WordResultsList oldWidget) {

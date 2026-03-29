@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cubit.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_state.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/results_state_switcher.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/analysis_results_list.dart';
+import 'package:word_flow/features/word_learning/presentation/widgets/analysis_results_header.dart';
 
 class ResultsSection extends StatefulWidget {
 
@@ -17,67 +17,55 @@ class ResultsSection extends StatefulWidget {
 class _ResultsSectionState extends State<ResultsSection> {
   @override
   Widget build(BuildContext context) {
-    return SliverMainAxisGroup(
-      slivers: [
-        BlocBuilder<WorkspaceCubit, WorkspaceState>(
-          buildWhen: (previous, current) => previous.runtimeType != current.runtimeType,
-          builder: (context, state) {
-            final words = state.maybeMap(
-              results: (s) => s.words,
-              orElse: () => const <ProcessedWord>[],
-            );
-            final isProcessing = state.maybeMap(
-              processing: (_) => true,
-              orElse: () => false,
-            );
-            return ResultsStateSwitcher(
-              state: state,
-              words: words,
-              isProcessing: isProcessing,
-            );
-          },
-        ),
-        BlocSelector<WorkspaceCubit, WorkspaceState, ({List<ProcessedWord> unknown, List<ProcessedWord> known, bool isRefreshing, Set<String> pendingWordTexts, bool isProcessing})>(
-          selector: (state) {
-            return state.maybeWhen(
-              processing: () => (
-                unknown: const <ProcessedWord>[],
-                known: const <ProcessedWord>[],
-                isRefreshing: true,
-                pendingWordTexts: const <String>{},
-                isProcessing: true,
+    return BlocBuilder<WorkspaceCubit, WorkspaceState>(
+      builder: (context, state) {
+        return SliverMainAxisGroup(
+          slivers: [
+            state.maybeMap(
+              results: (resultsState) => SliverToBoxAdapter(
+                // Using uniquely identifiable keys for every state
+                child: AnalysisResultsHeader(
+                  key: ValueKey('analysis_header_${resultsState.revision}'),
+                  isProcessing: resultsState.pendingKnownWords.isNotEmpty,
+                ),
               ),
-                results: (all, _, pendingKnownWords, __, ___) {
-                final unknown = all.where((w) => !w.isKnown).toList(growable: false);
-                final known = all.where((w) => w.isKnown).toList(growable: false);
-                return (
-                  unknown: unknown,
-                  known: known,
-                  isRefreshing: false,
-                  pendingWordTexts: pendingKnownWords,
-                  isProcessing: false,
+              orElse: () => ResultsStateSwitcher(
+                key: const ValueKey('results_switcher'),
+                state: state,
+                words: const [],
+                isProcessing: state.maybeMap(
+                  processing: (_) => true,
+                  orElse: () => false,
+                ),
+              ),
+            ),
+            state.maybeMap(
+              results: (resultsState) {
+                final unknown = resultsState.words
+                    .where((w) => !w.isKnown)
+                    .toList(growable: false);
+                final known = resultsState.words
+                    .where((w) => w.isKnown)
+                    .toList(growable: false);
+
+                return AnalysisResultsList(
+                  // Key incorporates revision/pending count to ensure fresh building
+                  // when fundamental state changes, avoiding stale list state
+                  key: ValueKey(
+                    'results_list_${resultsState.revision}_${resultsState.pendingKnownWords.length}',
+                  ),
+                  unknownWords: unknown,
+                  knownWords: known,
+                  isRefreshing: resultsState.pendingKnownWords.isNotEmpty,
+                  isProcessing: resultsState.pendingKnownWords.isNotEmpty,
+                  pendingWordTexts: resultsState.pendingKnownWords,
                 );
               },
-              orElse: () => (
-                unknown: const <ProcessedWord>[],
-                known: const <ProcessedWord>[],
-                isRefreshing: false,
-                pendingWordTexts: const <String>{},
-                isProcessing: false,
-              ),
-            );
-          },
-          builder: (context, data) {
-            return AnalysisResultsList(
-              unknownWords: data.unknown,
-              knownWords: data.known,
-              isRefreshing: data.isRefreshing,
-              isProcessing: data.isProcessing,
-              pendingWordTexts: data.pendingWordTexts,
-            );
-          },
-        ),
-      ],
+              orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+            ),
+          ],
+        );
+      },
     );
   }
 }

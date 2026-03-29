@@ -5,7 +5,6 @@ import 'package:word_flow/features/word_learning/presentation/blocs/workspace_st
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/analysis_chip.dart';
 import 'package:word_flow/shared/widgets/word_card_shimmer.dart';
-import 'package:word_flow/features/word_learning/presentation/widgets/analysis_results_header.dart';
 
 class ResultsStateSwitcher extends StatelessWidget {
 
@@ -23,14 +22,8 @@ class ResultsStateSwitcher extends StatelessWidget {
   Widget build(BuildContext context) {
     return state.maybeMap(
       initial: (_) => const _InitialState(),
-      processing: (_) {
-        if (words.isNotEmpty) return const SliverToBoxAdapter(child: SizedBox.shrink());
-        return const _LoadingState();
-      },
+      processing: (_) => const _LoadingState(),
       error: (error) => _ErrorState(message: error.message),
-      results: (_) => SliverToBoxAdapter(
-        child: AnalysisResultsHeader(isProcessing: isProcessing),
-      ),
       orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
     );
   }

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class ScriptInputField extends StatelessWidget {
-
   const ScriptInputField({super.key, required this.controller});
   final TextEditingController controller;
 
@@ -22,6 +21,9 @@ class ScriptInputField extends StatelessWidget {
             'Large text blocks are supported and analyzed offline-first.',
         alignLabelWithHint: true,
       ),
+      onTapOutside: (event) {
+        FocusScope.of(context).unfocus();
+      },
     );
   }
 }
