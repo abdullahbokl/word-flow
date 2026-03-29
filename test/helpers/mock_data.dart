@@ -1,7 +1,7 @@
 import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
-import 'package:word_flow/features/vocabulary/data/models/word_model.dart';
+import 'package:word_flow/core/database/app_database.dart';
 
 // ============================================================================
 // WORD ENTITY TEST FIXTURES
@@ -98,14 +98,10 @@ final testWordList = [
 final testEmptyWordList = <WordEntity>[];
 
 // ============================================================================
-// WORD MODEL TEST FIXTURES
+// WORD ROW TEST FIXTURES
 // ============================================================================
 
-// ============================================================================
-// WORD MODEL TEST FIXTURES
-// ============================================================================
-
-final testWordModel = WordModel(
+final testWordRow = WordRow(
   id: 'test-id-1',
   userId: 'user-1',
   wordText: 'flutter',
@@ -114,7 +110,7 @@ final testWordModel = WordModel(
   lastUpdated: DateTime(2024, 1, 1),
 );
 
-final testKnownWordModel = WordModel(
+final testKnownWordRow = WordRow(
   id: 'test-id-2',
   userId: 'user-1',
   wordText: 'dart',
@@ -123,7 +119,7 @@ final testKnownWordModel = WordModel(
   lastUpdated: DateTime(2024, 1, 1),
 );
 
-final testGuestWordModel = WordModel(
+final testGuestWordRow = WordRow(
   id: 'test-id-3',
   userId: null,
   wordText: 'hello',
@@ -132,7 +128,7 @@ final testGuestWordModel = WordModel(
   lastUpdated: DateTime(2024, 1, 1),
 );
 
-final testWordModel2 = WordModel(
+final testWordRow2 = WordRow(
   id: 'test-id-4',
   userId: 'user-1',
   wordText: 'widget',
@@ -141,10 +137,10 @@ final testWordModel2 = WordModel(
   lastUpdated: DateTime(2024, 1, 1),
 );
 
-final testWordModelList = [
-  testWordModel,
-  testKnownWordModel,
-  testWordModel2,
+final testWordRowList = [
+  testWordRow,
+  testKnownWordRow,
+  testWordRow2,
 ];
 
-final testEmptyWordModelList = <WordModel>[];
+final testEmptyWordRowList = <WordRow>[];

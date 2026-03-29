@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:word_flow/core/database/app_database.dart';
 import 'package:word_flow/core/database/write_queue.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/sync/sync_operation.dart';
-import 'package:word_flow/features/vocabulary/data/models/word_model.dart';
 import 'package:word_flow/features/vocabulary/data/repositories/word_repository_impl.dart';
 
 import '../../../../helpers/fakes.dart';
@@ -25,7 +25,9 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(testWord);
-    registerFallbackValue(testWordModel);
+    registerFallbackValue(testWordRow);
+    registerFallbackValue(const WordsCompanion());
+    registerFallbackValue(<WordsCompanion>[]);
   });
 
   setUp(() {
@@ -45,7 +47,7 @@ void main() {
     test('should merge counts for existing words', () async {
 
       // Arrange: existing word with count 3
-      final existingWord = WordModel(
+      final existingWord = WordRow(
         id: 'test-id-1',
         userId: 'user-1',
         wordText: 'flutter',
@@ -68,10 +70,10 @@ void main() {
       // Assert
       expect(result.isRight(), true);
       final captured = verify(() => mockLocal.saveWords(captureAny())).captured;
-      final savedWords = captured.first as List<WordModel>;
-      expect(savedWords.length, 1);
-      expect(savedWords[0].wordText, 'flutter');
-      expect(savedWords[0].totalCount, 5); // 3 + 2 merged
+      final savedCompanions = captured.first as List<WordsCompanion>;
+      expect(savedCompanions.length, 1);
+      expect(savedCompanions[0].wordText.value, 'flutter');
+      expect(savedCompanions[0].totalCount.value, 5); // 3 + 2 merged
     });
 
     test('should create new entries for unknown words', () async {
@@ -127,8 +129,8 @@ void main() {
 
       expect(result.isRight(), true);
       final captured = verify(() => mockLocal.saveWords(captureAny())).captured;
-      final savedWords = captured.first as List<WordModel>;
-      expect(savedWords.length, 2);
+      final savedCompanions = captured.first as List<WordsCompanion>;
+      expect(savedCompanions.length, 2);
     });
 
     test('should return DatabaseFailure on error', () async {
@@ -149,7 +151,7 @@ void main() {
   group('toggleKnown', () {
     test('should toggle isKnown flag via local source', () async {
 
-      final unknownWord = WordModel(
+      final unknownWord = WordRow(
         id: 'test-id-1',
         userId: 'user-1',
         wordText: 'flutter',
@@ -181,16 +183,16 @@ void main() {
 
       expect(result.isRight(), true);
       final captured = verify(() => mockLocal.saveWord(captureAny())).captured;
-      final savedWord = captured.first as WordModel;
-      expect(savedWord.wordText, 'new-word');
-      expect(savedWord.isKnown, true);
-      expect(savedWord.totalCount, 1);
+      final savedWord = captured.first as WordsCompanion;
+      expect(savedWord.wordText.value, 'new-word');
+      expect(savedWord.isKnown.value, true);
+      expect(savedWord.totalCount.value, 1);
     });
 
     test('should enqueue sync for authenticated users', () async {
 
       when(() => mockLocal.getWordByText('flutter', userId: 'user-1'))
-          .thenAnswer((_) async => testWordModel);
+          .thenAnswer((_) async => testWordRow);
       when(() => mockLocal.saveWord(any())).thenAnswer((_) async {});
       when(() => mockSync.enqueueSyncOperation(any(), any()))
           .thenAnswer((_) async {});
@@ -203,7 +205,7 @@ void main() {
     test('should NOT enqueue sync for guest users', () async {
 
       when(() => mockLocal.getWordByText('hello', userId: null))
-          .thenAnswer((_) async => testGuestWordModel);
+          .thenAnswer((_) async => testGuestWordRow);
       when(() => mockLocal.saveWord(any())).thenAnswer((_) async {});
 
       await repo.toggleKnown('hello', userId: null);
@@ -357,7 +359,7 @@ void main() {
   group('getKnownWords', () {
     test('should return known words only', () async {
       when(() => mockLocal.getWords(userId: 'user-1'))
-          .thenAnswer((_) async => [testWordModel, testKnownWordModel]);
+          .thenAnswer((_) async => [testWordRow, testKnownWordRow]);
 
       final result = await repo.getKnownWords(userId: 'user-1');
 
@@ -370,7 +372,7 @@ void main() {
 
     test('should return empty list when no known words', () async {
       when(() => mockLocal.getWords(userId: 'user-1'))
-          .thenAnswer((_) async => [testWordModel]); // Only unknown
+          .thenAnswer((_) async => [testWordRow]); // Only unknown
 
       final result = await repo.getKnownWords(userId: 'user-1');
 
@@ -384,7 +386,7 @@ void main() {
 
   group('watchWords', () {
     test('should emit words stream from local source', () async {
-      final testStream = Stream.value(testWordModelList);
+      final testStream = Stream.value(testWordRowList);
       when(() => mockLocal.watchWords(userId: 'user-1')).thenAnswer((_) => testStream);
 
       final stream = repo.watchWords(userId: 'user-1');

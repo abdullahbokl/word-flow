@@ -1,0 +1,3 @@
+-- The word_sync_queue is a LOCAL ONLY structure (SQLite).
+-- It should not be created on the remote Supabase database.
+-- All synchronization state is managed by the client to support offline-first operations.

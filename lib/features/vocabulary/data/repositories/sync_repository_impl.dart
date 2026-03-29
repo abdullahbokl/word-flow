@@ -7,6 +7,7 @@ import 'package:word_flow/features/vocabulary/domain/repositories/sync_repositor
 import 'package:word_flow/features/vocabulary/data/datasources/word_local_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/word_remote_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source.dart';
+import 'package:word_flow/features/vocabulary/data/mappers/word_mapper.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 @LazySingleton(as: SyncRepository)
@@ -70,7 +71,7 @@ class SyncRepositoryImpl implements SyncRepository {
             case SyncOperation.upsert:
               final word = await _localSource.getWordById(wordId);
               if (word != null) {
-                await _remoteSource.upsertWord(word);
+                await _remoteSource.upsertWord(WordMapper.toRemoteDto(WordMapper.fromRow(word)));
                 _logger.syncEvent('Successfully upserted word: ${word.wordText}');
               } else {
                  _logger.warning('Failed to upsert, missing word from local source: $wordId');

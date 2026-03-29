@@ -38,8 +38,8 @@ class WordRepositoryImpl with WordRepositoryImplHelpers implements WordRepositor
   @override
   Future<Either<Failure, List<WordEntity>>> getKnownWords({String? userId}) async {
     try {
-      final models = await localSource.getWords(userId: userId);
-      return Right(models.where((e) => e.isKnown).map(WordMapper.toEntityFromModel).toList());
+      final rows = await localSource.getWords(userId: userId);
+      return Right(rows.where((e) => e.isKnown).map(WordMapper.fromRow).toList());
     } catch (e) {
       return Left(DatabaseFailure(e.toString()));
     }
@@ -47,7 +47,7 @@ class WordRepositoryImpl with WordRepositoryImplHelpers implements WordRepositor
 
   @override
   Stream<List<WordEntity>> watchWords({String? userId}) =>
-      localSource.watchWords(userId: userId).map((ms) => ms.map(WordMapper.toEntityFromModel).toList());
+      localSource.watchWords(userId: userId).map((ms) => ms.map(WordMapper.fromRow).toList());
 
   @override
   Future<Either<Failure, int>> adoptGuestWords(String userId) => handleAdoptGuestWords(userId);
@@ -75,9 +75,9 @@ class WordRepositoryImpl with WordRepositoryImplHelpers implements WordRepositor
   Future<Either<Failure, void>> updateWord(WordEntity word) async {
     try {
       await writeQueue.enqueue(() async {
-        final model = WordMapper.fromEntityToModel(word);
-        await localSource.saveWord(model);
-        if (model.userId != null) await syncSource.enqueueSyncOperation(model.id, SyncOperation.upsert.value);
+        final companion = WordMapper.toCompanion(word);
+        await localSource.saveWord(companion);
+        if (word.userId != null) await syncSource.enqueueSyncOperation(word.id, SyncOperation.upsert.value);
       });
       return const Right(null);
     } catch (e) {

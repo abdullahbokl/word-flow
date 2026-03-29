@@ -4,6 +4,7 @@ import 'package:word_flow/core/database/app_database.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/sync/sync_operation.dart';
 import 'package:word_flow/features/vocabulary/data/repositories/sync_repository_impl.dart';
+import 'package:word_flow/features/vocabulary/data/models/word_remote_dto.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 
 import '../../../../helpers/fakes.dart';
@@ -20,7 +21,12 @@ void main() {
 
   setUpAll(() {
     // Register fallback values for mocktail
-    registerFallbackValue(testWordModel);
+    registerFallbackValue(testWordRow);
+    registerFallbackValue(WordRemoteDto.fromJson(const {
+      'id': 'fallback',
+      'word_text': 'fallback',
+      'last_updated': '2024-01-01T00:00:00Z',
+    }));
   });
 
   setUp(() {
@@ -111,9 +117,9 @@ void main() {
       ];
       when(() => mockSync.getSyncQueue(20)).thenAnswer((_) async => queueItems);
       when(() => mockLocal.getWordById('word-1'))
-          .thenAnswer((_) async => testWordModel);
+          .thenAnswer((_) async => testWordRow);
       when(() => mockLocal.getWordById('word-2'))
-          .thenAnswer((_) async => testWordModel2);
+          .thenAnswer((_) async => testWordRow2);
       when(() => mockRemote.upsertWord(any())).thenAnswer((_) async {});
       when(() => mockSync.removeFromSyncQueue(any())).thenAnswer((_) async {});
 
@@ -137,7 +143,7 @@ void main() {
       when(() => mockSync.getSyncQueue(20))
           .thenAnswer((_) async => [queueItem]);
       when(() => mockLocal.getWordById('test-id-1'))
-          .thenAnswer((_) async => testWordModel);
+          .thenAnswer((_) async => testWordRow);
       when(() => mockRemote.upsertWord(any())).thenAnswer((_) async {});
       when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
@@ -182,7 +188,7 @@ void main() {
       when(() => mockSync.getSyncQueue(20))
           .thenAnswer((_) async => [queueItem]);
       when(() => mockLocal.getWordById('test-id-1'))
-          .thenAnswer((_) async => testWordModel);
+          .thenAnswer((_) async => testWordRow);
       when(() => mockRemote.upsertWord(any()))
           .thenThrow(Exception('Network error'));
       when(() => mockSync.updateSyncQueueRetry(any(), any()))
@@ -267,7 +273,7 @@ void main() {
       when(() => mockSync.getSyncQueue(20))
           .thenAnswer((_) async => [queueItem]);
       when(() => mockLocal.getWordById('test-id-1'))
-          .thenAnswer((_) async => testWordModel);
+          .thenAnswer((_) async => testWordRow);
       when(() => mockRemote.upsertWord(any())).thenAnswer((_) async {});
       when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
@@ -289,7 +295,7 @@ void main() {
       when(() => mockSync.getSyncQueue(20))
           .thenAnswer((_) async => [queueItem]);
       when(() => mockLocal.getWordById('test-id-1'))
-          .thenAnswer((_) async => testWordModel);
+          .thenAnswer((_) async => testWordRow);
       when(() => mockRemote.upsertWord(any()))
           .thenThrow(Exception('Network error'));
       when(() => mockSync.updateSyncQueueRetry(any(), any()))

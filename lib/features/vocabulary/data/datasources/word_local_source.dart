@@ -1,18 +1,17 @@
 import 'package:injectable/injectable.dart';
-import 'package:word_flow/features/vocabulary/data/models/word_model.dart';
 import 'package:word_flow/core/database/app_database.dart';
-import 'package:drift/drift.dart' show Value;
+
 
 abstract class WordLocalSource {
-  Future<void> saveWord(WordModel word);
-  Future<void> saveWords(List<WordModel> words);
-  Future<Map<String, WordModel>> getWordTextMap({String? userId});
-  Future<List<WordModel>> getWords({String? userId});
+  Future<void> saveWord(WordsCompanion word);
+  Future<void> saveWords(List<WordsCompanion> words);
+  Future<Map<String, WordRow>> getWordTextMap({String? userId});
+  Future<List<WordRow>> getWords({String? userId});
   Future<List<String>> getKnownWordTexts({String? userId});
-  Future<WordModel?> getWordById(String id);
-  Future<WordModel?> getWordByText(String text, {String? userId});
+  Future<WordRow?> getWordById(String id);
+  Future<WordRow?> getWordByText(String text, {String? userId});
   Future<void> deleteWord(String id);
-  Stream<List<WordModel>> watchWords({String? userId});
+  Stream<List<WordRow>> watchWords({String? userId});
   Future<int> adoptGuestWords(String userId);
   Future<void> clearLocalWords({String? userId});
   Future<int> getGuestWordsCount();
@@ -25,17 +24,17 @@ class WordLocalSourceImpl implements WordLocalSource {
   final WordFlowDatabase _db;
 
   @override
-  Future<void> saveWord(WordModel word) async {
-    await _db.upsertWord(_toCompanion(word));
+  Future<void> saveWord(WordsCompanion word) async {
+    await _db.upsertWord(word);
   }
 
   @override
-  Future<void> saveWords(List<WordModel> words) async {
-    await _db.upsertWords(words.map(_toCompanion).toList(growable: false));
+  Future<void> saveWords(List<WordsCompanion> words) async {
+    await _db.upsertWords(words);
   }
 
   @override
-  Future<Map<String, WordModel>> getWordTextMap({String? userId}) async {
+  Future<Map<String, WordRow>> getWordTextMap({String? userId}) async {
     final query = _db.select(_db.words);
     if (userId != null) {
       query.where((t) => t.userId.equals(userId));
@@ -43,7 +42,7 @@ class WordLocalSourceImpl implements WordLocalSource {
       query.where((t) => t.userId.isNull());
     }
     final rows = await query.get();
-    return {for (final row in rows) row.wordText: _fromRow(row)};
+    return {for (final row in rows) row.wordText: row};
   }
 
   @override
@@ -52,9 +51,8 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Future<List<WordModel>> getWords({String? userId}) async {
-    final rows = await _db.watchWords(userId: userId).first;
-    return rows.map(_fromRow).toList(growable: false);
+  Future<List<WordRow>> getWords({String? userId}) async {
+    return _db.watchWords(userId: userId).first;
   }
 
   @override
@@ -63,15 +61,13 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Future<WordModel?> getWordById(String id) async {
-    final row = await _db.getWordById(id);
-    return row == null ? null : _fromRow(row);
+  Future<WordRow?> getWordById(String id) async {
+    return _db.getWordById(id);
   }
 
   @override
-  Future<WordModel?> getWordByText(String text, {String? userId}) async {
-    final row = await _db.getWordByText(text, userId: userId);
-    return row == null ? null : _fromRow(row);
+  Future<WordRow?> getWordByText(String text, {String? userId}) async {
+    return _db.getWordByText(text, userId: userId);
   }
 
   @override
@@ -80,10 +76,8 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Stream<List<WordModel>> watchWords({String? userId}) async* {
-    yield* _db.watchWords(userId: userId).map(
-          (rows) => rows.map(_fromRow).toList(growable: false),
-        );
+  Stream<List<WordRow>> watchWords({String? userId}) {
+    return _db.watchWords(userId: userId);
   }
 
   @override
@@ -94,27 +88,5 @@ class WordLocalSourceImpl implements WordLocalSource {
   @override
   Future<void> clearLocalWords({String? userId}) async {
     await _db.clearLocalWords(userId: userId);
-  }
-
-  WordsCompanion _toCompanion(WordModel word) {
-    return WordsCompanion.insert(
-      id: word.id,
-      userId: Value(word.userId),
-      wordText: word.wordText,
-      totalCount: Value(word.totalCount),
-      isKnown: Value(word.isKnown),
-      lastUpdated: word.lastUpdated.toUtc(),
-    );
-  }
-
-  WordModel _fromRow(WordRow row) {
-    return WordModel(
-      id: row.id,
-      userId: row.userId,
-      wordText: row.wordText,
-      totalCount: row.totalCount,
-      isKnown: row.isKnown,
-      lastUpdated: row.lastUpdated.toUtc(),
-    );
   }
 }
