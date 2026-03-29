@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 import 'package:word_flow/features/word_learning/domain/usecases/process_script.dart';
@@ -11,22 +12,51 @@ import 'package:injectable/injectable.dart';
 
 @injectable
 class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
-  WorkspaceCubit(this._processScript, this._saveProcessedWords, this.toggleKnownWordUseCase) 
-    : super(const WorkspaceState.initial());
+  WorkspaceCubit(
+    this._processScript,
+    this._saveProcessedWords,
+    this.toggleKnownWordUseCase,
+    this.logger,
+  ) : super(const WorkspaceState.initial());
+
   final ProcessScript _processScript;
   final SaveProcessedWords _saveProcessedWords;
-  @override final ToggleKnownWord toggleKnownWordUseCase;
+  final AppLogger logger;
 
-  ScriptSummary get summary => state.maybeMap(results: (s) => s.summary, orElse: () => const ScriptSummary.empty());
-  List<ProcessedWord> get words => state.maybeMap(results: (s) => s.words, orElse: () => const <ProcessedWord>[]);
-  Set<String> get pendingKnownWords => state.maybeMap(results: (s) => s.pendingKnownWords, orElse: () => const <String>{});
-  bool get isProcessing => state.maybeMap(processing: (_) => true, orElse: () => false);
+  @override
+  final ToggleKnownWord toggleKnownWordUseCase;
+
+  ScriptSummary get summary => state.maybeMap(
+        results: (s) => s.summary,
+        orElse: () => const ScriptSummary.empty(),
+      );
+
+  List<ProcessedWord> get words => state.maybeMap(
+        results: (s) => s.words,
+        orElse: () => const <ProcessedWord>[],
+      );
+
+  Set<String> get pendingKnownWords => state.maybeMap(
+        results: (s) => s.pendingKnownWords,
+        orElse: () => const <String>{},
+      );
+
+  bool get isProcessing => state.maybeMap(
+        processing: (_) => true,
+        orElse: () => false,
+      );
 
   Future<void> analyze(String text, {String? userId}) async {
     if (text.trim().isEmpty) return emit(const WorkspaceState.initial());
-    final nextRevision = state.maybeMap(results: (s) => s.revision + 1, orElse: () => 1);
+    
+    final nextRevision = state.maybeMap(
+      results: (s) => s.revision + 1,
+      orElse: () => 1,
+    );
+    
     emit(const WorkspaceState.processing());
     final result = await _processScript(text, userId: userId);
+    
     result.fold(
       (f) => emit(WorkspaceState.error(f.message)),
       (a) {
@@ -36,7 +66,16 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
           pendingKnownWords: const <String>{},
           revision: nextRevision,
         ));
-        unawaited(_saveProcessedWords(a.words, userId: userId));
+        
+        _saveProcessedWords(a.words, userId: userId).then(
+          (_) => logger.debug('Words saved successfully'),
+          onError: (e, st) {
+            logger.error('Failed to save processed words', e, st);
+            if (!isClosed) {
+              emit(const WorkspaceState.error('Failed to save words: please try again'));
+            }
+          },
+        );
       },
     );
   }
@@ -45,23 +84,32 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
     state.maybeMap(
       results: (s) {
         if (s.pendingKnownWords.contains(wordText)) return;
+        
         final nextPending = <String>{...s.pendingKnownWords, wordText};
         emit(s.copyWith(
           pendingKnownWords: nextPending,
           summary: rebuildWorkspaceSummary(s.summary, s.words, nextPending),
         ));
-        unawaited(() async {
-          await Future<void>.delayed(Duration.zero);
-          await persistToggle(wordText, revision: s.revision, fallbackSummary: s.summary, userId: userId);
-        }());
+        
+        Future.value().then(
+          (_) => persistToggle(
+            wordText,
+            revision: s.revision,
+            fallbackSummary: s.summary,
+            userId: userId,
+          ),
+        );
       },
       orElse: () {},
     );
   }
 
   void clearError() {
-    state.maybeMap(results: (s) {
-      if (s.lastError != null) emit(s.copyWith(lastError: null));
-    }, orElse: () {});
+    state.maybeMap(
+      results: (s) {
+        if (s.lastError != null) emit(s.copyWith(lastError: null));
+      },
+      orElse: () {},
+    );
   }
 }

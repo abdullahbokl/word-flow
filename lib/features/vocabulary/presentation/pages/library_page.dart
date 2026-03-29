@@ -182,11 +182,13 @@ class _LibraryLoadedContent extends StatelessWidget {
                 pendingWordIds: const <String>{},
               ),
             ),
-            builder: (context, data) => LibraryResultsList(
-              words: data.words,
-              filter: data.filter,
-              searchQuery: data.searchQuery,
-              pendingWordIds: data.pendingWordIds,
+            builder: (context, data) => RepaintBoundary(
+              child: LibraryResultsList(
+                words: data.words,
+                filter: data.filter,
+                searchQuery: data.searchQuery,
+                pendingWordIds: data.pendingWordIds,
+              ),
             ),
           ),
         ),

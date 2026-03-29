@@ -21,23 +21,35 @@ mixin WordRepositoryImplHelpers {
     try {
       await writeQueue.enqueue(() async {
         final now = DateTime.now().toUtc();
-        final existingMaps = <String?, Map<String, WordRow>>{};
-        for (final uId in words.map((w) => w.userId).toSet()) {
-          existingMaps[uId] = await localSource.getWordTextMap(userId: uId);
+        
+        // Group words by userId to perform targeted fetches per user
+        final userIds = words.map((w) => w.userId).toSet();
+        final existingMap = <String, WordRow>{};
+
+        for (final uId in userIds) {
+          final wordTexts = words
+              .where((w) => w.userId == uId)
+              .map((w) => w.wordText)
+              .toList();
+          
+          final rows = await localSource.getWordsByTexts(wordTexts, userId: uId);
+          for (final row in rows) {
+            // Key by (userId, wordText) to handle multi-user scenarios if words list mixed
+            existingMap['${uId}_${row.wordText}'] = row;
+          }
         }
 
         final List<WordsCompanion> companions = [];
         final List<String> syncIds = [];
 
         for (final word in words) {
-          final existing = existingMaps[word.userId]?[word.wordText];
+          final key = '${word.userId}_${word.wordText}';
+          final existing = existingMap[key];
+          
           if (existing == null) {
             companions.add(WordMapper.toCompanion(word.copyWith(lastUpdated: now)));
             if (word.userId != null) syncIds.add(word.id);
           } else {
-            // Merge strategy:
-            // 1. Higher total count wins (never decrease count).
-            // 2. Word is known if it was EVER marked known (logical OR).
             final existingEntity = WordMapper.fromRow(existing);
             final merged = existingEntity.copyWith(
               totalCount: existingEntity.totalCount + word.totalCount,
