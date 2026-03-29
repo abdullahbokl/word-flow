@@ -32,30 +32,33 @@ class WordCardBase extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = Theme.of(context).colorScheme;
     final statusColor = isKnown ? scheme.primary : scheme.secondary;
-
-    return Card(
-      clipBehavior: Clip.antiAlias,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 180),
-        opacity: isPending ? 0.35 : 1,
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: Row(
-            children: [
-              StatusIndicator(isKnown: isKnown, color: statusColor),
-              const SizedBox(width: 14),
-              Expanded(
-                child: WordInfo(text: text, count: count, isKnown: isKnown),
-              ),
-              ToggleButton(
-                isKnown: isKnown,
-                isPending: isPending,
-                onToggle: () => _onToggle(context),
-                statusColor: statusColor,
-              ),
-              ..._buildActions(context),
-              if (isPending && mode == WordCardMode.workspace && !enabled) AppLoader(size: 16, color: statusColor),
-            ],
+    return Semantics(
+      label: '$text, count $count, ${isKnown ? "known" : "unknown"}',
+      button: true,
+      child: Card(
+        clipBehavior: Clip.antiAlias,
+        child: AnimatedOpacity(
+          duration: const Duration(milliseconds: 180),
+          opacity: isPending ? 0.35 : 1,
+          child: Padding(
+            padding: const EdgeInsets.all(12),
+            child: Row(
+              children: [
+                ExcludeSemantics(child: StatusIndicator(isKnown: isKnown, color: statusColor)),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: WordInfo(text: text, count: count, isKnown: isKnown),
+                ),
+                ToggleButton(
+                  isKnown: isKnown,
+                  isPending: isPending,
+                  onToggle: () => _onToggle(context),
+                  statusColor: statusColor,
+                ),
+                ..._buildActions(context),
+                if (isPending && mode == WordCardMode.workspace && !enabled) AppLoader(size: 16, color: statusColor),
+              ],
+            ),
           ),
         ),
       ),
@@ -104,19 +107,27 @@ class WordCardBase extends StatelessWidget {
     if (mode != WordCardMode.library) return const [];
 
     return [
-      IconButton(
-        icon: const Icon(Icons.edit_rounded, size: 20),
-        onPressed: isPending || onEdit == null ? null : onEdit,
-        tooltip: 'Edit word',
-      ),
-      IconButton(
-        icon: Icon(
-          Icons.delete_outline_rounded,
-          size: 20,
-          color: Theme.of(context).colorScheme.error,
+      SizedBox(
+        width: 48,
+        height: 48,
+        child: IconButton(
+          icon: const Icon(Icons.edit_rounded, size: 20),
+          onPressed: isPending || onEdit == null ? null : onEdit,
+          tooltip: 'Edit word',
         ),
-        onPressed: isPending || onDelete == null ? null : onDelete,
-        tooltip: 'Delete word',
+      ),
+      SizedBox(
+        width: 48,
+        height: 48,
+        child: IconButton(
+          icon: Icon(
+            Icons.delete_outline_rounded,
+            size: 20,
+            color: Theme.of(context).colorScheme.error,
+          ),
+          onPressed: isPending || onDelete == null ? null : onDelete,
+          tooltip: 'Delete word',
+        ),
       ),
     ];
   }

@@ -6,6 +6,7 @@ import 'package:word_flow/features/words/domain/entities/word.dart';
 import 'package:word_flow/features/words/presentation/cubit/library_cubit.dart';
 import 'package:word_flow/features/words/presentation/cubit/library_state.dart';
 import 'package:word_flow/shared/widgets/word_card_base.dart';
+import 'package:word_flow/shared/widgets/empty_state.dart';
 
 class LibraryResultsList extends StatelessWidget {
 
@@ -23,6 +24,18 @@ class LibraryResultsList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (words.isEmpty) {
+      return EmptyState(
+        icon: Icons.library_books_outlined,
+        title: 'No words yet',
+        subtitle: 'Paste a script to get started',
+        action: FilledButton(
+          onPressed: () => context.go('/workspace'),
+          child: const Text('Go to Workspace'),
+        ),
+      );
+    }
+
     final filtered = words.where((w) {
       final matchesFilter = switch (filter) {
         WordsFilter.all => true,
@@ -33,7 +46,20 @@ class LibraryResultsList extends StatelessWidget {
       return matchesFilter && matchesSearch;
     }).toList(growable: false);
 
-    if (filtered.isEmpty) return const _EmptySearchResultsView();
+    if (filtered.isEmpty) {
+      if (searchQuery.isNotEmpty) {
+        return const EmptyState(
+          icon: Icons.search_off,
+          title: 'No matches',
+          subtitle: 'Try a different search term',
+        );
+      }
+      return const EmptyState(
+        icon: Icons.filter_list_off,
+        title: 'No words match filter',
+        subtitle: 'Try changing the filter',
+      );
+    }
 
     return ListView.builder(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -81,24 +107,6 @@ class LibraryResultsList extends StatelessWidget {
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-class _EmptySearchResultsView extends StatelessWidget {
-  const _EmptySearchResultsView();
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.search_off_rounded, size: 60, color: scheme.secondary.withValues(alpha: 0.5)),
-          const SizedBox(height: 16),
-          Text('No words found.', style: Theme.of(context).textTheme.titleMedium),
         ],
       ),
     );

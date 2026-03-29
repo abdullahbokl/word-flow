@@ -73,9 +73,9 @@ void main() {
 
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
-      final failure = const DatabaseFailure('Failed to update word');
+      const failure = DatabaseFailure('Failed to update word');
       when(() => mockRepository.updateWord(any()))
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(testWord);

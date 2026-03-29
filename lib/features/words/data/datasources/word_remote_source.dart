@@ -1,5 +1,5 @@
 import 'package:injectable/injectable.dart';
-import 'package:word_flow/core/network/dio_client.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:word_flow/features/words/data/models/word_model.dart';
 import 'package:word_flow/core/error/exceptions.dart';
 
@@ -12,17 +12,15 @@ abstract class WordRemoteSource {
 @LazySingleton(as: WordRemoteSource)
 class WordRemoteSourceImpl implements WordRemoteSource {
 
-  WordRemoteSourceImpl(this._dioClient);
-  final DioClient _dioClient;
+  WordRemoteSourceImpl(this._client);
+  final SupabaseClient _client;
 
   @override
   Future<void> upsertWord(WordModel word) async {
     try {
-      await _dioClient.instance.post(
-        'words',
-        data: word.toRemoteMap(),
-        queryParameters: {'on_conflict': 'id'},
-      );
+      await _client.from('words').upsert(word.toRemoteMap());
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -31,10 +29,9 @@ class WordRemoteSourceImpl implements WordRemoteSource {
   @override
   Future<void> deleteWord(String id) async {
     try {
-      await _dioClient.instance.delete(
-        'words',
-        queryParameters: {'id': 'eq.$id'},
-      );
+      await _client.from('words').delete().eq('id', id);
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
     }
@@ -43,13 +40,15 @@ class WordRemoteSourceImpl implements WordRemoteSource {
   @override
   Future<List<WordModel>> fetchUserWords(String userId) async {
     try {
-      final response = await _dioClient.instance.get(
-        'words',
-        queryParameters: {'user_id': 'eq.$userId'},
-      );
-      return (response.data as List)
-          .map((m) => WordModel.fromMap(m))
+      final response = await _client
+          .from('words')
+          .select()
+          .eq('user_id', userId);
+      return (response as List<dynamic>)
+          .map((m) => WordModel.fromMap(m as Map<String, dynamic>))
           .toList();
+    } on PostgrestException catch (e) {
+      throw ServerException(e.message);
     } catch (e) {
       throw ServerException(e.toString());
     }

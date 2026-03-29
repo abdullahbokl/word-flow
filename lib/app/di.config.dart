@@ -15,7 +15,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' as _i454;
 
 import '../core/database/app_database.dart' as _i935;
 import '../core/database/write_queue.dart' as _i470;
-import '../core/network/dio_client.dart' as _i393;
+import '../core/logging/app_logger.dart' as _i412;
 import '../core/sync/connectivity_monitor.dart' as _i862;
 import '../core/sync/sync_service.dart' as _i957;
 import '../features/auth/data/datasources/auth_remote_source.dart' as _i303;
@@ -66,6 +66,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i862.ConnectivityMonitor>(
       () => _i862.ConnectivityMonitor(),
     );
+    gh.lazySingleton<_i412.AppLogger>(() => _i412.AppLogger());
     gh.lazySingleton<_i935.WordFlowDatabase>(() => _i935.WordFlowDatabase());
     gh.lazySingleton<_i470.LocalWriteQueue>(() => _i470.LocalWriteQueue());
     gh.lazySingleton<_i311.TextAnalysisService>(
@@ -74,49 +75,22 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1011.SyncLocalSource>(
       () => _i1011.SyncLocalSourceImpl(gh<_i935.WordFlowDatabase>()),
     );
-    gh.lazySingleton<_i393.DioClient>(
-      () => _i393.DioClient(gh<_i454.SupabaseClient>()),
-    );
     gh.lazySingleton<_i621.WordLocalSource>(
       () => _i621.WordLocalSourceImpl(gh<_i935.WordFlowDatabase>()),
-    );
-    gh.lazySingleton<_i303.AuthRemoteSource>(
-      () => _i303.AuthRemoteSourceImpl(gh<_i454.SupabaseClient>()),
-    );
-    gh.lazySingleton<_i224.WordRemoteSource>(
-      () => _i224.WordRemoteSourceImpl(gh<_i393.DioClient>()),
-    );
-    gh.lazySingleton<_i899.SyncRepository>(
-      () => _i107.SyncRepositoryImpl(
-        gh<_i621.WordLocalSource>(),
-        gh<_i1011.SyncLocalSource>(),
-        gh<_i224.WordRemoteSource>(),
-      ),
     );
     gh.lazySingleton<_i994.WordRepository>(
       () => _i296.WordRepositoryImpl(
         gh<_i621.WordLocalSource>(),
         gh<_i1011.SyncLocalSource>(),
         gh<_i470.LocalWriteQueue>(),
+        gh<_i412.AppLogger>(),
       ),
     );
-    gh.lazySingleton<_i957.SyncService>(
-      () => _i957.SyncService(
-        gh<_i899.SyncRepository>(),
-        gh<_i862.ConnectivityMonitor>(),
-      ),
+    gh.lazySingleton<_i224.WordRemoteSource>(
+      () => _i224.WordRemoteSourceImpl(gh<_i454.SupabaseClient>()),
     );
-    gh.lazySingleton<_i869.AuthRepository>(
-      () => _i570.AuthRepositoryImpl(gh<_i303.AuthRemoteSource>()),
-    );
-    gh.lazySingleton<_i33.SignInWithEmail>(
-      () => _i33.SignInWithEmail(gh<_i869.AuthRepository>()),
-    );
-    gh.lazySingleton<_i472.SignOut>(
-      () => _i472.SignOut(gh<_i869.AuthRepository>()),
-    );
-    gh.lazySingleton<_i588.SignUpWithEmail>(
-      () => _i588.SignUpWithEmail(gh<_i869.AuthRepository>()),
+    gh.lazySingleton<_i303.AuthRemoteSource>(
+      () => _i303.AuthRemoteSourceImpl(gh<_i454.SupabaseClient>()),
     );
     gh.lazySingleton<_i69.ProcessScript>(
       () => _i69.ProcessScript(
@@ -154,6 +128,40 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i646.ToggleKnownWord>(
       () => _i646.ToggleKnownWord(gh<_i994.WordRepository>()),
     );
+    gh.lazySingleton<_i899.SyncRepository>(
+      () => _i107.SyncRepositoryImpl(
+        gh<_i621.WordLocalSource>(),
+        gh<_i1011.SyncLocalSource>(),
+        gh<_i224.WordRemoteSource>(),
+        gh<_i412.AppLogger>(),
+      ),
+    );
+    gh.factory<_i996.WorkspaceCubit>(
+      () => _i996.WorkspaceCubit(
+        gh<_i69.ProcessScript>(),
+        gh<_i455.SaveProcessedWords>(),
+        gh<_i646.ToggleKnownWord>(),
+      ),
+    );
+    gh.lazySingleton<_i869.AuthRepository>(
+      () => _i570.AuthRepositoryImpl(gh<_i303.AuthRemoteSource>()),
+    );
+    gh.lazySingleton<_i33.SignInWithEmail>(
+      () => _i33.SignInWithEmail(gh<_i869.AuthRepository>()),
+    );
+    gh.lazySingleton<_i472.SignOut>(
+      () => _i472.SignOut(gh<_i869.AuthRepository>()),
+    );
+    gh.lazySingleton<_i588.SignUpWithEmail>(
+      () => _i588.SignUpWithEmail(gh<_i869.AuthRepository>()),
+    );
+    gh.factory<_i7.LibraryCubit>(
+      () => _i7.LibraryCubit(
+        gh<_i226.WatchWords>(),
+        gh<_i906.UpdateWord>(),
+        gh<_i774.DeleteWord>(),
+      ),
+    );
     gh.lazySingleton<_i613.WatchPendingCount>(
       () => _i613.WatchPendingCount(gh<_i899.SyncRepository>()),
     );
@@ -179,18 +187,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i862.ConnectivityMonitor>(),
       ),
     );
-    gh.factory<_i996.WorkspaceCubit>(
-      () => _i996.WorkspaceCubit(
-        gh<_i69.ProcessScript>(),
-        gh<_i455.SaveProcessedWords>(),
-        gh<_i646.ToggleKnownWord>(),
-      ),
-    );
-    gh.factory<_i7.LibraryCubit>(
-      () => _i7.LibraryCubit(
-        gh<_i226.WatchWords>(),
-        gh<_i906.UpdateWord>(),
-        gh<_i774.DeleteWord>(),
+    gh.lazySingleton<_i957.SyncService>(
+      () => _i957.SyncService(
+        gh<_i899.SyncRepository>(),
+        gh<_i862.ConnectivityMonitor>(),
       ),
     );
     return this;

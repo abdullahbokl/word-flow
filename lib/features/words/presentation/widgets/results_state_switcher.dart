@@ -4,7 +4,7 @@ import 'package:word_flow/core/widgets/section_card.dart';
 import 'package:word_flow/features/words/presentation/cubit/workspace_state.dart';
 import 'package:word_flow/features/words/domain/entities/processed_word.dart';
 import 'package:word_flow/features/words/presentation/widgets/analysis_chip.dart';
-import 'package:word_flow/features/words/presentation/widgets/processing_view.dart';
+import 'package:word_flow/shared/widgets/word_card_shimmer.dart';
 import 'package:word_flow/features/words/presentation/widgets/analysis_results_header.dart';
 
 class ResultsStateSwitcher extends StatelessWidget {
@@ -63,7 +63,10 @@ class _LoadingState extends StatelessWidget {
             icon: Icons.hourglass_top_rounded,
             label: 'Analyzing',
           ),
-          child: ProcessingView(),
+          child: SizedBox(
+            height: 220,
+            child: ShimmerList(count: 4),
+          ),
         ),
       );
 }

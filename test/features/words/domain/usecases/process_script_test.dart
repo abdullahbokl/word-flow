@@ -82,7 +82,7 @@ void main() {
     test('should use empty set when repository returns failure', () async {
       // Arrange
       when(() => mockRepository.getKnownWordTexts(userId: any(named: 'userId')))
-          .thenAnswer((_) async => Left(DatabaseFailure('Error')));
+          .thenAnswer((_) async => const Left(DatabaseFailure('Error')));
       when(() => mockService.process(
             rawText: any(named: 'rawText'),
             knownWords: any(named: 'knownWords'),

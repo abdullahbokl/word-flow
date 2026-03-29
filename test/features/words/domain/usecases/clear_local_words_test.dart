@@ -56,9 +56,9 @@ void main() {
 
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
-      final failure = const DatabaseFailure('Failed to clear words');
+      const failure = DatabaseFailure('Failed to clear words');
       when(() => mockRepository.clearLocalWords(userId: any(named: 'userId')))
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(userId: testUserId);

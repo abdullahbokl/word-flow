@@ -8,9 +8,9 @@ Use `flutter_bloc` with Cubits for v1: `AuthCubit` for Supabase email/password s
 
 Keep SQLite as the write-first source of truth and Supabase as the remote mirror. Every mutation writes locally, enqueues sync work, and only then attempts remote sync.
 
-Use `supabase_flutter` for auth/session management and `Dio` for all REST sync calls, with interceptors for logging, Supabase headers, JWT injection, and error mapping.
+Use `supabase_flutter` for auth and all remote sync operations (PostgREST). No external HTTP client (like Dio) is used to minimize dependency surface.
 
-Enforce the `<=120` line rule for handwritten files by splitting screens, cubits, widgets, use cases, and data sources into very small units. Generated files are exempt.
+Use `fpdart` for functional patterns and sealed error handling. 
 
 ---
 
@@ -39,15 +39,9 @@ lib/
 │   ├── error/
 │   │   ├── failures.dart              # Failure sealed class hierarchy
 │   │   └── exceptions.dart            # Raw exception wrappers
-│   ├── network/
-│   │   ├── dio_client.dart            # Dio singleton factory
-│   │   ├── header_interceptor.dart    # Supabase API key injection
-│   │   ├── auth_interceptor.dart      # Bearer token (JWT) injection
-│   │   ├── logging_interceptor.dart   # Request/response logging
-│   │   └── error_interceptor.dart     # DioException → Failure mapping
 │   ├── database/
-│   │   ├── database_helper.dart       # SQLite open + migration runner
-│   │   └── migrations.dart            # Versioned schema migrations
+│   │   ├── app_database.dart          # Drift database + schema
+│   │   └── tables.dart                # Table definitions
 │   ├── sync/
 │   │   ├── sync_service.dart          # Coordinator: triggers sync
 │   │   ├── connectivity_monitor.dart  # Stream<ConnectivityStatus>
@@ -152,17 +146,14 @@ lib/
 | Package | Version | Purpose |
 |---------|---------|---------|
 | `flutter_bloc` | ^9.x | Cubit/BLoC state management |
-| `freezed_annotation` | ^3.x | Union types for states & events |
-| `equatable` | ^2.x | Value equality for states |
-| `dartz` | ^0.10.x | `Either<Failure, T>` for repos/usecases |
-| `dio` | ^5.x | HTTP client + interceptor pipeline |
+| `freezed_annotation` | ^2.x | Union types for states & entities |
+| `fpdart` | ^1.x | Functional programming primitives |
 | `get_it` | ^8.x | Service locator DI |
 | `injectable` | ^2.x | Code-gen DI wiring |
-| `sqflite` | ^2.x | Local SQLite database |
-| `path` | ^1.x | Database path resolution |
-| `supabase_flutter` | ^2.x | Auth + session management |
+| `drift` | ^2.x | Local SQLite database (ORM) |
+| `supabase_flutter` | ^2.x | Auth + Remote Storage (PostgREST) |
 | `connectivity_plus` | ^6.x | Network reachability stream |
-| `uuid` | ^4.x | Client-side UUID generation |
+| `sentry_flutter` | ^9.x | Error reporting & monitoring |
 
 ### Dev Dependencies
 
@@ -178,7 +169,9 @@ lib/
 
 | Original | Reason | Replacement |
 |----------|--------|-------------|
-| — | `dartz` is in maintenance-only mode | Keeping for v1 since API is stable; migrate to `fpdart` or a custom sealed `Result<T>` in v2 |
+| `dartz` | Maintenance-only mode | Replaced with `fpdart` |
+| `dio` | Overkill for Supabase | Replaced with `supabase_flutter` client |
+| `sqflite` | Low-level boilerplate | Replaced with `drift` (type-safe SQL) |
 
 > [!NOTE]
 > Environment secrets (`SUPABASE_URL`, `SUPABASE_ANON_KEY`) must be injected via `--dart-define` at build time, never hardcoded. `EnvConfig` reads them from `String.fromEnvironment`.
@@ -435,7 +428,7 @@ sealed class SyncState with _$SyncState {
 1. SyncService reads word_sync_queue (oldest first, max batch of 20)
 2. For each queued item:
    a. Read the word from local words table
-   b. POST/PUT to Supabase via Dio (upsert)
+   b. Upsert to Supabase via `SupabaseClient` (PostgREST)
    c. On success: delete queue entry
    d. On failure: increment retry_count, store last_error
 3. SyncCubit emits updated state with new pendingCount
@@ -456,22 +449,11 @@ sealed class SyncState with _$SyncState {
 
 ---
 
-## Networking — Dio Interceptor Pipeline
+### Networking — Supabase Client
 
-```
-Request → HeaderInterceptor → AuthInterceptor → LoggingInterceptor → Network
-Response ← ErrorInterceptor ← LoggingInterceptor ← Network
-```
+WordFlow uses the official `supabase_flutter` SDK for all networking. This eliminates the need for manual Dio interceptors for auth headers or API key injection, as the SDK handles session persistence and header management natively.
 
-| Interceptor | Responsibility |
-|-------------|----------------|
-| `HeaderInterceptor` | Injects `apikey` header, `Content-Type` |
-| `AuthInterceptor` | Injects `Authorization: Bearer <JWT>` from Supabase session |
-| `LoggingInterceptor` | Logs method/URL/status in debug mode only |
-| `ErrorInterceptor` | Maps `DioException` → typed `Failure` objects |
-
-> [!NOTE]
-> Sync orchestration stays in `SyncService`, **not** in interceptors. Interceptors handle cross-cutting concerns only.
+Error handling is done at the repository level by catching `PostgrestException` and mapping it to domain `Failure` objects.
 
 ---
 

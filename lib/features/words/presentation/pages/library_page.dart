@@ -11,7 +11,7 @@ import 'package:word_flow/features/words/presentation/widgets/add_edit_word_shee
 import 'package:word_flow/features/words/presentation/widgets/library_search_bar.dart';
 import 'package:word_flow/features/words/presentation/widgets/library_filter_row.dart';
 import 'package:word_flow/features/words/presentation/widgets/library_results_list.dart';
-import 'package:word_flow/core/widgets/app_loader.dart';
+import 'package:word_flow/shared/widgets/word_card_shimmer.dart';
 
 class LibraryPage extends StatelessWidget {
   const LibraryPage({super.key});
@@ -97,7 +97,7 @@ class _LibraryViewState extends State<LibraryView> {
           buildWhen: (previous, current) => previous.runtimeType != current.runtimeType,
           builder: (context, state) => state.when(
             initial: () => const Center(child: SizedBox.shrink()),
-            loading: () => const Center(child: AppLoader()),
+            loading: () => const ShimmerList(),
             loaded: (_, __, ___, ____, _____) => _LibraryLoadedContent(
               searchController: _searchController,
               onClearSearch: () => _clearSearch(context),

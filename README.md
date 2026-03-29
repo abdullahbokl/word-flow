@@ -19,8 +19,10 @@ The application follows a **"Script-to-Lexicon"** workflow:
 * **State Management:** BLoC / Cubit.
 * **Local Storage:** SQLite (used as the primary source of truth for offline-first).
 * **Backend:** Supabase (PostgreSQL + Auth).
-* **API Client:** Dio with specialized Interceptors for logging and auth headers.
-* **Functional Programming:** Dartz (using `Either<Failure, Success>` for robust error handling).
+* **API Client:** Supabase Client for all remote operations (replaces Dio).
+* **Functional Programming:** fpdart (Sealed classes + `Either<Failure, Success>`).
+* **Error Reporting:** Sentry (integrated into Auth and Sync flows).
+* **Structured Logging:** Talker (replacing `debugPrint`).
 
 ---
 

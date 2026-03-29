@@ -50,14 +50,18 @@ class ToggleButton extends StatelessWidget {
   final VoidCallback onToggle;
   final Color statusColor;
   @override
-  Widget build(BuildContext context) => IconButton(
-        icon: isPending
-            ? AppLoader(size: 16, color: statusColor)
-            : Icon(
-                isKnown ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
-                color: isKnown ? Theme.of(context).colorScheme.primary : null,
-              ),
-        onPressed: isPending ? null : onToggle,
-        tooltip: 'Toggle status',
+  Widget build(BuildContext context) => SizedBox(
+        width: 48,
+        height: 48,
+        child: IconButton(
+          icon: isPending
+              ? AppLoader(size: 16, color: statusColor)
+              : Icon(
+                  isKnown ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
+                  color: isKnown ? Theme.of(context).colorScheme.primary : null,
+                ),
+          onPressed: isPending ? null : onToggle,
+          tooltip: 'Toggle status',
+        ),
       );
 }

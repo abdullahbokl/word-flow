@@ -13,6 +13,9 @@ part 'app_database.g.dart';
 class WordFlowDatabase extends _$WordFlowDatabase {
   WordFlowDatabase() : super(_openConnection());
 
+  // Test constructor: allow passing a custom QueryExecutor (e.g. in-memory DB)
+  WordFlowDatabase.test(super.executor);
+
   @override
   int get schemaVersion => 4;
 
@@ -141,12 +144,73 @@ FROM words_dedup
   }
 
   Future<int> adoptGuestWords(String userId) async {
-    return (update(words)..where((t) => t.userId.isNull())).write(
-      WordsCompanion(
-        userId: Value(userId),
-        lastUpdated: Value(DateTime.now().toUtc()),
-      ),
-    );
+    return transaction(() async {
+      // 1. Get all guest words (userId == null)
+      final guestWords = await (select(words)
+            ..where((t) => t.userId.isNull()))
+          .get();
+
+      if (guestWords.isEmpty) return 0;
+
+      // 2. Get existing user words as a map [wordText -> WordRow]
+      final existingUserWordsQuery = select(words)
+        ..where((t) => t.userId.equals(userId));
+      final existingUserWords = await existingUserWordsQuery.get();
+      final existingMap = {
+        for (final word in existingUserWords) word.wordText: word
+      };
+
+      int adoptedCount = 0;
+      final now = DateTime.now().toUtc();
+
+      // 3. Merge logic: for each guest word
+      for (final guest in guestWords) {
+        final existing = existingMap[guest.wordText];
+
+        if (existing != null) {
+          // CONFLICT: User already has this word from cloud
+          // Merge: take highest count, set isKnown if either is true
+          await (update(words)..where((t) => t.id.equals(existing.id)))
+              .write(WordsCompanion(
+                totalCount: Value(
+                  existing.totalCount > guest.totalCount
+                      ? existing.totalCount
+                      : guest.totalCount,
+                ),
+                isKnown: Value(existing.isKnown || guest.isKnown),
+                lastUpdated: Value(now),
+              ));
+
+          // Delete the guest duplicate
+          await (delete(words)..where((t) => t.id.equals(guest.id))).go();
+        } else {
+          // No conflict: just reassign the userId
+          await (update(words)..where((t) => t.id.equals(guest.id))).write(
+            WordsCompanion(
+              userId: Value(userId),
+              lastUpdated: Value(now),
+            ),
+          );
+        }
+        adoptedCount++;
+      }
+
+      // 4. Enqueue ALL user words for cloud sync
+      final finalUserWords = await (select(words)
+            ..where((t) => t.userId.equals(userId)))
+          .get();
+
+      for (final word in finalUserWords) {
+        await into(wordSyncQueue).insert(WordSyncQueueCompanion.insert(
+          wordId: word.id,
+          operation: 'upsert',
+          createdAt: now,
+          updatedAt: now,
+        ));
+      }
+
+      return adoptedCount;
+    });
   }
 
   Future<void> clearLocalWords({String? userId}) async {

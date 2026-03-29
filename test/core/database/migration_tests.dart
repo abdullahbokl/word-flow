@@ -1,5 +1,5 @@
 @TestOn('vm')
-library migration_tests;
+library;
 
 import 'package:test/test.dart';
 
@@ -22,27 +22,27 @@ void main() {
         // - onUpgrade: handles v1→v2, v2→v3, v3→v4 migrations
         
         // This test serves as documentation of the migration design
-        final migrationExistsInCode = true;
+        const migrationExistsInCode = true;
         expect(migrationExistsInCode, isTrue);
       });
 
       test('Migration v1→v2 handles deduplication', () {
         // Strategy: creates words_dedup temp table, consolidates duplicates by
         // (user_id, word_text), sums total_count, maxes is_known/last_updated
-        final deduplicationLogicExists = true;
+        const deduplicationLogicExists = true;
         expect(deduplicationLogicExists, isTrue);
       });
 
       test('Migration v2→v3 enforces unique constraint', () {
         // Strategy: deletes non-unique entries, creates index on (user_id, word_text)
-        final uniqueConstraintCreated = true;
+        const uniqueConstraintCreated = true;
         expect(uniqueConstraintCreated, isTrue);
       });
 
       test('Migration v3→v4 adds updated_at column', () {
         // Strategy: ALTER TABLE word_sync_queue ADD COLUMN updated_at
         // with default value of current timestamp
-        final updatedAtColumnAdded = true;
+        const updatedAtColumnAdded = true;
         expect(updatedAtColumnAdded, isTrue);
       });
     });
@@ -51,14 +51,14 @@ void main() {
       test('Migrations use CREATE TABLE IF NOT EXISTS for idempotency', () {
         // Prevents errors if migrations are accidentally re-run
         // Example: CREATE UNIQUE INDEX IF NOT EXISTS idx_words_user_word
-        final idempotentMigrations = true;
+        const idempotentMigrations = true;
         expect(idempotentMigrations, isTrue);
       });
 
       test('Deduplication preserves all data in v1→v2', () {
         // Logic: SUM(total_count), MAX(is_known), MAX(last_updated)
         // Ensures no word count is lost during consolidation
-        final deduplicationPreserveData = true;
+        const deduplicationPreserveData = true;
         expect(deduplicationPreserveData, isTrue);
       });
 
@@ -66,14 +66,14 @@ void main() {
         // Unique constraint on (user_id, word_text) allows multiple NULLs
         // SQLite behavior: NULL != NULL, so duplicates with NULL userId allowed
         // This is intentional for guest word tracking
-        final nullHandlingCorrect = true;
+        const nullHandlingCorrect = true;
         expect(nullHandlingCorrect, isTrue);
       });
 
       test('v3→v4 timestamp default prevents NULL values', () {
         // DEFAULT (datetime('now')) ensures updated_at never NULL
         // Enables tracking of queue entry updates
-        final timestampDefaultSet = true;
+        const timestampDefaultSet = true;
         expect(timestampDefaultSet, isTrue);
       });
     });
@@ -84,14 +84,14 @@ void main() {
         // v1→v2: consolidates duplicate entries
         // v2→v3: removes remaining true duplicates (impossible in v2+)
         // v3→v4: adds tracking column with sensible default
-        final dataIntegrityMaintained = true;
+        const dataIntegrityMaintained = true;
         expect(dataIntegrityMaintained, isTrue);
       });
 
       test('Sync queue entries preserved through v3→v4 migration', () {
         // word_sync_queue table untouched except for updated_at column addition
         // Existing queue entries get default updated_at value
-        final queueDataPreserved = true;
+        const queueDataPreserved = true;
         expect(queueDataPreserved, isTrue);
       });
 
@@ -99,7 +99,7 @@ void main() {
         // word_sync_queue.word_id must reference words.id
         // Orphaned entries cleaned up in deduplication (v1→v2)
         // Further orphans impossible due to unique constraint (v2→v3+)
-        final foreignKeysValid = true;
+        const foreignKeysValid = true;
         expect(foreignKeysValid, isTrue);
       });
     });
@@ -108,7 +108,7 @@ void main() {
       test('v1→v2: Deduplication uses GROUP BY (user_id, word_text)', () {
         // Consolidates all entries matching same user + word
         // Preserves ID of most recent entry
-        final deduplicationGroupingCorrect = true;
+        const deduplicationGroupingCorrect = true;
         expect(deduplicationGroupingCorrect, isTrue);
       });
 
@@ -116,13 +116,13 @@ void main() {
           'v2→v3: DELETE eliminates all but first (MIN rowid) of each group',
           () {
         // After dedup in v1→v2, this should be no-op but ensures consistency
-        final deleteLogicSound = true;
+        const deleteLogicSound = true;
         expect(deleteLogicSound, isTrue);
       });
 
       test('v3→v4: ALTER TABLE preserves existing column values', () {
         // Only adds new column with default; doesn't modify existing data
-        final alterTableSafe = true;
+        const alterTableSafe = true;
         expect(alterTableSafe, isTrue);
       });
     });
@@ -130,13 +130,13 @@ void main() {
     group('Migration edge cases', () {
       test('Empty database migrates successfully to v4', () {
         // No data to consolidate or clean, migrations should complete
-        final emptyDbMigratesOk = true;
+        const emptyDbMigratesOk = true;
         expect(emptyDbMigratesOk, isTrue);
       });
 
       test('Corrupted duplicate entries cleaned by v2→v3', () {
         // If v1→v2 dedup didn't run (corrupt state), v2→v3 will fix it
-        final cleanupLogicExists = true;
+        const cleanupLogicExists = true;
         expect(cleanupLogicExists, isTrue);
       });
 
@@ -144,14 +144,14 @@ void main() {
         // v1→v2: dedup groups NULL with NULL for consolidation
         // v2→v3: unique constraint allows multiple NULLs (SQLite NULL != NULL)
         // v3→v4: timestamp tracking works for guest words too
-        final guestWordsHandled = true;
+        const guestWordsHandled = true;
         expect(guestWordsHandled, isTrue);
       });
 
       test('Re-running migrations is safe (idempotent)', () {
         // All statements use IF NOT EXISTS or are safe to re-run
         // Exception: DELETE statements, but only after dedup complete
-        final idempotencyEnforced = true;
+        const idempotencyEnforced = true;
         expect(idempotencyEnforced, isTrue);
       });
     });
@@ -186,28 +186,28 @@ void main() {
       test('Migration strategy prevents data loss', () {
         // All aggregation operations (SUM, MAX) designed to preserve data
         // No DELETE operations on user data, only cleanup
-        final dataLossProtected = true;
+        const dataLossProtected = true;
         expect(dataLossProtected, isTrue);
       });
 
       test('Schema changes are backward compatible', () {
         // Can read pre-migration data with post-migration queries
         // No breaking changes to column semantics
-        final backwardCompatible = true;
+        const backwardCompatible = true;
         expect(backwardCompatible, isTrue);
       });
 
       test('Transaction safety for deduplication', () {
         // v1→v2 dedup wrapped in transaction() call
         // Ensures atomic all-or-nothing operation
-        final transactionSafety = true;
+        const transactionSafety = true;
         expect(transactionSafety, isTrue);
       });
 
       test('Error handling in migrations', () {
         // Migration onUpgrade is async Future, can throw
         // SQLite rollback on failure within transaction
-        final errorHandling = true;
+        const errorHandling = true;
         expect(errorHandling, isTrue);
       });
     });

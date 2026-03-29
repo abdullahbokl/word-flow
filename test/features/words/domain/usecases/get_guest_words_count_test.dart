@@ -58,9 +58,9 @@ void main() {
 
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
-      final failure = const DatabaseFailure('Failed to count guest words');
+      const failure = DatabaseFailure('Failed to count guest words');
       when(() => mockRepository.getGuestWordsCount())
-          .thenAnswer((_) async => Left(failure));
+          .thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase();
