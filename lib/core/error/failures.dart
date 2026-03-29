@@ -31,3 +31,7 @@ class ProcessingFailure extends Failure {
 class ConnectionFailure extends Failure {
   const ConnectionFailure(super.message);
 }
+
+class MigrationFailure extends Failure {
+  const MigrationFailure(super.message);
+}
