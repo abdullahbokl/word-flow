@@ -1,13 +1,20 @@
-import '../../domain/entities/word.dart';
+import 'package:equatable/equatable.dart';
 
-class WordModel extends Word {
+class WordModel extends Equatable {
+  final String id;
+  final String? userId;
+  final String wordText;
+  final int totalCount;
+  final bool isKnown;
+  final DateTime lastUpdated;
+
   const WordModel({
-    required super.id,
-    super.userId,
-    required super.wordText,
-    super.totalCount = 1,
-    super.isKnown = false,
-    required super.lastUpdated,
+    required this.id,
+    this.userId,
+    required this.wordText,
+    this.totalCount = 1,
+    this.isKnown = false,
+    required this.lastUpdated,
   });
 
   factory WordModel.fromMap(Map<String, dynamic> map) {
@@ -29,7 +36,7 @@ class WordModel extends Word {
       'user_id': userId,
       'word_text': wordText,
       'total_count': totalCount,
-      'is_known': isKnown ? 1 : 0, // Store as int for SQLite
+      'is_known': isKnown ? 1 : 0,
       'last_updated': lastUpdated.toUtc().toIso8601String(),
     };
   }
@@ -40,19 +47,18 @@ class WordModel extends Word {
       'user_id': userId,
       'word_text': wordText,
       'total_count': totalCount,
-      'is_known': isKnown, // PostgREST expects true/false
+      'is_known': isKnown,
       'last_updated': lastUpdated.toUtc().toIso8601String(),
     };
   }
 
-  factory WordModel.fromEntity(Word word) {
-    return WordModel(
-      id: word.id,
-      userId: word.userId,
-      wordText: word.wordText,
-      totalCount: word.totalCount,
-      isKnown: word.isKnown,
-      lastUpdated: word.lastUpdated,
-    );
-  }
+  @override
+  List<Object?> get props => [
+        id,
+        userId,
+        wordText,
+        totalCount,
+        isKnown,
+        lastUpdated,
+      ];
 }

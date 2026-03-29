@@ -7,6 +7,7 @@ import '../../domain/repositories/word_repository.dart';
 import '../datasources/word_local_source.dart';
 import '../datasources/sync_local_source.dart';
 import '../models/word_model.dart';
+import '../mappers/word_mapper.dart';
 import '../../../../core/utils/uuid_generator.dart';
 
 @LazySingleton(as: WordRepository)
@@ -26,12 +27,12 @@ class WordRepositoryImpl implements WordRepository {
   }
 
   @override
-  Future<Either<Failure, void>> saveWords(List<Word> words) => _try(() async {
+  Future<Either<Failure, void>> saveWords(List<WordEntity> words) => _try(() async {
     await _writeQueue.enqueue(() async {
       final now = DateTime.now().toUtc();
       final List<WordModel> models = [];
       for (final word in words) {
-        final candidate = WordModel.fromEntity(word);
+        final candidate = WordMapper.fromEntityToModel(word);
         final existing = await _localSource.getWordByText(
           candidate.wordText,
           userId: candidate.userId,
@@ -73,12 +74,14 @@ class WordRepositoryImpl implements WordRepository {
   @override
   Future<Either<Failure, void>> toggleKnown(String text, {String? userId}) => _try(() async {
     await _writeQueue.enqueue(() async {
-      final word = await _localSource.getWordByText(text, userId: userId);
-      final model = word != null
-          ? WordModel.fromEntity(word.copyWith(
-              isKnown: !word.isKnown,
-              lastUpdated: DateTime.now().toUtc(),
-            ))
+      final wordModel = await _localSource.getWordByText(text, userId: userId);
+      final model = wordModel != null
+          ? WordMapper.fromEntityToModel(
+              WordMapper.toEntityFromModel(wordModel).copyWith(
+                isKnown: !wordModel.isKnown,
+                lastUpdated: DateTime.now().toUtc(),
+              ),
+            )
           : WordModel(
               id: UuidGenerator.generate(),
               userId: userId,
@@ -95,26 +98,33 @@ class WordRepositoryImpl implements WordRepository {
   });
 
   @override
-  Future<Either<Failure, List<Word>>> getKnownWords({String? userId}) => 
-    _try(() async => (await _localSource.getWords(userId: userId)).where((e) => e.isKnown).toList());
+  Future<Either<Failure, List<WordEntity>>> getKnownWords({String? userId}) => 
+    _try(() async {
+      final models = await _localSource.getWords(userId: userId);
+      return models
+          .where((e) => e.isKnown)
+          .map(WordMapper.toEntityFromModel)
+          .toList();
+    });
 
   @override
-  Stream<List<Word>> watchWords({String? userId}) => _localSource.watchWords(userId: userId);
+  Stream<List<WordEntity>> watchWords({String? userId}) {
+    return _localSource.watchWords(userId: userId).map(
+          (models) => models.map(WordMapper.toEntityFromModel).toList(),
+        );
+  }
 
   @override
-  Future<Either<Failure, int>> adoptGuestWords(String userId) => _try(() async {
-    final count = await _localSource.adoptGuestWords(userId);
-    // Note: ideally we'd get the IDs from adoptGuestWords to enqueue sync, 
-    // but for now let's assume sync service will pick them up or we'll trigger a full sync.
-    // To keep it simple and under 120 lines, we'll stick to this.
-    return count;
-  });
+  Future<Either<Failure, int>> adoptGuestWords(String userId) => 
+    _try(() => _localSource.adoptGuestWords(userId));
 
   @override
-  Future<Either<Failure, void>> clearLocalWords({String? userId}) => _try(() => _localSource.clearLocalWords(userId: userId));
+  Future<Either<Failure, void>> clearLocalWords({String? userId}) => 
+    _try(() => _localSource.clearLocalWords(userId: userId));
 
   @override
-  Future<Either<Failure, int>> getGuestWordsCount() => _try(() => _localSource.getGuestWordsCount());
+  Future<Either<Failure, int>> getGuestWordsCount() => 
+    _try(() => _localSource.getGuestWordsCount());
 
   @override
   Future<Either<Failure, void>> deleteWord(String id, {String? userId}) => _try(() async {
@@ -125,9 +135,9 @@ class WordRepositoryImpl implements WordRepository {
   });
 
   @override
-  Future<Either<Failure, void>> updateWord(Word word) => _try(() async {
+  Future<Either<Failure, void>> updateWord(WordEntity word) => _try(() async {
     await _writeQueue.enqueue(() async {
-      final model = WordModel.fromEntity(word);
+      final model = WordMapper.fromEntityToModel(word);
       await _localSource.saveWord(model);
       if (model.userId != null) {
         await _syncSource.enqueueSyncOperation(model.id, 'upsert');

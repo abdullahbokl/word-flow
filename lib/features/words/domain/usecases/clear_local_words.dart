@@ -1,16 +1,15 @@
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/error/failures.dart';
-import '../entities/word.dart';
 import '../repositories/word_repository.dart';
 
 @lazySingleton
-class UpdateWord {
+class ClearLocalWords {
   final WordRepository _repository;
 
-  UpdateWord(this._repository);
+  ClearLocalWords(this._repository);
 
-  Future<Either<Failure, void>> call(WordEntity word) {
-    return _repository.updateWord(word);
+  Future<Either<Failure, void>> call({String? userId}) {
+    return _repository.clearLocalWords(userId: userId);
   }
 }

@@ -94,7 +94,7 @@ class WordLocalSourceImpl implements WordLocalSource {
     );
   }
 
-  WordModel _fromRow(Word row) {
+  WordModel _fromRow(WordRow row) {
     return WordModel(
       id: row.id,
       userId: row.userId,

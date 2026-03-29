@@ -39,7 +39,7 @@ class SyncRepositoryImpl implements SyncRepository {
         final queueId = item['id'] as int;
         final retryCount = item['retry_count'] as int? ?? 0;
 
-        if (retryCount > 5) continue; // Skip stale items
+        if (retryCount > 5) continue;
 
         try {
           if (operation == 'upsert') {

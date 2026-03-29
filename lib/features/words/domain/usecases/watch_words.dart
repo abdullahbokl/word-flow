@@ -8,7 +8,7 @@ class WatchWords {
 
   WatchWords(this._repository);
 
-  Stream<List<Word>> call({String? userId}) {
+  Stream<List<WordEntity>> call({String? userId}) {
     return _repository.watchWords(userId: userId);
   }
 }

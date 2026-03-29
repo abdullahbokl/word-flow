@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-class Word extends Equatable {
+class WordEntity extends Equatable {
   final String id;
   final String? userId;
   final String wordText;
@@ -8,7 +8,7 @@ class Word extends Equatable {
   final bool isKnown;
   final DateTime lastUpdated;
 
-  const Word({
+  const WordEntity({
     required this.id,
     this.userId,
     required this.wordText,
@@ -27,7 +27,7 @@ class Word extends Equatable {
         lastUpdated,
       ];
 
-  Word copyWith({
+  WordEntity copyWith({
     String? id,
     String? userId,
     String? wordText,
@@ -35,7 +35,7 @@ class Word extends Equatable {
     bool? isKnown,
     DateTime? lastUpdated,
   }) {
-    return Word(
+    return WordEntity(
       id: id ?? this.id,
       userId: userId ?? this.userId,
       wordText: wordText ?? this.wordText,

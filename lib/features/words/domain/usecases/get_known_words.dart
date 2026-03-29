@@ -5,12 +5,12 @@ import '../entities/word.dart';
 import '../repositories/word_repository.dart';
 
 @lazySingleton
-class UpdateWord {
+class GetKnownWords {
   final WordRepository _repository;
 
-  UpdateWord(this._repository);
+  GetKnownWords(this._repository);
 
-  Future<Either<Failure, void>> call(WordEntity word) {
-    return _repository.updateWord(word);
+  Future<Either<Failure, List<WordEntity>>> call({String? userId}) {
+    return _repository.getKnownWords(userId: userId);
   }
 }

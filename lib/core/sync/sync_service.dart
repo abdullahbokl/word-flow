@@ -20,7 +20,7 @@ class SyncService {
       }
     });
 
-    // Perodic sync every 5 minutes as a fallback
+   
     _syncTimer = Timer.periodic(const Duration(minutes: 5), (_) => syncNow());
   }
 
