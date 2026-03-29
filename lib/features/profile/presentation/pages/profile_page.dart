@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit.dart';
 import 'package:word_flow/features/authentication/presentation/blocs/auth_state.dart';
 import 'package:word_flow/core/widgets/section_card.dart';
-import 'package:word_flow/features/authentication/domain/entities/user_entity.dart';
+import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({super.key});
@@ -29,7 +29,7 @@ class ProfilePage extends StatelessWidget {
 
 class _AuthenticatedProfile extends StatelessWidget {
   const _AuthenticatedProfile({required this.user});
-  final UserEntity user;
+  final AuthUser user;
 
   @override
   Widget build(BuildContext context) {

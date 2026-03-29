@@ -37,10 +37,7 @@ class ScriptInputSection extends StatelessWidget {
                   icon: Icons.auto_awesome_rounded,
                   isLoading: isProcessing,
                   onPressed: () {
-                    final userId = context.read<AuthCubit>().state.maybeMap(
-                          authenticated: (s) => s.user.id,
-                          orElse: () => null,
-                        );
+                    final userId = context.read<AuthCubit>().currentUserId;
                     context.read<WorkspaceCubit>().analyze(controller.text, userId: userId);
                   },
                 ),

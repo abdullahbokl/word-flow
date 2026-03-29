@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit.dart';
 import 'package:word_flow/features/authentication/presentation/blocs/auth_state.dart';
-import 'package:word_flow/features/authentication/presentation/widgets/auth_bottom_sheet.dart';
 import 'package:word_flow/features/authentication/presentation/widgets/auth_status_widgets.dart';
 import 'package:word_flow/features/authentication/presentation/widgets/authenticated_user_status.dart';
 import 'package:word_flow/features/authentication/presentation/widgets/guest_user_status.dart';
+
+import 'package:word_flow/app/router/routes.dart';
 
 class AuthStatusBar extends StatelessWidget {
   const AuthStatusBar({super.key});
@@ -26,22 +27,13 @@ class AuthStatusBar extends StatelessWidget {
                 ),
                 orElse: () => GuestUserStatus(
                   isCompact: isCompact,
-                  onSignIn: () => _showAuthBottomSheet(context),
+                  onSignIn: () => const AuthRoute().pushReplacement(context),
                 ),
               ),
             );
           },
         );
       },
-    );
-  }
-
-  void _showAuthBottomSheet(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.transparent,
-      builder: (context) => const AuthBottomSheet(),
     );
   }
 }

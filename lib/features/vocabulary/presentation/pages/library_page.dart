@@ -18,7 +18,7 @@ class LibraryPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final userId = context.read<AuthCubit>().state.maybeMap(authenticated: (s) => s.user.id, orElse: () => null);
+    final userId = context.read<AuthCubit>().currentUserId;
     return BlocProvider(create: (context) => getIt<LibraryCubit>()..init(userId), child: const LibraryView());
   }
 }
@@ -119,7 +119,7 @@ class _LibraryViewState extends State<LibraryView> {
   }
 
   void _showAddEditSheet(BuildContext outerContext, {WordEntity? word}) {
-    final userId = outerContext.read<AuthCubit>().state.maybeMap(authenticated: (s) => s.user.id, orElse: () => null);
+    final userId = outerContext.read<AuthCubit>().currentUserId;
     showModalBottomSheet(
       context: outerContext,
       isScrollControlled: true,

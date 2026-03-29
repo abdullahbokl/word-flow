@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:word_flow/features/authentication/domain/entities/user_entity.dart';
+import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 
 part 'auth_state.freezed.dart';
 
@@ -7,8 +7,8 @@ part 'auth_state.freezed.dart';
 class AuthState with _$AuthState {
   const factory AuthState.initial() = _Initial;
   const factory AuthState.loading() = _Loading;
-  const factory AuthState.authenticated(UserEntity user) = _Authenticated;
-  const factory AuthState.pendingMerge(UserEntity user, int guestWordCount) = _PendingMerge;
+  const factory AuthState.authenticated(AuthUser user) = _Authenticated;
+  const factory AuthState.pendingMerge(AuthUser user, int guestWordCount) = _PendingMerge;
   const factory AuthState.guest() = _Guest;
   const factory AuthState.error(String message) = _Error;
 }

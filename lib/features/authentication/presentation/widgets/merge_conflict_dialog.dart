@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:word_flow/features/authentication/domain/entities/user_entity.dart';
+import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit.dart';
 
 class MergeConflictDialog extends StatelessWidget {
@@ -10,7 +10,7 @@ class MergeConflictDialog extends StatelessWidget {
     required this.user,
     required this.guestCount,
   });
-  final UserEntity user;
+  final AuthUser user;
   final int guestCount;
 
   @override

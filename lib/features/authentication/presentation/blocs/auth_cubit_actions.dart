@@ -1,21 +1,20 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:word_flow/features/authentication/domain/usecases/sign_in_with_email.dart';
-import 'package:word_flow/features/authentication/domain/usecases/sign_up_with_email.dart';
-import 'package:word_flow/features/authentication/domain/usecases/sign_out.dart';
+import 'package:word_flow/features/auth/domain/usecases/auth_usecases.dart';
+import 'package:word_flow/features/auth/domain/usecases/sign_out_and_clear_local.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
 import 'package:word_flow/features/vocabulary/domain/usecases/adopt_guest_words.dart';
 import 'package:word_flow/features/authentication/presentation/blocs/auth_state.dart';
 
 mixin AuthCubitActions on Cubit<AuthState> {
-  SignInWithEmail get signInUseCase;
-  SignUpWithEmail get signUpUseCase;
-  SignOut get signOutUseCase;
+  SignInWithEmailUseCase get signInUseCase;
+  SignUpWithEmailUseCase get signUpUseCase;
+  SignOutAndClearLocal get signOutAndClearLocalUseCase;
   WordRepository get wordRepository;
   AdoptGuestWords get adoptGuestWordsUseCase;
 
   Future<void> signIn(String email, String password) async {
     emit(const AuthState.loading());
-    final result = await signInUseCase(email: email, password: password);
+    final result = await signInUseCase(email, password);
     result.fold(
       (failure) => emit(AuthState.error(failure.message)),
       (user) async {
@@ -28,7 +27,7 @@ mixin AuthCubitActions on Cubit<AuthState> {
 
   Future<void> signUp(String email, String password) async {
     emit(const AuthState.loading());
-    final result = await signUpUseCase(email: email, password: password);
+    final result = await signUpUseCase(email, password);
     result.fold(
       (failure) => emit(AuthState.error(failure.message)),
       (user) async {
@@ -40,14 +39,10 @@ mixin AuthCubitActions on Cubit<AuthState> {
 
   Future<void> logOut() async {
     emit(const AuthState.loading());
-    final user = state.maybeMap(authenticated: (s) => s.user, orElse: () => null);
-    final result = await signOutUseCase();
+    final result = await signOutAndClearLocalUseCase();
     result.fold(
       (failure) => emit(AuthState.error(failure.message)),
-      (_) async {
-        if (user != null) await wordRepository.clearLocalWords(userId: user.id);
-        emit(const AuthState.guest());
-      },
+      (_) => emit(const AuthState.guest()),
     );
   }
 }

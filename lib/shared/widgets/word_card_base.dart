@@ -92,10 +92,7 @@ class WordCardBase extends StatelessWidget {
     switch (mode) {
       case WordCardMode.workspace:
         final workspaceWord = word as ProcessedWord;
-        final userId = context.read<AuthCubit>().state.maybeMap(
-              authenticated: (s) => s.user.id,
-              orElse: () => null,
-            );
+        final userId = context.read<AuthCubit>().currentUserId;
         context.read<WorkspaceCubit>().toggleKnown(workspaceWord.wordText, userId: userId);
       case WordCardMode.library:
         final libraryWord = word as WordEntity;
