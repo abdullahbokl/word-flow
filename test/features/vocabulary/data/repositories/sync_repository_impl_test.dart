@@ -6,17 +6,20 @@ import 'package:word_flow/core/sync/sync_operation.dart';
 import 'package:word_flow/features/vocabulary/data/repositories/sync_repository_impl.dart';
 import 'package:word_flow/features/vocabulary/data/models/word_remote_dto.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
+import 'package:word_flow/core/sync/sync_preferences.dart';
 
 import '../../../../helpers/fakes.dart';
 import '../../../../helpers/mock_data.dart';
 
 class MockAppLogger extends Mock implements AppLogger {}
+class MockSyncPreferences extends Mock implements SyncPreferences {}
 
 void main() {
   late MockWordLocalSource mockLocal;
   late MockSyncLocalSource mockSync;
   late MockWordRemoteSource mockRemote;
   late MockAppLogger mockLogger;
+  late MockSyncPreferences mockPreferences;
   late SyncRepositoryImpl repo;
 
   setUpAll(() {
@@ -34,7 +37,8 @@ void main() {
     mockSync = MockSyncLocalSource();
     mockRemote = MockWordRemoteSource();
     mockLogger = MockAppLogger();
-    repo = SyncRepositoryImpl(mockLocal, mockSync, mockRemote, mockLogger);
+    mockPreferences = MockSyncPreferences();
+    repo = SyncRepositoryImpl(mockLocal, mockSync, mockRemote, mockPreferences, mockLogger);
   });
 
   group('getPendingCount', () {
