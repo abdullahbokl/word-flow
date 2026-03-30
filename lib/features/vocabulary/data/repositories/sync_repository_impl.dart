@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import 'dart:math';
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
@@ -129,41 +130,82 @@ class SyncRepositoryImpl implements SyncRepository {
       final lastPull = await _preferences.getLastPullTimestamp(userId);
       final now = DateTime.now().toUtc();
 
-      final remoteBatchResult = lastPull == null
-          ? await _remoteSource.fetchUserWords(userId)
-          : await _remoteSource.fetchWordsUpdatedSince(userId, lastPull);
+      int newCount = 0;
+      int mergedCount = 0;
+      int skippedCount = 0;
+      
+      int offset = 0;
+      const int limit = 500;
+      bool hasMore = true;
 
-      return await remoteBatchResult.fold(
-        (failure) async {
-           _logger.error('Failed fetching remote changes', failure);
-           return Left(failure);
-        },
-        (remoteWords) async {
-          _logger.syncEvent('Fetched ${remoteWords.length} updated words from remote');
-          int pulledCount = 0;
+      while (hasMore) {
+        final remoteBatchResult = lastPull == null
+            ? await _remoteSource.fetchUserWords(userId, limit: limit, offset: offset)
+            : await _remoteSource.fetchWordsUpdatedSince(userId, lastPull, limit: limit, offset: offset);
 
-          for (final remoteDto in remoteWords) {
-            final localWord = await _localSource.getWordById(remoteDto.id);
-            
-            // Merge strategy: incoming remote wins if:
-            // - It doesn't exist locally
-            // - OR it's strictly newer than the local version
-            final isLocalOutdated = localWord == null || 
-                remoteDto.lastUpdated.isAfter(localWord.lastUpdated);
+        await remoteBatchResult.fold(
+          (failure) async {
+             _logger.error('Failed fetching remote changes at offset $offset', failure);
+             // Handle error per-page: stop pulling further pages but don't abort the entire sync
+             hasMore = false;
+          },
+          (paginatedData) async {
+            _logger.syncEvent('Fetched ${paginatedData.words.length} updated words from remote (offset $offset)');
 
-            if (isLocalOutdated) {
-              final companion = WordMapper.toCompanion(WordMapper.fromRemoteDto(remoteDto));
-              // Note: We use saveWord directly to avoid triggering the sync queue
-              await _localSource.saveWord(companion);
-              pulledCount++;
+            for (final remoteDto in paginatedData.words) {
+              final localWord = await _localSource.getWordById(remoteDto.id);
+              
+              if (localWord == null) {
+                // Completely new word
+                final companion = WordMapper.toCompanion(WordMapper.fromRemoteDto(remoteDto));
+                await _localSource.saveWord(companion);
+                newCount++;
+              } else {
+                // Merge strategy:
+                // - total_count: HIGHER value
+                // - is_known: logical OR
+                // - word_text: keep remote
+                // - last_updated: NEWER timestamp
+                final mergedTotalCount = max(localWord.totalCount, remoteDto.totalCount);
+                final mergedIsKnown = localWord.isKnown || remoteDto.isKnown;
+                final mergedWordText = remoteDto.wordText;
+                
+                final remoteTime = remoteDto.lastUpdated;
+                final localTime = localWord.lastUpdated;
+                final mergedLastUpdated = remoteTime.isAfter(localTime) ? remoteTime : localTime;
+
+                // Check if merged result differs from local state
+                if (localWord.totalCount != mergedTotalCount ||
+                    localWord.isKnown != mergedIsKnown ||
+                    localWord.wordText != mergedWordText ||
+                    localWord.lastUpdated != mergedLastUpdated) {
+                  
+                  final updatedDto = remoteDto.copyWith(
+                    totalCount: mergedTotalCount,
+                    isKnown: mergedIsKnown,
+                    wordText: mergedWordText,
+                    lastUpdated: mergedLastUpdated,
+                  );
+
+                  final companion = WordMapper.toCompanion(WordMapper.fromRemoteDto(updatedDto));
+                  await _localSource.saveWord(companion);
+                  mergedCount++;
+                } else {
+                  // No changes to apply locally
+                  skippedCount++;
+                }
+              }
             }
-          }
 
-          await _preferences.setLastPullTimestamp(userId, now);
-          _logger.syncEvent('Successfully completed pull sync of $pulledCount words');
-          return Right(pulledCount);
-        },
-      );
+            hasMore = paginatedData.hasMore;
+            offset += limit;
+          },
+        );
+      }
+
+      await _preferences.setLastPullTimestamp(userId, now);
+      _logger.syncEvent('Successfully completed pull sync: $newCount new, $mergedCount merged, $skippedCount skipped');
+      return Right(newCount + mergedCount);
     } catch (e, stackTrace) {
       _logger.error('Unexpected error during pull sync', e, stackTrace);
       return Left(SyncFailure(e.toString()));

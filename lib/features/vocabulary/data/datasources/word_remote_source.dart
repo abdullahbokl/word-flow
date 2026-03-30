@@ -4,11 +4,21 @@ import 'package:word_flow/features/vocabulary/data/models/word_remote_dto.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/errors/exceptions.dart';
 
+class PaginatedSyncResult {
+  const PaginatedSyncResult({
+    required this.words,
+    required this.hasMore,
+  });
+
+  final List<WordRemoteDto> words;
+  final bool hasMore;
+}
+
 abstract class WordRemoteSource {
   Future<void> upsertWord(WordRemoteDto word);
   Future<void> deleteWord(String id);
-  Future<Either<Failure, List<WordRemoteDto>>> fetchUserWords(String userId);
-  Future<Either<Failure, List<WordRemoteDto>>> fetchWordsUpdatedSince(String userId, DateTime since);
+  Future<Either<Failure, PaginatedSyncResult>> fetchUserWords(String userId, {int limit = 500, int offset = 0});
+  Future<Either<Failure, PaginatedSyncResult>> fetchWordsUpdatedSince(String userId, DateTime since, {int limit = 500, int offset = 0});
 }
 
 class WordRemoteSourceImpl implements WordRemoteSource {
@@ -52,7 +62,11 @@ class WordRemoteSourceImpl implements WordRemoteSource {
   }
 
   @override
-  Future<Either<Failure, List<WordRemoteDto>>> fetchUserWords(String userId) async {
+  Future<Either<Failure, PaginatedSyncResult>> fetchUserWords(
+    String userId, {
+    int limit = 500,
+    int offset = 0,
+  }) async {
     try {
       final response = await _client
           .from('words')
@@ -60,12 +74,14 @@ class WordRemoteSourceImpl implements WordRemoteSource {
           // Note: The '.eq('user_id', userId)' filter is technically redundant 
           // because of Row Level Security (RLS) policies on the backend, 
           // but we keep it here for clarity and performance hints for the query planner.
-          .eq('user_id', userId);
+          .eq('user_id', userId)
+          .order('id', ascending: true)
+          .range(offset, offset + limit - 1);
       
       final data = response as List<dynamic>;
       try {
         final dtos = data.map((m) => WordRemoteDto.fromJson(m as Map<String, dynamic>)).toList();
-        return Right(dtos);
+        return Right(PaginatedSyncResult(words: dtos, hasMore: dtos.length == limit));
       } catch (e) {
         return Left(ServerFailure('Invalid server response: $e'));
       }
@@ -77,21 +93,26 @@ class WordRemoteSourceImpl implements WordRemoteSource {
   }
 
   @override
-  Future<Either<Failure, List<WordRemoteDto>>> fetchWordsUpdatedSince(
+  Future<Either<Failure, PaginatedSyncResult>> fetchWordsUpdatedSince(
     String userId,
-    DateTime since,
-  ) async {
+    DateTime since, {
+    int limit = 500,
+    int offset = 0,
+  }) async {
     try {
       final response = await _client
           .from('words')
           .select()
           .eq('user_id', userId)
-          .gte('last_updated', since.toUtc().toIso8601String());
+          .gte('last_updated', since.toUtc().toIso8601String())
+          .order('last_updated', ascending: true)
+          .order('id', ascending: true)
+          .range(offset, offset + limit - 1);
 
       final data = response as List<dynamic>;
       try {
         final dtos = data.map((m) => WordRemoteDto.fromJson(m as Map<String, dynamic>)).toList();
-        return Right(dtos);
+        return Right(PaginatedSyncResult(words: dtos, hasMore: dtos.length == limit));
       } catch (e) {
         return Left(ServerFailure('Invalid server response during delta fetch: $e'));
       }
@@ -118,12 +139,12 @@ class DisabledWordRemoteSource implements WordRemoteSource {
   }
 
   @override
-  Future<Either<Failure, List<WordRemoteDto>>> fetchUserWords(String userId) async {
+  Future<Either<Failure, PaginatedSyncResult>> fetchUserWords(String userId, {int limit = 500, int offset = 0}) async {
     return const Left(ConnectionFailure('Remote sync not configured'));
   }
 
   @override
-  Future<Either<Failure, List<WordRemoteDto>>> fetchWordsUpdatedSince(String userId, DateTime since) async {
+  Future<Either<Failure, PaginatedSyncResult>> fetchWordsUpdatedSince(String userId, DateTime since, {int limit = 500, int offset = 0}) async {
     return const Left(ConnectionFailure('Remote sync not configured'));
   }
 

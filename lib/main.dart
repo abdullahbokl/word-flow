@@ -11,6 +11,7 @@ import 'package:word_flow/core/config/env_config.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/security/security_service.dart';
 import 'package:word_flow/core/security/supabase_secure_storage.dart';
+import 'package:word_flow/core/sync/sync_orchestrator.dart';
 
 Future<void> main() async {
   await SentryFlutter.init(
@@ -47,6 +48,9 @@ Future<void> main() async {
         // Report to Sentry as well
         await Sentry.captureException(e, stackTrace: stackTrace);
       }
+
+      // Start global synchronization orchestration loop
+      getIt<SyncOrchestrator>().start();
 
       runApp(const WordFlowApp());
     },

@@ -21,11 +21,12 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     5: _migrate4To5,
     6: _migrate5To6,
     7: _migrate6To7,
+    8: _migrate7To8,
   };
 
   @override
   int get schemaVersion {
-    const expectedVersion = 7;
+    const expectedVersion = 8;
     assert(() {
       final maxStep = _migrationSteps.keys.reduce((a, b) => a > b ? a : b);
       if (maxStep != expectedVersion) {
@@ -51,6 +52,15 @@ class WordFlowDatabase extends _$WordFlowDatabase {
           await customStatement(
             'CREATE INDEX IF NOT EXISTS idx_words_last_updated ON words (last_updated)',
           );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_words_known ON words(user_id, is_known)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_words_updated ON words(user_id, last_updated)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_sync_queue_created ON word_sync_queue(created_at)',
+          );
         },
         onUpgrade: (m, from, to) async {
           await transaction(() async {
@@ -64,7 +74,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
             }
           });
           assert(() {
-            if (to != 7) {
+            if (to != 8) {
               throw AssertionError(
                 'Missing migration steps or wrong target schema version',
               );
@@ -440,6 +450,19 @@ Future<void> _migrate6To7(WordFlowDatabase db) async {
   });
 }
 
+Future<void> _migrate7To8(WordFlowDatabase db) async {
+  await db.transaction(() async {
+    await db.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_words_known ON words(user_id, is_known)',
+    );
+    await db.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_words_updated ON words(user_id, last_updated)',
+    );
+    await db.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_sync_queue_created ON word_sync_queue(created_at)',
+    );
+  });
+}
 
 QueryExecutor _openConnection(String encryptionKey) {
   return driftDatabase(
