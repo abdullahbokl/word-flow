@@ -21,24 +21,43 @@ mixin WordRepositoryImplHelpers {
     try {
       await writeQueue.enqueue(() async {
         final now = DateTime.now().toUtc();
-        final existingMaps = <String?, Map<String, WordRow>>{};
-        for (final uId in words.map((w) => w.userId).toSet()) {
-          existingMaps[uId] = await localSource.getWordTextMap(userId: uId);
+
+        // Group words by userId to perform targeted fetches per user
+        final userIds = words.map((w) => w.userId).toSet();
+        final existingMap = <String, WordRow>{};
+
+        for (final uId in userIds) {
+          final wordTexts = words
+              .where((w) => w.userId == uId)
+              .map((w) => w.wordText)
+              .toList();
+
+          final rows = await localSource.getWordsByTexts(
+            wordTexts,
+            userId: uId,
+          );
+          for (final row in rows) {
+            // Key by (userId, wordText) to handle multi-user scenarios if words list mixed
+            existingMap['${uId}_${row.wordText}'] = row;
+          }
         }
 
         final List<WordsCompanion> companions = [];
         final List<String> syncIds = [];
 
         for (final word in words) {
-          final existing = existingMaps[word.userId]?[word.wordText];
+          final key = '${word.userId}_${word.wordText}';
+          final existing = existingMap[key];
+
           if (existing == null) {
-            companions.add(WordMapper.toCompanion(word.copyWith(lastUpdated: now)));
+            companions.add(
+              WordMapper.toCompanion(word.copyWith(lastUpdated: now)),
+            );
             if (word.userId != null) syncIds.add(word.id);
           } else {
-            // Merge strategy:
-            // 1. Higher total count wins (never decrease count).
-            // 2. Word is known if it was EVER marked known (logical OR).
-            final existingEntity = WordMapper.fromRow(existing);
+            final existingEntity = WordMapper.fromRow(
+              existing,
+            ).getOrElse((failure) => throw StateError(failure.message));
             final merged = existingEntity.copyWith(
               totalCount: existingEntity.totalCount + word.totalCount,
               isKnown: existingEntity.isKnown || word.isKnown,
@@ -48,7 +67,7 @@ mixin WordRepositoryImplHelpers {
             if (merged.userId != null) syncIds.add(merged.id);
           }
         }
-        
+
         await localSource.saveWords(companions);
         for (final id in syncIds) {
           await syncSource.enqueueSyncOperation(id, SyncOperation.upsert.value);
@@ -60,14 +79,19 @@ mixin WordRepositoryImplHelpers {
     }
   }
 
-  Future<Either<Failure, void>> handleToggleKnown(String text, {String? userId}) async {
+  Future<Either<Failure, void>> handleToggleKnown(
+    String text, {
+    String? userId,
+  }) async {
     try {
       await writeQueue.enqueue(() async {
         final row = await localSource.getWordByText(text, userId: userId);
         final WordEntity entity;
-        
+
         if (row != null) {
-          final existing = WordMapper.fromRow(row);
+          final existing = WordMapper.fromRow(
+            row,
+          ).getOrElse((failure) => throw StateError(failure.message));
           entity = existing.copyWith(
             isKnown: !existing.isKnown,
             lastUpdated: DateTime.now().toUtc(),
@@ -85,7 +109,10 @@ mixin WordRepositoryImplHelpers {
 
         await localSource.saveWord(WordMapper.toCompanion(entity));
         if (entity.userId != null) {
-          await syncSource.enqueueSyncOperation(entity.id, SyncOperation.upsert.value);
+          await syncSource.enqueueSyncOperation(
+            entity.id,
+            SyncOperation.upsert.value,
+          );
         }
       });
       return const Right(null);
@@ -98,20 +125,33 @@ mixin WordRepositoryImplHelpers {
     logger.info('Starting guest data migration for user: $userId');
     try {
       final count = await localSource.adoptGuestWords(userId);
-      logger.syncEvent('Successfully adopted $count guest words for user: $userId');
+      logger.syncEvent(
+        'Successfully adopted $count guest words for user: $userId',
+      );
       return Right(count);
     } catch (e, stackTrace) {
       logger.error('Guest data migration failed', e, stackTrace);
       try {
         await Sentry.captureException(e, stackTrace: stackTrace);
       } catch (_) {}
-      return Left(MigrationFailure('Guest data migration failed: ${e.toString()}'));
+      return Left(
+        MigrationFailure('Guest data migration failed: ${e.toString()}'),
+      );
     }
   }
 
-  Future<Either<Failure, void>> handleClearLocalWords({String? userId}) async {
+  Future<Either<Failure, void>> handleClearLocalWords(String userId) async {
     try {
-      await localSource.clearLocalWords(userId: userId);
+      await localSource.clearLocalWords(userId);
+      return const Right(null);
+    } catch (e) {
+      return Left(DatabaseFailure(e.toString()));
+    }
+  }
+
+  Future<Either<Failure, void>> handleClearGuestWords() async {
+    try {
+      await localSource.clearGuestWords();
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure(e.toString()));

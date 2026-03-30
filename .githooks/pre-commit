@@ -1,0 +1,15 @@
+#!/bin/bash
+set -e
+
+echo "Running local pre-commit checks..."
+
+# Run dart format
+echo "Checking formatting..."
+dart format --set-exit-if-changed .
+
+# Run flutter analyze
+echo "Running static analysis..."
+flutter analyze --no-fatal-infos
+
+echo "Pre-commit checks passed!"
+exit 0

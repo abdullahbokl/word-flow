@@ -6,6 +6,7 @@ import 'package:word_flow/core/database/write_queue.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/sync/sync_preferences.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source.dart';
+import 'package:word_flow/features/vocabulary/data/datasources/sync_dead_letter_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/word_local_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/word_remote_source.dart';
 import 'package:word_flow/features/vocabulary/data/repositories/sync_repository_impl.dart';
@@ -14,18 +15,27 @@ import 'package:word_flow/features/vocabulary/data/models/word_remote_dto.dart';
 import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
 
 class MockWordRemoteSource extends Mock implements WordRemoteSource {}
+
 class MockSyncPreferences extends Mock implements SyncPreferences {}
+
 class MockAppLogger extends Mock implements AppLogger {}
 
 class _TestWriteQueue implements LocalWriteQueue {
   @override
-  Future<T> enqueue<T>(Future<T> Function() job) => job();
+  Future<void> enqueue(Future<void> Function() job) => job();
+
+  @override
+  Future<void> close() async {}
+
+  @override
+  int get pendingCount => 0;
 }
 
 void main() {
   late WordFlowDatabase db;
   late WordLocalSource localSource;
   late SyncLocalSource syncSource;
+  late SyncDeadLetterSource deadLetterSource;
   late MockWordRemoteSource mockRemote;
   late MockSyncPreferences mockPrefs;
   late MockAppLogger mockLogger;
@@ -34,21 +44,24 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(Uri.parse('http://localhost'));
-    registerFallbackValue(WordRemoteDto(
-      id: 'fake',
-      wordText: 'fake',
-      lastUpdated: DateTime.now().toUtc(),
-    ));
+    registerFallbackValue(
+      WordRemoteDto(
+        id: 'fake',
+        wordText: 'fake',
+        lastUpdated: DateTime.now().toUtc(),
+      ),
+    );
   });
 
   setUp(() async {
     db = WordFlowDatabase.test(NativeDatabase.memory());
     localSource = WordLocalSourceImpl(db);
     syncSource = SyncLocalSourceImpl(db);
+    deadLetterSource = SyncDeadLetterSourceImpl(db);
     mockRemote = MockWordRemoteSource();
     mockPrefs = MockSyncPreferences();
     mockLogger = MockAppLogger();
-    
+
     // Silence logger for tests unless needed
     when(() => mockLogger.syncEvent(any())).thenReturn(null);
     when(() => mockLogger.debug(any())).thenReturn(null);
@@ -56,8 +69,20 @@ void main() {
     when(() => mockLogger.warning(any())).thenReturn(null);
     when(() => mockLogger.error(any(), any(), any())).thenReturn(null);
 
-    wordRepo = WordRepositoryImpl(localSource, syncSource, _TestWriteQueue(), mockLogger);
-    syncRepo = SyncRepositoryImpl(localSource, syncSource, mockRemote, mockPrefs, mockLogger);
+    wordRepo = WordRepositoryImpl(
+      localSource,
+      syncSource,
+      _TestWriteQueue(),
+      mockLogger,
+    );
+    syncRepo = SyncRepositoryImpl(
+      localSource,
+      syncSource,
+      deadLetterSource,
+      mockRemote,
+      mockPrefs,
+      mockLogger,
+    );
   });
 
   tearDown(() async {
@@ -94,10 +119,10 @@ void main() {
       // 5. Verify
       expect(result.isRight(), true);
       expect(result.getOrElse((_) => -1), 3);
-      
+
       final remainingCount = await db.getPendingSyncCount();
       expect(remainingCount, 0);
-      
+
       verify(() => mockRemote.upsertWord(any())).called(3);
     });
 
@@ -107,12 +132,14 @@ void main() {
 
       // 2. Mock: first succeeds, second fails
       when(() => mockRemote.upsertWord(any())).thenAnswer((_) async => {});
-      
+
       // Override for the specific failure
       // We'll use id-2 as the failure
-      when(() => mockRemote.upsertWord(any(
-        that: isA<WordRemoteDto>().having((d) => d.id, 'id', tWord2.id)
-      ))).thenThrow(Exception('Server Error'));
+      when(
+        () => mockRemote.upsertWord(
+          any(that: isA<WordRemoteDto>().having((d) => d.id, 'id', tWord2.id)),
+        ),
+      ).thenThrow(Exception('Server Error'));
 
       // 3. Run: syncPendingWords()
       await syncRepo.syncPendingWords();
@@ -128,11 +155,17 @@ void main() {
     test('3. Exponential backoff - skip item that hasn\'t waited', () async {
       // 1. Create 1 word
       await wordRepo.saveWords([tWord1]);
-      
+
       // 2. Manually set retryCount=3 (backoff = 2^3 = 8s) and updatedAt to 5s ago
       await db.customStatement(
         'UPDATE word_sync_queue SET retry_count = 3, updated_at = ? WHERE word_id = ?',
-        [DateTime.now().toUtc().subtract(const Duration(seconds: 5)).toIso8601String(), tWord1.id],
+        [
+          DateTime.now()
+              .toUtc()
+              .subtract(const Duration(seconds: 5))
+              .toIso8601String(),
+          tWord1.id,
+        ],
       );
 
       // 3. Run: syncPendingWords()
@@ -147,7 +180,7 @@ void main() {
     test('4. Dead letter - skip item with 11 retries', () async {
       // 1. Create 1 word
       await wordRepo.saveWords([tWord1]);
-      
+
       // 2. Manually set retryCount=11
       await db.customStatement(
         'UPDATE word_sync_queue SET retry_count = 11 WHERE word_id = ?',
@@ -158,9 +191,12 @@ void main() {
       final result = await syncRepo.syncPendingWords();
 
       // 4. Verify: item removed, remote NOT called
-      expect(result.getOrElse((_) => -1), 0); // successful sync count is 0 because it was just removed
+      expect(
+        result.getOrElse((_) => -1),
+        0,
+      ); // successful sync count is 0 because it was just removed
       verifyNever(() => mockRemote.upsertWord(any()));
-      
+
       final count = await db.getPendingSyncCount();
       expect(count, 0);
     });
@@ -170,7 +206,7 @@ void main() {
       await wordRepo.saveWords([tWord1]);
       // Verify first it's upsert
       expect((await db.getSyncQueue(1)).first.operation, 'upsert');
-      
+
       await wordRepo.deleteWord(tWord1.id, userId: tWord1.userId);
 
       // 2. Verify: sync queue has operation='delete'

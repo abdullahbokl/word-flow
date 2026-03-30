@@ -4,113 +4,8 @@ import 'package:injectable/injectable.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
 import 'package:word_flow/features/vocabulary/domain/services/text_analysis_service.dart';
-
-const _stopWords = <String>{
-  'the',
-  'an',
-  'and',
-  'or',
-  'but',
-  'in',
-  'on',
-  'at',
-  'to',
-  'for',
-  'of',
-  'with',
-  'by',
-  'is',
-  'am',
-  'are',
-  'was',
-  'were',
-  'be',
-  'been',
-  'being',
-  'have',
-  'has',
-  'had',
-  'do',
-  'does',
-  'did',
-  'will',
-  'would',
-  'could',
-  'should',
-  'may',
-  'might',
-  'shall',
-  'can',
-  'need',
-  'dare',
-  'it',
-  'its',
-  'he',
-  'she',
-  'we',
-  'they',
-  'me',
-  'him',
-  'her',
-  'us',
-  'them',
-  'my',
-  'your',
-  'his',
-  'our',
-  'their',
-  'this',
-  'that',
-  'these',
-  'those',
-  'not',
-  'no',
-  'nor',
-  'so',
-  'if',
-  'then',
-  'than',
-  'too',
-  'very',
-  'just',
-  'about',
-  'also',
-  'as',
-  'from',
-  'up',
-  'out',
-  'into',
-  'over',
-  'after',
-  'before',
-  'between',
-  'under',
-  'again',
-  'more',
-  'most',
-  'other',
-  'some',
-  'such',
-  'only',
-  'own',
-  'same',
-  'each',
-  'every',
-  'both',
-  'few',
-  'all',
-  'any',
-  'many',
-  'much',
-  'how',
-  'when',
-  'where',
-  'why',
-  'what',
-  'which',
-  'who',
-  'whom',
-};
+import 'package:word_flow/features/vocabulary/domain/entities/text_analysis_config.dart';
+import 'package:word_flow/core/utils/porter_stemmer.dart';
 
 @LazySingleton(as: TextAnalysisService)
 class IsolateTextAnalysisService implements TextAnalysisService {
@@ -118,7 +13,11 @@ class IsolateTextAnalysisService implements TextAnalysisService {
   Future<ScriptAnalysis> process({
     required String rawText,
     required Set<String> knownWords,
+    required TextAnalysisConfig config,
   }) async {
+    // We pass individual properties that are Sendable to the isolate.
+    // TextAnalysisConfig is a plain class, so it can be passed if all its
+    // fields are sendable (Set, String, int, bool are all sendable).
     return Isolate.run(() {
       if (rawText.isEmpty) {
         return const ScriptAnalysis(
@@ -127,16 +26,30 @@ class IsolateTextAnalysisService implements TextAnalysisService {
         );
       }
 
-      final wordRegExp = RegExp(r"\b[a-zA-Z]{2,}(?:'[a-zA-Z]+)?\b");
+      // Build regex based on config
+      final minLen = config.minWordLength;
+      final contractions = config.includeContractionsAsOne ? '(?:\'[a-zA-Z]+)?' : '';
+      final wordRegExp = RegExp('\\b[a-zA-Z]{$minLen,}$contractions\\b');
+      
       final matches = wordRegExp.allMatches(rawText);
 
       final wordCounts = <String, int>{};
+      final stemToVariants = <String, Set<String>>{};
+      final stopWords = config.stopWords;
+      final stemmer = config.useStemming ? PorterStemmer() : null;
+
       for (final match in matches) {
-        final normalizedWord = match.group(0)!.toLowerCase();
-        if (_stopWords.contains(normalizedWord)) {
+        final originalWord = match.group(0)!.toLowerCase();
+        if (stopWords.contains(originalWord)) {
           continue;
         }
-        wordCounts[normalizedWord] = (wordCounts[normalizedWord] ?? 0) + 1;
+
+        final targetKey = stemmer?.stem(originalWord) ?? originalWord;
+        
+        wordCounts[targetKey] = (wordCounts[targetKey] ?? 0) + 1;
+        if (config.useStemming) {
+          stemToVariants.putIfAbsent(targetKey, () => <String>{}).add(originalWord);
+        }
       }
 
       final processed = <ProcessedWord>[];
@@ -149,11 +62,14 @@ class IsolateTextAnalysisService implements TextAnalysisService {
           newWordCount++;
         }
 
+        final variants = stemToVariants[wordText]?.toList() ?? const <String>[];
+
         processed.add(
           ProcessedWord(
             wordText: wordText,
             totalCount: entry.value,
             isKnown: isKnown,
+            variants: variants,
           ),
         );
       }

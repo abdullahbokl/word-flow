@@ -34,6 +34,10 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# Environment configuration (local development only)
+dart_define.json
+.vscode/.secrets/
+
 # Platform-generated local config and build outputs
 android/.gradle/
 android/build/
@@ -82,8 +86,10 @@ pubspec.lock
 
 implementation_plan.md
 
-# Generated files
+# Generated files - do not commit
 *.g.dart
 *.freezed.dart
 *.config.dart
 *.injectable.dart
+lib/app/di.config.dart
+lib/app/router/routes.g.dart

@@ -20,8 +20,8 @@ class WordResultsList extends StatefulWidget {
 }
 
 class _WordResultsListState extends State<WordResultsList> {
-  static const _exitDuration = Duration(milliseconds: 450);
-  static const _insertDuration = Duration(milliseconds: 400);
+  static const _exitDuration = Duration(milliseconds: 700);
+  static const _insertDuration = Duration(milliseconds: 600);
 
   GlobalKey<SliverAnimatedListState> _listKey = GlobalKey<SliverAnimatedListState>();
   late List<ProcessedWord> _visibleWords;

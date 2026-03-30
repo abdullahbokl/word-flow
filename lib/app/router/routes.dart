@@ -3,8 +3,10 @@ import 'package:go_router/go_router.dart';
 import 'package:word_flow/features/word_learning/presentation/pages/workspace_page.dart';
 import 'package:word_flow/features/vocabulary/presentation/pages/library_page.dart';
 import 'package:word_flow/features/profile/presentation/pages/profile_page.dart';
-import 'package:word_flow/features/authentication/presentation/pages/auth_page.dart';
+import 'package:word_flow/features/auth/presentation/pages/auth_page.dart';
+import 'package:word_flow/features/vocabulary/presentation/pages/analysis_settings_page.dart';
 import 'package:word_flow/app/router/splash_page.dart';
+import 'package:word_flow/features/auth/presentation/pages/reset_password_page.dart';
 
 part 'routes.g.dart';
 
@@ -15,11 +17,26 @@ class SplashRoute extends GoRouteData with _$SplashRoute {
   Widget build(BuildContext context, GoRouterState state) => const SplashPage();
 }
 
+@TypedGoRoute<AnalysisSettingsRoute>(path: '/settings/analysis')
+class AnalysisSettingsRoute extends GoRouteData with _$AnalysisSettingsRoute {
+  const AnalysisSettingsRoute();
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const AnalysisSettingsPage();
+}
+
 @TypedGoRoute<AuthRoute>(path: '/auth')
 class AuthRoute extends GoRouteData with _$AuthRoute {
   const AuthRoute();
   @override
   Widget build(BuildContext context, GoRouterState state) => const AuthPage();
+}
+
+@TypedGoRoute<ResetPasswordRoute>(path: '/reset-password')
+class ResetPasswordRoute extends GoRouteData with _$ResetPasswordRoute {
+  const ResetPasswordRoute();
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ResetPasswordPage();
 }
 
 @TypedGoRoute<WorkspaceRoute>(path: '/workspace')

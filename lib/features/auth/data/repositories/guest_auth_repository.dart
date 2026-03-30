@@ -6,7 +6,7 @@ import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart
 
 class GuestAuthRepository implements AuthRepository {
   @override
-  Stream<AuthStateChange> get authStateStream => Stream.empty();
+  Stream<AuthStateChange> get authStateStream => const Stream.empty();
 
   @override
   AuthUser? get currentUser => null;

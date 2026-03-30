@@ -4,8 +4,12 @@ import 'package:word_flow/features/word_learning/domain/entities/script_analysis
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_state.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cubit.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/results_section.dart';
-import 'package:word_flow/features/word_learning/presentation/widgets/script_input_section.dart';
+import 'package:word_flow/features/word_learning/presentation/widgets/script_input_widget.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/workspace_header.dart';
+import 'package:word_flow/core/widgets/error_state_widget.dart';
+import 'package:word_flow/core/errors/failure_mapper.dart';
+import 'package:word_flow/core/errors/failures.dart';
+import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
 
 class WorkspaceBody extends StatelessWidget {
 
@@ -40,22 +44,71 @@ class WorkspaceBody extends StatelessWidget {
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: BlocSelector<WorkspaceCubit, WorkspaceState, bool>(
+                  sliver: BlocSelector<WorkspaceCubit, WorkspaceState,
+                      ({bool isProcessing, double progress, int totalWords})>(
                     selector: (state) => state.maybeMap(
-                      processing: (_) => true,
-                      orElse: () => false,
+                      processing: (s) => (
+                        isProcessing: true,
+                        progress: s.progress,
+                        totalWords: s.totalWords,
+                      ),
+                      orElse: () => (
+                        isProcessing: false,
+                        progress: 0.0,
+                        totalWords: 0,
+                      ),
                     ),
-                    builder: (context, isProcessing) => SliverToBoxAdapter(
-                      child: ScriptInputSection(
+                    builder: (context, processingVm) => SliverToBoxAdapter(
+                      child: ScriptInputWidget(
                         controller: controller,
-                        isProcessing: isProcessing,
+                        isProcessing: processingVm.isProcessing,
+                        progress: processingVm.progress,
+                        totalWords: processingVm.totalWords,
                       ),
                     ),
                   ),
                 ),
-                const SliverPadding(
-                  padding: EdgeInsets.fromLTRB(20, 18, 20, 28),
-                  sliver: ResultsSection(),
+                BlocBuilder<WorkspaceCubit, WorkspaceState>(
+                  buildWhen: (p, c) => c.maybeMap(
+                    results: (_) => true,
+                    error: (_) => true,
+                    orElse: () => false,
+                  ) || p.maybeMap(
+                    results: (_) => true,
+                    error: (_) => true,
+                    orElse: () => false,
+                  ),
+                  builder: (context, state) {
+                    return state.maybeMap(
+                      results: (_) => const SliverPadding(
+                        padding: EdgeInsets.fromLTRB(20, 18, 20, 28),
+                        sliver: ResultsSection(),
+                      ),
+                      error: (s) {
+                        final isAuth = s.failure is AuthFailure;
+                        return SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                            child: ErrorStateWidget(
+                              title: s.failure?.title ?? 'Analysis Failed',
+                              message: s.failure?.friendlyMessage ?? s.message,
+                              icon: s.failure?.icon ?? Icons.analytics_rounded,
+                              onRetry: isAuth
+                                  ? null
+                                  : () {
+                                      final userId = context.read<AuthCubit>().currentUserId;
+                                      context.read<WorkspaceCubit>().analyze(controller.text, userId: userId);
+                                    },
+                              actionLabel: isAuth ? 'Sign In Again' : null,
+                              onAction: isAuth ? () => context.read<AuthCubit>().logOut() : null,
+                            ),
+                          ),
+                        );
+                      },
+                      orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+                    );
+                  },
                 ),
               ],
             ),

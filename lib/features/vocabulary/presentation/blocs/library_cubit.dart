@@ -9,6 +9,7 @@ import 'package:word_flow/features/vocabulary/domain/usecases/update_word.dart';
 import 'package:word_flow/features/vocabulary/domain/usecases/watch_words.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_state.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_optimistic_updates.dart';
+import 'package:word_flow/core/errors/failures.dart';
 
 @injectable
 class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
@@ -23,13 +24,15 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   final DeleteWord _deleteWord;
   StreamSubscription? _wordsSubscription;
   Set<String> _pendingWordIds = <String>{};
+  final Map<String, Timer> _debounceTimers = {};
+  static const _debounceMs = 2000;
 
   void init(String? userId) {
     emit(const LibraryState.loading());
     _wordsSubscription?.cancel();
     _wordsSubscription = _watchWords(UserIdParams(userId: userId)).listen((result) {
       result.fold(
-        (failure) => _emitLoadedError(failure.message),
+        (failure) => _emitLoadedError(failure.message, failure: failure),
         (words) {
           state.maybeMap(
             loaded: (s) => emit(s.copyWith(words: words, pendingWordIds: _pendingWordIds)),
@@ -55,6 +58,11 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   }
 
   Future<void> toggleKnown(WordEntity word) async {
+    // Debounce rapid toggles on the same word (2 second cooldown)
+    if (_debounceTimers.containsKey(word.id)) {
+      return; // Ignore this call; debounce active
+    }
+
     final updatedWord = word.copyWith(
       isKnown: !word.isKnown,
       lastUpdated: DateTime.now().toUtc(),
@@ -62,12 +70,22 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     final prev = word;
     _markPending(word.id);
     _optimisticallyReplace(updatedWord);
+
+    // Start debounce timer
+    _debounceTimers[word.id] = Timer(
+      const Duration(milliseconds: _debounceMs),
+      () => _debounceTimers.remove(word.id),
+    );
+
     final result = await _updateWord(updatedWord);
     result.fold(
       (f) {
         _unmarkPending(word.id);
         _optimisticallyReplace(prev);
-        _emitLoadedError(f.message);
+        _emitLoadedError(f.message, failure: f);
+        // Clear debounce timer on error to allow retry
+        _debounceTimers[word.id]?.cancel();
+        _debounceTimers.remove(word.id);
       },
       (_) => _unmarkPending(word.id),
     );
@@ -91,7 +109,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       (f) {
         _unmarkPending(id);
         if (prevWord != null) _optimisticallyUpsert(prevWord);
-        _emitLoadedError(f.message);
+        _emitLoadedError(f.message, failure: f);
       },
       (_) => _unmarkPending(id),
     );
@@ -112,7 +130,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       (f) {
         _unmarkPending(word.id);
         _optimisticallyRemove(word.id);
-        _emitLoadedError(f.message);
+        _emitLoadedError(f.message, failure: f);
       },
       (_) => _unmarkPending(word.id),
     );
@@ -132,7 +150,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       (f) {
         _unmarkPending(word.id);
         _optimisticallyReplace(prev);
-        _emitLoadedError(f.message);
+        _emitLoadedError(f.message, failure: f);
       },
       (_) => _unmarkPending(word.id),
     );
@@ -141,8 +159,8 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   void clearError() {
     state.maybeMap(
       loaded: (s) {
-        if (s.lastError != null) {
-          emit(s.copyWith(lastError: null));
+        if (s.lastError != null || s.failure != null) {
+          emit(s.copyWith(lastError: null, failure: null));
         }
       },
       orElse: () {},
@@ -167,10 +185,10 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     );
   }
 
-  void _emitLoadedError(String message) {
+  void _emitLoadedError(String message, {Failure? failure}) {
     state.maybeMap(
-      loaded: (s) => emit(s.copyWith(lastError: message)),
-      orElse: () => emit(LibraryState.error(message)),
+      loaded: (s) => emit(s.copyWith(lastError: message, failure: failure)),
+      orElse: () => emit(LibraryState.error(message, failure: failure)),
     );
   }
 
@@ -186,6 +204,11 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   @override
   Future<void> close() {
     _wordsSubscription?.cancel();
+    // Clean up all debounce timers
+    for (final timer in _debounceTimers.values) {
+      timer.cancel();
+    }
+    _debounceTimers.clear();
     return super.close();
   }
 }

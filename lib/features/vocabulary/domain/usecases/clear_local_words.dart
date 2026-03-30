@@ -12,13 +12,13 @@ class ClearLocalWords extends BaseUseCase<void, ClearLocalWordsParams> {
 
   @override
   Future<Either<Failure, void>> call(ClearLocalWordsParams params) {
-    return _repository.clearLocalWords(userId: params.userId);
+    return _repository.clearLocalWords(params.userId);
   }
 }
 
 class ClearLocalWordsParams extends Equatable {
-  const ClearLocalWordsParams({this.userId});
-  final String? userId;
+  const ClearLocalWordsParams({required this.userId});
+  final String userId;
 
   @override
   List<Object?> get props => [userId];

@@ -5,15 +5,18 @@ import 'package:word_flow/core/database/app_database.dart';
 abstract class WordLocalSource {
   Future<void> saveWord(WordsCompanion word);
   Future<void> saveWords(List<WordsCompanion> words);
+  Future<void> saveWordsInTransaction(List<WordsCompanion> companions);
   Future<Map<String, WordRow>> getWordTextMap({String? userId});
   Future<List<WordRow>> getWords({String? userId});
+  Future<List<WordRow>> getWordsByTexts(List<String> texts, {String? userId});
   Future<List<String>> getKnownWordTexts({String? userId});
   Future<WordRow?> getWordById(String id);
   Future<WordRow?> getWordByText(String text, {String? userId});
   Future<void> deleteWord(String id);
   Stream<List<WordRow>> watchWords({String? userId});
   Future<int> adoptGuestWords(String userId);
-  Future<void> clearLocalWords({String? userId});
+  Future<void> clearLocalWords(String userId);
+  Future<void> clearGuestWords();
   Future<int> getGuestWordsCount();
 }
 
@@ -31,6 +34,12 @@ class WordLocalSourceImpl implements WordLocalSource {
   @override
   Future<void> saveWords(List<WordsCompanion> words) async {
     await _db.upsertWords(words);
+  }
+
+  @override
+  Future<void> saveWordsInTransaction(List<WordsCompanion> companions) async {
+    // All page writes must commit atomically to avoid partial pull application.
+    await _db.upsertWordsInTransaction(companions);
   }
 
   @override
@@ -53,6 +62,11 @@ class WordLocalSourceImpl implements WordLocalSource {
   @override
   Future<List<WordRow>> getWords({String? userId}) async {
     return _db.watchWords(userId: userId).first;
+  }
+
+  @override
+  Future<List<WordRow>> getWordsByTexts(List<String> texts, {String? userId}) async {
+    return _db.getWordsByTexts(texts, userId: userId);
   }
 
   @override
@@ -86,7 +100,12 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Future<void> clearLocalWords({String? userId}) async {
-    await _db.clearLocalWords(userId: userId);
+  Future<void> clearLocalWords(String userId) async {
+    await _db.clearLocalWords(userId);
+  }
+
+  @override
+  Future<void> clearGuestWords() async {
+    await _db.clearGuestWords();
   }
 }

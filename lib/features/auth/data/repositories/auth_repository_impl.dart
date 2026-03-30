@@ -1,14 +1,20 @@
 import 'dart:async';
 import 'package:fpdart/fpdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:word_flow/core/errors/exceptions.dart';
 import 'package:word_flow/core/errors/failures.dart';
+import 'package:word_flow/core/errors/error_mapper.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_state_change.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
+import 'package:word_flow/features/auth/data/datasources/auth_remote_source.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl(this._supabase);
+  AuthRepositoryImpl(this._supabase, this._remoteSource, this._logger);
   final supabase.SupabaseClient _supabase;
+  final AuthRemoteSource _remoteSource;
+  final AppLogger _logger;
 
   @override
   Stream<AuthStateChange> get authStateStream =>
@@ -22,6 +28,8 @@ class AuthRepositoryImpl implements AuthRepository {
             return AuthStateChange.tokenRefreshed;
           case supabase.AuthChangeEvent.userUpdated:
             return AuthStateChange.userUpdated;
+          case supabase.AuthChangeEvent.passwordRecovery:
+            return AuthStateChange.passwordRecovery;
           default:
             return AuthStateChange.unknown;
         }
@@ -40,40 +48,45 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, AuthUser>> signInWithEmail(String email, String password) async {
     try {
-      final response = await _supabase.auth.signInWithPassword(
+      final user = await _remoteSource.signInWithEmail(
         email: email,
         password: password,
       );
-      final user = response.user;
-      if (user == null) return const Left(AuthFailure('User not found'));
-      return Right(AuthUser(id: user.id, email: user.email ?? ''));
-    } catch (e) {
-      return Left(AuthFailure(e.toString()));
+      return Right(user);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
+    } catch (e, stackTrace) {
+      // Keep Failure polymorphic; forcing AuthFailure here can throw CastError.
+      return Left(ErrorMapper.mapException(e, stackTrace, _logger));
     }
   }
 
   @override
   Future<Either<Failure, AuthUser>> signUpWithEmail(String email, String password) async {
     try {
-      final response = await _supabase.auth.signUp(
+      final user = await _remoteSource.signUpWithEmail(
         email: email,
         password: password,
       );
-      final user = response.user;
-      if (user == null) return const Left(AuthFailure('Sign up failed'));
-      return Right(AuthUser(id: user.id, email: user.email ?? ''));
-    } catch (e) {
-      return Left(AuthFailure(e.toString()));
+      return Right(user);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
+    } catch (e, stackTrace) {
+      // Keep Failure polymorphic; forcing AuthFailure here can throw CastError.
+      return Left(ErrorMapper.mapException(e, stackTrace, _logger));
     }
   }
 
   @override
   Future<Either<Failure, void>> signOut() async {
     try {
-      await _supabase.auth.signOut();
+      await _remoteSource.signOut();
       return const Right(null);
-    } catch (e) {
-      return Left(AuthFailure(e.toString()));
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
+    } catch (e, stackTrace) {
+      // Keep Failure polymorphic; forcing AuthFailure here can throw CastError.
+      return Left(ErrorMapper.mapException(e, stackTrace, _logger));
     }
   }
 }

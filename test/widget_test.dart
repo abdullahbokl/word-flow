@@ -13,8 +13,8 @@ import 'package:word_flow/features/word_learning/domain/entities/processed_word.
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cubit.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_state.dart';
 import 'package:word_flow/features/word_learning/presentation/pages/workspace_page.dart';
-import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit.dart';
-import 'package:word_flow/features/authentication/presentation/blocs/auth_state.dart';
+import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/blocs/auth_state.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart';
 

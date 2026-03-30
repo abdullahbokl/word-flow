@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
 import 'package:word_flow/core/widgets/sync_status_badge.dart';
-import 'package:word_flow/features/authentication/presentation/widgets/auth_status_bar.dart';
+import 'package:word_flow/features/auth/presentation/widgets/auth_status_bar.dart';
 import 'package:word_flow/app/router/routes.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/metric_tile.dart';
 
@@ -39,6 +39,12 @@ class WorkspaceHeader extends StatelessWidget {
                   onPressed: () => const LibraryRoute().push(context),
                   icon: const Icon(Icons.library_books_rounded, size: 20),
                   tooltip: 'My Words Library',
+                ),
+                const SizedBox(width: 8),
+                IconButton.filledTonal(
+                  onPressed: () => const AnalysisSettingsRoute().push(context),
+                  icon: const Icon(Icons.tune_rounded, size: 20),
+                  tooltip: 'Analysis Settings',
                 ),
               ],
             ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit.dart';
-import 'package:word_flow/features/authentication/presentation/blocs/auth_state.dart';
-import 'package:word_flow/features/authentication/presentation/widgets/merge_conflict_dialog.dart';
+import 'package:word_flow/features/auth/presentation/blocs/migration_cubit.dart';
+import 'package:word_flow/features/auth/presentation/blocs/migration_state.dart';
+import 'package:word_flow/features/auth/presentation/widgets/merge_conflict_dialog.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cubit.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_state.dart';
 
@@ -15,7 +15,7 @@ class WorkspaceListeners extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocListener(
       listeners: [
-        BlocListener<AuthCubit, AuthState>(
+        BlocListener<MigrationCubit, MigrationState>(
           listener: (context, state) {
             state.maybeMap(
               pendingMerge: (s) => showDialog(

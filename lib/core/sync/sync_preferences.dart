@@ -1,19 +1,27 @@
 import 'package:injectable/injectable.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:word_flow/core/database/app_database.dart';
 
 @lazySingleton
 class SyncPreferences {
-  static const _lastPullPrefix = 'sync_last_pull_';
+  SyncPreferences(this._db);
+
+  static const _lastPullPrefix = 'sync_pull_';
+  final WordFlowDatabase _db;
 
   Future<DateTime?> getLastPullTimestamp(String userId) async {
-    final prefs = await SharedPreferences.getInstance();
-    final timestampStr = prefs.getString('$_lastPullPrefix$userId');
+    final timestampStr = await _db.getAppSetting('$_lastPullPrefix$userId');
     if (timestampStr == null) return null;
     return DateTime.parse(timestampStr);
   }
 
   Future<void> setLastPullTimestamp(String userId, DateTime timestamp) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('$_lastPullPrefix$userId', timestamp.toIso8601String());
+    await _db.upsertAppSetting(
+      '$_lastPullPrefix$userId',
+      timestamp.toUtc().toIso8601String(),
+    );
+  }
+
+  Future<void> clearUserTimestamp(String userId) async {
+    await _db.deleteAppSetting('$_lastPullPrefix$userId');
   }
 }

@@ -5,23 +5,28 @@ class Words extends Table {
   TextColumn get id => text()();
   TextColumn get userId => text().nullable().named('user_id')();
   TextColumn get wordText => text().named('word_text')();
-  IntColumn get totalCount => integer().named('total_count').withDefault(const Constant(1))();
+  IntColumn get totalCount =>
+      integer().named('total_count').withDefault(const Constant(1))();
   BoolColumn get isKnown =>
       boolean().named('is_known').withDefault(const Constant(false))();
   DateTimeColumn get lastUpdated => dateTime().named('last_updated')();
+  DateTimeColumn get serverTimestamp =>
+      dateTime().nullable().named('server_timestamp')();
 
   @override
   Set<Column> get primaryKey => {id};
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {userId, wordText},
-      ];
+    {userId, wordText},
+  ];
 }
 
 class WordSyncQueue extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get wordId => text().named('word_id')();
+  TextColumn get wordId => text()
+      .references(Words, #id, onDelete: KeyAction.cascade)
+      .named('word_id')();
   TextColumn get operation => text()();
   IntColumn get retryCount =>
       integer().named('retry_count').withDefault(const Constant(0))();
@@ -31,6 +36,25 @@ class WordSyncQueue extends Table {
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {wordId, operation},
-      ];
+    {wordId, operation},
+  ];
+}
+
+class AppSettings extends Table {
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}
+
+class SyncDeadLetters extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get wordId => text().named('word_id')();
+  TextColumn get wordText => text().named('word_text')();
+  TextColumn get operation => text()();
+  TextColumn get lastError => text().named('last_error')();
+  DateTimeColumn get failedAt => dateTime().named('failed_at')();
+  BoolColumn get isAcknowledged =>
+      boolean().named('is_acknowledged').withDefault(const Constant(false))();
 }

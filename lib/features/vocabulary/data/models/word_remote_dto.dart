@@ -10,8 +10,12 @@ class WordRemoteDto with _$WordRemoteDto {
     @JsonKey(name: 'user_id') String? userId,
     @JsonKey(name: 'word_text') required String wordText,
     @JsonKey(name: 'total_count') @Default(1) int totalCount,
-    @JsonKey(name: 'is_known') @Default(false) @BoolFromIntConverter() bool isKnown,
+    @JsonKey(name: 'is_known')
+    @Default(false)
+    @BoolFromIntConverter()
+    bool isKnown,
     @JsonKey(name: 'last_updated') required DateTime lastUpdated,
+    @JsonKey(name: 'server_timestamp') DateTime? serverTimestamp,
   }) = _WordRemoteDto;
 
   factory WordRemoteDto.fromJson(Map<String, dynamic> json) =>

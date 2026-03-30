@@ -5,12 +5,14 @@ class ProcessedWord extends Equatable {
     required this.wordText,
     required this.totalCount,
     this.isKnown = false,
+    this.variants = const [],
   });
 
   final String wordText;
   final int totalCount;
   final bool isKnown;
+  final List<String> variants;
 
   @override
-  List<Object?> get props => [wordText, totalCount, isKnown];
+  List<Object?> get props => [wordText, totalCount, isKnown, variants];
 }

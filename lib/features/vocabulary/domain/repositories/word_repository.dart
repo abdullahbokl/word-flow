@@ -9,7 +9,8 @@ abstract class WordRepository {
   Future<Either<Failure, List<String>>> getKnownWordTexts({String? userId});
   Stream<List<WordEntity>> watchWords({String? userId});
   Future<Either<Failure, int>> adoptGuestWords(String userId);
-  Future<Either<Failure, void>> clearLocalWords({String? userId});
+  Future<Either<Failure, void>> clearLocalWords(String userId);
+  Future<Either<Failure, void>> clearGuestWords();
   Future<Either<Failure, int>> getGuestWordsCount();
   Future<Either<Failure, void>> deleteWord(String id, {String? userId});
   Future<Either<Failure, void>> updateWord(WordEntity word);

@@ -32,14 +32,14 @@ void main() {
       mockDeleteWord,
     );
     
-    registerFallbackValue(DeleteWordParams(id: '1', userId: null));
+    registerFallbackValue(const DeleteWordParams(id: '1', userId: null));
     registerFallbackValue(WordEntity(
       id: '1', 
       wordText: 'test', 
       isKnown: false, 
       lastUpdated: DateTime.now()
     ));
-    registerFallbackValue(UserIdParams());
+    registerFallbackValue(const UserIdParams());
   });
 
   const tUserId = 'user-123';

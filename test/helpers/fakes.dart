@@ -10,6 +10,7 @@ import 'package:word_flow/features/vocabulary/domain/services/text_analysis_serv
 // Data Sources
 import 'package:word_flow/features/vocabulary/data/datasources/word_local_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/word_remote_source.dart';
+import 'package:word_flow/features/vocabulary/data/datasources/sync_dead_letter_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source.dart';
 
 // Core
@@ -37,6 +38,7 @@ import 'package:word_flow/features/vocabulary/domain/usecases/watch_words.dart';
 // ============================================================================
 
 class MockWordRepository extends Mock implements WordRepository {}
+
 class MockSyncRepository extends Mock implements SyncRepository {}
 
 // ============================================================================
@@ -50,8 +52,13 @@ class MockTextAnalysisService extends Mock implements TextAnalysisService {}
 // ============================================================================
 
 class MockWordLocalSource extends Mock implements WordLocalSource {}
+
 class MockWordRemoteSource extends Mock implements WordRemoteSource {}
+
 class MockSyncLocalSource extends Mock implements SyncLocalSource {}
+
+class MockSyncDeadLetterSource extends Mock implements SyncDeadLetterSource {}
+
 class MockLocalWriteQueue extends Mock implements LocalWriteQueue {}
 
 // ============================================================================
@@ -59,18 +66,31 @@ class MockLocalWriteQueue extends Mock implements LocalWriteQueue {}
 // ============================================================================
 
 class MockAdoptGuestWords extends Mock implements AdoptGuestWords {}
+
 class MockClearLocalWords extends Mock implements ClearLocalWords {}
+
 class MockDeleteWord extends Mock implements DeleteWord {}
+
 class MockGetGuestWordsCount extends Mock implements GetGuestWordsCount {}
+
 class MockGetKnownWords extends Mock implements GetKnownWords {}
+
 class MockGetKnownWordTexts extends Mock implements GetKnownWordTexts {}
+
 class MockGetPendingCount extends Mock implements GetPendingCount {}
+
 class MockProcessScript extends Mock implements ProcessScript {}
+
 class MockSaveProcessedWords extends Mock implements SaveProcessedWords {}
+
 class MockSyncPendingWords extends Mock implements SyncPendingWords {}
+
 class MockToggleKnownWord extends Mock implements ToggleKnownWord {}
+
 class MockUpdateWord extends Mock implements UpdateWord {}
+
 class MockWatchPendingCount extends Mock implements WatchPendingCount {}
+
 class MockWatchWords extends Mock implements WatchWords {}
 
 // ============================================================================

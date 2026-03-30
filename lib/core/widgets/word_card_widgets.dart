@@ -13,19 +13,37 @@ class StatusIndicator extends StatelessWidget {
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(
-          isKnown ? Icons.verified_rounded : Icons.auto_awesome_rounded,
-          color: color,
-          size: 20,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: (child, animation) => ScaleTransition(
+            scale: animation,
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          ),
+          child: Icon(
+            isKnown ? Icons.verified_rounded : Icons.auto_awesome_rounded,
+            key: ValueKey('status_${isKnown ? 'known' : 'unknown'}'),
+            color: color,
+            size: 20,
+          ),
         ),
       );
 }
 
 class WordInfo extends StatelessWidget {
-  const WordInfo({super.key, required this.text, required this.count, required this.isKnown});
+  const WordInfo({
+    super.key,
+    required this.text,
+    required this.count,
+    required this.isKnown,
+    this.variants = const [],
+  });
   final String text;
   final int count;
   final bool isKnown;
+  final List<String> variants;
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -38,6 +56,16 @@ class WordInfo extends StatelessWidget {
           'Count: $count • ${isKnown ? "Known" : "Unknown"}',
           style: textTheme.bodySmall,
         ),
+        if (variants.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            'Variants: ${variants.join(", ")}',
+            style: textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
       ],
     );
   }
@@ -54,12 +82,23 @@ class ToggleButton extends StatelessWidget {
         width: 48,
         height: 48,
         child: IconButton(
-          icon: isPending
-              ? AppLoader(size: 16, color: statusColor)
-              : Icon(
-                  isKnown ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
-                  color: isKnown ? Theme.of(context).colorScheme.primary : null,
-                ),
+          icon: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (child, animation) => ScaleTransition(
+              scale: animation,
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            ),
+            child: isPending
+                ? AppLoader(key: const ValueKey('loader'), size: 16, color: statusColor)
+                : Icon(
+                    isKnown ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
+                    key: ValueKey('checkbox_${isKnown ? 'checked' : 'unchecked'}'),
+                    color: isKnown ? Theme.of(context).colorScheme.primary : null,
+                  ),
+          ),
           onPressed: isPending ? null : onToggle,
           tooltip: 'Toggle status',
         ),

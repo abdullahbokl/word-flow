@@ -21,6 +21,7 @@ class ConnectivityMonitor {
   StreamSubscription? _connectivitySubscription;
   StreamSubscription? _internetSubscription;
   Timer? _debounceTimer;
+  bool _isDisposed = false;
 
   static const Duration reconnectDebounce = Duration(seconds: 3);
 
@@ -35,9 +36,14 @@ class ConnectivityMonitor {
   }
 
   Future<void> _evaluateConnectivity() async {
+    if (_isDisposed) return;
+
     final results = await _connectivity.checkConnectivity();
+    if (_isDisposed) return;
+
     final hasInterface = !results.contains(ConnectivityResult.none);
     final hasInternet = await _checker.hasInternetAccess;
+    if (_isDisposed) return;
 
     final newStatus = (hasInterface && hasInternet) 
         ? ConnectivityStatus.online 
@@ -47,7 +53,6 @@ class ConnectivityMonitor {
       _debounceTimer?.cancel();
       _emitIfChanged(ConnectivityStatus.offline);
     } else {
-      // If we were offline or initial, and now interface is up, debounce the "online" event
       if (_lastStatus != ConnectivityStatus.online && !(_debounceTimer?.isActive ?? false)) {
         _debounceTimer = Timer(reconnectDebounce, () async {
           if (await _checker.hasInternetAccess) {
@@ -59,14 +64,13 @@ class ConnectivityMonitor {
   }
 
   void _emitIfChanged(ConnectivityStatus status) {
+    if (_isDisposed) return;
     if (_lastStatus != status) {
       _lastStatus = status;
       _controller.add(status);
     }
   }
 
-  /// Verifies actual reachability to the Supabase health endpoint.
-  /// Useful for detecting captive portals or domain-specific blocks.
   Future<bool> checkReachability() async {
     if (!EnvConfig.isConfigured) return false;
     
@@ -81,9 +85,8 @@ class ConnectivityMonitor {
     }
   }
 
-  /// Returns true if the device has a network interface and internet access.
-  /// Uses cached status from InternetConnectionCheckerPlus for speed.
   Future<bool> get isOnline async {
+    if (_isDisposed) return false;
     final results = await _connectivity.checkConnectivity();
     if (results.contains(ConnectivityResult.none)) return false;
     return await _checker.hasInternetAccess;
@@ -91,6 +94,8 @@ class ConnectivityMonitor {
 
   @disposeMethod
   void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
     _debounceTimer?.cancel();
     _connectivitySubscription?.cancel();
     _internetSubscription?.cancel();
