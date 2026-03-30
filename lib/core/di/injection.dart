@@ -4,9 +4,14 @@ import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:word_flow/core/config/env_config.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
+import 'package:word_flow/features/auth/data/datasources/auth_remote_source.dart';
 import 'package:word_flow/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:word_flow/features/auth/data/repositories/guest_auth_repository.dart';
 import 'package:word_flow/core/di/injection.config.dart';
+import 'package:word_flow/core/database/app_database.dart';
+import 'package:word_flow/core/database/database_key_manager.dart';
+
+import 'package:word_flow/features/vocabulary/data/datasources/word_remote_source.dart';
 
 final getIt = GetIt.instance;
 
@@ -15,16 +20,23 @@ abstract class RegisterModule {
   @lazySingleton
   SupabaseClient get supabaseClient {
     if (!EnvConfig.isConfigured) {
-      // Provide a dummy client to avoid DI crashes when keys are missing.
-      return SupabaseClient('https://disabled.supabase.io', 'disabled');
+      throw StateError('Supabase is not configured');
     }
     return Supabase.instance.client;
   }
 
   @lazySingleton
+  WordRemoteSource get wordRemoteSource {
+    if (EnvConfig.isConfigured) {
+      return WordRemoteSourceImpl(supabaseClient);
+    }
+    return DisabledWordRemoteSource();
+  }
+
+  @lazySingleton
   AuthRepository get authRepository {
     if (EnvConfig.isConfigured) {
-      return AuthRepositoryImpl(supabaseClient);
+      return AuthRepositoryImpl(supabaseClient, getIt<AuthRemoteSource>());
     }
     return GuestAuthRepository();
   }
@@ -37,6 +49,12 @@ abstract class RegisterModule {
           accessibility: KeychainAccessibility.first_unlock,
         ),
       );
+  @lazySingleton
+  @preResolve
+  Future<WordFlowDatabase> getDatabase(DatabaseKeyManager keyManager) async {
+    final key = await keyManager.getOrCreateKey();
+    return WordFlowDatabase(key);
+  }
 }
 
 @InjectableInit(
@@ -44,4 +62,4 @@ abstract class RegisterModule {
   preferRelativeImports: true,
   asExtension: true,
 )
-void configureDependencies() => getIt.init();
+Future<void> configureDependencies() async => await getIt.init();

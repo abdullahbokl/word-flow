@@ -9,7 +9,7 @@ import 'package:word_flow/features/word_learning/presentation/widgets/workspace_
 import 'package:word_flow/core/widgets/error_state_widget.dart';
 import 'package:word_flow/core/errors/failure_mapper.dart';
 import 'package:word_flow/core/errors/failures.dart';
-import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
 
 class WorkspaceBody extends StatelessWidget {
 

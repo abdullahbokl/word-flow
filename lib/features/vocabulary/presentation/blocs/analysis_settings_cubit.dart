@@ -6,11 +6,11 @@ import 'package:word_flow/features/vocabulary/presentation/blocs/analysis_settin
 
 @injectable
 class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
-  final GetTextAnalysisConfig _getConfig;
-  final SettingsRepository _repository;
-
   AnalysisSettingsCubit(this._getConfig, this._repository)
       : super(const AnalysisSettingsState.initial());
+
+  final GetTextAnalysisConfig _getConfig;
+  final SettingsRepository _repository;
 
   Future<void> load() async {
     emit(const AnalysisSettingsState.loading());
@@ -22,7 +22,7 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
   }
 
   Future<void> updateLanguage(String lang) async {
-    state.maybeWhen(
+    await state.maybeWhen(
       loaded: (config, isSaving, error) async {
         final result = await _repository.updateLanguage(lang);
         result.fold(
@@ -35,7 +35,7 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
   }
 
   Future<void> updateMinWordLength(int length) async {
-    state.maybeWhen(
+    await state.maybeWhen(
       loaded: (config, isSaving, error) async {
         final result = await _repository.updateMinWordLength(length);
         result.fold(
@@ -48,7 +48,7 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
   }
 
   Future<void> toggleContractions(bool enabled) async {
-    state.maybeWhen(
+    await state.maybeWhen(
       loaded: (config, isSaving, error) async {
         final result = await _repository.updateIncludeContractions(enabled);
         result.fold(
@@ -61,7 +61,7 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
   }
 
   Future<void> toggleStemming(bool enabled) async {
-    state.maybeWhen(
+    await state.maybeWhen(
       loaded: (config, isSaving, error) async {
         final result = await _repository.updateUseStemming(enabled);
         result.fold(
@@ -75,7 +75,7 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
 
   Future<void> addStopword(String word) async {
     if (word.trim().isEmpty) return;
-    state.maybeWhen(
+    await state.maybeWhen(
       loaded: (config, isSaving, error) async {
         final result = await _repository.addCustomStopword(word.trim().toLowerCase());
         result.fold(
@@ -88,7 +88,7 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
   }
 
   Future<void> removeStopword(String word) async {
-    state.maybeWhen(
+    await state.maybeWhen(
       loaded: (config, isSaving, error) async {
         final result = await _repository.removeCustomStopword(word);
         result.fold(

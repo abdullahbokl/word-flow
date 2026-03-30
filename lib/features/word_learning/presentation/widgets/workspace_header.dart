@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
 import 'package:word_flow/core/widgets/sync_status_badge.dart';
-import 'package:word_flow/features/authentication/presentation/widgets/auth_status_bar.dart';
+import 'package:word_flow/features/auth/presentation/widgets/auth_status_bar.dart';
 import 'package:word_flow/app/router/routes.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/metric_tile.dart';
 

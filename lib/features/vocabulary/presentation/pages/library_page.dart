@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:word_flow/core/di/injection.dart';
 import 'package:word_flow/core/errors/failures.dart';
-import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_state.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart';

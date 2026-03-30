@@ -2,16 +2,14 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/database/tables.dart';
 
 part 'app_database.g.dart';
 
 
 @DriftDatabase(tables: [Words, WordSyncQueue, AppSettings])
-@lazySingleton
 class WordFlowDatabase extends _$WordFlowDatabase {
-  WordFlowDatabase() : super(_openConnection());
+  WordFlowDatabase(String encryptionKey) : super(_openConnection(encryptionKey));
 
   // Test constructor: allow passing a custom QueryExecutor (e.g. in-memory DB)
   WordFlowDatabase.test(super.executor);
@@ -443,15 +441,12 @@ Future<void> _migrate6To7(WordFlowDatabase db) async {
 }
 
 
-QueryExecutor _openConnection() {
+QueryExecutor _openConnection(String encryptionKey) {
   return driftDatabase(
     name: 'wordflow',
     native: DriftNativeOptions(
       setup: (rawDb) {
-        // In a real app, we would fetch a persistent key from SecureStorage here.
-        // For now, we use a constant to demonstrate the PRAGMA key functionality.
-        // Note: For existing databases, a re-keying migration would be needed.
-        rawDb.execute("PRAGMA key = 'wordflow-secure-storage-key';");
+        rawDb.execute("PRAGMA key = '$encryptionKey';");
       },
     ),
   );

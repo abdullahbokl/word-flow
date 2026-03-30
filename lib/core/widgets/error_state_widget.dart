@@ -2,14 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 class ErrorStateWidget extends StatelessWidget {
-  final String title;
-  final String message;
-  final VoidCallback? onRetry;
-  final IconData icon;
-  final String? retryLabel;
-  final String? actionLabel;
-  final VoidCallback? onAction;
-
   const ErrorStateWidget({
     super.key,
     required this.title,
@@ -20,6 +12,14 @@ class ErrorStateWidget extends StatelessWidget {
     this.actionLabel,
     this.onAction,
   });
+
+  final String title;
+  final String message;
+  final VoidCallback? onRetry;
+  final IconData icon;
+  final String? retryLabel;
+  final String? actionLabel;
+  final VoidCallback? onAction;
 
   @override
   Widget build(BuildContext context) {

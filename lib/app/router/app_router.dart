@@ -1,7 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:word_flow/app/router/routes.dart';
 import 'package:word_flow/app/router/error_page.dart';
-import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:word_flow/core/utils/router_utils.dart';
 import 'package:word_flow/core/di/injection.dart';
 

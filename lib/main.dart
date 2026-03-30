@@ -22,7 +22,7 @@ Future<void> main() async {
     },
     appRunner: () async {
       WidgetsFlutterBinding.ensureInitialized();
-      configureDependencies();
+      await configureDependencies();
 
       final logger = getIt<AppLogger>();
       Bloc.observer = TalkerBlocObserver(talker: logger.talker);

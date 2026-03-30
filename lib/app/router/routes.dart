@@ -3,7 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:word_flow/features/word_learning/presentation/pages/workspace_page.dart';
 import 'package:word_flow/features/vocabulary/presentation/pages/library_page.dart';
 import 'package:word_flow/features/profile/presentation/pages/profile_page.dart';
-import 'package:word_flow/features/authentication/presentation/pages/auth_page.dart';
+import 'package:word_flow/features/auth/presentation/pages/auth_page.dart';
 import 'package:word_flow/features/vocabulary/presentation/pages/analysis_settings_page.dart';
 import 'package:word_flow/app/router/splash_page.dart';
 
