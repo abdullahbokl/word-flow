@@ -43,6 +43,11 @@ class SyncRepositoryImpl implements SyncRepository {
 
   @override
   Future<Either<Failure, int>> syncPendingWords() async {
+    if (_remoteSource is DisabledWordRemoteSource) {
+      _logger.debug('Skipping syncPendingWords: Remote sync not configured');
+      return const Left(SyncFailure('Remote sync not configured'));
+    }
+
     try {
       _logger.syncEvent('Starting sync of pending words');
       final queueItems = await _syncSource.getSyncQueue(20);
@@ -114,6 +119,11 @@ class SyncRepositoryImpl implements SyncRepository {
 
   @override
   Future<Either<Failure, int>> pullRemoteChanges(String userId) async {
+    if (_remoteSource is DisabledWordRemoteSource) {
+      _logger.debug('Skipping pullRemoteChanges: Remote sync not configured');
+      return const Left(SyncFailure('Remote sync not configured'));
+    }
+
     try {
       _logger.syncEvent('Starting pull of remote changes for user: $userId');
       final lastPull = await _preferences.getLastPullTimestamp(userId);

@@ -1,5 +1,4 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:word_flow/features/vocabulary/data/models/word_remote_dto.dart';
 import 'package:word_flow/core/errors/failures.dart';
@@ -12,7 +11,6 @@ abstract class WordRemoteSource {
   Future<Either<Failure, List<WordRemoteDto>>> fetchWordsUpdatedSince(String userId, DateTime since);
 }
 
-@LazySingleton(as: WordRemoteSource)
 class WordRemoteSourceImpl implements WordRemoteSource {
 
   WordRemoteSourceImpl(this._client);
@@ -102,5 +100,35 @@ class WordRemoteSourceImpl implements WordRemoteSource {
     } catch (e) {
       return Left(ServerFailure(e.toString()));
     }
+  }
+}
+
+class DisabledWordRemoteSource implements WordRemoteSource {
+  @override
+  Future<void> deleteWord(String id) async {
+    // No-op for disabled backend. A real application might queue this, 
+    // but here we just return or throw since the remote source isn't configured.
+    // However, the interface returns Future<void>, so we just complete.
+    // SyncRepositoryImpl checks if remote is configured so it shouldn't be called,
+    // but if it is, it just silently does nothing or throws.
+    // To match instructions: "returns Left(ConnectionFailure...)" but deleteWord is Future<void>.
+    // So for Future<void>, we can just throw or complete.
+    // Let's throw an exception to be safe and let caller catch it.
+    throw ServerException('Remote sync not configured');
+  }
+
+  @override
+  Future<Either<Failure, List<WordRemoteDto>>> fetchUserWords(String userId) async {
+    return const Left(ConnectionFailure('Remote sync not configured'));
+  }
+
+  @override
+  Future<Either<Failure, List<WordRemoteDto>>> fetchWordsUpdatedSince(String userId, DateTime since) async {
+    return const Left(ConnectionFailure('Remote sync not configured'));
+  }
+
+  @override
+  Future<void> upsertWord(WordRemoteDto word) async {
+    throw ServerException('Remote sync not configured');
   }
 }
