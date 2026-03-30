@@ -15,7 +15,8 @@ abstract class WordLocalSource {
   Future<void> deleteWord(String id);
   Stream<List<WordRow>> watchWords({String? userId});
   Future<int> adoptGuestWords(String userId);
-  Future<void> clearLocalWords({String? userId});
+  Future<void> clearLocalWords(String userId);
+  Future<void> clearGuestWords();
   Future<int> getGuestWordsCount();
 }
 
@@ -99,7 +100,12 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Future<void> clearLocalWords({String? userId}) async {
-    await _db.clearLocalWords(userId: userId);
+  Future<void> clearLocalWords(String userId) async {
+    await _db.clearLocalWords(userId);
+  }
+
+  @override
+  Future<void> clearGuestWords() async {
+    await _db.clearGuestWords();
   }
 }

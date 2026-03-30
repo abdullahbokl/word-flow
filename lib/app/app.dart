@@ -15,30 +15,30 @@ class WordFlowApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider(
-          lazy: false,
-          create: (_) => getIt<AuthCubit>()..init(),
-        ),
-        BlocProvider(
-          create: (_) => getIt<MigrationCubit>(),
-        ),
-        BlocProvider(
-          lazy: false,
-          create: (_) => getIt<SyncCubit>()..init(),
-        ),
-        BlocProvider(
-          lazy: false,
-          create: (_) => getIt<ConnectivityCubit>(),
-        ),
+        BlocProvider(lazy: false, create: (_) => getIt<AuthCubit>()..init()),
+        BlocProvider(create: (_) => getIt<MigrationCubit>()),
+        BlocProvider(lazy: false, create: (_) => getIt<SyncCubit>()..init()),
+        BlocProvider(lazy: false, create: (_) => getIt<ConnectivityCubit>()),
       ],
-      child: MaterialApp.router(
-        title: 'WordFlow',
-        theme: AppTheme.light,
-        darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.system,
-        debugShowCheckedModeBanner: false,
-        routerConfig: AppRouter.router,
-      ),
+      child: const _WordFlowAppShell(),
+    );
+  }
+}
+
+class _WordFlowAppShell extends StatelessWidget {
+  const _WordFlowAppShell();
+
+  @override
+  Widget build(BuildContext context) {
+    final appRouter = AppRouter(context.read<AuthCubit>());
+
+    return MaterialApp.router(
+      title: 'WordFlow',
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
+      themeMode: ThemeMode.system,
+      debugShowCheckedModeBanner: false,
+      routerConfig: appRouter.router,
     );
   }
 }

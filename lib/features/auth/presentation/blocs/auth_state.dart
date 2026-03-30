@@ -11,6 +11,7 @@ class AuthState with _$AuthState {
   const factory AuthState.pendingMerge(AuthUser user, int guestWordCount) =
       AuthPendingMerge;
   const factory AuthState.guest() = AuthGuest;
+  const factory AuthState.passwordRecovery() = AuthPasswordRecovery;
   const factory AuthState.error(String message) = AuthError;
   const factory AuthState.rateLimited(Duration cooldown) = AuthRateLimited;
 }

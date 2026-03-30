@@ -140,9 +140,18 @@ mixin WordRepositoryImplHelpers {
     }
   }
 
-  Future<Either<Failure, void>> handleClearLocalWords({String? userId}) async {
+  Future<Either<Failure, void>> handleClearLocalWords(String userId) async {
     try {
-      await localSource.clearLocalWords(userId: userId);
+      await localSource.clearLocalWords(userId);
+      return const Right(null);
+    } catch (e) {
+      return Left(DatabaseFailure(e.toString()));
+    }
+  }
+
+  Future<Either<Failure, void>> handleClearGuestWords() async {
+    try {
+      await localSource.clearGuestWords();
       return const Right(null);
     } catch (e) {
       return Left(DatabaseFailure(e.toString()));

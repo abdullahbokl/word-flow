@@ -30,8 +30,7 @@ class MigrationService {
 
   Future<Either<Failure, void>> discardGuestData() async {
     _logger.debug('Discarding guest words');
-    // Using userId: null discards words belonging to the guest.
-    final result = await _wordRepository.clearLocalWords(userId: null);
+    final result = await _wordRepository.clearGuestWords();
     return result.fold(
       (failure) {
         _logger.error('Failed to discard guest data', failure);

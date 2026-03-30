@@ -28,6 +28,8 @@ class AuthRepositoryImpl implements AuthRepository {
             return AuthStateChange.tokenRefreshed;
           case supabase.AuthChangeEvent.userUpdated:
             return AuthStateChange.userUpdated;
+          case supabase.AuthChangeEvent.passwordRecovery:
+            return AuthStateChange.passwordRecovery;
           default:
             return AuthStateChange.unknown;
         }

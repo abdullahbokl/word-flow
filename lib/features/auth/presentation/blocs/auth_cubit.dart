@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/utils/rate_limiter.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
@@ -8,29 +9,25 @@ import 'package:word_flow/features/auth/domain/entities/auth_state_change.dart';
 import 'package:word_flow/features/auth/domain/usecases/auth_usecases.dart';
 import 'package:word_flow/features/auth/domain/usecases/sign_out_and_clear_local.dart';
 import 'package:word_flow/features/auth/presentation/blocs/auth_state.dart';
-import 'package:word_flow/features/auth/presentation/blocs/auth_cubit_actions.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 @lazySingleton
-class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
+class AuthCubit extends Cubit<AuthState> {
   AuthCubit(
     this.authRepository,
-    this.signInUseCase,
-    this.signUpUseCase,
-    this.signOutAndClearLocalUseCase,
-    @Named('auth_rate_limiter') this.rateLimiter,
+    this._signInUseCase,
+    this._signUpUseCase,
+    this._signOutAndClearLocalUseCase,
+    @Named('auth_rate_limiter') this._rateLimiter,
   ) : super(const AuthState.initial());
 
-  final AuthRepository authRepository;
-  @override
-  final SignInWithEmailUseCase signInUseCase;
-  @override
-  final SignUpWithEmailUseCase signUpUseCase;
-  @override
-  final SignOutAndClearLocal signOutAndClearLocalUseCase;
+  final SignInWithEmailUseCase _signInUseCase;
+  final SignUpWithEmailUseCase _signUpUseCase;
+  final SignOutAndClearLocal _signOutAndClearLocalUseCase;
+  final RateLimiter _rateLimiter;
+  final AppLogger _logger = AppLogger();
 
-  @override
-  final RateLimiter rateLimiter;
+  final AuthRepository authRepository;
 
   String? get currentUserId => authRepository.currentUserId;
 
@@ -43,7 +40,7 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
     }
     _isInitialized = true;
 
-    await rateLimiter.initialize();
+    await _rateLimiter.initialize();
     emit(const AuthState.loading());
     _checkInitialSession();
     await _authSubscription?.cancel();
@@ -79,11 +76,16 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
           _updateSentryUser(user.id);
         }
         break;
+      case AuthStateChange.passwordRecovery:
+        emit(const AuthState.passwordRecovery());
+        break;
       case AuthStateChange.signedOut:
         _updateSentryUser(null);
         emit(const AuthState.guest());
         break;
-      default:
+      case AuthStateChange.unknown:
+        _logger.warning('Unknown auth event received — re-checking session');
+        _checkInitialSession();
         break;
     }
   }
@@ -102,6 +104,67 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
 
   void onAuthenticatedWithDiscard(AuthUser user) {
     emit(AuthState.authenticated(user));
+  }
+
+  Future<void> signIn(String email, String password) async {
+    await _signIn(email, password);
+  }
+
+  Future<void> signUp(String email, String password) async {
+    await _signUp(email, password);
+  }
+
+  Future<void> logOut() async {
+    await _logOut();
+  }
+
+  Future<void> _signIn(String email, String password) async {
+    if (!_rateLimiter.canAttempt()) {
+      emit(
+        AuthState.rateLimited(_rateLimiter.remainingCooldown ?? Duration.zero),
+      );
+      return;
+    }
+    await _rateLimiter.recordAttempt();
+
+    emit(const AuthState.loading());
+    final result = await _signInUseCase(email, password);
+    await result.fold(
+      (failure) async => emit(AuthState.error(failure.message)),
+      (user) async {
+        await _rateLimiter.reset();
+        emit(AuthState.authenticated(user));
+      },
+    );
+  }
+
+  Future<void> _signUp(String email, String password) async {
+    if (!_rateLimiter.canAttempt()) {
+      emit(
+        AuthState.rateLimited(_rateLimiter.remainingCooldown ?? Duration.zero),
+      );
+      return;
+    }
+    await _rateLimiter.recordAttempt();
+
+    emit(const AuthState.loading());
+    final result = await _signUpUseCase(email, password);
+    await result.fold(
+      (failure) async => emit(AuthState.error(failure.message)),
+      (user) async {
+        await _rateLimiter.reset();
+        emit(AuthState.authenticated(user));
+      },
+    );
+  }
+
+  Future<void> _logOut() async {
+    emit(const AuthState.loading());
+    final result = await _signOutAndClearLocalUseCase();
+    result.fold(
+      (failure) => emit(AuthState.error(failure.message)),
+      (_) => emit(const AuthState.guest()),
+    );
   }
 
   @override

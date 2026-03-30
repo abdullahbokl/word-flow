@@ -429,13 +429,22 @@ void main() {
 
   group('clearLocalWords', () {
     test('should clear words for specified user', () async {
-      when(() => mockLocal.clearLocalWords(userId: 'user-1'))
+      when(() => mockLocal.clearLocalWords('user-1'))
           .thenAnswer((_) async {});
 
-      final result = await repo.clearLocalWords(userId: 'user-1');
+      final result = await repo.clearLocalWords('user-1');
 
       expect(result.isRight(), true);
-      verify(() => mockLocal.clearLocalWords(userId: 'user-1')).called(1);
+      verify(() => mockLocal.clearLocalWords('user-1')).called(1);
+    });
+
+    test('should clear guest words explicitly', () async {
+      when(() => mockLocal.clearGuestWords()).thenAnswer((_) async {});
+
+      final result = await repo.clearGuestWords();
+
+      expect(result.isRight(), true);
+      verify(() => mockLocal.clearGuestWords()).called(1);
     });
   });
 

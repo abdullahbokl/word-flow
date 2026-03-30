@@ -3,5 +3,6 @@ enum AuthStateChange {
   signedOut,
   userUpdated,
   tokenRefreshed,
+  passwordRecovery,
   unknown,
 }

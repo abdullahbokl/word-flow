@@ -225,11 +225,12 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     });
   }
 
-  Future<void> clearLocalWords({String? userId}) async {
-    await (delete(words)..where(
-          (t) => userId == null ? t.userId.isNull() : t.userId.equals(userId),
-        ))
-        .go();
+  Future<void> clearLocalWords(String userId) async {
+    await (delete(words)..where((t) => t.userId.equals(userId))).go();
+  }
+
+  Future<void> clearGuestWords() async {
+    await (delete(words)..where((t) => t.userId.isNull())).go();
   }
 
   Future<int> getGuestWordsCount() async {

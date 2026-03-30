@@ -37,7 +37,7 @@ class SignOutAndClearLocal {
       if (userId != null) {
         // Clear authenticated user-local words first.
         await trackCleanupFailure(
-          await wordRepository.clearLocalWords(userId: userId),
+          await wordRepository.clearLocalWords(userId),
           'clear authenticated user words',
         );
 
@@ -51,7 +51,7 @@ class SignOutAndClearLocal {
 
       // Also clear any remaining guest words.
       await trackCleanupFailure(
-        await wordRepository.clearLocalWords(userId: null),
+        await wordRepository.clearGuestWords(),
         'clear guest words',
       );
     } catch (e, stackTrace) {

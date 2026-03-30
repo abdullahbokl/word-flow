@@ -242,12 +242,28 @@ void main() {
       WordsCompanion.insert(id: '2', wordText: 'w2', userId: const Value(null), lastUpdated: now),
     ]);
 
-    await db.clearLocalWords(userId: 'u1');
+    await db.clearLocalWords('u1');
 
     final u1Words = await db.getWordByText('w1', userId: 'u1');
     final guestWords = await db.getWordByText('w2');
 
     expect(u1Words, isNull);
     expect(guestWords, isNotNull);
+  });
+
+  test('clearGuestWords only clears guest words', () async {
+    final now = DateTime.now().toUtc();
+    await db.upsertWords([
+      WordsCompanion.insert(id: '3', wordText: 'w3', userId: const Value('u2'), lastUpdated: now),
+      WordsCompanion.insert(id: '4', wordText: 'w4', userId: const Value(null), lastUpdated: now),
+    ]);
+
+    await db.clearGuestWords();
+
+    final userWord = await db.getWordByText('w3', userId: 'u2');
+    final guestWord = await db.getWordByText('w4');
+
+    expect(userWord, isNotNull);
+    expect(guestWord, isNull);
   });
 }

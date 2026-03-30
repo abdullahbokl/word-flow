@@ -5,17 +5,22 @@ import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/sync/sync_orchestrator.dart';
 import 'package:word_flow/core/sync/sync_status.dart';
+import 'package:word_flow/features/auth/domain/entities/auth_state_change.dart';
+import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart';
 
-@injectable
+@lazySingleton
 class SyncCubit extends Cubit<SyncState> {
-
-  SyncCubit(this._orchestrator) : super(const SyncState.idle(pendingCount: 0));
+  SyncCubit(this._orchestrator, this._authRepository)
+    : super(const SyncState.idle(pendingCount: 0));
 
   final SyncOrchestrator _orchestrator;
+  final AuthRepository _authRepository;
 
   StreamSubscription<int>? _pendingSub;
   StreamSubscription<SyncStatus>? _statusSub;
+  StreamSubscription<AuthStateChange>? _authSub;
+  Timer? _periodicTimer;
   bool _isInitialized = false;
 
   /// Initialize connectivity and pending count listeners
@@ -96,6 +101,31 @@ class SyncCubit extends Cubit<SyncState> {
         },
       );
     });
+
+    _authSub?.cancel();
+    _authSub = _authRepository.authStateStream.listen((_) {
+      _syncPeriodicTimerWithAuthState();
+    });
+
+    _syncPeriodicTimerWithAuthState();
+  }
+
+  void _syncPeriodicTimerWithAuthState() {
+    if (_authRepository.currentUserId == null) {
+      _periodicTimer?.cancel();
+      _periodicTimer = null;
+      return;
+    }
+
+    _periodicTimer?.cancel();
+    _periodicTimer = Timer.periodic(const Duration(minutes: 5), (_) {
+      if (_authRepository.currentUserId == null) {
+        _periodicTimer?.cancel();
+        _periodicTimer = null;
+        return;
+      }
+      _orchestrator.retrySync();
+    });
   }
 
   /// Call this when new items are added to the sync queue
@@ -104,6 +134,10 @@ class SyncCubit extends Cubit<SyncState> {
   }
 
   Future<void> syncNow() async {
+    if (_authRepository.currentUserId == null && state.pendingCount == 0) {
+      return;
+    }
+
     // Manual retry delegates to orchestrator (single sync owner).
     _orchestrator.retrySync();
   }
@@ -112,6 +146,8 @@ class SyncCubit extends Cubit<SyncState> {
   Future<void> close() {
     _pendingSub?.cancel();
     _statusSub?.cancel();
+    _authSub?.cancel();
+    _periodicTimer?.cancel();
     return super.close();
   }
 }

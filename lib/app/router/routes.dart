@@ -6,6 +6,7 @@ import 'package:word_flow/features/profile/presentation/pages/profile_page.dart'
 import 'package:word_flow/features/auth/presentation/pages/auth_page.dart';
 import 'package:word_flow/features/vocabulary/presentation/pages/analysis_settings_page.dart';
 import 'package:word_flow/app/router/splash_page.dart';
+import 'package:word_flow/features/auth/presentation/pages/reset_password_page.dart';
 
 part 'routes.g.dart';
 
@@ -28,6 +29,14 @@ class AuthRoute extends GoRouteData with _$AuthRoute {
   const AuthRoute();
   @override
   Widget build(BuildContext context, GoRouterState state) => const AuthPage();
+}
+
+@TypedGoRoute<ResetPasswordRoute>(path: '/reset-password')
+class ResetPasswordRoute extends GoRouteData with _$ResetPasswordRoute {
+  const ResetPasswordRoute();
+  @override
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ResetPasswordPage();
 }
 
 @TypedGoRoute<WorkspaceRoute>(path: '/workspace')

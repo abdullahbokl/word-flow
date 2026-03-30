@@ -20,31 +20,19 @@ void main() {
 
     test('should call repository.clearLocalWords with correct userId', () async {
       // Arrange
-      when(() => mockRepository.clearLocalWords(userId: any(named: 'userId')))
+      when(() => mockRepository.clearLocalWords(any()))
           .thenAnswer((_) async => const Right(null));
 
       // Act
       await useCase(const ClearLocalWordsParams(userId: testUserId));
 
       // Assert
-      verify(() => mockRepository.clearLocalWords(userId: testUserId)).called(1);
-    });
-
-    test('should call repository.clearLocalWords with null userId when not provided', () async {
-      // Arrange
-      when(() => mockRepository.clearLocalWords(userId: any(named: 'userId')))
-          .thenAnswer((_) async => const Right(null));
-
-      // Act
-      await useCase(const ClearLocalWordsParams());
-
-      // Assert
-      verify(() => mockRepository.clearLocalWords(userId: null)).called(1);
+      verify(() => mockRepository.clearLocalWords(testUserId)).called(1);
     });
 
     test('should return Right(null) on success', () async {
       // Arrange
-      when(() => mockRepository.clearLocalWords(userId: any(named: 'userId')))
+      when(() => mockRepository.clearLocalWords(any()))
           .thenAnswer((_) async => const Right(null));
 
       // Act
@@ -57,7 +45,7 @@ void main() {
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
       const failure = DatabaseFailure('Failed to clear words');
-      when(() => mockRepository.clearLocalWords(userId: any(named: 'userId')))
+      when(() => mockRepository.clearLocalWords(any()))
           .thenAnswer((_) async => const Left(failure));
 
       // Act

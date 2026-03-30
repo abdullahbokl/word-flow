@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/core/sync/sync_orchestrator.dart';
 import 'package:word_flow/core/sync/sync_status.dart';
 import 'package:word_flow/core/errors/failures.dart';
@@ -8,13 +9,16 @@ import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart';
 
 class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
+class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
   late SyncCubit cubit;
   late MockSyncOrchestrator mockSyncOrchestrator;
+  late MockAuthRepository mockAuthRepository;
 
   setUp(() {
     mockSyncOrchestrator = MockSyncOrchestrator();
+    mockAuthRepository = MockAuthRepository();
 
     when(
       () => mockSyncOrchestrator.pendingCountStream,
@@ -23,8 +27,11 @@ void main() {
       () => mockSyncOrchestrator.statusStream,
     ).thenAnswer((_) => const Stream.empty());
     when(() => mockSyncOrchestrator.retrySync()).thenReturn(null);
+    when(() => mockAuthRepository.authStateStream)
+      .thenAnswer((_) => const Stream.empty());
+    when(() => mockAuthRepository.currentUserId).thenReturn('user-1');
 
-    cubit = SyncCubit(mockSyncOrchestrator);
+    cubit = SyncCubit(mockSyncOrchestrator, mockAuthRepository);
   });
 
   group('SyncCubit - syncNow delegation', () {
