@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'dart:math';
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/errors/failures.dart';
+import 'package:word_flow/core/errors/error_mapper.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/sync/sync_operation.dart';
 import 'package:word_flow/core/sync/sync_preferences.dart';
@@ -110,11 +111,7 @@ class SyncRepositoryImpl implements SyncRepository {
       }
       return Right(successCount);
     } catch (e, stackTrace) {
-      _logger.error('Failed executing whole sync block queue query', e, stackTrace);
-      try {
-        await Sentry.captureException(e, stackTrace: stackTrace);
-      } catch (_) {}
-      return Left(SyncFailure(e.toString()));
+      return Left(ErrorMapper.mapException(e, stackTrace, _logger) as SyncFailure);
     }
   }
 
@@ -207,8 +204,7 @@ class SyncRepositoryImpl implements SyncRepository {
       _logger.syncEvent('Successfully completed pull sync: $newCount new, $mergedCount merged, $skippedCount skipped');
       return Right(newCount + mergedCount);
     } catch (e, stackTrace) {
-      _logger.error('Unexpected error during pull sync', e, stackTrace);
-      return Left(SyncFailure(e.toString()));
+      return Left(ErrorMapper.mapException(e, stackTrace, _logger) as SyncFailure);
     }
   }
 }

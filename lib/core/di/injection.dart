@@ -3,6 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:word_flow/core/config/env_config.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/auth/data/datasources/auth_remote_source.dart';
 import 'package:word_flow/features/auth/data/repositories/auth_repository_impl.dart';
@@ -36,7 +37,7 @@ abstract class RegisterModule {
   @lazySingleton
   AuthRepository get authRepository {
     if (EnvConfig.isConfigured) {
-      return AuthRepositoryImpl(supabaseClient, getIt<AuthRemoteSource>());
+      return AuthRepositoryImpl(supabaseClient, getIt<AuthRemoteSource>(), getIt<AppLogger>());
     }
     return GuestAuthRepository();
   }

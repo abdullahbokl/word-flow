@@ -24,11 +24,16 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
   ) : super(const AuthState.initial());
 
   final AuthRepository authRepository;
-  @override final SignInWithEmailUseCase signInUseCase;
-  @override final SignUpWithEmailUseCase signUpUseCase;
-  @override final SignOutAndClearLocal signOutAndClearLocalUseCase;
-  @override final WordRepository wordRepository;
-  @override final AdoptGuestWords adoptGuestWordsUseCase;
+  @override
+  final SignInWithEmailUseCase signInUseCase;
+  @override
+  final SignUpWithEmailUseCase signUpUseCase;
+  @override
+  final SignOutAndClearLocal signOutAndClearLocalUseCase;
+  @override
+  final WordRepository wordRepository;
+  @override
+  final AdoptGuestWords adoptGuestWordsUseCase;
 
   String? get currentUserId => authRepository.currentUserId;
 
@@ -43,7 +48,9 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
     emit(const AuthState.loading());
     _checkInitialSession();
     await _authSubscription?.cancel();
-    _authSubscription = authRepository.authStateStream.listen(_handleAuthStateChange);
+    _authSubscription = authRepository.authStateStream.listen(
+      _handleAuthStateChange,
+    );
   }
 
   void _checkInitialSession() {
@@ -61,9 +68,9 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
 
   void _handleAuthStateChange(AuthStateChange event) {
     if (isClosed) return;
-    
+
     final user = authRepository.currentUser;
-    
+
     switch (event) {
       case AuthStateChange.signedIn:
       case AuthStateChange.tokenRefreshed:
@@ -84,7 +91,9 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
 
   void _updateSentryUser(String? id) {
     try {
-      Sentry.configureScope((scope) => scope.setUser(id == null ? null : SentryUser(id: id)));
+      Sentry.configureScope(
+        (scope) => scope.setUser(id == null ? null : SentryUser(id: id)),
+      );
     } catch (_) {}
   }
 

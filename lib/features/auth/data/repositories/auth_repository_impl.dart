@@ -1,18 +1,20 @@
 import 'dart:async';
 import 'package:fpdart/fpdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
-import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:word_flow/core/errors/exceptions.dart';
 import 'package:word_flow/core/errors/failures.dart';
+import 'package:word_flow/core/errors/error_mapper.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_state_change.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/auth/data/datasources/auth_remote_source.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl(this._supabase, this._remoteSource);
+  AuthRepositoryImpl(this._supabase, this._remoteSource, this._logger);
   final supabase.SupabaseClient _supabase;
   final AuthRemoteSource _remoteSource;
+  final AppLogger _logger;
 
   @override
   Stream<AuthStateChange> get authStateStream =>
@@ -52,10 +54,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
     } catch (e, stackTrace) {
-      try {
-        await Sentry.captureException(e, stackTrace: stackTrace);
-      } catch (_) {}
-      return Left(AuthFailure(e.toString()));
+      return Left(ErrorMapper.mapException(e, stackTrace, _logger) as AuthFailure);
     }
   }
 
@@ -70,10 +69,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
     } catch (e, stackTrace) {
-      try {
-        await Sentry.captureException(e, stackTrace: stackTrace);
-      } catch (_) {}
-      return Left(AuthFailure(e.toString()));
+      return Left(ErrorMapper.mapException(e, stackTrace, _logger) as AuthFailure);
     }
   }
 
@@ -85,10 +81,7 @@ class AuthRepositoryImpl implements AuthRepository {
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
     } catch (e, stackTrace) {
-      try {
-        await Sentry.captureException(e, stackTrace: stackTrace);
-      } catch (_) {}
-      return Left(AuthFailure(e.toString()));
+      return Left(ErrorMapper.mapException(e, stackTrace, _logger) as AuthFailure);
     }
   }
 }
