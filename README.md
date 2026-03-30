@@ -43,3 +43,5 @@ The project strictly adheres to **Clean Architecture** principles to ensure scal
 ## **4. The "Guest-to-Auth" Workflow**
 * **Guest Mode:** New users can fully use the app. Data is stored locally with a `null` or `GUEST` user ID.
 * **Onboarding/Migration:** When a user creates an account, a migration service moves all local records to the Supabase cloud, linking them to the new User ID. This ensures users never lose their vocabulary progress.
+
+<- Chore: optimize library state management and improve the consistency of optimistic CI test: do not merge - 2026-03-30T22:10:24Z -->
