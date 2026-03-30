@@ -6,15 +6,16 @@ import 'package:word_flow/core/database/tables.dart';
 
 part 'app_database.g.dart';
 
-
 @DriftDatabase(tables: [Words, WordSyncQueue, AppSettings])
 class WordFlowDatabase extends _$WordFlowDatabase {
-  WordFlowDatabase(String encryptionKey) : super(_openConnection(encryptionKey));
+  WordFlowDatabase(String encryptionKey)
+    : super(_openConnection(encryptionKey));
 
   // Test constructor: allow passing a custom QueryExecutor (e.g. in-memory DB)
   WordFlowDatabase.test(super.executor);
 
-  static final Map<int, Future<void> Function(WordFlowDatabase)> _migrationSteps = {
+  static final Map<int, Future<void> Function(WordFlowDatabase)>
+  _migrationSteps = {
     2: _migrate1To2,
     3: _migrate2To3,
     4: _migrate3To4,
@@ -22,11 +23,12 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     6: _migrate5To6,
     7: _migrate6To7,
     8: _migrate7To8,
+    9: _migrate8To9,
   };
 
   @override
   int get schemaVersion {
-    const expectedVersion = 8;
+    const expectedVersion = 9;
     assert(() {
       final maxStep = _migrationSteps.keys.reduce((a, b) => a > b ? a : b);
       if (maxStep != expectedVersion) {
@@ -39,57 +41,54 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     return expectedVersion;
   }
 
- 
- 
   @override
   MigrationStrategy get migration => MigrationStrategy(
-        onCreate: (m) async {
-          await m.createAll();
-          // Create indices that were added in later versions
-          await customStatement(
-            'CREATE INDEX IF NOT EXISTS idx_words_known_partial ON words (user_id, is_known) WHERE is_known = 1',
-          );
-          await customStatement(
-            'CREATE INDEX IF NOT EXISTS idx_words_last_updated ON words (last_updated)',
-          );
-          await customStatement(
-            'CREATE INDEX IF NOT EXISTS idx_words_known ON words(user_id, is_known)',
-          );
-          await customStatement(
-            'CREATE INDEX IF NOT EXISTS idx_words_updated ON words(user_id, last_updated)',
-          );
-          await customStatement(
-            'CREATE INDEX IF NOT EXISTS idx_sync_queue_created ON word_sync_queue(created_at)',
-          );
-        },
-        onUpgrade: (m, from, to) async {
-          await transaction(() async {
-            for (var target = from + 1; target <= to; target++) {
-              final step = _migrationSteps[target];
-              if (step != null) {
-                await step(this);
-              } else {
-                throw Exception('Unhandled upgrade step: $target');
-              }
-            }
-          });
-          assert(() {
-            if (to != 8) {
-              throw AssertionError(
-                'Missing migration steps or wrong target schema version',
-              );
-            }
-            return true;
-          }());
-        },
+    onCreate: (m) async {
+      await m.createAll();
+      // Create indices that were added in later versions
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_words_known_partial ON words (user_id, is_known) WHERE is_known = 1',
       );
-
- 
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_words_last_updated ON words (last_updated)',
+      );
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_words_known ON words(user_id, is_known)',
+      );
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_words_updated ON words(user_id, last_updated)',
+      );
+      await customStatement(
+        'CREATE INDEX IF NOT EXISTS idx_sync_queue_created ON word_sync_queue(created_at)',
+      );
+    },
+    onUpgrade: (m, from, to) async {
+      await transaction(() async {
+        for (var target = from + 1; target <= to; target++) {
+          final step = _migrationSteps[target];
+          if (step != null) {
+            await step(this);
+          } else {
+            throw Exception('Unhandled upgrade step: $target');
+          }
+        }
+      });
+      assert(() {
+        if (to != 9) {
+          throw AssertionError(
+            'Missing migration steps or wrong target schema version',
+          );
+        }
+        return true;
+      }());
+    },
+  );
 
   Stream<List<WordRow>> watchWords({String? userId}) {
     final query = select(words)
-      ..where((t) =>
-          userId == null ? t.userId.isNull() : t.userId.equals(userId));
+      ..where(
+        (t) => userId == null ? t.userId.isNull() : t.userId.equals(userId),
+      );
     return query.watch();
   }
 
@@ -97,7 +96,9 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     final query = selectOnly(words)
       ..addColumns([words.wordText])
       ..where(words.isKnown.equals(true))
-      ..where(userId == null ? words.userId.isNull() : words.userId.equals(userId));
+      ..where(
+        userId == null ? words.userId.isNull() : words.userId.equals(userId),
+      );
     final rows = await query.get();
     return rows.map((r) => r.read(words.wordText)!).toList(growable: false);
   }
@@ -107,12 +108,16 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     return query.getSingleOrNull();
   }
 
-  Future<List<WordRow>> getWordsByTexts(List<String> texts, {String? userId}) async {
+  Future<List<WordRow>> getWordsByTexts(
+    List<String> texts, {
+    String? userId,
+  }) async {
     final query = select(words)
       ..where((t) {
         final textIn = t.wordText.isIn(texts);
-        final userMatch =
-            userId == null ? t.userId.isNull() : t.userId.equals(userId);
+        final userMatch = userId == null
+            ? t.userId.isNull()
+            : t.userId.equals(userId);
         return textIn & userMatch;
       });
     return query.get();
@@ -122,8 +127,9 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     final query = select(words)
       ..where((t) {
         final textMatch = t.wordText.equals(text);
-        final userMatch =
-            userId == null ? t.userId.isNull() : t.userId.equals(userId);
+        final userMatch = userId == null
+            ? t.userId.isNull()
+            : t.userId.equals(userId);
         return textMatch & userMatch;
       })
       ..orderBy([(t) => OrderingTerm.desc(t.lastUpdated)])
@@ -157,9 +163,9 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   Future<int> adoptGuestWords(String userId) async {
     return transaction(() async {
       // 1. Get all guest words (userId == null)
-      final guestWords = await (select(words)
-            ..where((t) => t.userId.isNull()))
-          .get();
+      final guestWords = await (select(
+        words,
+      )..where((t) => t.userId.isNull())).get();
 
       if (guestWords.isEmpty) return 0;
 
@@ -168,7 +174,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
         ..where((t) => t.userId.equals(userId));
       final existingUserWords = await existingUserWordsQuery.get();
       final existingMap = {
-        for (final word in existingUserWords) word.wordText: word
+        for (final word in existingUserWords) word.wordText: word,
       };
 
       int adoptedCount = 0;
@@ -177,7 +183,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
 
       // 3. Merge Strategy:
       // - If user DOES NOT have the word: reassign guest word to user (keeps local UUID).
-      // - If user DOES have the word: merge guest stats (highest count, union isKnown) 
+      // - If user DOES have the word: merge guest stats (highest count, union isKnown)
       //   into the existing user word and delete the guest duplicate.
       // - To save bandwidth, only the IDs in changedWordIds are enqueued for sync.
       for (final guest in guestWords) {
@@ -185,16 +191,17 @@ class WordFlowDatabase extends _$WordFlowDatabase {
 
         if (existing != null) {
           // CONFLICT: User already has this word from cloud. Merge into user row.
-          await (update(words)..where((t) => t.id.equals(existing.id)))
-              .write(WordsCompanion(
-            totalCount: Value(
-              existing.totalCount > guest.totalCount
-                  ? existing.totalCount
-                  : guest.totalCount,
+          await (update(words)..where((t) => t.id.equals(existing.id))).write(
+            WordsCompanion(
+              totalCount: Value(
+                existing.totalCount > guest.totalCount
+                    ? existing.totalCount
+                    : guest.totalCount,
+              ),
+              isKnown: Value(existing.isKnown || guest.isKnown),
+              lastUpdated: Value(now),
             ),
-            isKnown: Value(existing.isKnown || guest.isKnown),
-            lastUpdated: Value(now),
-          ));
+          );
           changedWordIds.add(existing.id);
 
           // Delete the now-redundant guest duplicate
@@ -202,10 +209,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
         } else {
           // ADOPT: No conflict. Reassign the existing guest word to the new userId.
           await (update(words)..where((t) => t.id.equals(guest.id))).write(
-            WordsCompanion(
-              userId: Value(userId),
-              lastUpdated: Value(now),
-            ),
+            WordsCompanion(userId: Value(userId), lastUpdated: Value(now)),
           );
           changedWordIds.add(guest.id);
         }
@@ -222,9 +226,9 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   }
 
   Future<void> clearLocalWords({String? userId}) async {
-    await (delete(words)
-          ..where((t) =>
-              userId == null ? t.userId.isNull() : t.userId.equals(userId)))
+    await (delete(words)..where(
+          (t) => userId == null ? t.userId.isNull() : t.userId.equals(userId),
+        ))
         .go();
   }
 
@@ -236,8 +240,6 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     final row = await query.getSingle();
     return row.read(countExp) ?? 0;
   }
-
- 
 
   Stream<int> watchPendingSyncCount() {
     final countExp = wordSyncQueue.id.count();
@@ -258,8 +260,9 @@ class WordFlowDatabase extends _$WordFlowDatabase {
       // 1. Cross-operation idempotency: replace pending conflicts
       // If we are upserting and have a pending delete, or vice versa
       final otherOperation = operation == 'upsert' ? 'delete' : 'upsert';
-      await (delete(wordSyncQueue)
-            ..where((t) => t.wordId.equals(wordId) & t.operation.equals(otherOperation)))
+      await (delete(wordSyncQueue)..where(
+            (t) => t.wordId.equals(wordId) & t.operation.equals(otherOperation),
+          ))
           .go();
 
       // 2. Upsert same-operation: update timestamp and reset retry count
@@ -309,6 +312,22 @@ WHERE id = ?
 DELETE FROM word_sync_queue
 WHERE word_id NOT IN (SELECT id FROM words)
 ''');
+  }
+
+  Future<String?> getAppSetting(String key) async {
+    final query = select(appSettings)..where((t) => t.key.equals(key));
+    final row = await query.getSingleOrNull();
+    return row?.value;
+  }
+
+  Future<void> upsertAppSetting(String key, String value) async {
+    await into(appSettings).insertOnConflictUpdate(
+      AppSettingsCompanion.insert(key: key, value: value),
+    );
+  }
+
+  Future<void> deleteAppSetting(String key) async {
+    await (delete(appSettings)..where((t) => t.key.equals(key))).go();
   }
 }
 
@@ -408,16 +427,21 @@ Future<void> _migrate4To5(WordFlowDatabase db) async {
 
     // 3. Swap tables
     await db.customStatement('DROP TABLE word_sync_queue;');
-    await db.customStatement('ALTER TABLE word_sync_queue_new RENAME TO word_sync_queue;');
+    await db.customStatement(
+      'ALTER TABLE word_sync_queue_new RENAME TO word_sync_queue;',
+    );
   });
 }
+
 Future<void> _migrate5To6(WordFlowDatabase db) async {
   await db.transaction(() async {
     // 1. Create new indices on words table
     await db.customStatement(
-        'CREATE INDEX IF NOT EXISTS idx_words_known_partial ON words (user_id, is_known) WHERE is_known = 1');
+      'CREATE INDEX IF NOT EXISTS idx_words_known_partial ON words (user_id, is_known) WHERE is_known = 1',
+    );
     await db.customStatement(
-        'CREATE INDEX IF NOT EXISTS idx_words_last_updated ON words (last_updated)');
+      'CREATE INDEX IF NOT EXISTS idx_words_last_updated ON words (last_updated)',
+    );
 
     // 2. Add foreign key to word_sync_queue by recreating it
     // SQLite doesn't support adding FKs to existing tables.
@@ -442,7 +466,9 @@ Future<void> _migrate5To6(WordFlowDatabase db) async {
 
     // Swap tables
     await db.customStatement('DROP TABLE word_sync_queue;');
-    await db.customStatement('ALTER TABLE word_sync_queue_new RENAME TO word_sync_queue;');
+    await db.customStatement(
+      'ALTER TABLE word_sync_queue_new RENAME TO word_sync_queue;',
+    );
   });
 }
 
@@ -471,14 +497,32 @@ Future<void> _migrate7To8(WordFlowDatabase db) async {
   });
 }
 
+Future<void> _migrate8To9(WordFlowDatabase db) async {
+  try {
+    await db.customStatement(
+      'ALTER TABLE words ADD COLUMN server_timestamp TEXT',
+    );
+  } catch (e) {
+    if (!e.toString().contains('duplicate column name')) {
+      rethrow;
+    }
+  }
+}
+
 QueryExecutor _openConnection(String encryptionKey) {
+  assert(
+    encryptionKey.length == 64 &&
+        RegExp(r'^[0-9a-f]+$').hasMatch(encryptionKey),
+    'Key must be 64 hex chars',
+  );
+
+  final hexKey = encryptionKey;
   return driftDatabase(
     name: 'wordflow',
     native: DriftNativeOptions(
       setup: (rawDb) {
-        rawDb.execute("PRAGMA key = '$encryptionKey';");
+        rawDb.execute("PRAGMA key = \"x'$hexKey'\"");
       },
     ),
   );
 }
-

@@ -16,7 +16,6 @@ import 'package:sentry_flutter/sentry_flutter.dart';
 
 @LazySingleton(as: SyncRepository)
 class SyncRepositoryImpl implements SyncRepository {
-
   SyncRepositoryImpl(
     this._localSource,
     this._syncSource,
@@ -62,7 +61,9 @@ class SyncRepositoryImpl implements SyncRepository {
     try {
       _logger.syncEvent('Starting sync of pending words');
       final queueItems = await _syncSource.getSyncQueue(20);
-      _logger.syncEvent('Found ${queueItems.length} items in sync queue limit query');
+      _logger.syncEvent(
+        'Found ${queueItems.length} items in sync queue limit query',
+      );
       int successCount = 0;
       final now = DateTime.now().toUtc();
 
@@ -74,7 +75,9 @@ class SyncRepositoryImpl implements SyncRepository {
 
         // Dead letter: skip items that have failed too many times
         if (retryCount > 10) {
-          _logger.warning('Skipping dead letter queue item: $queueId (retries: $retryCount)');
+          _logger.warning(
+            'Skipping dead letter queue item: $queueId (retries: $retryCount)',
+          );
           await _syncSource.removeFromSyncQueue(queueId);
           continue;
         }
@@ -82,11 +85,16 @@ class SyncRepositoryImpl implements SyncRepository {
         // Exponential backoff: skip items that haven't waited long enough
         // Backoff seconds: 1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024
         if (retryCount > 0) {
-          final backoffSeconds = (1 << retryCount).clamp(0, 1024); // 2^retryCount, max 1024s
+          final backoffSeconds = (1 << retryCount).clamp(
+            0,
+            1024,
+          ); // 2^retryCount, max 1024s
           final lastAttempt = item.updatedAt;
           final timeSinceLastAttempt = now.difference(lastAttempt).inSeconds;
           if (timeSinceLastAttempt < backoffSeconds) {
-            _logger.debug('Skipping backoff queue item: $queueId (wait: $backoffSeconds - $timeSinceLastAttempt)');
+            _logger.debug(
+              'Skipping backoff queue item: $queueId (wait: $backoffSeconds - $timeSinceLastAttempt)',
+            );
             continue; // Not enough time has passed, skip for now
           }
         }
@@ -96,21 +104,49 @@ class SyncRepositoryImpl implements SyncRepository {
             case SyncOperation.upsert:
               final word = await _localSource.getWordById(wordId);
               if (word != null) {
-                await _remoteSource.upsertWord(WordMapper.toRemoteDto(WordMapper.fromRow(word)));
-                _logger.syncEvent('Successfully upserted word: ${word.wordText}');
+                final mappedWord = WordMapper.fromRow(word);
+                final mapFailure = mappedWord.fold((f) => f, (_) => null);
+                if (mapFailure != null) {
+                  _logger.error(
+                    'Skipping invalid local word during sync: $wordId',
+                    mapFailure,
+                  );
+                  await _syncSource.removeFromSyncQueue(queueId);
+                  continue;
+                }
+
+                await _remoteSource.upsertWord(
+                  WordMapper.toRemoteDto(
+                    mappedWord.getOrElse(
+                      (_) =>
+                          throw StateError('Mapped word unexpectedly missing'),
+                    ),
+                  ),
+                );
+                _logger.syncEvent(
+                  'Successfully upserted word: ${word.wordText}',
+                );
               } else {
-                 _logger.warning('Failed to upsert, missing word from local source: $wordId');
+                _logger.warning(
+                  'Failed to upsert, missing word from local source: $wordId',
+                );
               }
               break;
             case SyncOperation.delete:
               await _remoteSource.deleteWord(wordId);
-              _logger.syncEvent('Successfully deleted word locally with remote cascade: $wordId');
+              _logger.syncEvent(
+                'Successfully deleted word locally with remote cascade: $wordId',
+              );
               break;
           }
           await _syncSource.removeFromSyncQueue(queueId);
           successCount++;
         } catch (e, stackTrace) {
-          _logger.error('Error syncing operation: ${operation.name} on word $wordId', e, stackTrace);
+          _logger.error(
+            'Error syncing operation: ${operation.name} on word $wordId',
+            e,
+            stackTrace,
+          );
           // Report to Sentry
           try {
             await Sentry.captureException(e, stackTrace: stackTrace);
@@ -140,19 +176,34 @@ class SyncRepositoryImpl implements SyncRepository {
       int newCount = 0;
       int mergedCount = 0;
       int skippedCount = 0;
-      
+
       int offset = 0;
       const int limit = 500;
       bool hasMore = true;
 
       while (hasMore) {
         final remoteBatchResult = lastPull == null
-            ? await _remoteSource.fetchUserWords(userId, limit: limit, offset: offset)
-            : await _remoteSource.fetchWordsUpdatedSince(userId, lastPull, limit: limit, offset: offset);
+            ? await _remoteSource.fetchUserWords(
+                userId,
+                limit: limit,
+                offset: offset,
+              )
+            : await _remoteSource.fetchWordsUpdatedSince(
+                userId,
+                lastPull,
+                limit: limit,
+                offset: offset,
+              );
 
-        final fetchFailure = remoteBatchResult.fold((failure) => failure, (_) => null);
+        final fetchFailure = remoteBatchResult.fold(
+          (failure) => failure,
+          (_) => null,
+        );
         if (fetchFailure != null) {
-          _logger.error('Failed fetching remote changes at offset $offset', fetchFailure);
+          _logger.error(
+            'Failed fetching remote changes at offset $offset',
+            fetchFailure,
+          );
           return Left(fetchFailure);
         }
 
@@ -160,7 +211,9 @@ class SyncRepositoryImpl implements SyncRepository {
           (_) => throw StateError('Remote batch unexpectedly missing'),
         );
 
-        _logger.syncEvent('Fetched ${paginatedData.words.length} updated words from remote (offset $offset)');
+        _logger.syncEvent(
+          'Fetched ${paginatedData.words.length} updated words from remote (offset $offset)',
+        );
 
         // Stage all local writes for this page in memory first.
         final companionsToCommit = <WordsCompanion>[];
@@ -172,8 +225,26 @@ class SyncRepositoryImpl implements SyncRepository {
           final localWord = await _localSource.getWordById(remoteDto.id);
 
           if (localWord == null) {
+            final mappedRemote = WordMapper.fromRemoteDto(remoteDto);
+            final mapFailure = mappedRemote.fold((f) => f, (_) => null);
+            if (mapFailure != null) {
+              _logger.error(
+                'Skipping invalid remote word during pull: ${remoteDto.id}',
+                mapFailure,
+              );
+              pageSkippedCount++;
+              continue;
+            }
+
             companionsToCommit.add(
-              WordMapper.toCompanion(WordMapper.fromRemoteDto(remoteDto)),
+              WordMapper.toCompanion(
+                mappedRemote.getOrElse(
+                  (_) => throw StateError(
+                    'Mapped remote word unexpectedly missing',
+                  ),
+                ),
+                includeServerTimestamp: true,
+              ),
             );
             pageNewCount++;
             continue;
@@ -183,28 +254,61 @@ class SyncRepositoryImpl implements SyncRepository {
           // - total_count: HIGHER value
           // - is_known: logical OR
           // - word_text: keep remote
-          // - last_updated: NEWER timestamp
-          final mergedTotalCount = max(localWord.totalCount, remoteDto.totalCount);
+          // - winner selection: server_timestamp (server-authored clock)
+          final mergedTotalCount = max(
+            localWord.totalCount,
+            remoteDto.totalCount,
+          );
           final mergedIsKnown = localWord.isKnown || remoteDto.isKnown;
-          final mergedWordText = remoteDto.wordText;
+          final remoteServerTs = remoteDto.serverTimestamp;
+          final localServerTs = localWord.serverTimestamp;
+          final useRemote =
+              remoteServerTs != null &&
+              (localServerTs == null || remoteServerTs.isAfter(localServerTs));
 
-          final remoteTime = remoteDto.lastUpdated;
-          final localTime = localWord.lastUpdated;
-          final mergedLastUpdated = remoteTime.isAfter(localTime) ? remoteTime : localTime;
+          final mergedWordText = useRemote
+              ? remoteDto.wordText
+              : localWord.wordText;
+          final mergedLastUpdated = useRemote
+              ? remoteDto.lastUpdated
+              : localWord.lastUpdated;
+          final mergedServerTimestamp = useRemote
+              ? remoteServerTs
+              : localServerTs;
 
           if (localWord.totalCount != mergedTotalCount ||
               localWord.isKnown != mergedIsKnown ||
               localWord.wordText != mergedWordText ||
-              localWord.lastUpdated != mergedLastUpdated) {
+              localWord.lastUpdated != mergedLastUpdated ||
+              localWord.serverTimestamp != mergedServerTimestamp) {
             final updatedDto = remoteDto.copyWith(
               totalCount: mergedTotalCount,
               isKnown: mergedIsKnown,
               wordText: mergedWordText,
               lastUpdated: mergedLastUpdated,
+              serverTimestamp: mergedServerTimestamp,
             );
 
+            final mappedUpdated = WordMapper.fromRemoteDto(updatedDto);
+            final mapFailure = mappedUpdated.fold((f) => f, (_) => null);
+            if (mapFailure != null) {
+              _logger.error(
+                'Skipping invalid merged remote word during pull: ${updatedDto.id}',
+                mapFailure,
+              );
+              pageSkippedCount++;
+              continue;
+            }
+
             companionsToCommit.add(
-              WordMapper.toCompanion(WordMapper.fromRemoteDto(updatedDto)),
+              WordMapper.toCompanion(
+                mappedUpdated.getOrElse(
+                  (_) => throw StateError(
+                    'Mapped updated word unexpectedly missing',
+                  ),
+                ),
+                includeServerTimestamp: true,
+              ),
             );
             pageMergedCount++;
           } else {
@@ -218,7 +322,11 @@ class SyncRepositoryImpl implements SyncRepository {
             await _localSource.saveWordsInTransaction(companionsToCommit);
           }
         } catch (e, stackTrace) {
-          _logger.error('Pull transaction failed at offset $offset', e, stackTrace);
+          _logger.error(
+            'Pull transaction failed at offset $offset',
+            e,
+            stackTrace,
+          );
           try {
             await Sentry.captureException(e, stackTrace: stackTrace);
           } catch (_) {}
@@ -235,7 +343,9 @@ class SyncRepositoryImpl implements SyncRepository {
 
       // Only advance pull cursor after all page transactions succeeded.
       await _preferences.setLastPullTimestamp(userId, now);
-      _logger.syncEvent('Successfully completed pull sync: $newCount new, $mergedCount merged, $skippedCount skipped');
+      _logger.syncEvent(
+        'Successfully completed pull sync: $newCount new, $mergedCount merged, $skippedCount skipped',
+      );
       return Right(newCount + mergedCount);
     } catch (e, stackTrace) {
       // No force-cast: map safely, then normalize to sync-domain failure.

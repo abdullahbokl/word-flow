@@ -9,9 +9,8 @@ class EmailValidator {
     if (email.length > 254) {
       return const Left(AuthFailure('Email is too long'));
     }
-    // Simple but effective RFC 5322 regex fragment
     final emailRegex = RegExp(
-      r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9]+\.[a-zA-Z]+",
+      r'^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$',
     );
     if (!emailRegex.hasMatch(email)) {
       return const Left(AuthFailure('Invalid email format'));
@@ -26,10 +25,14 @@ class PasswordValidator {
       return const Left(AuthFailure('Password must be at least 8 characters'));
     }
     if (!password.contains(RegExp(r'[A-Z]'))) {
-      return const Left(AuthFailure('Password must contain at least one uppercase letter'));
+      return const Left(
+        AuthFailure('Password must contain at least one uppercase letter'),
+      );
     }
     if (!password.contains(RegExp(r'[0-9]'))) {
-      return const Left(AuthFailure('Password must contain at least one digit'));
+      return const Left(
+        AuthFailure('Password must contain at least one digit'),
+      );
     }
     return Right(password);
   }

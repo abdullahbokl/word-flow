@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/services/migration_service.dart';
@@ -14,21 +16,28 @@ class MigrationCubit extends Cubit<MigrationState> {
     this.signUpUseCase,
     this.migrationService,
     this.authCubit,
-  ) : super(const MigrationState.initial());
+    @Named('migration_rate_limiter') this._rateLimiter,
+  ) : super(const MigrationState.initial()) {
+    unawaited(_rateLimiter.initialize());
+  }
 
   final SignInWithEmailUseCase signInUseCase;
   final SignUpWithEmailUseCase signUpUseCase;
   final MigrationService migrationService;
   final AuthCubit authCubit;
-  final _rateLimiter = RateLimiter();
+  final RateLimiter _rateLimiter;
 
   Future<void> signIn(String email, String password) async {
     if (!_rateLimiter.canAttempt()) {
-      emit(MigrationState.rateLimited(_rateLimiter.remainingCooldown ?? Duration.zero));
+      emit(
+        MigrationState.rateLimited(
+          _rateLimiter.remainingCooldown ?? Duration.zero,
+        ),
+      );
       return;
     }
-    _rateLimiter.recordAttempt();
-    
+    await _rateLimiter.recordAttempt();
+
     emit(const MigrationState.loading());
     final result = await signInUseCase(email, password);
     await result.fold(
@@ -39,7 +48,7 @@ class MigrationCubit extends Cubit<MigrationState> {
         if (guestCount > 0) {
           emit(MigrationState.pendingMerge(user, guestCount));
         } else {
-          _rateLimiter.reset();
+          await _rateLimiter.reset();
           authCubit.onAuthenticatedWithMerge(user);
           emit(const MigrationState.success());
         }
@@ -49,17 +58,21 @@ class MigrationCubit extends Cubit<MigrationState> {
 
   Future<void> signUp(String email, String password) async {
     if (!_rateLimiter.canAttempt()) {
-      emit(MigrationState.rateLimited(_rateLimiter.remainingCooldown ?? Duration.zero));
+      emit(
+        MigrationState.rateLimited(
+          _rateLimiter.remainingCooldown ?? Duration.zero,
+        ),
+      );
       return;
     }
-    _rateLimiter.recordAttempt();
+    await _rateLimiter.recordAttempt();
 
     emit(const MigrationState.loading());
     final result = await signUpUseCase(email, password);
     await result.fold(
       (failure) async => emit(MigrationState.error(failure.message)),
       (user) async {
-        _rateLimiter.reset();
+        await _rateLimiter.reset();
         await migrationService.migrateGuestData(user.id);
         authCubit.onAuthenticatedWithMerge(user);
         emit(const MigrationState.success());

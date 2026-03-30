@@ -12,17 +12,19 @@ mixin AuthCubitActions on Cubit<AuthState> {
 
   Future<void> signIn(String email, String password) async {
     if (!rateLimiter.canAttempt()) {
-      emit(AuthState.rateLimited(rateLimiter.remainingCooldown ?? Duration.zero));
+      emit(
+        AuthState.rateLimited(rateLimiter.remainingCooldown ?? Duration.zero),
+      );
       return;
     }
-    rateLimiter.recordAttempt();
+    await rateLimiter.recordAttempt();
 
     emit(const AuthState.loading());
     final result = await signInUseCase(email, password);
-    result.fold(
-      (failure) => emit(AuthState.error(failure.message)),
-      (user) {
-        rateLimiter.reset();
+    await result.fold(
+      (failure) async => emit(AuthState.error(failure.message)),
+      (user) async {
+        await rateLimiter.reset();
         emit(AuthState.authenticated(user));
       },
     );
@@ -30,17 +32,19 @@ mixin AuthCubitActions on Cubit<AuthState> {
 
   Future<void> signUp(String email, String password) async {
     if (!rateLimiter.canAttempt()) {
-      emit(AuthState.rateLimited(rateLimiter.remainingCooldown ?? Duration.zero));
+      emit(
+        AuthState.rateLimited(rateLimiter.remainingCooldown ?? Duration.zero),
+      );
       return;
     }
-    rateLimiter.recordAttempt();
+    await rateLimiter.recordAttempt();
 
     emit(const AuthState.loading());
     final result = await signUpUseCase(email, password);
-    result.fold(
-      (failure) => emit(AuthState.error(failure.message)),
-      (user) {
-        rateLimiter.reset();
+    await result.fold(
+      (failure) async => emit(AuthState.error(failure.message)),
+      (user) async {
+        await rateLimiter.reset();
         emit(AuthState.authenticated(user));
       },
     );
@@ -55,4 +59,3 @@ mixin AuthCubitActions on Cubit<AuthState> {
     );
   }
 }
-

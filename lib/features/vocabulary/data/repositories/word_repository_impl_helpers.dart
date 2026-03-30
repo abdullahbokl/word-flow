@@ -21,7 +21,7 @@ mixin WordRepositoryImplHelpers {
     try {
       await writeQueue.enqueue(() async {
         final now = DateTime.now().toUtc();
-        
+
         // Group words by userId to perform targeted fetches per user
         final userIds = words.map((w) => w.userId).toSet();
         final existingMap = <String, WordRow>{};
@@ -31,8 +31,11 @@ mixin WordRepositoryImplHelpers {
               .where((w) => w.userId == uId)
               .map((w) => w.wordText)
               .toList();
-          
-          final rows = await localSource.getWordsByTexts(wordTexts, userId: uId);
+
+          final rows = await localSource.getWordsByTexts(
+            wordTexts,
+            userId: uId,
+          );
           for (final row in rows) {
             // Key by (userId, wordText) to handle multi-user scenarios if words list mixed
             existingMap['${uId}_${row.wordText}'] = row;
@@ -45,12 +48,16 @@ mixin WordRepositoryImplHelpers {
         for (final word in words) {
           final key = '${word.userId}_${word.wordText}';
           final existing = existingMap[key];
-          
+
           if (existing == null) {
-            companions.add(WordMapper.toCompanion(word.copyWith(lastUpdated: now)));
+            companions.add(
+              WordMapper.toCompanion(word.copyWith(lastUpdated: now)),
+            );
             if (word.userId != null) syncIds.add(word.id);
           } else {
-            final existingEntity = WordMapper.fromRow(existing);
+            final existingEntity = WordMapper.fromRow(
+              existing,
+            ).getOrElse((failure) => throw StateError(failure.message));
             final merged = existingEntity.copyWith(
               totalCount: existingEntity.totalCount + word.totalCount,
               isKnown: existingEntity.isKnown || word.isKnown,
@@ -60,7 +67,7 @@ mixin WordRepositoryImplHelpers {
             if (merged.userId != null) syncIds.add(merged.id);
           }
         }
-        
+
         await localSource.saveWords(companions);
         for (final id in syncIds) {
           await syncSource.enqueueSyncOperation(id, SyncOperation.upsert.value);
@@ -72,14 +79,19 @@ mixin WordRepositoryImplHelpers {
     }
   }
 
-  Future<Either<Failure, void>> handleToggleKnown(String text, {String? userId}) async {
+  Future<Either<Failure, void>> handleToggleKnown(
+    String text, {
+    String? userId,
+  }) async {
     try {
       await writeQueue.enqueue(() async {
         final row = await localSource.getWordByText(text, userId: userId);
         final WordEntity entity;
-        
+
         if (row != null) {
-          final existing = WordMapper.fromRow(row);
+          final existing = WordMapper.fromRow(
+            row,
+          ).getOrElse((failure) => throw StateError(failure.message));
           entity = existing.copyWith(
             isKnown: !existing.isKnown,
             lastUpdated: DateTime.now().toUtc(),
@@ -97,7 +109,10 @@ mixin WordRepositoryImplHelpers {
 
         await localSource.saveWord(WordMapper.toCompanion(entity));
         if (entity.userId != null) {
-          await syncSource.enqueueSyncOperation(entity.id, SyncOperation.upsert.value);
+          await syncSource.enqueueSyncOperation(
+            entity.id,
+            SyncOperation.upsert.value,
+          );
         }
       });
       return const Right(null);
@@ -110,14 +125,18 @@ mixin WordRepositoryImplHelpers {
     logger.info('Starting guest data migration for user: $userId');
     try {
       final count = await localSource.adoptGuestWords(userId);
-      logger.syncEvent('Successfully adopted $count guest words for user: $userId');
+      logger.syncEvent(
+        'Successfully adopted $count guest words for user: $userId',
+      );
       return Right(count);
     } catch (e, stackTrace) {
       logger.error('Guest data migration failed', e, stackTrace);
       try {
         await Sentry.captureException(e, stackTrace: stackTrace);
       } catch (_) {}
-      return Left(MigrationFailure('Guest data migration failed: ${e.toString()}'));
+      return Left(
+        MigrationFailure('Guest data migration failed: ${e.toString()}'),
+      );
     }
   }
 

@@ -18,6 +18,7 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
     this.signInUseCase,
     this.signUpUseCase,
     this.signOutAndClearLocalUseCase,
+    @Named('auth_rate_limiter') this.rateLimiter,
   ) : super(const AuthState.initial());
 
   final AuthRepository authRepository;
@@ -27,9 +28,9 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
   final SignUpWithEmailUseCase signUpUseCase;
   @override
   final SignOutAndClearLocal signOutAndClearLocalUseCase;
-  
+
   @override
-  final rateLimiter = RateLimiter();
+  final RateLimiter rateLimiter;
 
   String? get currentUserId => authRepository.currentUserId;
 
@@ -41,6 +42,8 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
       return;
     }
     _isInitialized = true;
+
+    await rateLimiter.initialize();
     emit(const AuthState.loading());
     _checkInitialSession();
     await _authSubscription?.cancel();
@@ -107,4 +110,3 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
     return super.close();
   }
 }
-

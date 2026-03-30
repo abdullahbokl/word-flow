@@ -11,7 +11,6 @@ import 'package:injectable/injectable.dart';
 
 @lazySingleton
 class ProcessScript {
-
   ProcessScript(this._repository, this._textAnalysisService);
   final WordRepository _repository;
   final TextAnalysisService _textAnalysisService;
@@ -22,9 +21,31 @@ class ProcessScript {
     required TextAnalysisConfig config,
   }) async {
     try {
-      final sanitizedResult = InputSanitizer.sanitizeScript(rawText);
+      if (rawText.trim().isEmpty) {
+        return const Left(ProcessingFailure('Script cannot be empty'));
+      }
+      if (rawText.length > 500000) {
+        return const Left(
+          ProcessingFailure('Script is too large (max 500,000 characters)'),
+        );
+      }
+
+      final normalized = rawText.toLowerCase().trim();
+      final filteredWords = normalized
+          .split(RegExp(r'\s+'))
+          .map((word) => word.replaceAll(RegExp(r"[^a-zA-Z']"), ''))
+          .where((word) => word.length >= 2 && word.length <= 50)
+          .toList(growable: false);
+
+      final normalizedText = filteredWords.join(' ');
+      final sanitizedResult = InputSanitizer.sanitizeScript(normalizedText);
       if (sanitizedResult.isLeft()) {
-        return Left(sanitizedResult.fold((l) => l, (_) => const ProcessingFailure('unknown')));
+        return Left(
+          sanitizedResult.fold(
+            (l) => l,
+            (_) => const ProcessingFailure('unknown'),
+          ),
+        );
       }
       final sanitizedText = sanitizedResult.getOrElse((_) => '');
 
@@ -55,10 +76,9 @@ class ProcessScript {
           return b.totalCount.compareTo(a.totalCount);
         });
 
-      return Right(ScriptAnalysis(
-        summary: processed.summary,
-        words: sortedWords,
-      ));
+      return Right(
+        ScriptAnalysis(summary: processed.summary, words: sortedWords),
+      );
     } catch (e) {
       return Left(ProcessingFailure(e.toString()));
     }

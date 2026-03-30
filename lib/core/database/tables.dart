@@ -5,19 +5,21 @@ class Words extends Table {
   TextColumn get id => text()();
   TextColumn get userId => text().nullable().named('user_id')();
   TextColumn get wordText => text().named('word_text')();
-  IntColumn get totalCount => integer().named('total_count').withDefault(const Constant(1))();
+  IntColumn get totalCount =>
+      integer().named('total_count').withDefault(const Constant(1))();
   BoolColumn get isKnown =>
       boolean().named('is_known').withDefault(const Constant(false))();
   DateTimeColumn get lastUpdated => dateTime().named('last_updated')();
-
+  DateTimeColumn get serverTimestamp =>
+      dateTime().nullable().named('server_timestamp')();
 
   @override
   Set<Column> get primaryKey => {id};
 
   @override
   List<Set<Column>> get uniqueKeys => [
-        {userId, wordText},
-      ];
+    {userId, wordText},
+  ];
 }
 
 class WordSyncQueue extends Table {
@@ -32,12 +34,12 @@ class WordSyncQueue extends Table {
   DateTimeColumn get createdAt => dateTime().named('created_at')();
   DateTimeColumn get updatedAt => dateTime().named('updated_at')();
 
-
   @override
   List<Set<Column>> get uniqueKeys => [
-        {wordId, operation},
-      ];
+    {wordId, operation},
+  ];
 }
+
 class AppSettings extends Table {
   TextColumn get key => text()();
   TextColumn get value => text()();

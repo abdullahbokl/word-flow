@@ -9,6 +9,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:word_flow/core/config/env_config.dart';
 import 'package:word_flow/core/errors/exceptions.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
+import 'package:word_flow/core/utils/rate_limiter.dart';
+import 'package:word_flow/core/utils/rate_limiter_storage.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/auth/data/datasources/auth_remote_source.dart';
 import 'package:word_flow/features/auth/data/repositories/auth_repository_impl.dart';
@@ -72,6 +74,18 @@ abstract class RegisterModule {
   }
 
   @lazySingleton
+  @Named('auth_rate_limiter')
+  RateLimiter authRateLimiter(RateLimiterStorage storage) {
+    return RateLimiter(storage: storage, storageKey: 'auth');
+  }
+
+  @lazySingleton
+  @Named('migration_rate_limiter')
+  RateLimiter migrationRateLimiter(RateLimiterStorage storage) {
+    return RateLimiter(storage: storage, storageKey: 'migration');
+  }
+
+  @lazySingleton
   WordRemoteSource get wordRemoteSource {
     if (EnvConfig.isConfigured) {
       return WordRemoteSourceImpl(supabaseClient);
@@ -82,7 +96,11 @@ abstract class RegisterModule {
   @lazySingleton
   AuthRepository get authRepository {
     if (EnvConfig.isConfigured) {
-      return AuthRepositoryImpl(supabaseClient, getIt<AuthRemoteSource>(), getIt<AppLogger>());
+      return AuthRepositoryImpl(
+        supabaseClient,
+        getIt<AuthRemoteSource>(),
+        getIt<AppLogger>(),
+      );
     }
     return GuestAuthRepository();
   }
@@ -90,11 +108,9 @@ abstract class RegisterModule {
   @lazySingleton
   @Named('secure_storage')
   FlutterSecureStorage get secureStorage => const FlutterSecureStorage(
-        aOptions: AndroidOptions(),
-        iOptions: IOSOptions(
-          accessibility: KeychainAccessibility.first_unlock,
-        ),
-      );
+    aOptions: AndroidOptions(),
+    iOptions: IOSOptions(accessibility: KeychainAccessibility.first_unlock),
+  );
   @lazySingleton
   @preResolve
   Future<WordFlowDatabase> getDatabase(DatabaseKeyManager keyManager) async {

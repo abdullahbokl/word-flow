@@ -12,6 +12,7 @@ class DatabaseKeyManager {
   DatabaseKeyManager(this._securityService);
 
   static const String _keyName = 'wordflow_database_key';
+  static final RegExp _hexKeyPattern = RegExp(r'^[0-9a-f]{64}$');
   static const int _maxWriteAttempts = 3;
   static const Duration _retryDelay = Duration(milliseconds: 100);
   final SecurityService _securityService;
@@ -19,12 +20,18 @@ class DatabaseKeyManager {
 
   Future<String> getOrCreateKey() async {
     final result = await _securityService.read(key: _keyName);
-    
+
     return result.fold(
       (failure) => _generateAndStoreKey(),
       (key) {
         if (key != null && key.isNotEmpty) {
-          return key;
+          if (_isValidHexKey(key)) {
+            return key;
+          }
+
+          // Migrate legacy non-hex keys (old base64url format) without
+          // changing underlying key bytes.
+          return _migrateLegacyKeyOrRegenerate(key);
         } else {
           return _generateAndStoreKey();
         }
@@ -35,10 +42,35 @@ class DatabaseKeyManager {
   Future<String> _generateAndStoreKey() async {
     final random = Random.secure();
     final values = List<int>.generate(32, (i) => random.nextInt(256));
-    final newKey = base64UrlEncode(values);
+    final hexKey = values
+        .map((b) => b.toRadixString(16).padLeft(2, '0'))
+        .join();
 
-    await _persistKeyWithRetry(newKey);
-    return newKey;
+    await _persistKeyWithRetry(hexKey);
+    return hexKey;
+  }
+
+  Future<String> _migrateLegacyKeyOrRegenerate(String legacyKey) async {
+    try {
+      final normalized = base64Url.normalize(legacyKey);
+      final bytes = base64Url.decode(normalized);
+
+      if (bytes.length == 32) {
+        final hexKey = bytes
+            .map((b) => b.toRadixString(16).padLeft(2, '0'))
+            .join();
+        await _persistKeyWithRetry(hexKey);
+        return hexKey;
+      }
+    } catch (_) {
+      // If old value is invalid/corrupted, regenerate a fresh key.
+    }
+
+    return _generateAndStoreKey();
+  }
+
+  bool _isValidHexKey(String key) {
+    return _hexKeyPattern.hasMatch(key);
   }
 
   Future<void> _persistKeyWithRetry(String key) async {
