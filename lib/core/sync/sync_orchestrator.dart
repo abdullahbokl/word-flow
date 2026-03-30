@@ -4,10 +4,9 @@ import 'package:injectable/injectable.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/sync/connectivity_monitor.dart';
+import 'package:word_flow/core/sync/sync_status.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/sync_repository.dart';
-
-enum SyncStatus { idle, syncing, success, failed }
 
 @lazySingleton
 class SyncOrchestrator {
@@ -31,16 +30,25 @@ class SyncOrchestrator {
   Stream<SyncStatus> get statusStream => _statusController.stream;
 
   void start() {
-    _statusController.add(SyncStatus.idle);
+    _statusController.add(const SyncStatus.idle());
     _connectivitySub = _connectivityMonitor.statusStream.listen((status) {
       _debounceTimer?.cancel();
       
       if (status == ConnectivityStatus.online) {
+        _statusController.add(const SyncStatus.idle());
         _debounceTimer = Timer(const Duration(seconds: 5), () {
           _performSync();
         });
+      } else {
+        _statusController.add(const SyncStatus.offline());
       }
     });
+  }
+
+  void retrySync() {
+    if (_isSyncing) return;
+    _debounceTimer?.cancel();
+    _performSync();
   }
 
   Future<void> _performSync() async {
@@ -53,8 +61,8 @@ class SyncOrchestrator {
     }
 
     _isSyncing = true;
-    _statusController.add(SyncStatus.syncing);
-    _logger.info('SyncOrchestrator: Starting push/pull for user \$userId');
+    _statusController.add(const SyncStatus.syncing());
+    _logger.info('SyncOrchestrator: Starting push/pull for user $userId');
 
     try {
       // 1. Push pending
@@ -62,10 +70,10 @@ class SyncOrchestrator {
       bool pushFailed = false;
       pushResult.fold(
         (failure) {
-          _logger.error('SyncOrchestrator: push failed - \${failure.message}');
+          _logger.error('SyncOrchestrator: push failed - ${failure.message}');
           pushFailed = true;
         },
-        (count) => _logger.info('SyncOrchestrator: pushed \$count changes'),
+        (count) => _logger.info('SyncOrchestrator: pushed $count changes'),
       );
 
       // 2. Pull remote
@@ -73,27 +81,23 @@ class SyncOrchestrator {
       bool pullFailed = false;
       pullResult.fold(
         (failure) {
-          _logger.error('SyncOrchestrator: pull failed - \${failure.message}');
+          _logger.error('SyncOrchestrator: pull failed - ${failure.message}');
           pullFailed = true;
         },
-        (count) => _logger.info('SyncOrchestrator: pulled \$count changes'),
+        (count) => _logger.info('SyncOrchestrator: pulled $count changes'),
       );
 
       if (pushFailed || pullFailed) {
-        _statusController.add(SyncStatus.failed);
+        _statusController.add(const SyncStatus.error('Sync partially failed'));
       } else {
-        _statusController.add(SyncStatus.success);
+        _statusController.add(const SyncStatus.idle());
       }
     } catch (error, stackTrace) {
       _logger.error('SyncOrchestrator: Unhandled sync exception', error, stackTrace);
       await Sentry.captureException(error, stackTrace: stackTrace);
-      _statusController.add(SyncStatus.failed);
+      _statusController.add(SyncStatus.error(error.toString()));
     } finally {
-      // Revert to idle after 2 seconds so observers can show success/failure before clearing
-      Timer(const Duration(seconds: 2), () {
-        _isSyncing = false;
-        _statusController.add(SyncStatus.idle);
-      });
+      _isSyncing = false;
     }
   }
 

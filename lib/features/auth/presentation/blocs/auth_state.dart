@@ -5,9 +5,12 @@ part 'auth_state.freezed.dart';
 
 @freezed
 class AuthState with _$AuthState {
-  const factory AuthState.initial() = _Initial;
-  const factory AuthState.loading() = _Loading;
-  const factory AuthState.authenticated(AuthUser user) = _Authenticated;
-  const factory AuthState.guest() = _Guest;
-  const factory AuthState.error(String message) = _Error;
+  const factory AuthState.initial() = AuthInitial;
+  const factory AuthState.loading() = AuthLoading;
+  const factory AuthState.authenticated(AuthUser user) = AuthAuthenticated;
+  const factory AuthState.pendingMerge(AuthUser user, int guestWordCount) =
+      AuthPendingMerge;
+  const factory AuthState.guest() = AuthGuest;
+  const factory AuthState.error(String message) = AuthError;
+  const factory AuthState.rateLimited(Duration cooldown) = AuthRateLimited;
 }

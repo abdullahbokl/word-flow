@@ -17,6 +17,7 @@ class AppTextField extends StatelessWidget {
     this.validator,
     this.textCapitalization = TextCapitalization.none,
     this.onTapOutside,
+    this.errorText,
   });
   final TextEditingController? controller;
   final String? label;
@@ -31,6 +32,7 @@ class AppTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final TextCapitalization textCapitalization;
   final void Function(PointerDownEvent)? onTapOutside;
+  final String? errorText;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +43,7 @@ class AppTextField extends StatelessWidget {
         hintText: hint,
         prefixIcon: prefixIcon,
         suffixIcon: suffixIcon,
+        errorText: errorText,
         border: const OutlineInputBorder(),
       ),
       onChanged: onChanged,

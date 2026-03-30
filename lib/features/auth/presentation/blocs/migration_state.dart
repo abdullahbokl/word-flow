@@ -5,9 +5,14 @@ part 'migration_state.freezed.dart';
 
 @freezed
 class MigrationState with _$MigrationState {
-  const factory MigrationState.initial() = _Initial;
-  const factory MigrationState.loading() = _Loading;
-  const factory MigrationState.success() = _Success;
-  const factory MigrationState.error(String message) = _Error;
-  const factory MigrationState.pendingMerge(AuthUser user, int guestWordCount) = _PendingMerge;
+  const factory MigrationState.initial() = MigrationInitial;
+  const factory MigrationState.loading() = MigrationLoading;
+  const factory MigrationState.success() = MigrationSuccess;
+  const factory MigrationState.error(String message) = MigrationError;
+  const factory MigrationState.pendingMerge(
+    AuthUser user,
+    int guestWordCount,
+  ) = MigrationPendingMerge;
+  const factory MigrationState.rateLimited(Duration cooldown) =
+      MigrationRateLimited;
 }

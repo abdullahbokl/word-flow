@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
+import 'package:word_flow/core/utils/rate_limiter.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_state_change.dart';
@@ -26,6 +27,9 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
   final SignUpWithEmailUseCase signUpUseCase;
   @override
   final SignOutAndClearLocal signOutAndClearLocalUseCase;
+  
+  @override
+  final rateLimiter = RateLimiter();
 
   String? get currentUserId => authRepository.currentUserId;
 
