@@ -22,10 +22,17 @@ class StatusIndicator extends StatelessWidget {
 }
 
 class WordInfo extends StatelessWidget {
-  const WordInfo({super.key, required this.text, required this.count, required this.isKnown});
+  const WordInfo({
+    super.key,
+    required this.text,
+    required this.count,
+    required this.isKnown,
+    this.variants = const [],
+  });
   final String text;
   final int count;
   final bool isKnown;
+  final List<String> variants;
   @override
   Widget build(BuildContext context) {
     final textTheme = Theme.of(context).textTheme;
@@ -38,6 +45,16 @@ class WordInfo extends StatelessWidget {
           'Count: $count • ${isKnown ? "Known" : "Unknown"}',
           style: textTheme.bodySmall,
         ),
+        if (variants.isNotEmpty) ...[
+          const SizedBox(height: 4),
+          Text(
+            'Variants: ${variants.join(", ")}',
+            style: textTheme.labelSmall?.copyWith(
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
       ],
     );
   }

@@ -47,7 +47,7 @@ class WordCardBase extends StatelessWidget {
                 ExcludeSemantics(child: StatusIndicator(isKnown: isKnown, color: statusColor)),
                 const SizedBox(width: 14),
                 Expanded(
-                  child: WordInfo(text: text, count: count, isKnown: isKnown),
+                  child: WordInfo(text: text, count: count, isKnown: isKnown, variants: variants),
                 ),
                 ToggleButton(
                   isKnown: isKnown,
@@ -83,6 +83,13 @@ class WordCardBase extends StatelessWidget {
     return switch (mode) {
       WordCardMode.workspace => (word as ProcessedWord).isKnown,
       WordCardMode.library => (word as WordEntity).isKnown,
+    };
+  }
+
+  List<String> get variants {
+    return switch (mode) {
+      WordCardMode.workspace => (word as ProcessedWord).variants,
+      WordCardMode.library => const [],
     };
   }
 

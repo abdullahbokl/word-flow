@@ -4,6 +4,7 @@ import 'package:word_flow/features/word_learning/presentation/pages/workspace_pa
 import 'package:word_flow/features/vocabulary/presentation/pages/library_page.dart';
 import 'package:word_flow/features/profile/presentation/pages/profile_page.dart';
 import 'package:word_flow/features/authentication/presentation/pages/auth_page.dart';
+import 'package:word_flow/features/vocabulary/presentation/pages/analysis_settings_page.dart';
 import 'package:word_flow/app/router/splash_page.dart';
 
 part 'routes.g.dart';
@@ -13,6 +14,13 @@ class SplashRoute extends GoRouteData with _$SplashRoute {
   const SplashRoute();
   @override
   Widget build(BuildContext context, GoRouterState state) => const SplashPage();
+}
+
+@TypedGoRoute<AnalysisSettingsRoute>(path: '/settings/analysis')
+class AnalysisSettingsRoute extends GoRouteData with _$AnalysisSettingsRoute {
+  const AnalysisSettingsRoute();
+  @override
+  Widget build(BuildContext context, GoRouterState state) => const AnalysisSettingsPage();
 }
 
 @TypedGoRoute<AuthRoute>(path: '/auth')

@@ -8,6 +8,10 @@ import 'package:word_flow/features/word_learning/domain/usecases/save_processed_
 import 'package:word_flow/features/vocabulary/domain/usecases/toggle_known_word.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_state.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cubit_helpers.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/get_text_analysis_config.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/text_analysis_config.dart';
+import 'package:word_flow/core/errors/failures.dart';
+import 'package:word_flow/core/utils/porter_stemmer.dart';
 import 'package:injectable/injectable.dart';
 
 @injectable
@@ -15,12 +19,14 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
   WorkspaceCubit(
     this._processScript,
     this._saveProcessedWords,
+    this._getAnalysisConfig,
     this.toggleKnownWordUseCase,
     this.logger,
   ) : super(const WorkspaceState.initial());
 
   final ProcessScript _processScript;
   final SaveProcessedWords _saveProcessedWords;
+  final GetTextAnalysisConfig _getAnalysisConfig;
   final AppLogger logger;
 
   @override
@@ -55,14 +61,22 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
     );
     
     emit(const WorkspaceState.processing());
-    final result = await _processScript(text, userId: userId);
+    
+    final configResult = await _getAnalysisConfig();
+    final config = configResult.getOrElse((_) => const TextAnalysisConfig(
+      stopWords: {},
+      language: 'english',
+    ));
+    
+    final result = await _processScript(text, userId: userId, config: config);
     
     result.fold(
-      (f) => emit(WorkspaceState.error(f.message)),
+      (f) => emit(WorkspaceState.error(f.message, failure: f)),
       (a) {
         emit(WorkspaceState.results(
           words: a.words,
           summary: a.summary,
+          config: config,
           pendingKnownWords: const <String>{},
           revision: nextRevision,
         ));
@@ -72,7 +86,10 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
           onError: (e, st) {
             logger.error('Failed to save processed words', e, st);
             if (!isClosed) {
-              emit(const WorkspaceState.error('Failed to save words: please try again'));
+              emit(WorkspaceState.error(
+                'Failed to save words: please try again',
+                failure: DatabaseFailure(e.toString()),
+              ));
             }
           },
         );
@@ -85,6 +102,8 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
       results: (s) {
         if (s.pendingKnownWords.contains(wordText)) return;
         
+        final targetText = s.config.useStemming ? PorterStemmer().stem(wordText) : wordText;
+        
         final nextPending = <String>{...s.pendingKnownWords, wordText};
         emit(s.copyWith(
           pendingKnownWords: nextPending,
@@ -93,7 +112,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
         
         Future.value().then(
           (_) => persistToggle(
-            wordText,
+            targetText,
             revision: s.revision,
             fallbackSummary: s.summary,
             userId: userId,
