@@ -47,3 +47,14 @@ class AppSettings extends Table {
   @override
   Set<Column> get primaryKey => {key};
 }
+
+class SyncDeadLetters extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get wordId => text().named('word_id')();
+  TextColumn get wordText => text().named('word_text')();
+  TextColumn get operation => text()();
+  TextColumn get lastError => text().named('last_error')();
+  DateTimeColumn get failedAt => dateTime().named('failed_at')();
+  BoolColumn get isAcknowledged =>
+      boolean().named('is_acknowledged').withDefault(const Constant(false))();
+}

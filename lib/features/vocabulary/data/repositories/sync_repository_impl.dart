@@ -7,6 +7,7 @@ import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/sync/sync_operation.dart';
 import 'package:word_flow/core/sync/sync_preferences.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/sync_repository.dart';
+import 'package:word_flow/features/vocabulary/data/datasources/sync_dead_letter_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/word_local_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/word_remote_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source.dart';
@@ -19,6 +20,7 @@ class SyncRepositoryImpl implements SyncRepository {
   SyncRepositoryImpl(
     this._localSource,
     this._syncSource,
+    this._deadLetterSource,
     this._remoteSource,
     this._preferences,
     this._logger,
@@ -26,6 +28,7 @@ class SyncRepositoryImpl implements SyncRepository {
 
   final WordLocalSource _localSource;
   final SyncLocalSource _syncSource;
+  final SyncDeadLetterSource _deadLetterSource;
   final WordRemoteSource _remoteSource;
   final SyncPreferences _preferences;
   final AppLogger _logger;
@@ -75,8 +78,21 @@ class SyncRepositoryImpl implements SyncRepository {
 
         // Dead letter: skip items that have failed too many times
         if (retryCount > 10) {
+          final word = await _localSource.getWordById(wordId);
+          final wordText = word?.wordText ?? '[deleted locally]';
+          final errorMessage =
+              item.lastError ?? 'Exceeded max retry count ($retryCount)';
+
+          await _deadLetterSource.addDeadLetter(
+            wordId: wordId,
+            wordText: wordText,
+            operation: item.operation,
+            lastError: errorMessage,
+            failedAt: now,
+          );
+
           _logger.warning(
-            'Skipping dead letter queue item: $queueId (retries: $retryCount)',
+            'Moved queue item to dead letters: $queueId (retries: $retryCount)',
           );
           await _syncSource.removeFromSyncQueue(queueId);
           continue;
@@ -177,22 +193,24 @@ class SyncRepositoryImpl implements SyncRepository {
       int mergedCount = 0;
       int skippedCount = 0;
 
-      int offset = 0;
       const int limit = 500;
-      bool hasMore = true;
+      String? cursorTime;
+      String? cursorId;
 
-      while (hasMore) {
+      while (true) {
         final remoteBatchResult = lastPull == null
             ? await _remoteSource.fetchUserWords(
                 userId,
                 limit: limit,
-                offset: offset,
+                cursorTime: cursorTime,
+                cursorId: cursorId,
               )
             : await _remoteSource.fetchWordsUpdatedSince(
                 userId,
                 lastPull,
                 limit: limit,
-                offset: offset,
+                cursorTime: cursorTime,
+                cursorId: cursorId,
               );
 
         final fetchFailure = remoteBatchResult.fold(
@@ -201,7 +219,7 @@ class SyncRepositoryImpl implements SyncRepository {
         );
         if (fetchFailure != null) {
           _logger.error(
-            'Failed fetching remote changes at offset $offset',
+            'Failed fetching remote changes at cursor ($cursorTime, $cursorId)',
             fetchFailure,
           );
           return Left(fetchFailure);
@@ -212,7 +230,7 @@ class SyncRepositoryImpl implements SyncRepository {
         );
 
         _logger.syncEvent(
-          'Fetched ${paginatedData.words.length} updated words from remote (offset $offset)',
+          'Fetched ${paginatedData.words.length} updated words from remote (cursor: $cursorTime, $cursorId)',
         );
 
         // Stage all local writes for this page in memory first.
@@ -323,7 +341,7 @@ class SyncRepositoryImpl implements SyncRepository {
           }
         } catch (e, stackTrace) {
           _logger.error(
-            'Pull transaction failed at offset $offset',
+            'Pull transaction failed at cursor ($cursorTime, $cursorId)',
             e,
             stackTrace,
           );
@@ -337,8 +355,11 @@ class SyncRepositoryImpl implements SyncRepository {
         mergedCount += pageMergedCount;
         skippedCount += pageSkippedCount;
 
-        hasMore = paginatedData.hasMore;
-        offset += limit;
+        cursorTime = paginatedData.nextCursorTime;
+        cursorId = paginatedData.nextCursorId;
+        if (cursorTime == null || cursorId == null) {
+          break;
+        }
       }
 
       // Only advance pull cursor after all page transactions succeeded.

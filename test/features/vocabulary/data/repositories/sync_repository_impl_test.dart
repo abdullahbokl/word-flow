@@ -12,12 +12,14 @@ import '../../../../helpers/fakes.dart';
 import '../../../../helpers/mock_data.dart';
 
 class MockAppLogger extends Mock implements AppLogger {}
+
 class MockSyncPreferences extends Mock implements SyncPreferences {}
 
 void main() {
   late MockWordLocalSource mockLocal;
   late MockSyncLocalSource mockSync;
   late MockWordRemoteSource mockRemote;
+  late MockSyncDeadLetterSource mockDeadLetters;
   late MockAppLogger mockLogger;
   late MockSyncPreferences mockPreferences;
   late SyncRepositoryImpl repo;
@@ -25,20 +27,30 @@ void main() {
   setUpAll(() {
     // Register fallback values for mocktail
     registerFallbackValue(testWordRow);
-    registerFallbackValue(WordRemoteDto.fromJson(const {
-      'id': 'fallback',
-      'word_text': 'fallback',
-      'last_updated': '2024-01-01T00:00:00Z',
-    }));
+    registerFallbackValue(
+      WordRemoteDto.fromJson(const {
+        'id': 'fallback',
+        'word_text': 'fallback',
+        'last_updated': '2024-01-01T00:00:00Z',
+      }),
+    );
   });
 
   setUp(() {
     mockLocal = MockWordLocalSource();
     mockSync = MockSyncLocalSource();
     mockRemote = MockWordRemoteSource();
+    mockDeadLetters = MockSyncDeadLetterSource();
     mockLogger = MockAppLogger();
     mockPreferences = MockSyncPreferences();
-    repo = SyncRepositoryImpl(mockLocal, mockSync, mockRemote, mockPreferences, mockLogger);
+    repo = SyncRepositoryImpl(
+      mockLocal,
+      mockSync,
+      mockDeadLetters,
+      mockRemote,
+      mockPreferences,
+      mockLogger,
+    );
   });
 
   group('getPendingCount', () {
@@ -48,10 +60,7 @@ void main() {
       final result = await repo.getPendingCount();
 
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Expected right'),
-        (count) => expect(count, 5),
-      );
+      result.fold((_) => fail('Expected right'), (count) => expect(count, 5));
     });
 
     test('should return 0 when no pending items', () async {
@@ -60,15 +69,11 @@ void main() {
       final result = await repo.getPendingCount();
 
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Expected right'),
-        (count) => expect(count, 0),
-      );
+      result.fold((_) => fail('Expected right'), (count) => expect(count, 0));
     });
 
     test('should return SyncFailure on error', () async {
-      when(() => mockSync.getSyncQueueCount())
-          .thenThrow(Exception('DB Error'));
+      when(() => mockSync.getSyncQueueCount()).thenThrow(Exception('DB Error'));
 
       final result = await repo.getPendingCount();
 
@@ -120,10 +125,12 @@ void main() {
         createQueueItem(id: 2, wordId: 'word-2', operation: 'upsert'),
       ];
       when(() => mockSync.getSyncQueue(20)).thenAnswer((_) async => queueItems);
-      when(() => mockLocal.getWordById('word-1'))
-          .thenAnswer((_) async => testWordRow);
-      when(() => mockLocal.getWordById('word-2'))
-          .thenAnswer((_) async => testWordRow2);
+      when(
+        () => mockLocal.getWordById('word-1'),
+      ).thenAnswer((_) async => testWordRow);
+      when(
+        () => mockLocal.getWordById('word-2'),
+      ).thenAnswer((_) async => testWordRow2);
       when(() => mockRemote.upsertWord(any())).thenAnswer((_) async {});
       when(() => mockSync.removeFromSyncQueue(any())).thenAnswer((_) async {});
 
@@ -144,10 +151,12 @@ void main() {
         wordId: 'test-id-1',
         operation: SyncOperation.upsert.value,
       );
-      when(() => mockSync.getSyncQueue(20))
-          .thenAnswer((_) async => [queueItem]);
-      when(() => mockLocal.getWordById('test-id-1'))
-          .thenAnswer((_) async => testWordRow);
+      when(
+        () => mockSync.getSyncQueue(20),
+      ).thenAnswer((_) async => [queueItem]);
+      when(
+        () => mockLocal.getWordById('test-id-1'),
+      ).thenAnswer((_) async => testWordRow);
       when(() => mockRemote.upsertWord(any())).thenAnswer((_) async {});
       when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
@@ -167,8 +176,9 @@ void main() {
         wordId: 'test-id-1',
         operation: SyncOperation.delete.value,
       );
-      when(() => mockSync.getSyncQueue(20))
-          .thenAnswer((_) async => [queueItem]);
+      when(
+        () => mockSync.getSyncQueue(20),
+      ).thenAnswer((_) async => [queueItem]);
       when(() => mockRemote.deleteWord('test-id-1')).thenAnswer((_) async {});
       when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
@@ -189,14 +199,18 @@ void main() {
         operation: SyncOperation.upsert.value,
         retryCount: 0,
       );
-      when(() => mockSync.getSyncQueue(20))
-          .thenAnswer((_) async => [queueItem]);
-      when(() => mockLocal.getWordById('test-id-1'))
-          .thenAnswer((_) async => testWordRow);
-      when(() => mockRemote.upsertWord(any()))
-          .thenThrow(Exception('Network error'));
-      when(() => mockSync.updateSyncQueueRetry(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.getSyncQueue(20),
+      ).thenAnswer((_) async => [queueItem]);
+      when(
+        () => mockLocal.getWordById('test-id-1'),
+      ).thenAnswer((_) async => testWordRow);
+      when(
+        () => mockRemote.upsertWord(any()),
+      ).thenThrow(Exception('Network error'));
+      when(
+        () => mockSync.updateSyncQueueRetry(any(), any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();
 
@@ -214,8 +228,21 @@ void main() {
         operation: SyncOperation.upsert.value,
         retryCount: 11, // Exceeds max of 10
       );
-      when(() => mockSync.getSyncQueue(20))
-          .thenAnswer((_) async => [queueItem]);
+      when(
+        () => mockSync.getSyncQueue(20),
+      ).thenAnswer((_) async => [queueItem]);
+      when(
+        () => mockLocal.getWordById('test-id-1'),
+      ).thenAnswer((_) async => testWordRow);
+      when(
+        () => mockDeadLetters.addDeadLetter(
+          wordId: any(named: 'wordId'),
+          wordText: any(named: 'wordText'),
+          operation: any(named: 'operation'),
+          lastError: any(named: 'lastError'),
+          failedAt: any(named: 'failedAt'),
+        ),
+      ).thenAnswer((_) async {});
       when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();
@@ -225,13 +252,21 @@ void main() {
         (_) => fail('Expected right'),
         (successCount) => expect(successCount, 0),
       );
+      verify(
+        () => mockDeadLetters.addDeadLetter(
+          wordId: 'test-id-1',
+          wordText: any(named: 'wordText'),
+          operation: 'upsert',
+          lastError: any(named: 'lastError'),
+          failedAt: any(named: 'failedAt'),
+        ),
+      ).called(1);
       verify(() => mockSync.removeFromSyncQueue(1)).called(1);
       verifyNever(() => mockRemote.upsertWord(any()));
     });
 
     test('should handle empty queue gracefully', () async {
-      when(() => mockSync.getSyncQueue(20))
-          .thenAnswer((_) async => []);
+      when(() => mockSync.getSyncQueue(20)).thenAnswer((_) async => []);
 
       final result = await repo.syncPendingWords();
 
@@ -249,10 +284,13 @@ void main() {
         wordId: 'test-id-1',
         operation: SyncOperation.upsert.value,
         retryCount: 3,
-        updatedAt: now.subtract(const Duration(seconds: 5)), // Only 5 seconds passed
+        updatedAt: now.subtract(
+          const Duration(seconds: 5),
+        ), // Only 5 seconds passed
       );
-      when(() => mockSync.getSyncQueue(20))
-          .thenAnswer((_) async => [queueItem]);
+      when(
+        () => mockSync.getSyncQueue(20),
+      ).thenAnswer((_) async => [queueItem]);
 
       final result = await repo.syncPendingWords();
 
@@ -272,12 +310,16 @@ void main() {
         wordId: 'test-id-1',
         operation: SyncOperation.upsert.value,
         retryCount: 2,
-        updatedAt: now.subtract(const Duration(seconds: 5)), // 5 seconds passed > 4
+        updatedAt: now.subtract(
+          const Duration(seconds: 5),
+        ), // 5 seconds passed > 4
       );
-      when(() => mockSync.getSyncQueue(20))
-          .thenAnswer((_) async => [queueItem]);
-      when(() => mockLocal.getWordById('test-id-1'))
-          .thenAnswer((_) async => testWordRow);
+      when(
+        () => mockSync.getSyncQueue(20),
+      ).thenAnswer((_) async => [queueItem]);
+      when(
+        () => mockLocal.getWordById('test-id-1'),
+      ).thenAnswer((_) async => testWordRow);
       when(() => mockRemote.upsertWord(any())).thenAnswer((_) async {});
       when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
@@ -296,14 +338,18 @@ void main() {
         wordId: 'test-id-1',
         operation: SyncOperation.upsert.value,
       );
-      when(() => mockSync.getSyncQueue(20))
-          .thenAnswer((_) async => [queueItem]);
-      when(() => mockLocal.getWordById('test-id-1'))
-          .thenAnswer((_) async => testWordRow);
-      when(() => mockRemote.upsertWord(any()))
-          .thenThrow(Exception('Network error'));
-      when(() => mockSync.updateSyncQueueRetry(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.getSyncQueue(20),
+      ).thenAnswer((_) async => [queueItem]);
+      when(
+        () => mockLocal.getWordById('test-id-1'),
+      ).thenAnswer((_) async => testWordRow);
+      when(
+        () => mockRemote.upsertWord(any()),
+      ).thenThrow(Exception('Network error'));
+      when(
+        () => mockSync.updateSyncQueueRetry(any(), any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();
 
@@ -318,8 +364,9 @@ void main() {
     });
 
     test('should return SyncFailure on critical error', () async {
-      when(() => mockSync.getSyncQueue(20))
-          .thenThrow(Exception('Critical DB error'));
+      when(
+        () => mockSync.getSyncQueue(20),
+      ).thenThrow(Exception('Critical DB error'));
 
       final result = await repo.syncPendingWords();
 
@@ -335,10 +382,12 @@ void main() {
         wordId: 'missing-id',
         operation: SyncOperation.upsert.value,
       );
-      when(() => mockSync.getSyncQueue(20))
-          .thenAnswer((_) async => [queueItem]);
-      when(() => mockLocal.getWordById('missing-id'))
-          .thenAnswer((_) async => null);
+      when(
+        () => mockSync.getSyncQueue(20),
+      ).thenAnswer((_) async => [queueItem]);
+      when(
+        () => mockLocal.getWordById('missing-id'),
+      ).thenAnswer((_) async => null);
       when(() => mockSync.removeFromSyncQueue(1)).thenAnswer((_) async {});
 
       final result = await repo.syncPendingWords();

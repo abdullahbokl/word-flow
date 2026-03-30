@@ -6,7 +6,7 @@ import 'package:word_flow/core/database/tables.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Words, WordSyncQueue, AppSettings])
+@DriftDatabase(tables: [Words, WordSyncQueue, AppSettings, SyncDeadLetters])
 class WordFlowDatabase extends _$WordFlowDatabase {
   WordFlowDatabase(String encryptionKey)
     : super(_openConnection(encryptionKey));
@@ -24,11 +24,35 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     7: _migrate6To7,
     8: _migrate7To8,
     9: _migrate8To9,
+    10: _migrate9To10,
   };
 
+  static Future<void> _createAllIndices(DatabaseConnectionUser db) async {
+    await db.customStatement(
+      'CREATE UNIQUE INDEX IF NOT EXISTS idx_words_user_word ON words(user_id, word_text)',
+    );
+    await db.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_words_known_partial ON words (user_id, is_known) WHERE is_known = 1',
+    );
+    await db.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_words_last_updated ON words (last_updated)',
+    );
+    await db.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_words_known ON words(user_id, is_known)',
+    );
+    await db.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_words_updated ON words(user_id, last_updated)',
+    );
+    await db.customStatement(
+      'CREATE INDEX IF NOT EXISTS idx_sync_queue_created ON word_sync_queue(created_at)',
+    );
+  }
+
+  // Keep this assertion in sync with _migrationSteps to prevent shipping
+  // schemaVersion bumps without a corresponding upgrade path.
   @override
   int get schemaVersion {
-    const expectedVersion = 9;
+    const expectedVersion = 10;
     assert(() {
       final maxStep = _migrationSteps.keys.reduce((a, b) => a > b ? a : b);
       if (maxStep != expectedVersion) {
@@ -45,22 +69,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   MigrationStrategy get migration => MigrationStrategy(
     onCreate: (m) async {
       await m.createAll();
-      // Create indices that were added in later versions
-      await customStatement(
-        'CREATE INDEX IF NOT EXISTS idx_words_known_partial ON words (user_id, is_known) WHERE is_known = 1',
-      );
-      await customStatement(
-        'CREATE INDEX IF NOT EXISTS idx_words_last_updated ON words (last_updated)',
-      );
-      await customStatement(
-        'CREATE INDEX IF NOT EXISTS idx_words_known ON words(user_id, is_known)',
-      );
-      await customStatement(
-        'CREATE INDEX IF NOT EXISTS idx_words_updated ON words(user_id, last_updated)',
-      );
-      await customStatement(
-        'CREATE INDEX IF NOT EXISTS idx_sync_queue_created ON word_sync_queue(created_at)',
-      );
+      await _createAllIndices(m.database);
     },
     onUpgrade: (m, from, to) async {
       await transaction(() async {
@@ -74,7 +83,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
         }
       });
       assert(() {
-        if (to != 9) {
+        if (to != 10) {
           throw AssertionError(
             'Missing migration steps or wrong target schema version',
           );
@@ -330,6 +339,86 @@ WHERE word_id NOT IN (SELECT id FROM words)
   Future<void> deleteAppSetting(String key) async {
     await (delete(appSettings)..where((t) => t.key.equals(key))).go();
   }
+
+  Future<void> insertDeadLetter({
+    required String wordId,
+    required String wordText,
+    required String operation,
+    required String lastError,
+    required DateTime failedAt,
+  }) async {
+    await into(syncDeadLetters).insert(
+      SyncDeadLettersCompanion.insert(
+        wordId: wordId,
+        wordText: wordText,
+        operation: operation,
+        lastError: lastError,
+        failedAt: failedAt,
+      ),
+    );
+  }
+
+  Future<List<SyncDeadLetter>> getUnacknowledgedDeadLetters() {
+    final query = (select(syncDeadLetters)
+      ..where((t) => t.isAcknowledged.equals(false))
+      ..orderBy([(t) => OrderingTerm.desc(t.failedAt)]));
+    return query.get();
+  }
+
+  Stream<int> watchUnacknowledgedDeadLetterCount() {
+    final countExp = syncDeadLetters.id.count();
+    final query = (selectOnly(syncDeadLetters)
+      ..addColumns([countExp])
+      ..where(syncDeadLetters.isAcknowledged.equals(false)));
+    return query.watchSingle().map((row) => row.read(countExp) ?? 0);
+  }
+
+  Future<SyncDeadLetter?> getDeadLetterById(int id) {
+    final query = select(syncDeadLetters)..where((t) => t.id.equals(id));
+    return query.getSingleOrNull();
+  }
+
+  Future<void> acknowledgeDeadLetter(int id) async {
+    await (update(syncDeadLetters)..where((t) => t.id.equals(id))).write(
+      const SyncDeadLettersCompanion(isAcknowledged: Value(true)),
+    );
+  }
+
+  Future<bool> verifyIntegrity() async {
+    try {
+      final result = await customSelect('PRAGMA integrity_check').getSingle();
+      return result.data['integrity_check'] == 'ok';
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> verifyEncryptionKey() async {
+    try {
+      await customSelect('SELECT count(*) FROM sqlite_master').getSingle();
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<String?> getDatabaseFilePath() async {
+    try {
+      final rows = await customSelect('PRAGMA database_list').get();
+      for (final row in rows) {
+        final name = row.data['name']?.toString();
+        if (name == 'main') {
+          final path = row.data['file']?.toString();
+          if (path != null && path.isNotEmpty) {
+            return path;
+          }
+        }
+      }
+      return null;
+    } catch (_) {
+      return null;
+    }
+  }
 }
 
 Future<void> _migrate1To2(WordFlowDatabase db) async {
@@ -385,9 +474,7 @@ Future<void> _migrate2To3(WordFlowDatabase db) async {
       SELECT MIN(rowid) FROM words GROUP BY user_id, word_text
     )
   ''');
-  await db.customStatement(
-    'CREATE UNIQUE INDEX IF NOT EXISTS idx_words_user_word ON words(user_id, word_text)',
-  );
+  await WordFlowDatabase._createAllIndices(db);
 }
 
 Future<void> _migrate3To4(WordFlowDatabase db) async {
@@ -436,15 +523,7 @@ Future<void> _migrate4To5(WordFlowDatabase db) async {
 
 Future<void> _migrate5To6(WordFlowDatabase db) async {
   await db.transaction(() async {
-    // 1. Create new indices on words table
-    await db.customStatement(
-      'CREATE INDEX IF NOT EXISTS idx_words_known_partial ON words (user_id, is_known) WHERE is_known = 1',
-    );
-    await db.customStatement(
-      'CREATE INDEX IF NOT EXISTS idx_words_last_updated ON words (last_updated)',
-    );
-
-    // 2. Add foreign key to word_sync_queue by recreating it
+    // 1. Add foreign key to word_sync_queue by recreating it
     // SQLite doesn't support adding FKs to existing tables.
     await db.customStatement('''
       CREATE TABLE word_sync_queue_new (
@@ -470,6 +549,9 @@ Future<void> _migrate5To6(WordFlowDatabase db) async {
     await db.customStatement(
       'ALTER TABLE word_sync_queue_new RENAME TO word_sync_queue;',
     );
+
+    // 2. Ensure all indices exist after table swap.
+    await WordFlowDatabase._createAllIndices(db);
   });
 }
 
@@ -486,15 +568,7 @@ Future<void> _migrate6To7(WordFlowDatabase db) async {
 
 Future<void> _migrate7To8(WordFlowDatabase db) async {
   await db.transaction(() async {
-    await db.customStatement(
-      'CREATE INDEX IF NOT EXISTS idx_words_known ON words(user_id, is_known)',
-    );
-    await db.customStatement(
-      'CREATE INDEX IF NOT EXISTS idx_words_updated ON words(user_id, last_updated)',
-    );
-    await db.customStatement(
-      'CREATE INDEX IF NOT EXISTS idx_sync_queue_created ON word_sync_queue(created_at)',
-    );
+    await WordFlowDatabase._createAllIndices(db);
   });
 }
 
@@ -508,6 +582,20 @@ Future<void> _migrate8To9(WordFlowDatabase db) async {
       rethrow;
     }
   }
+}
+
+Future<void> _migrate9To10(WordFlowDatabase db) async {
+  await db.customStatement('''
+CREATE TABLE IF NOT EXISTS sync_dead_letters (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  word_id TEXT NOT NULL,
+  word_text TEXT NOT NULL,
+  operation TEXT NOT NULL,
+  last_error TEXT NOT NULL,
+  failed_at TEXT NOT NULL,
+  is_acknowledged INTEGER NOT NULL DEFAULT 0
+)
+''');
 }
 
 QueryExecutor _openConnection(String encryptionKey) {

@@ -8,22 +8,34 @@ import 'package:word_flow/core/errors/exceptions.dart';
 class PaginatedSyncResult {
   const PaginatedSyncResult({
     required this.words,
-    required this.hasMore,
+    this.nextCursorTime,
+    this.nextCursorId,
   });
 
   final List<WordRemoteDto> words;
-  final bool hasMore;
+  final String? nextCursorTime;
+  final String? nextCursorId;
 }
 
 abstract class WordRemoteSource {
   Future<void> upsertWord(WordRemoteDto word);
   Future<void> deleteWord(String id);
-  Future<Either<Failure, PaginatedSyncResult>> fetchUserWords(String userId, {int limit = 500, int offset = 0});
-  Future<Either<Failure, PaginatedSyncResult>> fetchWordsUpdatedSince(String userId, DateTime since, {int limit = 500, int offset = 0});
+  Future<Either<Failure, PaginatedSyncResult>> fetchUserWords(
+    String userId, {
+    int limit = 500,
+    String? cursorTime,
+    String? cursorId,
+  });
+  Future<Either<Failure, PaginatedSyncResult>> fetchWordsUpdatedSince(
+    String userId,
+    DateTime since, {
+    int limit = 500,
+    String? cursorTime,
+    String? cursorId,
+  });
 }
 
 class WordRemoteSourceImpl implements WordRemoteSource {
-
   WordRemoteSourceImpl(this._client);
   final SupabaseClient _client;
   final AppLogger _logger = AppLogger();
@@ -67,18 +79,28 @@ class WordRemoteSourceImpl implements WordRemoteSource {
   Future<Either<Failure, PaginatedSyncResult>> fetchUserWords(
     String userId, {
     int limit = 500,
-    int offset = 0,
+    String? cursorTime,
+    String? cursorId,
   }) async {
     try {
-      final dynamic response = await _client
+      var query = _client
           .from('words')
           .select()
-          // Note: The '.eq('user_id', userId)' filter is technically redundant 
-          // because of Row Level Security (RLS) policies on the backend, 
+          // Note: The '.eq('user_id', userId)' filter is technically redundant
+          // because of Row Level Security (RLS) policies on the backend,
           // but we keep it here for clarity and performance hints for the query planner.
-          .eq('user_id', userId)
+          .eq('user_id', userId);
+
+      if (cursorTime != null && cursorId != null) {
+        query = query.or(
+          'last_updated.gt.$cursorTime,and(last_updated.eq.$cursorTime,id.gt.$cursorId)',
+        );
+      }
+
+      final dynamic response = await query
+          .order('last_updated', ascending: true)
           .order('id', ascending: true)
-          .range(offset, offset + limit - 1);
+          .limit(limit);
 
       // Guard before any cast: Supabase can return non-list payloads (null/map).
       if (response is! List) {
@@ -97,10 +119,22 @@ class WordRemoteSourceImpl implements WordRemoteSource {
         for (final row in rows) {
           dtos.add(WordRemoteDto.fromJson(row));
         }
-        return Right(PaginatedSyncResult(words: dtos, hasMore: dtos.length == limit));
+        final hasNextPage = dtos.length == limit;
+        final last = hasNextPage ? dtos.last : null;
+        return Right(
+          PaginatedSyncResult(
+            words: dtos,
+            nextCursorTime: last?.lastUpdated.toUtc().toIso8601String(),
+            nextCursorId: last?.id,
+          ),
+        );
       } catch (e, stackTrace) {
         final failure = ServerFailure('Failed to parse word: $e');
-        _logger.error('fetchUserWords: failed to parse word', failure, stackTrace);
+        _logger.error(
+          'fetchUserWords: failed to parse word',
+          failure,
+          stackTrace,
+        );
         return Left(failure);
       }
     } on PostgrestException catch (e, stackTrace) {
@@ -123,17 +157,26 @@ class WordRemoteSourceImpl implements WordRemoteSource {
     String userId,
     DateTime since, {
     int limit = 500,
-    int offset = 0,
+    String? cursorTime,
+    String? cursorId,
   }) async {
     try {
-      final dynamic response = await _client
+      var query = _client
           .from('words')
           .select()
           .eq('user_id', userId)
-          .gte('last_updated', since.toUtc().toIso8601String())
+          .gte('last_updated', since.toUtc().toIso8601String());
+
+      if (cursorTime != null && cursorId != null) {
+        query = query.or(
+          'last_updated.gt.$cursorTime,and(last_updated.eq.$cursorTime,id.gt.$cursorId)',
+        );
+      }
+
+      final dynamic response = await query
           .order('last_updated', ascending: true)
           .order('id', ascending: true)
-          .range(offset, offset + limit - 1);
+          .limit(limit);
 
       // Guard before any cast: Supabase can return non-list payloads (null/map).
       if (response is! List) {
@@ -155,7 +198,15 @@ class WordRemoteSourceImpl implements WordRemoteSource {
         for (final row in rows) {
           dtos.add(WordRemoteDto.fromJson(row));
         }
-        return Right(PaginatedSyncResult(words: dtos, hasMore: dtos.length == limit));
+        final hasNextPage = dtos.length == limit;
+        final last = hasNextPage ? dtos.last : null;
+        return Right(
+          PaginatedSyncResult(
+            words: dtos,
+            nextCursorTime: last?.lastUpdated.toUtc().toIso8601String(),
+            nextCursorId: last?.id,
+          ),
+        );
       } catch (e, stackTrace) {
         final failure = ServerFailure('Failed to parse word: $e');
         _logger.error(
@@ -188,7 +239,7 @@ class WordRemoteSourceImpl implements WordRemoteSource {
 class DisabledWordRemoteSource implements WordRemoteSource {
   @override
   Future<void> deleteWord(String id) async {
-    // No-op for disabled backend. A real application might queue this, 
+    // No-op for disabled backend. A real application might queue this,
     // but here we just return or throw since the remote source isn't configured.
     // However, the interface returns Future<void>, so we just complete.
     // SyncRepositoryImpl checks if remote is configured so it shouldn't be called,
@@ -200,12 +251,23 @@ class DisabledWordRemoteSource implements WordRemoteSource {
   }
 
   @override
-  Future<Either<Failure, PaginatedSyncResult>> fetchUserWords(String userId, {int limit = 500, int offset = 0}) async {
+  Future<Either<Failure, PaginatedSyncResult>> fetchUserWords(
+    String userId, {
+    int limit = 500,
+    String? cursorTime,
+    String? cursorId,
+  }) async {
     return const Left(ConnectionFailure('Remote sync not configured'));
   }
 
   @override
-  Future<Either<Failure, PaginatedSyncResult>> fetchWordsUpdatedSince(String userId, DateTime since, {int limit = 500, int offset = 0}) async {
+  Future<Either<Failure, PaginatedSyncResult>> fetchWordsUpdatedSince(
+    String userId,
+    DateTime since, {
+    int limit = 500,
+    String? cursorTime,
+    String? cursorId,
+  }) async {
     return const Left(ConnectionFailure('Remote sync not configured'));
   }
 
