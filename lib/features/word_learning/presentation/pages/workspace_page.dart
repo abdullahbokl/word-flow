@@ -6,7 +6,7 @@ import 'package:word_flow/features/word_learning/presentation/blocs/workspace_st
 import 'package:word_flow/features/word_learning/presentation/widgets/workspace_background.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/workspace_body.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/workspace_listeners.dart';
-import 'package:word_flow/shared/widgets/sync_status_bar.dart';
+import 'package:word_flow/features/vocabulary/presentation/widgets/sync_status_banner.dart';
 
 class WorkspacePage extends StatefulWidget {
   const WorkspacePage({super.key, this.cubit});
@@ -54,7 +54,7 @@ class _WorkspaceContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        const SyncStatusBar(),
+        const SyncStatusBanner(),
         Expanded(
           child: BlocBuilder<WorkspaceCubit, WorkspaceState>(
             buildWhen: (previous, current) =>

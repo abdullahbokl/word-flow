@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+/// Typography system using bundled Outfit font for offline-first support.
+/// All text styles use the 'Outfit' font family which is bundled in assets/fonts/
 class AppTextStyles {
   static TextTheme textTheme(ColorScheme colorScheme) {
     return TextTheme(
@@ -25,7 +27,7 @@ class AppTextStyles {
     int weight,
   ) {
     return TextStyle(
-      fontFamily: 'serif',
+      fontFamily: 'Outfit',
       color: color,
       fontSize: size,
       height: height,
@@ -42,6 +44,7 @@ class AppTextStyles {
     int weight = 400,
   ]) {
     return TextStyle(
+      fontFamily: 'Outfit',
       color: color,
       fontSize: size,
       height: height,

@@ -24,6 +24,8 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   final DeleteWord _deleteWord;
   StreamSubscription? _wordsSubscription;
   Set<String> _pendingWordIds = <String>{};
+  final Map<String, Timer> _debounceTimers = {};
+  static const _debounceMs = 2000;
 
   void init(String? userId) {
     emit(const LibraryState.loading());
@@ -56,6 +58,11 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   }
 
   Future<void> toggleKnown(WordEntity word) async {
+    // Debounce rapid toggles on the same word (2 second cooldown)
+    if (_debounceTimers.containsKey(word.id)) {
+      return; // Ignore this call; debounce active
+    }
+
     final updatedWord = word.copyWith(
       isKnown: !word.isKnown,
       lastUpdated: DateTime.now().toUtc(),
@@ -63,12 +70,22 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     final prev = word;
     _markPending(word.id);
     _optimisticallyReplace(updatedWord);
+
+    // Start debounce timer
+    _debounceTimers[word.id] = Timer(
+      const Duration(milliseconds: _debounceMs),
+      () => _debounceTimers.remove(word.id),
+    );
+
     final result = await _updateWord(updatedWord);
     result.fold(
       (f) {
         _unmarkPending(word.id);
         _optimisticallyReplace(prev);
         _emitLoadedError(f.message, failure: f);
+        // Clear debounce timer on error to allow retry
+        _debounceTimers[word.id]?.cancel();
+        _debounceTimers.remove(word.id);
       },
       (_) => _unmarkPending(word.id),
     );
@@ -187,6 +204,11 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   @override
   Future<void> close() {
     _wordsSubscription?.cancel();
+    // Clean up all debounce timers
+    for (final timer in _debounceTimers.values) {
+      timer.cancel();
+    }
+    _debounceTimers.clear();
     return super.close();
   }
 }

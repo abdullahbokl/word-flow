@@ -85,7 +85,7 @@ void main() {
       },
       act: (cubit) => cubit.analyze('hello hello', userId: tUserId),
       expect: () => [
-        const WorkspaceState.processing(),
+        const WorkspaceState.processing(progress: 0.0, totalWords: 2),
         WorkspaceState.results(
           words: tProcessedWords,
           summary: tAnalysis.summary,
@@ -108,7 +108,7 @@ void main() {
       },
       act: (cubit) => cubit.analyze('error', userId: tUserId),
       expect: () => [
-        const WorkspaceState.processing(),
+        const WorkspaceState.processing(progress: 0.0, totalWords: 1),
         const WorkspaceState.error('fail', failure: ProcessingFailure('fail')),
       ],
     );

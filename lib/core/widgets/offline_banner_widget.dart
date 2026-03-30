@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:word_flow/core/sync/connectivity_cubit.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class OfflineBannerWidget extends StatelessWidget {
   const OfflineBannerWidget({super.key});
@@ -41,7 +40,8 @@ class OfflineBannerWidget extends StatelessWidget {
                   child: Text(
                     "You're offline — changes will sync when connected",
                     textAlign: TextAlign.center,
-                    style: GoogleFonts.outfit(
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                       color: colorScheme.onErrorContainer,

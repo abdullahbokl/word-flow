@@ -4,7 +4,7 @@ import 'package:word_flow/features/word_learning/domain/entities/script_analysis
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_state.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cubit.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/results_section.dart';
-import 'package:word_flow/features/word_learning/presentation/widgets/script_input_section.dart';
+import 'package:word_flow/features/word_learning/presentation/widgets/script_input_widget.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/workspace_header.dart';
 import 'package:word_flow/core/widgets/error_state_widget.dart';
 import 'package:word_flow/core/errors/failure_mapper.dart';
@@ -44,15 +44,26 @@ class WorkspaceBody extends StatelessWidget {
                 ),
                 SliverPadding(
                   padding: const EdgeInsets.symmetric(horizontal: 20),
-                  sliver: BlocSelector<WorkspaceCubit, WorkspaceState, bool>(
+                  sliver: BlocSelector<WorkspaceCubit, WorkspaceState,
+                      ({bool isProcessing, double progress, int totalWords})>(
                     selector: (state) => state.maybeMap(
-                      processing: (_) => true,
-                      orElse: () => false,
+                      processing: (s) => (
+                        isProcessing: true,
+                        progress: s.progress,
+                        totalWords: s.totalWords,
+                      ),
+                      orElse: () => (
+                        isProcessing: false,
+                        progress: 0.0,
+                        totalWords: 0,
+                      ),
                     ),
-                    builder: (context, isProcessing) => SliverToBoxAdapter(
-                      child: ScriptInputSection(
+                    builder: (context, processingVm) => SliverToBoxAdapter(
+                      child: ScriptInputWidget(
                         controller: controller,
-                        isProcessing: isProcessing,
+                        isProcessing: processingVm.isProcessing,
+                        progress: processingVm.progress,
+                        totalWords: processingVm.totalWords,
                       ),
                     ),
                   ),

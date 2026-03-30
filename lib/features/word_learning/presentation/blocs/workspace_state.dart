@@ -9,7 +9,10 @@ part 'workspace_state.freezed.dart';
 @freezed
 sealed class WorkspaceState with _$WorkspaceState {
   const factory WorkspaceState.initial() = _Initial;
-  const factory WorkspaceState.processing() = _Processing;
+  const factory WorkspaceState.processing({
+    required double progress,
+    required int totalWords,
+  }) = _Processing;
   const factory WorkspaceState.results({
     required List<ProcessedWord> words,
     required ScriptSummary summary,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 class ErrorStateWidget extends StatelessWidget {
   const ErrorStateWidget({
@@ -48,7 +47,8 @@ class ErrorStateWidget extends StatelessWidget {
             Text(
               title,
               textAlign: TextAlign.center,
-              style: GoogleFonts.outfit(
+              style: TextStyle(
+                fontFamily: 'Outfit',
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: colorScheme.onSurface,
@@ -71,7 +71,8 @@ class ErrorStateWidget extends StatelessWidget {
                   icon: const Icon(Icons.refresh_rounded),
                   label: Text(
                     retryLabel ?? 'Try Again',
-                    style: GoogleFonts.outfit(
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -90,7 +91,8 @@ class ErrorStateWidget extends StatelessWidget {
                   icon: const Icon(Icons.arrow_forward_rounded),
                   label: Text(
                     actionLabel ?? 'Continue',
-                    style: GoogleFonts.outfit(
+                    style: TextStyle(
+                      fontFamily: 'Outfit',
                       fontWeight: FontWeight.w600,
                     ),
                   ),

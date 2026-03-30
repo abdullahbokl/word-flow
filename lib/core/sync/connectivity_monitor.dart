@@ -21,6 +21,7 @@ class ConnectivityMonitor {
   StreamSubscription? _connectivitySubscription;
   StreamSubscription? _internetSubscription;
   Timer? _debounceTimer;
+  bool _isDisposed = false;
 
   static const Duration reconnectDebounce = Duration(seconds: 3);
 
@@ -35,9 +36,14 @@ class ConnectivityMonitor {
   }
 
   Future<void> _evaluateConnectivity() async {
+    if (_isDisposed) return;
+
     final results = await _connectivity.checkConnectivity();
+    if (_isDisposed) return;
+
     final hasInterface = !results.contains(ConnectivityResult.none);
     final hasInternet = await _checker.hasInternetAccess;
+    if (_isDisposed) return;
 
     final newStatus = (hasInterface && hasInternet) 
         ? ConnectivityStatus.online 
@@ -58,6 +64,7 @@ class ConnectivityMonitor {
   }
 
   void _emitIfChanged(ConnectivityStatus status) {
+    if (_isDisposed) return;
     if (_lastStatus != status) {
       _lastStatus = status;
       _controller.add(status);
@@ -79,6 +86,7 @@ class ConnectivityMonitor {
   }
 
   Future<bool> get isOnline async {
+    if (_isDisposed) return false;
     final results = await _connectivity.checkConnectivity();
     if (results.contains(ConnectivityResult.none)) return false;
     return await _checker.hasInternetAccess;
@@ -86,6 +94,8 @@ class ConnectivityMonitor {
 
   @disposeMethod
   void dispose() {
+    if (_isDisposed) return;
+    _isDisposed = true;
     _debounceTimer?.cancel();
     _connectivitySubscription?.cancel();
     _internetSubscription?.cancel();

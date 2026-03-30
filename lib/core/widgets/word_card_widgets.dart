@@ -13,10 +13,21 @@ class StatusIndicator extends StatelessWidget {
           color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(12),
         ),
-        child: Icon(
-          isKnown ? Icons.verified_rounded : Icons.auto_awesome_rounded,
-          color: color,
-          size: 20,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 200),
+          transitionBuilder: (child, animation) => ScaleTransition(
+            scale: animation,
+            child: FadeTransition(
+              opacity: animation,
+              child: child,
+            ),
+          ),
+          child: Icon(
+            isKnown ? Icons.verified_rounded : Icons.auto_awesome_rounded,
+            key: ValueKey('status_${isKnown ? 'known' : 'unknown'}'),
+            color: color,
+            size: 20,
+          ),
         ),
       );
 }
@@ -71,12 +82,23 @@ class ToggleButton extends StatelessWidget {
         width: 48,
         height: 48,
         child: IconButton(
-          icon: isPending
-              ? AppLoader(size: 16, color: statusColor)
-              : Icon(
-                  isKnown ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
-                  color: isKnown ? Theme.of(context).colorScheme.primary : null,
-                ),
+          icon: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 200),
+            transitionBuilder: (child, animation) => ScaleTransition(
+              scale: animation,
+              child: FadeTransition(
+                opacity: animation,
+                child: child,
+              ),
+            ),
+            child: isPending
+                ? AppLoader(key: const ValueKey('loader'), size: 16, color: statusColor)
+                : Icon(
+                    isKnown ? Icons.check_box_rounded : Icons.check_box_outline_blank_rounded,
+                    key: ValueKey('checkbox_${isKnown ? 'checked' : 'unchecked'}'),
+                    color: isKnown ? Theme.of(context).colorScheme.primary : null,
+                  ),
+          ),
           onPressed: isPending ? null : onToggle,
           tooltip: 'Toggle status',
         ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:word_flow/core/di/injection.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/analysis_settings_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/analysis_settings_state.dart';
@@ -30,7 +29,10 @@ class _AnalysisSettingsView extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Analysis Settings',
-          style: GoogleFonts.outfit(fontWeight: FontWeight.w600),
+          style: TextStyle(
+            fontFamily: 'Outfit',
+            fontWeight: FontWeight.w600,
+          ),
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -76,8 +78,8 @@ class _AnalysisSettingsView extends StatelessWidget {
                     children: [
                       ListTile(
                         leading: Icon(Icons.language_rounded, color: colorScheme.primary),
-                        title: Text('Primary Language', style: GoogleFonts.outfit(fontWeight: FontWeight.w500)),
-                        subtitle: Text(config.language.toUpperCase(), style: GoogleFonts.outfit(fontSize: 12)),
+                        title: Text('Primary Language', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w500)),
+                        subtitle: Text(config.language.toUpperCase(), style: const TextStyle(fontFamily: 'Outfit', fontSize: 12)),
                         trailing: DropdownButton<String>(
                           value: config.language,
                           underline: const SizedBox(),
@@ -93,8 +95,8 @@ class _AnalysisSettingsView extends StatelessWidget {
                       const Divider(height: 1, indent: 64),
                       ListTile(
                         leading: Icon(Icons.short_text_rounded, color: colorScheme.primary),
-                        title: Text('Minimum Word Length', style: GoogleFonts.outfit(fontWeight: FontWeight.w500)),
-                        subtitle: Text('${config.minWordLength} characters', style: GoogleFonts.outfit(fontSize: 12)),
+                        title: Text('Minimum Word Length', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w500)),
+                        subtitle: Text('${config.minWordLength} characters', style: const TextStyle(fontFamily: 'Outfit', fontSize: 12)),
                         trailing: SizedBox(
                           width: 120,
                           child: Slider(
@@ -112,8 +114,8 @@ class _AnalysisSettingsView extends StatelessWidget {
                       const Divider(height: 1, indent: 64),
                       SwitchListTile(
                         secondary: Icon(Icons.merge_type_rounded, color: colorScheme.primary),
-                        title: Text('Merge Contractions', style: GoogleFonts.outfit(fontWeight: FontWeight.w500)),
-                        subtitle: Text("Treat 'don't' as one word", style: GoogleFonts.outfit(fontSize: 12)),
+                        title: Text('Merge Contractions', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w500)),
+                        subtitle: Text("Treat 'don't' as one word", style: const TextStyle(fontFamily: 'Outfit', fontSize: 12)),
                         value: config.includeContractionsAsOne,
                         onChanged: (val) {
                           context.read<AnalysisSettingsCubit>().toggleContractions(val);
@@ -122,8 +124,8 @@ class _AnalysisSettingsView extends StatelessWidget {
                       const Divider(height: 1, indent: 64),
                       SwitchListTile(
                         secondary: Icon(Icons.account_tree_rounded, color: colorScheme.primary),
-                        title: Text('Group Word Variants', style: GoogleFonts.outfit(fontWeight: FontWeight.w500)),
-                        subtitle: Text("Count 'runs' and 'running' as 'run' (Stemming)", style: GoogleFonts.outfit(fontSize: 12)),
+                        title: Text('Group Word Variants', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w500)),
+                        subtitle: Text("Count 'runs' and 'running' as 'run' (Stemming)", style: const TextStyle(fontFamily: 'Outfit', fontSize: 12)),
                         value: config.useStemming,
                         onChanged: (val) {
                           context.read<AnalysisSettingsCubit>().toggleStemming(val);
@@ -174,7 +176,7 @@ class _AnalysisSettingsView extends StatelessWidget {
                           runSpacing: 8,
                           children: config.stopWords.take(50).map((word) {
                             return Chip(
-                              label: Text(word, style: GoogleFonts.outfit(fontSize: 12)),
+                              label: Text(word, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12)),
                               onDeleted: () => context.read<AnalysisSettingsCubit>().removeStopword(word),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                               backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.4),
@@ -210,7 +212,8 @@ class _AnalysisSettingsView extends StatelessWidget {
         const SizedBox(width: 12),
         Text(
           title,
-          style: GoogleFonts.outfit(
+          style: TextStyle(
+            fontFamily: 'Outfit',
             fontSize: 16,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.5,

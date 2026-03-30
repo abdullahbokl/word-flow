@@ -28,6 +28,7 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
   final SaveProcessedWords _saveProcessedWords;
   final GetTextAnalysisConfig _getAnalysisConfig;
   final AppLogger logger;
+  Timer? _progressTimer;
 
   @override
   final ToggleKnownWord toggleKnownWordUseCase;
@@ -52,6 +53,12 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
         orElse: () => false,
       );
 
+  @override
+  Future<void> close() {
+    _stopProgressSimulation();
+    return super.close();
+  }
+
   Future<void> analyze(String text, {String? userId}) async {
     if (text.trim().isEmpty) return emit(const WorkspaceState.initial());
     
@@ -60,7 +67,9 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
       orElse: () => 1,
     );
     
-    emit(const WorkspaceState.processing());
+    final totalWords = _estimateWordCount(text);
+    emit(WorkspaceState.processing(progress: 0, totalWords: totalWords));
+    _startProgressSimulation(totalWords);
     
     final configResult = await _getAnalysisConfig();
     final config = configResult.getOrElse((_) => const TextAnalysisConfig(
@@ -69,6 +78,8 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
     ));
     
     final result = await _processScript(text, userId: userId, config: config);
+
+    _stopProgressSimulation();
     
     result.fold(
       (f) => emit(WorkspaceState.error(f.message, failure: f)),
@@ -95,6 +106,37 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
         );
       },
     );
+  }
+
+  int _estimateWordCount(String text) {
+    final trimmed = text.trim();
+    if (trimmed.isEmpty) return 0;
+    return trimmed.split(RegExp(r'\s+')).where((w) => w.isNotEmpty).length;
+  }
+
+  void _startProgressSimulation(int totalWords) {
+    _stopProgressSimulation();
+    _progressTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+      if (isClosed) {
+        timer.cancel();
+        return;
+      }
+
+      state.maybeMap(
+        processing: (s) {
+          final next = (s.progress + 0.05).clamp(0.0, 0.9);
+          if (next > s.progress) {
+            emit(WorkspaceState.processing(progress: next, totalWords: totalWords));
+          }
+        },
+        orElse: () => timer.cancel(),
+      );
+    });
+  }
+
+  void _stopProgressSimulation() {
+    _progressTimer?.cancel();
+    _progressTimer = null;
   }
 
   Future<void> toggleKnown(String wordText, {String? userId}) async {

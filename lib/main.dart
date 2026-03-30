@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:talker_bloc_logger/talker_bloc_logger.dart';
@@ -11,9 +12,16 @@ import 'package:word_flow/core/config/env_config.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/security/security_service.dart';
 import 'package:word_flow/core/security/supabase_secure_storage.dart';
+import 'package:word_flow/core/sync/connectivity_lifecycle_manager.dart';
 import 'package:word_flow/core/sync/sync_orchestrator.dart';
 
 Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // Disable runtime font fetching to ensure offline-first typography
+  // All fonts are now bundled as assets in assets/fonts/
+  GoogleFonts.config.allowRuntimeFetching = false;
+  
   await SentryFlutter.init(
     (options) {
       options.dsn = EnvConfig.sentryDsn;
@@ -22,7 +30,6 @@ Future<void> main() async {
       options.sendDefaultPii = false;
     },
     appRunner: () async {
-      WidgetsFlutterBinding.ensureInitialized();
       await configureDependencies();
 
       final logger = getIt<AppLogger>();
@@ -48,6 +55,9 @@ Future<void> main() async {
         // Report to Sentry as well
         await Sentry.captureException(e, stackTrace: stackTrace);
       }
+
+      // Observe app lifecycle to auto-clean lazy singleton connectivity resources.
+      getIt<ConnectivityLifecycleManager>().start();
 
       // Start global synchronization orchestration loop
       getIt<SyncOrchestrator>().start();
