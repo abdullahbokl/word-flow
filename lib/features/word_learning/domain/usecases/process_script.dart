@@ -6,6 +6,7 @@ import 'package:word_flow/features/vocabulary/domain/repositories/word_repositor
 import 'package:word_flow/features/vocabulary/domain/services/text_analysis_service.dart';
 import 'package:word_flow/features/vocabulary/domain/entities/text_analysis_config.dart';
 import 'package:word_flow/core/utils/porter_stemmer.dart';
+import 'package:word_flow/core/utils/input_sanitizer.dart';
 import 'package:injectable/injectable.dart';
 
 @lazySingleton
@@ -21,6 +22,12 @@ class ProcessScript {
     required TextAnalysisConfig config,
   }) async {
     try {
+      final sanitizedResult = InputSanitizer.sanitizeScript(rawText);
+      if (sanitizedResult.isLeft()) {
+        return Left(sanitizedResult.fold((l) => l, (_) => const ProcessingFailure('unknown')));
+      }
+      final sanitizedText = sanitizedResult.getOrElse((_) => '');
+
       final wordsResult = await _repository.getKnownWordTexts(userId: userId);
       final Set<String> rawKnownTexts = wordsResult.fold(
         (failure) => {},
@@ -36,7 +43,7 @@ class ProcessScript {
       }
 
       final processed = await _textAnalysisService.process(
-        rawText: rawText,
+        rawText: sanitizedText,
         knownWords: knownWordTexts,
         config: config,
       );
