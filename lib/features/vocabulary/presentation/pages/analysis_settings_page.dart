@@ -113,7 +113,7 @@ class _AnalysisSettingsView extends StatelessWidget {
                       SwitchListTile(
                         secondary: Icon(Icons.merge_type_rounded, color: colorScheme.primary),
                         title: Text('Merge Contractions', style: GoogleFonts.outfit(fontWeight: FontWeight.w500)),
-                        subtitle: Text("Treat \"don't\" as one word", style: GoogleFonts.outfit(fontSize: 12)),
+                        subtitle: Text("Treat 'don't' as one word", style: GoogleFonts.outfit(fontSize: 12)),
                         value: config.includeContractionsAsOne,
                         onChanged: (val) {
                           context.read<AnalysisSettingsCubit>().toggleContractions(val);
@@ -123,7 +123,7 @@ class _AnalysisSettingsView extends StatelessWidget {
                       SwitchListTile(
                         secondary: Icon(Icons.account_tree_rounded, color: colorScheme.primary),
                         title: Text('Group Word Variants', style: GoogleFonts.outfit(fontWeight: FontWeight.w500)),
-                        subtitle: Text("Count \"runs\" and \"running\" as \"run\" (Stemming)", style: GoogleFonts.outfit(fontSize: 12)),
+                        subtitle: Text("Count 'runs' and 'running' as 'run' (Stemming)", style: GoogleFonts.outfit(fontSize: 12)),
                         value: config.useStemming,
                         onChanged: (val) {
                           context.read<AnalysisSettingsCubit>().toggleStemming(val);
@@ -152,11 +152,11 @@ class _AnalysisSettingsView extends StatelessWidget {
                             hintText: 'Add custom stopword...',
                             suffixIcon: IconButton(
                               icon: const Icon(Icons.add_circle_outline_rounded),
-                              onPressed: () {}, // Handled by onSubmitted or similar
+                              onPressed: () {},
                             ),
                             prefixIcon: const Icon(Icons.search_rounded),
                             filled: true,
-                            fillColor: colorScheme.surfaceVariant.withOpacity(0.3),
+                            fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
                               borderSide: BorderSide.none,
@@ -173,12 +173,11 @@ class _AnalysisSettingsView extends StatelessWidget {
                           spacing: 8,
                           runSpacing: 8,
                           children: config.stopWords.take(50).map((word) {
-                            // Highlight custom ones (fake it for now since we don't distinguish in domain model yet)
                             return Chip(
                               label: Text(word, style: GoogleFonts.outfit(fontSize: 12)),
                               onDeleted: () => context.read<AnalysisSettingsCubit>().removeStopword(word),
                               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              backgroundColor: colorScheme.primaryContainer.withOpacity(0.4),
+                              backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.4),
                               deleteIconColor: colorScheme.primary,
                             );
                           }).toList(),
@@ -207,7 +206,7 @@ class _AnalysisSettingsView extends StatelessWidget {
     final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
-        Icon(icon, size: 20, color: colorScheme.primary.withOpacity(0.7)),
+        Icon(icon, size: 20, color: colorScheme.primary.withValues(alpha: 0.7)),
         const SizedBox(width: 12),
         Text(
           title,
@@ -215,7 +214,7 @@ class _AnalysisSettingsView extends StatelessWidget {
             fontSize: 16,
             fontWeight: FontWeight.w700,
             letterSpacing: 0.5,
-            color: colorScheme.onSurface.withOpacity(0.8),
+            color: colorScheme.onSurface.withValues(alpha: 0.8),
           ),
         ),
       ],
@@ -227,10 +226,10 @@ class _AnalysisSettingsView extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withOpacity(0.5)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.03),
+            color: Colors.black.withValues(alpha: 0.03),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),

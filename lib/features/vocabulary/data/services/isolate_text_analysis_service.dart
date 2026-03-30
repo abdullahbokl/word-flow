@@ -28,8 +28,8 @@ class IsolateTextAnalysisService implements TextAnalysisService {
 
       // Build regex based on config
       final minLen = config.minWordLength;
-      final contractions = config.includeContractionsAsOne ? "(?:'[a-zA-Z]+)?" : "";
-      final wordRegExp = RegExp("\\b[a-zA-Z]{$minLen,}$contractions\\b");
+      final contractions = config.includeContractionsAsOne ? '(?:\'[a-zA-Z]+)?' : '';
+      final wordRegExp = RegExp('\\b[a-zA-Z]{$minLen,}$contractions\\b');
       
       final matches = wordRegExp.allMatches(rawText);
 

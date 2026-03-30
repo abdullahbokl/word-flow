@@ -57,21 +57,29 @@ class WorkspaceBody extends StatelessWidget {
                     ),
                   ),
                 ),
-                SliverFillRemaining(
-                  hasScrollBody: false,
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
-                    child: BlocBuilder<WorkspaceCubit, WorkspaceState>(
-                      buildWhen: (p, c) => c.maybeMap(
-                        error: (_) => true,
-                        results: (_) => true,
-                        orElse: () => false,
+                BlocBuilder<WorkspaceCubit, WorkspaceState>(
+                  buildWhen: (p, c) => c.maybeMap(
+                    results: (_) => true,
+                    error: (_) => true,
+                    orElse: () => false,
+                  ) || p.maybeMap(
+                    results: (_) => true,
+                    error: (_) => true,
+                    orElse: () => false,
+                  ),
+                  builder: (context, state) {
+                    return state.maybeMap(
+                      results: (_) => const SliverPadding(
+                        padding: EdgeInsets.fromLTRB(20, 18, 20, 28),
+                        sliver: ResultsSection(),
                       ),
-                      builder: (context, state) {
-                        return state.maybeMap(
-                          error: (s) {
-                            final isAuth = s.failure is AuthFailure;
-                            return ErrorStateWidget(
+                      error: (s) {
+                        final isAuth = s.failure is AuthFailure;
+                        return SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 18, 20, 28),
+                            child: ErrorStateWidget(
                               title: s.failure?.title ?? 'Analysis Failed',
                               message: s.failure?.friendlyMessage ?? s.message,
                               icon: s.failure?.icon ?? Icons.analytics_rounded,
@@ -83,14 +91,13 @@ class WorkspaceBody extends StatelessWidget {
                                     },
                               actionLabel: isAuth ? 'Sign In Again' : null,
                               onAction: isAuth ? () => context.read<AuthCubit>().logOut() : null,
-                            );
-                          },
-                          results: (_) => const ResultsSection(),
-                          orElse: () => const SizedBox.shrink(),
+                            ),
+                          ),
                         );
                       },
-                    ),
-                  ),
+                      orElse: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
+                    );
+                  },
                 ),
               ],
             ),

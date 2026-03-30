@@ -30,7 +30,7 @@ class _LibraryResultsListState extends State<LibraryResultsList> {
   static const _exitDuration = Duration(milliseconds: 450);
   static const _insertDuration = Duration(milliseconds: 400);
 
-  final GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
+  GlobalKey<AnimatedListState> _listKey = GlobalKey<AnimatedListState>();
   late List<WordEntity> _visibleItems;
 
   @override
@@ -60,8 +60,11 @@ class _LibraryResultsListState extends State<LibraryResultsList> {
     // For small changes, animate. For large ones, just rebuild.
     if (widget.searchQuery != oldWidget.searchQuery || 
         widget.filter != oldWidget.filter ||
-        (targetItems.length - _visibleItems.length).abs() > 5) {
-      _visibleItems = targetItems;
+        (targetItems.length - _visibleItems.length).abs() > 3) {
+      setState(() {
+        _listKey = GlobalKey<AnimatedListState>();
+        _visibleItems = targetItems;
+      });
       return;
     }
 
@@ -110,8 +113,11 @@ class _LibraryResultsListState extends State<LibraryResultsList> {
 
   @override
   Widget build(BuildContext context) {
+    Widget content;
+    
     if (widget.words.isEmpty && widget.searchQuery.isEmpty) {
-      return EmptyState(
+      content = EmptyState(
+        key: const ValueKey('empty_none'),
         icon: Icons.library_books_outlined,
         title: 'No words yet',
         subtitle: 'Paste a script to get started',
@@ -120,31 +126,36 @@ class _LibraryResultsListState extends State<LibraryResultsList> {
           child: const Text('Go to Workspace'),
         ),
       );
-    }
-
-    if (_visibleItems.isEmpty) {
-      return const EmptyState(
+    } else if (_visibleItems.isEmpty) {
+      content = const EmptyState(
+        key: ValueKey('empty_search'),
         icon: Icons.search_off,
         title: 'No matches',
         subtitle: 'Try a different search term or filter',
       );
+    } else {
+      content = AnimatedList(
+        key: _listKey,
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        initialItemCount: _visibleItems.length,
+        itemBuilder: (context, index, animation) {
+          if (index >= _visibleItems.length) return const SizedBox.shrink();
+          final item = _visibleItems[index];
+          return LibraryAnimatedItem(
+            key: ValueKey(item.id),
+            animation: animation,
+            word: item,
+            isPending: widget.pendingWordIds.contains(item.id),
+            onEdit: () => _showAddEditSheet(context, word: item),
+            onDelete: () => _confirmDelete(context, item),
+          );
+        },
+      );
     }
 
-    return AnimatedList(
-      key: _listKey,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      initialItemCount: _visibleItems.length,
-      itemBuilder: (context, index, animation) {
-        final item = _visibleItems[index];
-        return LibraryAnimatedItem(
-          key: ValueKey(item.id),
-          animation: animation,
-          word: item,
-          isPending: widget.pendingWordIds.contains(item.id),
-          onEdit: () => _showAddEditSheet(context, word: item),
-          onDelete: () => _confirmDelete(context, item),
-        );
-      },
+    return AnimatedSwitcher(
+      duration: const Duration(milliseconds: 300),
+      child: content,
     );
   }
 

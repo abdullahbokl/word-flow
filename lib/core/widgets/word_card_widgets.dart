@@ -50,7 +50,7 @@ class WordInfo extends StatelessWidget {
           Text(
             'Variants: ${variants.join(", ")}',
             style: textTheme.labelSmall?.copyWith(
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.6),
+              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
               fontStyle: FontStyle.italic,
             ),
           ),

@@ -6,9 +6,9 @@ import 'package:word_flow/features/vocabulary/domain/repositories/settings_repos
 
 @lazySingleton
 class GetTextAnalysisConfig {
-  final SettingsRepository _repository;
-
   GetTextAnalysisConfig(this._repository);
+
+  final SettingsRepository _repository;
 
   Future<Either<Failure, TextAnalysisConfig>> call() =>
       _repository.getAnalysisConfig();

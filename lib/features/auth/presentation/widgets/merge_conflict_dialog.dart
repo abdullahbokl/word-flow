@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
-import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/blocs/migration_cubit.dart';
 
 class MergeConflictDialog extends StatelessWidget {
 
@@ -25,14 +25,14 @@ class MergeConflictDialog extends StatelessWidget {
         TextButton(
           onPressed: () {
             Navigator.of(context).pop();
-            context.read<AuthCubit>().discardGuestAndSignIn(user);
+            context.read<MigrationCubit>().discardGuestAndSignIn(user);
           },
           child: const Text('Discard Guest Data'),
         ),
         ElevatedButton(
           onPressed: () {
             Navigator.of(context).pop();
-            context.read<AuthCubit>().mergeAndSignIn(user);
+            context.read<MigrationCubit>().mergeAndSignIn(user);
           },
           child: const Text('Merge Both'),
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:word_flow/core/theme/app_theme.dart';
 import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/blocs/migration_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart';
 import 'package:word_flow/core/sync/connectivity_cubit.dart';
 import 'package:word_flow/app/router/app_router.dart';
@@ -17,6 +18,9 @@ class WordFlowApp extends StatelessWidget {
         BlocProvider(
           lazy: false,
           create: (_) => getIt<AuthCubit>()..init(),
+        ),
+        BlocProvider(
+          create: (_) => getIt<MigrationCubit>(),
         ),
         BlocProvider(
           lazy: false,

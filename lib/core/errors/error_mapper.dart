@@ -37,22 +37,22 @@ class ErrorMapper {
       return AuthFailure(error.message ?? 'Authentication error occurred');
     }
     if (error is ServerException) {
-      return ServerFailure('A server error occurred');
+      return const ServerFailure('A server error occurred');
     }
     if (error is PostgrestException) {
       // Supabase client wraps HTTP errors in PostgrestException.
-      return ServerFailure('A server error occurred');
+      return const ServerFailure('A server error occurred');
     }
     if (error is DatabaseException) {
-      return DatabaseFailure('A database error occurred');
+      return const DatabaseFailure('A database error occurred');
     }
     if (error is TimeoutException) {
-      return ConnectionFailure('A connection timeout occurred');
+      return const ConnectionFailure('A connection timeout occurred');
     }
     if (error is SocketException) {
-      return ConnectionFailure('A network connection error occurred');
+      return const ConnectionFailure('A network connection error occurred');
     }
     // Fallback – unknown error type.
-    return ServerFailure('An unexpected error occurred');
+    return const ServerFailure('An unexpected error occurred');
   }
 }

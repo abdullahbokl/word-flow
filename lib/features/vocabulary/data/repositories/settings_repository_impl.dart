@@ -9,10 +9,10 @@ import 'package:word_flow/features/vocabulary/domain/repositories/settings_repos
 
 @LazySingleton(as: SettingsRepository)
 class SettingsRepositoryImpl implements SettingsRepository {
+  SettingsRepositoryImpl(this._db, this._loader);
+
   final WordFlowDatabase _db;
   final StopwordsLoader _loader;
-
-  SettingsRepositoryImpl(this._db, this._loader);
 
   static const _keyLang = 'analysis_lang';
   static const _keyMinLen = 'analysis_min_len';

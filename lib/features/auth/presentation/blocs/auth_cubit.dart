@@ -6,8 +6,6 @@ import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_state_change.dart';
 import 'package:word_flow/features/auth/domain/usecases/auth_usecases.dart';
 import 'package:word_flow/features/auth/domain/usecases/sign_out_and_clear_local.dart';
-import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
-import 'package:word_flow/features/vocabulary/domain/usecases/adopt_guest_words.dart';
 import 'package:word_flow/features/auth/presentation/blocs/auth_state.dart';
 import 'package:word_flow/features/auth/presentation/blocs/auth_cubit_actions.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
@@ -19,8 +17,6 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
     this.signInUseCase,
     this.signUpUseCase,
     this.signOutAndClearLocalUseCase,
-    this.wordRepository,
-    this.adoptGuestWordsUseCase,
   ) : super(const AuthState.initial());
 
   final AuthRepository authRepository;
@@ -30,10 +26,6 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
   final SignUpWithEmailUseCase signUpUseCase;
   @override
   final SignOutAndClearLocal signOutAndClearLocalUseCase;
-  @override
-  final WordRepository wordRepository;
-  @override
-  final AdoptGuestWords adoptGuestWordsUseCase;
 
   String? get currentUserId => authRepository.currentUserId;
 
@@ -97,15 +89,11 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
     } catch (_) {}
   }
 
-  Future<void> mergeAndSignIn(AuthUser user) async {
-    emit(const AuthState.loading());
-    await adoptGuestWordsUseCase(user.id);
+  void onAuthenticatedWithMerge(AuthUser user) {
     emit(AuthState.authenticated(user));
   }
 
-  Future<void> discardGuestAndSignIn(AuthUser user) async {
-    emit(const AuthState.loading());
-    await wordRepository.clearLocalWords(userId: null);
+  void onAuthenticatedWithDiscard(AuthUser user) {
     emit(AuthState.authenticated(user));
   }
 
@@ -115,3 +103,4 @@ class AuthCubit extends Cubit<AuthState> with AuthCubitActions {
     return super.close();
   }
 }
+

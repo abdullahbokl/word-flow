@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/blocs/migration_cubit.dart';
 import 'package:word_flow/features/auth/presentation/widgets/auth_form.dart';
 
 class AuthBottomSheet extends StatefulWidget {
@@ -26,9 +26,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
     final email = _emailController.text;
     final pass = _passwordController.text;
     if (_isSignUp) {
-      context.read<AuthCubit>().signUp(email, pass);
+      context.read<MigrationCubit>().signUp(email, pass);
     } else {
-      context.read<AuthCubit>().signIn(email, pass);
+      context.read<MigrationCubit>().signIn(email, pass);
     }
   }
 

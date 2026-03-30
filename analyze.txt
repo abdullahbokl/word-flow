@@ -1,0 +1,25 @@
+Analyzing word_flow...                                          
+
+   info • Use 'const' with the constructor to improve performance • lib/core/errors/error_mapper.dart:40:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/core/errors/error_mapper.dart:44:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/core/errors/error_mapper.dart:47:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/core/errors/error_mapper.dart:50:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/core/errors/error_mapper.dart:53:14 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • lib/core/errors/error_mapper.dart:56:12 • prefer_const_constructors
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/core/widgets/word_card_widgets.dart:53:69 • deprecated_member_use
+   info • Constructor declarations should be before non-constructor declarations • lib/features/vocabulary/data/repositories/settings_repository_impl.dart:15:3 • sort_constructors_first
+   info • Unnecessary use of double quotes • lib/features/vocabulary/data/services/isolate_text_analysis_service.dart:31:82 • prefer_single_quotes
+   info • Unnecessary use of double quotes • lib/features/vocabulary/data/services/isolate_text_analysis_service.dart:32:33 • prefer_single_quotes
+   info • Constructor declarations should be before non-constructor declarations • lib/features/vocabulary/domain/usecases/get_text_analysis_config.dart:11:3 • sort_constructors_first
+   info • Unnecessary use of double quotes • lib/features/vocabulary/presentation/pages/analysis_settings_page.dart:126:40 • prefer_single_quotes
+   info • 'surfaceVariant' is deprecated and shouldn't be used. Use surfaceContainerHighest instead. This feature was deprecated after v3.18.0-0.1.pre • lib/features/vocabulary/presentation/pages/analysis_settings_page.dart:159:52 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/vocabulary/presentation/pages/analysis_settings_page.dart:159:67 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/vocabulary/presentation/pages/analysis_settings_page.dart:181:77 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/vocabulary/presentation/pages/analysis_settings_page.dart:210:57 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/vocabulary/presentation/pages/analysis_settings_page.dart:218:42 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/vocabulary/presentation/pages/analysis_settings_page.dart:230:80 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/vocabulary/presentation/pages/analysis_settings_page.dart:233:33 • deprecated_member_use
+   info • Use 'const' with the constructor to improve performance • test/features/vocabulary/data/services/isolate_text_analysis_service_test.dart:152:22 • prefer_const_constructors
+   info • Use 'const' with the constructor to improve performance • test/features/vocabulary/data/services/isolate_text_analysis_service_test.dart:165:28 • prefer_const_constructors
+   info • Unnecessary use of double quotes • test/features/vocabulary/data/services/isolate_text_analysis_service_test.dart:174:60 • prefer_single_quotes
+

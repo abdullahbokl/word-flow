@@ -8,7 +8,6 @@ class AuthState with _$AuthState {
   const factory AuthState.initial() = _Initial;
   const factory AuthState.loading() = _Loading;
   const factory AuthState.authenticated(AuthUser user) = _Authenticated;
-  const factory AuthState.pendingMerge(AuthUser user, int guestWordCount) = _PendingMerge;
   const factory AuthState.guest() = _Guest;
   const factory AuthState.error(String message) = _Error;
 }
