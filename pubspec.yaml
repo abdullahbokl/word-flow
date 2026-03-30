@@ -1,21 +1,35 @@
 name: word_flow
-description: "A new Flutter project."
+description: >
+  WordFlow — An offline-first vocabulary learning app built with Flutter.
+  
+  Features:
+  - Offline-first local storage (SQLite with encrypted sync queue)
+  - Seamless sync with Supabase backend (push/pull conflict resolution)
+  - Rate-limited authentication with guest mode support
+  - Comprehensive observability (Sentry breadcrumbs, structured logging)
+  - Full test coverage (unit, widget, integration tests)
+  - Dead-letter queue for failed sync operations
+  - Responsive Material 3 design system
+  
+  Architecture: Clean Architecture with Repository pattern, BLoC state management,
+  dependency injection (get_it), and code generation (drift, freezed, injectable).
+
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
-publish_to: 'none' # Remove this line if you wish to publish to pub.dev
+publish_to: 'none'
 
-# The following defines the version and build number for your application.
-# A version number is three numbers separated by dots, like 1.2.43
-# followed by an optional build number separated by a +.
-# Both the version and the builder number may be overridden in flutter
-# build by specifying --build-name and --build-number, respectively.
-# In Android, build-name is used as versionName while build-number used as versionCode.
-# Read more about Android versioning at https://developer.android.com/studio/publish/versioning
-# In iOS, build-name is used as CFBundleShortVersionString while build-number is used as CFBundleVersion.
-# Read more about iOS versioning at
-# https://developer.apple.com/library/archive/documentation/General/Reference/InfoPlistKeyReference/Articles/CoreFoundationKeys.html
-# In Windows, build-name is used as the major, minor, and patch parts
-# of the product and file versions while build-number is used as the build suffix.
+# Version Management:
+# - MAJOR: Breaking changes or significant feature releases
+# - MINOR: New features that are backward compatible
+# - PATCH: Bug fixes and minor improvements
+# - BUILD_NUMBER: Incremented for each release build (tracked automatically in CI)
+#
+# Format: major.minor.patch+build_number
+# For CI/CD automation: Build number is set via --build-number flag in release builds
+# Example: flutter build apk --build-name 1.2.0 --build-number 42
+#
+# Current version: 1.0.0 (initial release)
+# Build number: Managed by CI pipeline (GitHub Actions)
 version: 1.0.0+1
 
 environment:

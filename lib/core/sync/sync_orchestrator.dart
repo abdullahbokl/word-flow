@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:injectable/injectable.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
+import 'package:word_flow/core/observability/sentry_breadcrumbs.dart';
 import 'package:word_flow/core/sync/connectivity_monitor.dart';
 import 'package:word_flow/core/sync/sync_status.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
@@ -97,40 +98,130 @@ class SyncOrchestrator {
     _statusController.add(const SyncStatus.syncing());
     _logger.info('SyncOrchestrator: Starting push/pull for user $userId');
 
+    // Start Sentry transaction for full sync cycle
+    final transaction = SentryBreadcrumbs.startSyncTransaction();
+
     try {
-      // 1. Push pending
+      // Get pending count for context
+      final pendingCount = await _syncLocalSource.getSyncQueueCount();
+
+      // Breadcrumb: Sync started
+      SentryBreadcrumbs.addSyncBreadcrumb(
+        'Sync cycle started',
+        data: {
+          'userId': userId,
+          'pendingCount': pendingCount,
+        },
+      );
+
+      // 1. Push pending changes
+      _logger.info('SyncOrchestrator: Starting push phase...');
+      SentryBreadcrumbs.addSyncBreadcrumb('Push phase started');
+
       final pushResult = await _syncRepository.syncPendingWords();
       bool pushFailed = false;
+      int? pushCount;
+
       pushResult.fold(
         (failure) {
           _logger.error('SyncOrchestrator: push failed - ${failure.message}');
           pushFailed = true;
+          // Breadcrumb: Push failed
+          SentryBreadcrumbs.addSyncBreadcrumb(
+            'Push phase failed',
+            data: {'reason': failure.message},
+            level: SentryLevel.warning,
+          );
         },
-        (count) => _logger.info('SyncOrchestrator: pushed $count changes'),
+        (count) {
+          pushCount = count;
+          _logger.info('SyncOrchestrator: pushed $count changes');
+          // Breadcrumb: Push completed
+          SentryBreadcrumbs.addSyncBreadcrumb(
+            'Push phase completed',
+            data: {'pushedCount': count},
+          );
+        },
       );
 
-      // 2. Pull remote
+      // 2. Pull remote changes
+      _logger.info('SyncOrchestrator: Starting pull phase...');
+      final lastPullTime = DateTime.now().toUtc();
+
+      SentryBreadcrumbs.addSyncBreadcrumb(
+        'Pull phase started',
+        data: {'lastPullTimestamp': lastPullTime.toIso8601String()},
+      );
+
       final pullResult = await _syncRepository.pullRemoteChanges(userId);
       bool pullFailed = false;
+      int? pullCount;
+
       pullResult.fold(
         (failure) {
           _logger.error('SyncOrchestrator: pull failed - ${failure.message}');
           pullFailed = true;
+          // Breadcrumb: Pull failed
+          SentryBreadcrumbs.addSyncBreadcrumb(
+            'Pull phase failed',
+            data: {'reason': failure.message},
+            level: SentryLevel.warning,
+          );
         },
-        (count) => _logger.info('SyncOrchestrator: pulled $count changes'),
+        (count) {
+          pullCount = count;
+          _logger.info('SyncOrchestrator: pulled $count changes');
+          // Breadcrumb: Pull completed
+          SentryBreadcrumbs.addSyncBreadcrumb(
+            'Pull phase completed',
+            data: {
+              'pulledCount': count,
+              'mergedItemsCount': count,
+            },
+          );
+        },
       );
 
       if (pushFailed || pullFailed) {
+        _logger.warning('SyncOrchestrator: Sync partially failed (push:$pushFailed, pull:$pullFailed)');
+        SentryBreadcrumbs.addSyncBreadcrumb(
+          'Sync cycle partially failed',
+          data: {
+            'pushFailed': pushFailed,
+            'pullFailed': pullFailed,
+            'pushCount': pushCount ?? 0,
+            'pullCount': pullCount ?? 0,
+          },
+          level: SentryLevel.warning,
+        );
         _statusController.add(const SyncStatus.error('Sync partially failed'));
       } else {
+        _logger.info('SyncOrchestrator: Sync completed successfully');
+        SentryBreadcrumbs.addSyncBreadcrumb(
+          'Sync cycle completed successfully',
+          data: {
+            'pushCount': pushCount ?? 0,
+            'pullCount': pullCount ?? 0,
+            'totalSyncItems': (pushCount ?? 0) + (pullCount ?? 0),
+          },
+        );
         _statusController.add(const SyncStatus.idle());
       }
     } catch (error, stackTrace) {
       _logger.error('SyncOrchestrator: Unhandled sync exception', error, stackTrace);
+      SentryBreadcrumbs.addSyncBreadcrumb(
+        'Sync cycle failed with exception',
+        data: {
+          'error': error.toString(),
+          'exceptionType': error.runtimeType.toString(),
+        },
+        level: SentryLevel.error,
+      );
       await Sentry.captureException(error, stackTrace: stackTrace);
       _statusController.add(SyncStatus.error(error.toString()));
     } finally {
       _isSyncing = false;
+      await transaction.finish();
     }
   }
 

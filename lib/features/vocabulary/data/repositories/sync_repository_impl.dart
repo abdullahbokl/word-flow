@@ -1,9 +1,11 @@
 import 'package:fpdart/fpdart.dart';
 import 'dart:math';
 import 'package:injectable/injectable.dart';
+import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/errors/error_mapper.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
+import 'package:word_flow/core/observability/sentry_breadcrumbs.dart';
 import 'package:word_flow/core/sync/sync_operation.dart';
 import 'package:word_flow/core/sync/sync_preferences.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/sync_repository.dart';
@@ -13,7 +15,6 @@ import 'package:word_flow/features/vocabulary/data/datasources/word_remote_sourc
 import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source.dart';
 import 'package:word_flow/features/vocabulary/data/mappers/word_mapper.dart';
 import 'package:word_flow/core/database/app_database.dart';
-import 'package:sentry_flutter/sentry_flutter.dart';
 
 @LazySingleton(as: SyncRepository)
 class SyncRepositoryImpl implements SyncRepository {
@@ -89,6 +90,20 @@ class SyncRepositoryImpl implements SyncRepository {
             operation: item.operation,
             lastError: errorMessage,
             failedAt: now,
+          );
+
+          // Breadcrumb: Dead-letter event (warning level)
+          SentryBreadcrumbs.addDBBreadcrumb(
+            'Sync item moved to dead letters',
+            operation: item.operation,
+            data: {
+              'wordId': wordId,
+              'wordText': wordText,
+              'retryCount': retryCount,
+              'lastError': errorMessage,
+              'queueId': queueId,
+            },
+            level: SentryLevel.warning,
           );
 
           _logger.warning(
