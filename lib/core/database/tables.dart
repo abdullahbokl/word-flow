@@ -38,3 +38,10 @@ class WordSyncQueue extends Table {
         {wordId, operation},
       ];
 }
+class AppSettings extends Table {
+  TextColumn get key => text()();
+  TextColumn get value => text()();
+
+  @override
+  Set<Column> get primaryKey => {key};
+}

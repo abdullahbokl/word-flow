@@ -8,7 +8,7 @@ import 'package:word_flow/core/database/tables.dart';
 part 'app_database.g.dart';
 
 
-@DriftDatabase(tables: [Words, WordSyncQueue])
+@DriftDatabase(tables: [Words, WordSyncQueue, AppSettings])
 @lazySingleton
 class WordFlowDatabase extends _$WordFlowDatabase {
   WordFlowDatabase() : super(_openConnection());
@@ -22,11 +22,12 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     4: _migrate3To4,
     5: _migrate4To5,
     6: _migrate5To6,
+    7: _migrate6To7,
   };
 
   @override
   int get schemaVersion {
-    const expectedVersion = 6;
+    const expectedVersion = 7;
     assert(() {
       final maxStep = _migrationSteps.keys.reduce((a, b) => a > b ? a : b);
       if (maxStep != expectedVersion) {
@@ -65,7 +66,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
             }
           });
           assert(() {
-            if (to != 6) {
+            if (to != 7) {
               throw AssertionError(
                 'Missing migration steps or wrong target schema version',
               );
@@ -427,6 +428,17 @@ Future<void> _migrate5To6(WordFlowDatabase db) async {
     // Swap tables
     await db.customStatement('DROP TABLE word_sync_queue;');
     await db.customStatement('ALTER TABLE word_sync_queue_new RENAME TO word_sync_queue;');
+  });
+}
+
+Future<void> _migrate6To7(WordFlowDatabase db) async {
+  await db.transaction(() async {
+    await db.customStatement('''
+      CREATE TABLE IF NOT EXISTS app_settings (
+        "key" TEXT NOT NULL PRIMARY KEY,
+        "value" TEXT NOT NULL
+      );
+    ''');
   });
 }
 
