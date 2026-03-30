@@ -9,6 +9,7 @@ import 'package:word_flow/features/vocabulary/domain/usecases/update_word.dart';
 import 'package:word_flow/features/vocabulary/domain/usecases/watch_words.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_state.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_optimistic_updates.dart';
+import 'package:word_flow/core/errors/failures.dart';
 
 @injectable
 class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
@@ -29,7 +30,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     _wordsSubscription?.cancel();
     _wordsSubscription = _watchWords(UserIdParams(userId: userId)).listen((result) {
       result.fold(
-        (failure) => _emitLoadedError(failure.message),
+        (failure) => _emitLoadedError(failure.message, failure: failure),
         (words) {
           state.maybeMap(
             loaded: (s) => emit(s.copyWith(words: words, pendingWordIds: _pendingWordIds)),
@@ -67,7 +68,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       (f) {
         _unmarkPending(word.id);
         _optimisticallyReplace(prev);
-        _emitLoadedError(f.message);
+        _emitLoadedError(f.message, failure: f);
       },
       (_) => _unmarkPending(word.id),
     );
@@ -91,7 +92,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       (f) {
         _unmarkPending(id);
         if (prevWord != null) _optimisticallyUpsert(prevWord);
-        _emitLoadedError(f.message);
+        _emitLoadedError(f.message, failure: f);
       },
       (_) => _unmarkPending(id),
     );
@@ -112,7 +113,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       (f) {
         _unmarkPending(word.id);
         _optimisticallyRemove(word.id);
-        _emitLoadedError(f.message);
+        _emitLoadedError(f.message, failure: f);
       },
       (_) => _unmarkPending(word.id),
     );
@@ -132,7 +133,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       (f) {
         _unmarkPending(word.id);
         _optimisticallyReplace(prev);
-        _emitLoadedError(f.message);
+        _emitLoadedError(f.message, failure: f);
       },
       (_) => _unmarkPending(word.id),
     );
@@ -141,8 +142,8 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   void clearError() {
     state.maybeMap(
       loaded: (s) {
-        if (s.lastError != null) {
-          emit(s.copyWith(lastError: null));
+        if (s.lastError != null || s.failure != null) {
+          emit(s.copyWith(lastError: null, failure: null));
         }
       },
       orElse: () {},
@@ -167,10 +168,10 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     );
   }
 
-  void _emitLoadedError(String message) {
+  void _emitLoadedError(String message, {Failure? failure}) {
     state.maybeMap(
-      loaded: (s) => emit(s.copyWith(lastError: message)),
-      orElse: () => emit(LibraryState.error(message)),
+      loaded: (s) => emit(s.copyWith(lastError: message, failure: failure)),
+      orElse: () => emit(LibraryState.error(message, failure: failure)),
     );
   }
 

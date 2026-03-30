@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
 
 part 'library_state.freezed.dart';
@@ -15,6 +16,7 @@ class LibraryState with _$LibraryState {
     @Default('') String searchQuery,
     @Default(<String>{}) Set<String> pendingWordIds,
     String? lastError,
+    Failure? failure,
   }) = _Loaded;
-  const factory LibraryState.error(String message) = _Error;
+  const factory LibraryState.error(String message, {Failure? failure}) = _Error;
 }

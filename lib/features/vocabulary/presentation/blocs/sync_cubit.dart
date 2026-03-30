@@ -49,6 +49,7 @@ class SyncCubit extends Cubit<SyncState> {
         (failure) => emit(SyncState.error(
           pendingCount: state.pendingCount,
           message: failure.message,
+          failure: failure,
         )),
         (count) => emit(SyncState.idle(
           pendingCount: count,
@@ -114,11 +115,13 @@ class SyncCubit extends Cubit<SyncState> {
         (failure) => emit(SyncState.error(
           pendingCount: state.pendingCount,
           message: 'Push failed: ${failure.message}',
+          failure: failure,
         )),
         (_) => pullResult.fold(
           (failure) => emit(SyncState.error(
             pendingCount: state.pendingCount,
             message: 'Pull failed: ${failure.message}',
+            failure: failure,
           )),
           (_) => emit(SyncState.idle(
             pendingCount: 0,
@@ -132,6 +135,7 @@ class SyncCubit extends Cubit<SyncState> {
       (failure) => emit(SyncState.error(
         pendingCount: state.pendingCount,
         message: failure.message,
+        failure: failure,
       )),
       (_) => emit(SyncState.idle(
         pendingCount: 0,

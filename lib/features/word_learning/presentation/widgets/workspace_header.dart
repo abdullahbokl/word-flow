@@ -40,6 +40,12 @@ class WorkspaceHeader extends StatelessWidget {
                   icon: const Icon(Icons.library_books_rounded, size: 20),
                   tooltip: 'My Words Library',
                 ),
+                const SizedBox(width: 8),
+                IconButton.filledTonal(
+                  onPressed: () => const AnalysisSettingsRoute().push(context),
+                  icon: const Icon(Icons.tune_rounded, size: 20),
+                  tooltip: 'Analysis Settings',
+                ),
               ],
             ),
             const SizedBox(height: 10),
