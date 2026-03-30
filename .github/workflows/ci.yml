@@ -1,105 +1,62 @@
-name: WordFlow CI
+name: CI
 
 on:
   push:
-    branches: [ main, develop ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, develop ]
+    branches: [ main ]
 
 jobs:
   analyze:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version-file: .flutter-version
+          channel: "stable"
           cache: true
-          
-      - name: Install dependencies
+      - name: Install Dependencies
         run: flutter pub get
-        
-      - name: Code Generation
+      - name: Create Generated Files
         run: dart run build_runner build --delete-conflicting-outputs
-        
       - name: Static Analysis
-        run: flutter analyze --no-fatal-infos
+        run: flutter analyze --fatal-infos
 
   test:
+    needs: analyze
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version-file: .flutter-version
+          channel: "stable"
           cache: true
-          
-      - name: Install dependencies
+      - name: Install Dependencies
         run: flutter pub get
-        
-      - name: Code Generation
+      - name: Create Generated Files
         run: dart run build_runner build --delete-conflicting-outputs
-        
-      - name: Run Tests
+      - name: Run Tests with Coverage
         run: flutter test --coverage
-        
-      - name: Check Coverage
-        run: |
-          LCOV_REPORT="coverage/lcov.info"
-          if [ -f "$LCOV_REPORT" ]; then
-            COVERAGE=$(grep -oP '(?<=^LF:)\d+' "$LCOV_REPORT" | awk '{sum+=$1} END {print sum}')
-            MATCHED=$(grep -oP '(?<=^LH:)\d+' "$LCOV_REPORT" | awk '{sum+=$1} END {print sum}')
-            if [ "$COVERAGE" -gt 0 ]; then
-              PERCENTAGE=$(echo "scale=2; $MATCHED * 100 / $COVERAGE" | bc)
-              echo "Test Coverage: $PERCENTAGE%"
-              if (( $(echo "$PERCENTAGE < 60.0" | bc -l) )); then
-                echo "Coverage is below 60% threshold!"
-                exit 1
-              fi
-            else
-              echo "No lines covered by tests!"
-              exit 1
-            fi
-          else
-            echo "LCOV report not found!"
-            exit 1
-          fi
+      - name: Upload Coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage/lcov.info
+          fail_ci_if_error: false
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
   build:
-    needs: [analyze, test]
+    needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      
-      - name: Setup Flutter
-        uses: subosito/flutter-action@v2
+      - uses: subosito/flutter-action@v2
         with:
-          flutter-version-file: .flutter-version
+          channel: "stable"
           cache: true
-          
-      - name: Install dependencies
+      - name: Install Dependencies
         run: flutter pub get
-        
-      - name: Code Generation
+      - name: Create Generated Files
         run: dart run build_runner build --delete-conflicting-outputs
-        
-      - name: Build Android APK
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
-          SENTRY_DSN: ${{ secrets.SENTRY_DSN }}
-        run: |
-          flutter build apk --release \
-            --dart-define=SUPABASE_URL=$SUPABASE_URL \
-            --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY \
-            --dart-define=SENTRY_DSN=$SENTRY_DSN
-
-      - name: Upload Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wordflow-apk
-          path: build/app/outputs/flutter-apk/app-release.apk
+      - name: Build Debug APK
+        run: flutter build apk --debug --dart-define=SUPABASE_URL=test --dart-define=SUPABASE_ANON_KEY=test

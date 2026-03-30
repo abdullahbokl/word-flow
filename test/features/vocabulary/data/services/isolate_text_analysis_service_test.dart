@@ -149,7 +149,7 @@ void main() {
 
     test('14. Custom min word length works', () async {
       const text = 'a be see';
-      final config = TextAnalysisConfig(
+      const config = TextAnalysisConfig(
         stopWords: {},
         language: 'english',
         minWordLength: 3,
@@ -162,7 +162,7 @@ void main() {
 
     test('15. Disabling contractions splitting works', () async {
       const text = "don't";
-      final configNoCont = TextAnalysisConfig(
+      const configNoCont = TextAnalysisConfig(
         stopWords: {},
         language: 'english',
         includeContractionsAsOne: false,
@@ -171,7 +171,7 @@ void main() {
       
       // If NOT including contractions as one, "don't" matches "don" and then "'" and "t".
       // "don" is len 3, matches. "t" is len 1, filtered (minLen 2).
-      expect(result.words.map((w) => w.wordText), contains("don"));
+      expect(result.words.map((w) => w.wordText), contains('don'));
       expect(result.words.map((w) => w.wordText), isNot(contains("don't")));
     });
   });
