@@ -22,3 +22,11 @@ class ProcessingException implements Exception {
   ProcessingException([this.message]);
   final String? message;
 }
+
+class KeyPersistenceException implements Exception {
+  KeyPersistenceException([this.message]);
+  final String? message;
+
+  @override
+  String toString() => 'KeyPersistenceException: ${message ?? 'No message provided'}';
+}

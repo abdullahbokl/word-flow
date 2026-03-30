@@ -16,4 +16,9 @@ class SyncPreferences {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString('$_lastPullPrefix$userId', timestamp.toIso8601String());
   }
+
+  Future<void> clearUserTimestamp(String userId) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.remove('$_lastPullPrefix$userId');
+  }
 }

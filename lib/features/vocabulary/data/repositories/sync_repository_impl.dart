@@ -11,6 +11,7 @@ import 'package:word_flow/features/vocabulary/data/datasources/word_local_source
 import 'package:word_flow/features/vocabulary/data/datasources/word_remote_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source.dart';
 import 'package:word_flow/features/vocabulary/data/mappers/word_mapper.dart';
+import 'package:word_flow/core/database/app_database.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 
 @LazySingleton(as: SyncRepository)
@@ -29,6 +30,14 @@ class SyncRepositoryImpl implements SyncRepository {
   final WordRemoteSource _remoteSource;
   final SyncPreferences _preferences;
   final AppLogger _logger;
+
+  Failure _mapSyncFailure(dynamic error, StackTrace stackTrace) {
+    final mapped = ErrorMapper.mapException(error, stackTrace, _logger);
+    if (mapped is SyncFailure) {
+      return mapped;
+    }
+    return SyncFailure(mapped.message);
+  }
 
   @override
   Future<Either<Failure, int>> getPendingCount() async {
@@ -111,7 +120,8 @@ class SyncRepositoryImpl implements SyncRepository {
       }
       return Right(successCount);
     } catch (e, stackTrace) {
-      return Left(ErrorMapper.mapException(e, stackTrace, _logger) as SyncFailure);
+      // No force-cast: map safely, then normalize to sync-domain failure.
+      return Left(_mapSyncFailure(e, stackTrace));
     }
   }
 
@@ -140,71 +150,96 @@ class SyncRepositoryImpl implements SyncRepository {
             ? await _remoteSource.fetchUserWords(userId, limit: limit, offset: offset)
             : await _remoteSource.fetchWordsUpdatedSince(userId, lastPull, limit: limit, offset: offset);
 
-        await remoteBatchResult.fold(
-          (failure) async {
-             _logger.error('Failed fetching remote changes at offset $offset', failure);
-             // Handle error per-page: stop pulling further pages but don't abort the entire sync
-             hasMore = false;
-          },
-          (paginatedData) async {
-            _logger.syncEvent('Fetched ${paginatedData.words.length} updated words from remote (offset $offset)');
+        final fetchFailure = remoteBatchResult.fold((failure) => failure, (_) => null);
+        if (fetchFailure != null) {
+          _logger.error('Failed fetching remote changes at offset $offset', fetchFailure);
+          return Left(fetchFailure);
+        }
 
-            for (final remoteDto in paginatedData.words) {
-              final localWord = await _localSource.getWordById(remoteDto.id);
-              
-              if (localWord == null) {
-                // Completely new word
-                final companion = WordMapper.toCompanion(WordMapper.fromRemoteDto(remoteDto));
-                await _localSource.saveWord(companion);
-                newCount++;
-              } else {
-                // Merge strategy:
-                // - total_count: HIGHER value
-                // - is_known: logical OR
-                // - word_text: keep remote
-                // - last_updated: NEWER timestamp
-                final mergedTotalCount = max(localWord.totalCount, remoteDto.totalCount);
-                final mergedIsKnown = localWord.isKnown || remoteDto.isKnown;
-                final mergedWordText = remoteDto.wordText;
-                
-                final remoteTime = remoteDto.lastUpdated;
-                final localTime = localWord.lastUpdated;
-                final mergedLastUpdated = remoteTime.isAfter(localTime) ? remoteTime : localTime;
-
-                // Check if merged result differs from local state
-                if (localWord.totalCount != mergedTotalCount ||
-                    localWord.isKnown != mergedIsKnown ||
-                    localWord.wordText != mergedWordText ||
-                    localWord.lastUpdated != mergedLastUpdated) {
-                  
-                  final updatedDto = remoteDto.copyWith(
-                    totalCount: mergedTotalCount,
-                    isKnown: mergedIsKnown,
-                    wordText: mergedWordText,
-                    lastUpdated: mergedLastUpdated,
-                  );
-
-                  final companion = WordMapper.toCompanion(WordMapper.fromRemoteDto(updatedDto));
-                  await _localSource.saveWord(companion);
-                  mergedCount++;
-                } else {
-                  // No changes to apply locally
-                  skippedCount++;
-                }
-              }
-            }
-
-            hasMore = paginatedData.hasMore;
-            offset += limit;
-          },
+        final paginatedData = remoteBatchResult.getOrElse(
+          (_) => throw StateError('Remote batch unexpectedly missing'),
         );
+
+        _logger.syncEvent('Fetched ${paginatedData.words.length} updated words from remote (offset $offset)');
+
+        // Stage all local writes for this page in memory first.
+        final companionsToCommit = <WordsCompanion>[];
+        var pageNewCount = 0;
+        var pageMergedCount = 0;
+        var pageSkippedCount = 0;
+
+        for (final remoteDto in paginatedData.words) {
+          final localWord = await _localSource.getWordById(remoteDto.id);
+
+          if (localWord == null) {
+            companionsToCommit.add(
+              WordMapper.toCompanion(WordMapper.fromRemoteDto(remoteDto)),
+            );
+            pageNewCount++;
+            continue;
+          }
+
+          // Merge strategy:
+          // - total_count: HIGHER value
+          // - is_known: logical OR
+          // - word_text: keep remote
+          // - last_updated: NEWER timestamp
+          final mergedTotalCount = max(localWord.totalCount, remoteDto.totalCount);
+          final mergedIsKnown = localWord.isKnown || remoteDto.isKnown;
+          final mergedWordText = remoteDto.wordText;
+
+          final remoteTime = remoteDto.lastUpdated;
+          final localTime = localWord.lastUpdated;
+          final mergedLastUpdated = remoteTime.isAfter(localTime) ? remoteTime : localTime;
+
+          if (localWord.totalCount != mergedTotalCount ||
+              localWord.isKnown != mergedIsKnown ||
+              localWord.wordText != mergedWordText ||
+              localWord.lastUpdated != mergedLastUpdated) {
+            final updatedDto = remoteDto.copyWith(
+              totalCount: mergedTotalCount,
+              isKnown: mergedIsKnown,
+              wordText: mergedWordText,
+              lastUpdated: mergedLastUpdated,
+            );
+
+            companionsToCommit.add(
+              WordMapper.toCompanion(WordMapper.fromRemoteDto(updatedDto)),
+            );
+            pageMergedCount++;
+          } else {
+            pageSkippedCount++;
+          }
+        }
+
+        try {
+          if (companionsToCommit.isNotEmpty) {
+            // Commit this page atomically; partial page writes are not allowed.
+            await _localSource.saveWordsInTransaction(companionsToCommit);
+          }
+        } catch (e, stackTrace) {
+          _logger.error('Pull transaction failed at offset $offset', e, stackTrace);
+          try {
+            await Sentry.captureException(e, stackTrace: stackTrace);
+          } catch (_) {}
+          return const Left(SyncFailure('Pull transaction failed'));
+        }
+
+        newCount += pageNewCount;
+        mergedCount += pageMergedCount;
+        skippedCount += pageSkippedCount;
+
+        hasMore = paginatedData.hasMore;
+        offset += limit;
       }
 
+      // Only advance pull cursor after all page transactions succeeded.
       await _preferences.setLastPullTimestamp(userId, now);
       _logger.syncEvent('Successfully completed pull sync: $newCount new, $mergedCount merged, $skippedCount skipped');
       return Right(newCount + mergedCount);
     } catch (e, stackTrace) {
-      return Left(ErrorMapper.mapException(e, stackTrace, _logger) as SyncFailure);
+      // No force-cast: map safely, then normalize to sync-domain failure.
+      return Left(_mapSyncFailure(e, stackTrace));
     }
   }
 }

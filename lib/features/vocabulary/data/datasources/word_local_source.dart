@@ -5,6 +5,7 @@ import 'package:word_flow/core/database/app_database.dart';
 abstract class WordLocalSource {
   Future<void> saveWord(WordsCompanion word);
   Future<void> saveWords(List<WordsCompanion> words);
+  Future<void> saveWordsInTransaction(List<WordsCompanion> companions);
   Future<Map<String, WordRow>> getWordTextMap({String? userId});
   Future<List<WordRow>> getWords({String? userId});
   Future<List<WordRow>> getWordsByTexts(List<String> texts, {String? userId});
@@ -32,6 +33,12 @@ class WordLocalSourceImpl implements WordLocalSource {
   @override
   Future<void> saveWords(List<WordsCompanion> words) async {
     await _db.upsertWords(words);
+  }
+
+  @override
+  Future<void> saveWordsInTransaction(List<WordsCompanion> companions) async {
+    // All page writes must commit atomically to avoid partial pull application.
+    await _db.upsertWordsInTransaction(companions);
   }
 
   @override

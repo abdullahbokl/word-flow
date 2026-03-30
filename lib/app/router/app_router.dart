@@ -7,6 +7,7 @@ import 'package:word_flow/core/di/injection.dart';
 
 class AppRouter {
   static final router = GoRouter(
+    navigatorKey: rootNavigatorKey,
     initialLocation: '/splash',
     refreshListenable: StreamToListenable(getIt<AuthCubit>().stream),
     routes: $appRoutes,

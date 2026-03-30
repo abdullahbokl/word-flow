@@ -139,6 +139,13 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     });
   }
 
+  Future<void> upsertWordsInTransaction(List<WordsCompanion> rows) async {
+    // One transaction per pull page ensures all-or-nothing local apply.
+    await transaction(() async {
+      await upsertWords(rows);
+    });
+  }
+
   Future<void> upsertWord(WordsCompanion row) async {
     await into(words).insertOnConflictUpdate(row);
   }

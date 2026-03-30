@@ -54,7 +54,8 @@ class AuthRepositoryImpl implements AuthRepository {
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
     } catch (e, stackTrace) {
-      return Left(ErrorMapper.mapException(e, stackTrace, _logger) as AuthFailure);
+      // Keep Failure polymorphic; forcing AuthFailure here can throw CastError.
+      return Left(ErrorMapper.mapException(e, stackTrace, _logger));
     }
   }
 
@@ -69,7 +70,8 @@ class AuthRepositoryImpl implements AuthRepository {
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
     } catch (e, stackTrace) {
-      return Left(ErrorMapper.mapException(e, stackTrace, _logger) as AuthFailure);
+      // Keep Failure polymorphic; forcing AuthFailure here can throw CastError.
+      return Left(ErrorMapper.mapException(e, stackTrace, _logger));
     }
   }
 
@@ -81,7 +83,8 @@ class AuthRepositoryImpl implements AuthRepository {
     } on AuthException catch (e) {
       return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
     } catch (e, stackTrace) {
-      return Left(ErrorMapper.mapException(e, stackTrace, _logger) as AuthFailure);
+      // Keep Failure polymorphic; forcing AuthFailure here can throw CastError.
+      return Left(ErrorMapper.mapException(e, stackTrace, _logger));
     }
   }
 }

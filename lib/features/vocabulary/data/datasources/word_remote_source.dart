@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/features/vocabulary/data/models/word_remote_dto.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/errors/exceptions.dart';
@@ -25,6 +26,7 @@ class WordRemoteSourceImpl implements WordRemoteSource {
 
   WordRemoteSourceImpl(this._client);
   final SupabaseClient _client;
+  final AppLogger _logger = AppLogger();
 
   @override
   Future<void> upsertWord(WordRemoteDto word) async {
@@ -68,7 +70,7 @@ class WordRemoteSourceImpl implements WordRemoteSource {
     int offset = 0,
   }) async {
     try {
-      final response = await _client
+      final dynamic response = await _client
           .from('words')
           .select()
           // Note: The '.eq('user_id', userId)' filter is technically redundant 
@@ -77,18 +79,42 @@ class WordRemoteSourceImpl implements WordRemoteSource {
           .eq('user_id', userId)
           .order('id', ascending: true)
           .range(offset, offset + limit - 1);
-      
-      final data = response as List<dynamic>;
-      try {
-        final dtos = data.map((m) => WordRemoteDto.fromJson(m as Map<String, dynamic>)).toList();
-        return Right(PaginatedSyncResult(words: dtos, hasMore: dtos.length == limit));
-      } catch (e) {
-        return Left(ServerFailure('Invalid server response: $e'));
+
+      // Guard before any cast: Supabase can return non-list payloads (null/map).
+      if (response is! List) {
+        final failure = ServerFailure(
+          'Unexpected response format: ${response.runtimeType}',
+        );
+        _logger.error('fetchUserWords: unexpected response format', failure);
+        return Left(failure);
       }
-    } on PostgrestException catch (e) {
-      return Left(ServerFailure(e.message));
+      final Object validatedResponse = response;
+
+      try {
+        // Parse is isolated so malformed rows become Failure instead of app crash.
+        final rows = (validatedResponse as List).cast<Map<String, dynamic>>();
+        final dtos = <WordRemoteDto>[];
+        for (final row in rows) {
+          dtos.add(WordRemoteDto.fromJson(row));
+        }
+        return Right(PaginatedSyncResult(words: dtos, hasMore: dtos.length == limit));
+      } catch (e, stackTrace) {
+        final failure = ServerFailure('Failed to parse word: $e');
+        _logger.error('fetchUserWords: failed to parse word', failure, stackTrace);
+        return Left(failure);
+      }
+    } on PostgrestException catch (e, stackTrace) {
+      final failure = ServerFailure(e.message);
+      _logger.error('fetchUserWords: postgrest exception', failure, stackTrace);
+      return Left(failure);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      final failure = ServerFailure(e.toString());
+      _logger.error(
+        'fetchUserWords: unexpected exception',
+        failure,
+        StackTrace.current,
+      );
+      return Left(failure);
     }
   }
 
@@ -100,7 +126,7 @@ class WordRemoteSourceImpl implements WordRemoteSource {
     int offset = 0,
   }) async {
     try {
-      final response = await _client
+      final dynamic response = await _client
           .from('words')
           .select()
           .eq('user_id', userId)
@@ -109,17 +135,52 @@ class WordRemoteSourceImpl implements WordRemoteSource {
           .order('id', ascending: true)
           .range(offset, offset + limit - 1);
 
-      final data = response as List<dynamic>;
-      try {
-        final dtos = data.map((m) => WordRemoteDto.fromJson(m as Map<String, dynamic>)).toList();
-        return Right(PaginatedSyncResult(words: dtos, hasMore: dtos.length == limit));
-      } catch (e) {
-        return Left(ServerFailure('Invalid server response during delta fetch: $e'));
+      // Guard before any cast: Supabase can return non-list payloads (null/map).
+      if (response is! List) {
+        final failure = ServerFailure(
+          'Unexpected response format: ${response.runtimeType}',
+        );
+        _logger.error(
+          'fetchWordsUpdatedSince: unexpected response format',
+          failure,
+        );
+        return Left(failure);
       }
-    } on PostgrestException catch (e) {
-      return Left(ServerFailure(e.message));
+      final Object validatedResponse = response;
+
+      try {
+        // Parse is isolated so malformed rows become Failure instead of app crash.
+        final rows = (validatedResponse as List).cast<Map<String, dynamic>>();
+        final dtos = <WordRemoteDto>[];
+        for (final row in rows) {
+          dtos.add(WordRemoteDto.fromJson(row));
+        }
+        return Right(PaginatedSyncResult(words: dtos, hasMore: dtos.length == limit));
+      } catch (e, stackTrace) {
+        final failure = ServerFailure('Failed to parse word: $e');
+        _logger.error(
+          'fetchWordsUpdatedSince: failed to parse word',
+          failure,
+          stackTrace,
+        );
+        return Left(failure);
+      }
+    } on PostgrestException catch (e, stackTrace) {
+      final failure = ServerFailure(e.message);
+      _logger.error(
+        'fetchWordsUpdatedSince: postgrest exception',
+        failure,
+        stackTrace,
+      );
+      return Left(failure);
     } catch (e) {
-      return Left(ServerFailure(e.toString()));
+      final failure = ServerFailure(e.toString());
+      _logger.error(
+        'fetchWordsUpdatedSince: unexpected exception',
+        failure,
+        StackTrace.current,
+      );
+      return Left(failure);
     }
   }
 }
