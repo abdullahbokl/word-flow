@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:word_flow/features/authentication/presentation/widgets/auth_bottom_sheet.dart';
+import 'package:word_flow/features/auth/presentation/widgets/auth_bottom_sheet.dart';
 
 class AuthPage extends StatelessWidget {
   const AuthPage({super.key});

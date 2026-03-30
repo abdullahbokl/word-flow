@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
-import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
 
 class MergeConflictDialog extends StatelessWidget {
 

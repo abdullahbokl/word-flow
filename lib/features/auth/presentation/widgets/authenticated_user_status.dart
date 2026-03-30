@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
-import 'package:word_flow/features/authentication/presentation/widgets/auth_status_widgets.dart';
+import 'package:word_flow/features/auth/presentation/widgets/auth_status_widgets.dart';
 import 'package:word_flow/app/router/routes.dart';
 
 class AuthenticatedUserStatus extends StatelessWidget {

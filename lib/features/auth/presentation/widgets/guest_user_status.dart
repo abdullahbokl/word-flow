@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:word_flow/features/authentication/presentation/widgets/auth_status_widgets.dart';
+import 'package:word_flow/features/auth/presentation/widgets/auth_status_widgets.dart';
 
 class GuestUserStatus extends StatelessWidget {
 

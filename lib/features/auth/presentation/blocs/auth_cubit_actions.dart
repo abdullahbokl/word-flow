@@ -3,7 +3,7 @@ import 'package:word_flow/features/auth/domain/usecases/auth_usecases.dart';
 import 'package:word_flow/features/auth/domain/usecases/sign_out_and_clear_local.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
 import 'package:word_flow/features/vocabulary/domain/usecases/adopt_guest_words.dart';
-import 'package:word_flow/features/authentication/presentation/blocs/auth_state.dart';
+import 'package:word_flow/features/auth/presentation/blocs/auth_state.dart';
 
 mixin AuthCubitActions on Cubit<AuthState> {
   SignInWithEmailUseCase get signInUseCase;

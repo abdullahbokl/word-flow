@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:word_flow/core/widgets/app_loader.dart';
 import 'package:word_flow/core/widgets/app_text_field.dart';
-import 'package:word_flow/features/authentication/presentation/blocs/auth_cubit.dart';
-import 'package:word_flow/features/authentication/presentation/blocs/auth_state.dart';
+import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
+import 'package:word_flow/features/auth/presentation/blocs/auth_state.dart';
 
 class AuthForm extends StatelessWidget {
 

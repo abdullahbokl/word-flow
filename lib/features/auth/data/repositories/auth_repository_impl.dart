@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'package:fpdart/fpdart.dart';
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
+import 'package:sentry_flutter/sentry_flutter.dart';
+import 'package:word_flow/core/errors/exceptions.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_state_change.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
+import 'package:word_flow/features/auth/data/datasources/auth_remote_source.dart';
 
 class AuthRepositoryImpl implements AuthRepository {
-  AuthRepositoryImpl(this._supabase);
+  AuthRepositoryImpl(this._supabase, this._remoteSource);
   final supabase.SupabaseClient _supabase;
+  final AuthRemoteSource _remoteSource;
 
   @override
   Stream<AuthStateChange> get authStateStream =>
@@ -40,14 +44,17 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, AuthUser>> signInWithEmail(String email, String password) async {
     try {
-      final response = await _supabase.auth.signInWithPassword(
+      final user = await _remoteSource.signInWithEmail(
         email: email,
         password: password,
       );
-      final user = response.user;
-      if (user == null) return const Left(AuthFailure('User not found'));
-      return Right(AuthUser(id: user.id, email: user.email ?? ''));
-    } catch (e) {
+      return Right(user);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
+    } catch (e, stackTrace) {
+      try {
+        await Sentry.captureException(e, stackTrace: stackTrace);
+      } catch (_) {}
       return Left(AuthFailure(e.toString()));
     }
   }
@@ -55,14 +62,17 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, AuthUser>> signUpWithEmail(String email, String password) async {
     try {
-      final response = await _supabase.auth.signUp(
+      final user = await _remoteSource.signUpWithEmail(
         email: email,
         password: password,
       );
-      final user = response.user;
-      if (user == null) return const Left(AuthFailure('Sign up failed'));
-      return Right(AuthUser(id: user.id, email: user.email ?? ''));
-    } catch (e) {
+      return Right(user);
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
+    } catch (e, stackTrace) {
+      try {
+        await Sentry.captureException(e, stackTrace: stackTrace);
+      } catch (_) {}
       return Left(AuthFailure(e.toString()));
     }
   }
@@ -70,9 +80,14 @@ class AuthRepositoryImpl implements AuthRepository {
   @override
   Future<Either<Failure, void>> signOut() async {
     try {
-      await _supabase.auth.signOut();
+      await _remoteSource.signOut();
       return const Right(null);
-    } catch (e) {
+    } on AuthException catch (e) {
+      return Left(AuthFailure(e.message ?? 'Auth error occurred.'));
+    } catch (e, stackTrace) {
+      try {
+        await Sentry.captureException(e, stackTrace: stackTrace);
+      } catch (_) {}
       return Left(AuthFailure(e.toString()));
     }
   }

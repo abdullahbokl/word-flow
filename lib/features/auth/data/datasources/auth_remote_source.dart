@@ -1,22 +1,22 @@
 import 'package:supabase_flutter/supabase_flutter.dart' as supabase;
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/errors/exceptions.dart';
-import 'package:word_flow/features/authentication/domain/entities/user_entity.dart';
+import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 
 abstract class AuthRemoteSource {
-  Future<UserEntity> signUpWithEmail({
+  Future<AuthUser> signUpWithEmail({
     required String email,
     required String password,
   });
 
-  Future<UserEntity> signInWithEmail({
+  Future<AuthUser> signInWithEmail({
     required String email,
     required String password,
   });
 
   Future<void> signOut();
 
-  Stream<UserEntity?> get userStream;
+  Stream<AuthUser?> get userStream;
 }
 
 @LazySingleton(as: AuthRemoteSource)
@@ -26,7 +26,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   final supabase.SupabaseClient _supabaseClient;
 
   @override
-  Future<UserEntity> signInWithEmail({
+  Future<AuthUser> signInWithEmail({
     required String email,
     required String password,
   }) async {
@@ -38,7 +38,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
       if (response.user == null) {
         throw AuthException('Signed in but user data is missing.');
       }
-      return UserEntity(
+      return AuthUser(
         id: response.user!.id,
         email: response.user!.email!,
       );
@@ -48,7 +48,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   }
 
   @override
-  Future<UserEntity> signUpWithEmail({
+  Future<AuthUser> signUpWithEmail({
     required String email,
     required String password,
   }) async {
@@ -60,7 +60,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
       if (response.user == null) {
         throw AuthException('Signed up but user data is missing.');
       }
-      return UserEntity(
+      return AuthUser(
         id: response.user!.id,
         email: response.user!.email!,
       );
@@ -79,11 +79,11 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   }
 
   @override
-  Stream<UserEntity?> get userStream {
+  Stream<AuthUser?> get userStream {
     return _supabaseClient.auth.onAuthStateChange.map((event) {
       final user = event.session?.user;
       if (user == null) return null;
-      return UserEntity(id: user.id, email: user.email!);
+      return AuthUser(id: user.id, email: user.email!);
     });
   }
 }
