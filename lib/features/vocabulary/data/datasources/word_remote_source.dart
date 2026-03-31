@@ -45,18 +45,20 @@ class WordRemoteSourceImpl implements WordRemoteSource {
     try {
       // Sync uses Last-Writer-Wins (LWW) semantics.
       // We use a custom RPC function to handle the LWW merge logic on the server.
+      // p_server_timestamp is nullable; when null, Postgres trigger
+      // (set_server_timestamp) sets it on INSERT. On UPDATE, the existing
+      // server timestamp should be preserved by server-side merge rules.
       final json = word.toJson();
-      await _client.rpc(
-        'upsert_word_lww',
-        params: {
-          'p_id': json['id'],
-          'p_user_id': json['user_id'],
-          'p_word_text': json['word_text'],
-          'p_total_count': json['total_count'],
-          'p_is_known': json['is_known'],
-          'p_last_updated': json['last_updated'],
-        },
-      );
+      final params = {
+        'p_id': json['id'],
+        'p_user_id': json['user_id'],
+        'p_word_text': json['word_text'],
+        'p_total_count': json['total_count'],
+        'p_is_known': json['is_known'],
+        'p_last_updated': json['last_updated'],
+        'p_server_timestamp': json['server_timestamp'],
+      };
+      await _client.rpc('upsert_word_lww', params: params);
     } on PostgrestException catch (e) {
       throw ServerException(e.message);
     } catch (e) {

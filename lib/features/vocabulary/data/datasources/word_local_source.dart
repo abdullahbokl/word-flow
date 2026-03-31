@@ -8,6 +8,7 @@ abstract class WordLocalSource {
   Future<Map<String, WordRow>> getWordTextMap({String? userId});
   Future<List<WordRow>> getWords({String? userId});
   Future<List<WordRow>> getWordsByTexts(List<String> texts, {String? userId});
+  Future<Map<String, WordRow>> getWordsByIds(List<String> ids);
   Future<List<String>> getKnownWordTexts({String? userId});
   Future<WordRow?> getWordById(String id);
   Future<WordRow?> getWordByText(String text, {String? userId});
@@ -68,6 +69,11 @@ class WordLocalSourceImpl implements WordLocalSource {
     String? userId,
   }) async {
     return _db.getWordsByTexts(texts, userId: userId);
+  }
+
+  @override
+  Future<Map<String, WordRow>> getWordsByIds(List<String> ids) async {
+    return _db.getWordsByIds(ids);
   }
 
   @override

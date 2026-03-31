@@ -157,11 +157,9 @@ class SyncOrchestrator {
 
       // 2. Pull remote changes
       _logger.info('SyncOrchestrator: Starting pull phase...');
-      final lastPullTime = DateTime.now().toUtc();
 
       SentryBreadcrumbs.addSyncBreadcrumb(
         'Pull phase started',
-        data: {'lastPullTimestamp': lastPullTime.toIso8601String()},
       );
 
       final pullResult = await _syncRepository.pullRemoteChanges(userId);

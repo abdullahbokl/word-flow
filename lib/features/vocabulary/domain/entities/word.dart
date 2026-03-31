@@ -31,8 +31,15 @@ class WordEntity extends Equatable {
     if (totalCount < 1) {
       throw ArgumentError('totalCount must be at least 1');
     }
-    if (lastUpdated.toUtc().isAfter(DateTime.now().toUtc())) {
-      throw ArgumentError('lastUpdated cannot be in the future');
+    // Allow up to 5 minutes of clock skew between device and server.
+    // Supabase server timestamps can appear "in the future" due to clock drift.
+    const skewTolerance = Duration(minutes: 5);
+    if (lastUpdated.toUtc().isAfter(
+      DateTime.now().toUtc().add(skewTolerance),
+    )) {
+      throw ArgumentError(
+        'lastUpdated is more than 5 minutes in the future — possible data corruption',
+      );
     }
 
     return WordEntity(

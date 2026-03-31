@@ -117,6 +117,15 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     return query.getSingleOrNull();
   }
 
+  Future<Map<String, WordRow>> getWordsByIds(List<String> ids) async {
+    if (ids.isEmpty) {
+      return {};
+    }
+    final query = select(words)..where((t) => t.id.isIn(ids));
+    final rows = await query.get();
+    return {for (final row in rows) row.id: row};
+  }
+
   Future<List<WordRow>> getWordsByTexts(
     List<String> texts, {
     String? userId,

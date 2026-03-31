@@ -288,8 +288,12 @@ class SyncRepositoryImpl implements SyncRepository {
         var pageMergedCount = 0;
         var pageSkippedCount = 0;
 
+        // Batch fetch all local words for this page to avoid N queries.
+        final pageIds = paginatedData.words.map((w) => w.id).toList();
+        final localMap = await _localSource.getWordsByIds(pageIds);
+
         for (final remoteDto in paginatedData.words) {
-          final localWord = await _localSource.getWordById(remoteDto.id);
+          final localWord = localMap[remoteDto.id];
 
           if (localWord == null) {
             final mappedRemote = WordMapper.fromRemoteDto(remoteDto);

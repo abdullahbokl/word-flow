@@ -468,8 +468,8 @@ void main() {
         ),
       ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
       when(
-        () => mockLocal.getWordById('remote-new'),
-      ).thenAnswer((_) async => null);
+        () => mockLocal.getWordsByIds(['remote-new']),
+      ).thenAnswer((_) async => {});  // Empty map - no local word
       when(
         () => mockLocal.saveWordsInTransaction(any()),
       ).thenAnswer((_) async {});
@@ -522,8 +522,8 @@ void main() {
           ),
         ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
         when(
-          () => mockLocal.getWordById('same-id'),
-        ).thenAnswer((_) async => local);
+          () => mockLocal.getWordsByIds(['same-id']),
+        ).thenAnswer((_) async => {'same-id': local});
         when(
           () => mockLocal.saveWordsInTransaction(any()),
         ).thenAnswer((_) async {});
@@ -575,8 +575,8 @@ void main() {
           ),
         ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
         when(
-          () => mockLocal.getWordById('same-id'),
-        ).thenAnswer((_) async => local);
+          () => mockLocal.getWordsByIds(['same-id']),
+        ).thenAnswer((_) async => {'same-id': local});
         when(
           () => mockLocal.saveWordsInTransaction(any()),
         ).thenAnswer((_) async {});
@@ -628,8 +628,8 @@ void main() {
           ),
         ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
         when(
-          () => mockLocal.getWordById('same-id'),
-        ).thenAnswer((_) async => local);
+          () => mockLocal.getWordsByIds(['same-id']),
+        ).thenAnswer((_) async => {'same-id': local});
         when(
           () => mockLocal.saveWordsInTransaction(any()),
         ).thenAnswer((_) async {});
@@ -679,8 +679,8 @@ void main() {
         ),
       ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
       when(
-        () => mockLocal.getWordById('same-id'),
-      ).thenAnswer((_) async => local);
+        () => mockLocal.getWordsByIds(['same-id']),
+      ).thenAnswer((_) async => {'same-id': local});
       when(
         () => mockLocal.saveWordsInTransaction(any()),
       ).thenAnswer((_) async {});
@@ -729,8 +729,8 @@ void main() {
         ),
       ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
       when(
-        () => mockLocal.getWordById('same-id'),
-      ).thenAnswer((_) async => local);
+        () => mockLocal.getWordsByIds(['same-id']),
+      ).thenAnswer((_) async => {'same-id': local});
       when(
         () => mockLocal.saveWordsInTransaction(any()),
       ).thenAnswer((_) async {});
@@ -780,8 +780,8 @@ void main() {
         ),
       ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
       when(
-        () => mockLocal.getWordById('same-id'),
-      ).thenAnswer((_) async => local);
+        () => mockLocal.getWordsByIds(['same-id']),
+      ).thenAnswer((_) async => {'same-id': local});
       when(
         () => mockPreferences.setLastPullTimestamp(userId, any()),
       ).thenAnswer((_) async {});
@@ -814,8 +814,8 @@ void main() {
         ),
       ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
       when(
-        () => mockLocal.getWordById('remote-new'),
-      ).thenAnswer((_) async => null);
+        () => mockLocal.getWordsByIds(['remote-new']),
+      ).thenAnswer((_) async => {});
       when(
         () => mockLocal.saveWordsInTransaction(any()),
       ).thenThrow(Exception('transaction failed'));
@@ -899,8 +899,8 @@ void main() {
       ).thenAnswer(
         (_) async => Right(PaginatedSyncResult(words: [secondPageWord])),
       );
-      when(() => mockLocal.getWordById('word-1')).thenAnswer((_) async => null);
-      when(() => mockLocal.getWordById('word-2')).thenAnswer((_) async => null);
+      when(() => mockLocal.getWordsByIds(['word-1'])).thenAnswer((_) async => {});
+      when(() => mockLocal.getWordsByIds(['word-2'])).thenAnswer((_) async => {});
       when(
         () => mockLocal.saveWordsInTransaction(any()),
       ).thenAnswer((_) async {});
