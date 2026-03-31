@@ -1,7 +1,6 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/core/sync/sync_orchestrator.dart';
 import 'package:word_flow/core/sync/sync_status.dart';
 import 'package:word_flow/core/errors/failures.dart';
@@ -10,16 +9,12 @@ import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart
 
 class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
 
-class MockAuthRepository extends Mock implements AuthRepository {}
-
 void main() {
   late SyncCubit cubit;
   late MockSyncOrchestrator mockSyncOrchestrator;
-  late MockAuthRepository mockAuthRepository;
 
   setUp(() {
     mockSyncOrchestrator = MockSyncOrchestrator();
-    mockAuthRepository = MockAuthRepository();
 
     when(
       () => mockSyncOrchestrator.pendingCountStream,
@@ -28,22 +23,53 @@ void main() {
       () => mockSyncOrchestrator.statusStream,
     ).thenAnswer((_) => const Stream.empty());
     when(() => mockSyncOrchestrator.retrySync()).thenReturn(null);
-    when(
-      () => mockAuthRepository.authStateStream,
-    ).thenAnswer((_) => const Stream.empty());
-    when(() => mockAuthRepository.currentUserId).thenReturn('user-1');
 
-    cubit = SyncCubit(mockSyncOrchestrator, mockAuthRepository);
+    cubit = SyncCubit(mockSyncOrchestrator);
   });
 
   group('SyncCubit - syncNow delegation', () {
-    blocTest<SyncCubit, SyncState>(
-      'calls SyncOrchestrator.retrySync and emits no local state directly',
-      build: () => cubit,
-      act: (cubit) => cubit.syncNow(),
-      expect: () => [],
-      verify: (_) {
-        verify(() => mockSyncOrchestrator.retrySync()).called(1);
+    test(
+      'calls SyncOrchestrator.retrySync when pendingCount > 0',
+      () async {
+        // Create fresh mock for this specific test
+        final testMock = MockSyncOrchestrator();
+        
+        // Set up streams to emit values
+        when(() => testMock.pendingCountStream).thenAnswer(
+          (_) => Stream<int>.fromIterable([0, 1, 2]),
+        );
+        when(() => testMock.statusStream).thenAnswer(
+          (_) => const Stream.empty(),
+        );
+        when(() => testMock.retrySync()).thenReturn(null);
+
+        final testCubit = SyncCubit(testMock);
+        
+        // Initialize to set up stream listeners
+        testCubit.init();
+        
+        // Give streams time to emit values and update state
+        await Future.delayed(const Duration(milliseconds: 100));
+        
+        // Now syncNow should call retrySync since pendingCount is > 0
+        testCubit.syncNow();
+        
+        // Verify retrySync was called
+        verify(() => testMock.retrySync()).called(1);
+      },
+    );
+
+    test(
+      'does not call retrySync when pendingCount == 0',
+      () {
+        // Use the default setup from setUp() which has pendingCount = 0
+        cubit.init();
+        
+        // syncNow() should return early since pendingCount == 0
+        cubit.syncNow();
+        
+        // Verify retrySync was never called
+        verifyNever(() => mockSyncOrchestrator.retrySync());
       },
     );
   });

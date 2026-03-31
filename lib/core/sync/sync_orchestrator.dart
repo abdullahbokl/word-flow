@@ -67,6 +67,16 @@ class SyncOrchestrator {
     _performSync();
   }
 
+  /// Cancels any pending or in-flight sync cycle.
+  /// Must be called before clearing local user data (e.g. on sign-out).
+  void cancelInFlightSync() {
+    _debounceTimer?.cancel();
+    _debounceTimer = null;
+    _isSyncing = false;
+    _statusController.add(const SyncStatus.idle());
+    _logger.info('SyncOrchestrator: sync cancelled (sign-out or manual cancel)');
+  }
+
   void _updatePeriodicScheduling() {
     _periodicTimer?.cancel();
 

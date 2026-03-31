@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
+import 'package:word_flow/core/sync/sync_orchestrator.dart';
 import 'package:word_flow/core/sync/sync_preferences.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
@@ -13,14 +14,19 @@ class SignOutAndClearLocal {
     this.wordRepository,
     this.syncPreferences,
     this.logger,
+    this.syncOrchestrator,
   );
 
   final AuthRepository authRepository;
   final WordRepository wordRepository;
   final SyncPreferences syncPreferences;
   final AppLogger logger;
+  final SyncOrchestrator syncOrchestrator;
 
   Future<Either<Failure, void>> call() async {
+    // Cancel any in-flight sync BEFORE clearing local data to avoid writing deleted words remotely.
+    syncOrchestrator.cancelInFlightSync();
+
     // Capture current user before sign-out so we can clear that user's local data.
     final userId = authRepository.currentUserId;
 

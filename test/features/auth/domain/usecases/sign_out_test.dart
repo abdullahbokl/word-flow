@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
+import 'package:word_flow/core/sync/sync_orchestrator.dart';
 import 'package:word_flow/core/sync/sync_preferences.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/auth/domain/usecases/sign_out_and_clear_local.dart';
@@ -16,11 +17,14 @@ class MockSyncPreferences extends Mock implements SyncPreferences {}
 
 class MockAppLogger extends Mock implements AppLogger {}
 
+class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
+
 void main() {
   late MockAuthRepository mockAuthRepository;
   late MockWordRepository mockWordRepository;
   late MockSyncPreferences mockSyncPreferences;
   late MockAppLogger mockLogger;
+  late MockSyncOrchestrator mockSyncOrchestrator;
   late SignOutAndClearLocal useCase;
 
   const userId = 'user-123';
@@ -30,12 +34,16 @@ void main() {
     mockWordRepository = MockWordRepository();
     mockSyncPreferences = MockSyncPreferences();
     mockLogger = MockAppLogger();
+    mockSyncOrchestrator = MockSyncOrchestrator();
+
+    when(() => mockSyncOrchestrator.cancelInFlightSync()).thenReturn(null);
 
     useCase = SignOutAndClearLocal(
       mockAuthRepository,
       mockWordRepository,
       mockSyncPreferences,
       mockLogger,
+      mockSyncOrchestrator,
     );
   });
 
@@ -44,6 +52,7 @@ void main() {
     reset(mockWordRepository);
     reset(mockSyncPreferences);
     reset(mockLogger);
+    reset(mockSyncOrchestrator);
   });
 
   group('SignOutAndClearLocal', () {
@@ -65,6 +74,7 @@ void main() {
       final result = await useCase();
 
       expect(result, const Right<Failure, void>(null));
+      verify(() => mockSyncOrchestrator.cancelInFlightSync()).called(1);
       verify(() => mockWordRepository.clearLocalWords(userId)).called(1);
       verify(() => mockWordRepository.clearGuestWords()).called(1);
       verify(() => mockAuthRepository.signOut()).called(1);

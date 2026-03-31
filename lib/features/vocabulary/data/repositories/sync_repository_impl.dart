@@ -77,6 +77,40 @@ class SyncRepositoryImpl implements SyncRepository {
         final queueId = item.id;
         final retryCount = item.retryCount;
 
+        // Handle unknown operation: move to dead-letters immediately
+        if (operation == null) {
+          final word = await _localSource.getWordById(wordId);
+          final wordText = word?.wordText ?? '[deleted locally]';
+          final errorMessage = 'Unknown sync operation: ${item.operation}';
+
+          await _deadLetterSource.addDeadLetter(
+            wordId: wordId,
+            wordText: wordText,
+            operation: item.operation,
+            lastError: errorMessage,
+            failedAt: now,
+          );
+
+          // Breadcrumb: Dead-letter event for unknown operation
+          SentryBreadcrumbs.addDBBreadcrumb(
+            'Sync item moved to dead letters (unknown operation)',
+            operation: item.operation,
+            data: {
+              'wordId': wordId,
+              'wordText': wordText,
+              'unknownOperation': item.operation,
+              'queueId': queueId,
+            },
+            level: SentryLevel.warning,
+          );
+
+          _logger.warning(
+            'Moved queue item to dead letters: $queueId (unknown operation: ${item.operation})',
+          );
+          await _syncSource.removeFromSyncQueue(queueId);
+          continue;
+        }
+
         // Dead letter: skip items that have failed too many times
         if (retryCount > 10) {
           final word = await _localSource.getWordById(wordId);
