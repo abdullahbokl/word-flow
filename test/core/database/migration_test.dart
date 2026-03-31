@@ -23,7 +23,7 @@ void main() {
       expect(tableNames, contains('app_settings'));
 
       // Verify schemaVersion
-      expect(db.schemaVersion, 7);
+      expect(db.schemaVersion, 10);
 
       await db.close();
     });
@@ -61,7 +61,7 @@ void main() {
 
       await wordFlowDb.customSelect('SELECT 1').get();
 
-      expect(wordFlowDb.schemaVersion, 7);
+      expect(wordFlowDb.schemaVersion, 10);
 
       final tables = await wordFlowDb
           .customSelect('SELECT name FROM sqlite_master WHERE type="table"')
@@ -77,7 +77,7 @@ void main() {
       final wordFlowDb1 = WordFlowDatabase.test(executor);
 
       await wordFlowDb1.customSelect('SELECT 1').get();
-      expect(wordFlowDb1.schemaVersion, 7);
+      expect(wordFlowDb1.schemaVersion, 10);
 
       // We don't need to manually reset user_version because the test constructor 
       // is already handling the current state of the in-memory DB if shared, 

@@ -160,7 +160,7 @@ void main() {
   test('Sanitizes input before passing to analysis service', () async {
     // Arrange
     const rawText = 'Hello\x00World'; // Control character
-    const expectedSanitized = 'HelloWorld';
+    const expectedSanitized = 'helloworld';
 
     when(() => mockRepository.getKnownWordTexts(userId: any(named: 'userId')))
         .thenAnswer((_) async => const Right([]));

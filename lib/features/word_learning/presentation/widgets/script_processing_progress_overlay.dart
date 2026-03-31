@@ -22,19 +22,25 @@ class ScriptProcessingProgressOverlay extends StatefulWidget {
 class _ScriptProcessingProgressOverlayState
     extends State<ScriptProcessingProgressOverlay>
     with SingleTickerProviderStateMixin {
-  late final AnimationController _controller = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 260),
-  );
-  late final Animation<double> _scale = CurvedAnimation(
-    parent: _controller,
-    curve: Curves.easeOutBack,
-  );
+  late AnimationController _controller;
+  late Animation<double> _scale;
 
   Timer? _dismissTimer;
   bool _showSuccess = false;
 
   @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 260),
+    );
+    _scale = CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutBack,
+    );
+  }
+
   void didUpdateWidget(covariant ScriptProcessingProgressOverlay oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.isProcessing && !widget.isProcessing) {
