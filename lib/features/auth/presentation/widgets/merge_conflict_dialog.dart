@@ -4,7 +4,6 @@ import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 import 'package:word_flow/features/auth/presentation/blocs/migration_cubit.dart';
 
 class MergeConflictDialog extends StatelessWidget {
-
   const MergeConflictDialog({
     super.key,
     required this.user,

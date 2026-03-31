@@ -79,15 +79,15 @@ void main() {
       await wordFlowDb1.customSelect('SELECT 1').get();
       expect(wordFlowDb1.schemaVersion, 10);
 
-      // We don't need to manually reset user_version because the test constructor 
-      // is already handling the current state of the in-memory DB if shared, 
+      // We don't need to manually reset user_version because the test constructor
+      // is already handling the current state of the in-memory DB if shared,
       // but NativeDatabase.memory() creates a NEW database every time.
       // To test idempotency correctly on the SAME database:
-      
+
       final db = sqlite3.openInMemory();
       db.execute('CREATE TABLE dummy (id INTEGER);');
       db.execute('PRAGMA user_version = 1;');
-      
+
       // First run (onCreate then migrations if we had them from v1, or just onCreate)
       // Actually, WordFlowDatabase.test starts from scratch.
       // Let's just verify that fresh install results in v7.

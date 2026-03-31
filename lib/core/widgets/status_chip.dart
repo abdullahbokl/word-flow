@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 enum StatusChipVariant { neutral, success, warning, info }
 
 class StatusChip extends StatelessWidget {
-
   const StatusChip({
     super.key,
     required this.label,

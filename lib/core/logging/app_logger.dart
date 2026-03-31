@@ -10,12 +10,12 @@ class AppLogger {
   /// In DEBUG: full console output with history
   /// In RELEASE: console disabled, only history (for memory efficiency)
   AppLogger()
-      : _talker = Talker(
-          settings: TalkerSettings(
-            useConsoleLogs: kDebugMode, // Only console logs in debug
-            useHistory: true, // Always keep history for flushLogs()
-          ),
-        );
+    : _talker = Talker(
+        settings: TalkerSettings(
+          useConsoleLogs: kDebugMode, // Only console logs in debug
+          useHistory: true, // Always keep history for flushLogs()
+        ),
+      );
 
   final Talker _talker;
 
@@ -87,10 +87,7 @@ class AppLogger {
   void warning(String message) {
     _talker.warning(message);
     // Forward to Sentry as breadcrumb
-    SentryBreadcrumbs.addSyncBreadcrumb(
-      message,
-      level: SentryLevel.warning,
-    );
+    SentryBreadcrumbs.addSyncBreadcrumb(message, level: SentryLevel.warning);
   }
 
   /// Log at error level + forward to Sentry

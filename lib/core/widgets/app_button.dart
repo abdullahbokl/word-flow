@@ -4,7 +4,6 @@ import 'package:word_flow/core/widgets/app_loader.dart';
 enum AppButtonVariant { primary, secondary, outline }
 
 class AppButton extends StatelessWidget {
-
   const AppButton({
     super.key,
     required this.label,
@@ -22,10 +21,7 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = isLoading
-        ? AppLoader(
-            size: 20,
-            color: _loadingColor(context),
-          )
+        ? AppLoader(size: 20, color: _loadingColor(context))
         : Text(label);
 
     final button = switch (variant) {

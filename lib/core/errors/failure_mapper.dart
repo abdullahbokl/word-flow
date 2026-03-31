@@ -15,8 +15,10 @@ extension FailureMapper on Failure {
 
   String get friendlyMessage {
     return switch (this) {
-      DatabaseFailure() => 'Something went wrong loading your words. Tap to retry.',
-      SyncFailure() => "Couldn't sync your changes. They're saved locally and will retry.",
+      DatabaseFailure() =>
+        'Something went wrong loading your words. Tap to retry.',
+      SyncFailure() =>
+        "Couldn't sync your changes. They're saved locally and will retry.",
       ServerFailure() => 'Server error. Please check your connection.',
       AuthFailure() => 'Your session has expired. Please sign in again.',
       ConnectionFailure() => 'Check your internet connection and try again.',

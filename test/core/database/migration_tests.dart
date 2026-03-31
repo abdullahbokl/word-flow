@@ -11,7 +11,8 @@ void main() {
         expect(
           4,
           equals(4),
-          reason: 'Current schema version should be 4 supporting all'
+          reason:
+              'Current schema version should be 4 supporting all'
               ' migrations: v1→v2 (dedup), v2→v3 (unique), v3→v4 (timestamp)',
         );
       });
@@ -20,7 +21,7 @@ void main() {
         // The app_database.dart includes MigrationStrategy with:
         // - onCreate: creates all tables
         // - onUpgrade: handles v1→v2, v2→v3, v3→v4 migrations
-        
+
         // This test serves as documentation of the migration design
         const migrationExistsInCode = true;
         expect(migrationExistsInCode, isTrue);
@@ -113,12 +114,13 @@ void main() {
       });
 
       test(
-          'v2→v3: DELETE eliminates all but first (MIN rowid) of each group',
-          () {
-        // After dedup in v1→v2, this should be no-op but ensures consistency
-        const deleteLogicSound = true;
-        expect(deleteLogicSound, isTrue);
-      });
+        'v2→v3: DELETE eliminates all but first (MIN rowid) of each group',
+        () {
+          // After dedup in v1→v2, this should be no-op but ensures consistency
+          const deleteLogicSound = true;
+          expect(deleteLogicSound, isTrue);
+        },
+      );
 
       test('v3→v4: ALTER TABLE preserves existing column values', () {
         // Only adds new column with default; doesn't modify existing data

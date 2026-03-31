@@ -24,13 +24,15 @@ class SignOutAndClearLocal {
     // Capture current user before sign-out so we can clear that user's local data.
     final userId = authRepository.currentUserId;
 
-    Future<void> trackCleanupFailure(Either<Failure, void> result, String step) async {
-      result.fold(
-        (failure) {
-          logger.error('SignOutAndClearLocal cleanup failed at $step: ${failure.message}');
-        },
-        (_) {},
-      );
+    Future<void> trackCleanupFailure(
+      Either<Failure, void> result,
+      String step,
+    ) async {
+      result.fold((failure) {
+        logger.error(
+          'SignOutAndClearLocal cleanup failed at $step: ${failure.message}',
+        );
+      }, (_) {});
     }
 
     try {
@@ -45,7 +47,11 @@ class SignOutAndClearLocal {
           // Clear per-user sync cursor to avoid stale pull windows next login.
           await syncPreferences.clearUserTimestamp(userId);
         } catch (e, stackTrace) {
-          logger.error('SignOutAndClearLocal cleanup failed at clear user timestamp', e, stackTrace);
+          logger.error(
+            'SignOutAndClearLocal cleanup failed at clear user timestamp',
+            e,
+            stackTrace,
+          );
         }
       }
 
@@ -55,7 +61,11 @@ class SignOutAndClearLocal {
         'clear guest words',
       );
     } catch (e, stackTrace) {
-      logger.error('SignOutAndClearLocal unexpected cleanup error', e, stackTrace);
+      logger.error(
+        'SignOutAndClearLocal unexpected cleanup error',
+        e,
+        stackTrace,
+      );
     }
 
     final signOutResult = await authRepository.signOut();

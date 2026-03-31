@@ -12,7 +12,7 @@ class LocalWriteQueue {
 
   final AppLogger _logger;
   static const int _maxDepth = 100;
-  
+
   int _pendingCount = 0;
   final _controller = StreamController<(_Job, Completer<void>)>();
   late final StreamSubscription _subscription;
@@ -39,7 +39,9 @@ class LocalWriteQueue {
   /// Enqueues a write operation. Returns a Future that completes when the operation finishes.
   Future<void> enqueue(Future<void> Function() job) {
     if (_pendingCount >= _maxDepth) {
-      _logger.warning('LocalWriteQueue max depth reached ($_maxDepth). Skipping.');
+      _logger.warning(
+        'LocalWriteQueue max depth reached ($_maxDepth). Skipping.',
+      );
       return Future.value();
     }
 

@@ -67,7 +67,10 @@ void main() {
     test('Irregular/Common variants', () {
       expect(stemmer.stem('running'), 'run');
       expect(stemmer.stem('runs'), 'run');
-      expect(stemmer.stem('runner'), 'runner'); // "runner" should actually stem to "runner" in Porter unless Step 4 handles it
+      expect(
+        stemmer.stem('runner'),
+        'runner',
+      ); // "runner" should actually stem to "runner" in Porter unless Step 4 handles it
       expect(stemmer.stem('walked'), 'walk');
       expect(stemmer.stem('walking'), 'walk');
       expect(stemmer.stem('walks'), 'walk');

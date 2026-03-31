@@ -17,14 +17,14 @@ import 'package:word_flow/core/sync/sync_orchestrator.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Disable runtime font fetching to ensure offline-first typography
   // All fonts are now bundled as assets in assets/fonts/
   GoogleFonts.config.allowRuntimeFetching = false;
-  
+
   // Validate environment configuration (throws in DEBUG mode if missing)
   EnvConfig.validate();
-  
+
   await SentryFlutter.init(
     (options) {
       options.dsn = EnvConfig.sentryDsn;
@@ -36,13 +36,13 @@ Future<void> main() async {
       await configureDependencies();
 
       final logger = getIt<AppLogger>();
-      
+
       // Configure BLoC logging based on build mode
       // DEBUG: Log all state transitions (info level) + errors
       // RELEASE: Only log BLoC errors (no state transition spam)
       // Verbose logging suppressed via AppLogger's kDebugMode checks
       Bloc.observer = TalkerBlocObserver(talker: logger.talker);
-      
+
       // Attach Sentry breadcrumb behavior (verbose in debug, minimal in release)
       logger.attachToSentry();
 

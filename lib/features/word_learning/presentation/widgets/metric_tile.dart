@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class MetricTile extends StatelessWidget {
-
   const MetricTile({
     super.key,
     required this.width,

@@ -79,18 +79,13 @@ class AuthCubit extends Cubit<AuthState> {
           SentryBreadcrumbs.addAuthBreadcrumb(
             'User authenticated',
             userId: user.id,
-            data: {
-              'event': event.toString(),
-              'email': user.email,
-            },
+            data: {'event': event.toString(), 'email': user.email},
           );
         }
         break;
       case AuthStateChange.passwordRecovery:
         emit(const AuthState.passwordRecovery());
-        SentryBreadcrumbs.addAuthBreadcrumb(
-          'Password recovery initiated',
-        );
+        SentryBreadcrumbs.addAuthBreadcrumb('Password recovery initiated');
         break;
       case AuthStateChange.signedOut:
         _updateSentryUser(null);
@@ -173,10 +168,7 @@ class AuthCubit extends Cubit<AuthState> {
           emit(AuthState.error(failure.message));
           SentryBreadcrumbs.addAuthBreadcrumb(
             'Sign in failed',
-            data: {
-              'email': email,
-              'reason': failure.message,
-            },
+            data: {'email': email, 'reason': failure.message},
             level: SentryLevel.warning,
           );
         },
@@ -229,10 +221,7 @@ class AuthCubit extends Cubit<AuthState> {
           emit(AuthState.error(failure.message));
           SentryBreadcrumbs.addAuthBreadcrumb(
             'Sign up failed',
-            data: {
-              'email': email,
-              'reason': failure.message,
-            },
+            data: {'email': email, 'reason': failure.message},
             level: SentryLevel.warning,
           );
         },

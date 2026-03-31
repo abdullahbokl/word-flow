@@ -28,9 +28,11 @@ class IsolateTextAnalysisService implements TextAnalysisService {
 
       // Build regex based on config
       final minLen = config.minWordLength;
-      final contractions = config.includeContractionsAsOne ? '(?:\'[a-zA-Z]+)?' : '';
+      final contractions = config.includeContractionsAsOne
+          ? '(?:\'[a-zA-Z]+)?'
+          : '';
       final wordRegExp = RegExp('\\b[a-zA-Z]{$minLen,}$contractions\\b');
-      
+
       final matches = wordRegExp.allMatches(rawText);
 
       final wordCounts = <String, int>{};
@@ -45,10 +47,12 @@ class IsolateTextAnalysisService implements TextAnalysisService {
         }
 
         final targetKey = stemmer?.stem(originalWord) ?? originalWord;
-        
+
         wordCounts[targetKey] = (wordCounts[targetKey] ?? 0) + 1;
         if (config.useStemming) {
-          stemToVariants.putIfAbsent(targetKey, () => <String>{}).add(originalWord);
+          stemToVariants
+              .putIfAbsent(targetKey, () => <String>{})
+              .add(originalWord);
         }
       }
 

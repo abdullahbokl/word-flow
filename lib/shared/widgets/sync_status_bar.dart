@@ -15,17 +15,14 @@ class SyncStatusBar extends StatelessWidget {
       initialData: const SyncStatus.idle(),
       builder: (context, snapshot) {
         final status = snapshot.data!;
-        
+
         return AnimatedSwitcher(
           duration: const Duration(milliseconds: 400),
           transitionBuilder: (child, animation) {
             return SizeTransition(
               sizeFactor: animation,
               axisAlignment: -1,
-              child: FadeTransition(
-                opacity: animation,
-                child: child,
-              ),
+              child: FadeTransition(opacity: animation, child: child),
             );
           },
           child: _buildContent(context, status, orchestrator),
@@ -34,7 +31,11 @@ class SyncStatusBar extends StatelessWidget {
     );
   }
 
-  Widget _buildContent(BuildContext context, SyncStatus status, SyncOrchestrator orchestrator) {
+  Widget _buildContent(
+    BuildContext context,
+    SyncStatus status,
+    SyncOrchestrator orchestrator,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
 
     return status.when(
@@ -52,7 +53,11 @@ class SyncStatusBar extends StatelessWidget {
         child: _StatusContainer(
           key: const ValueKey('error'),
           backgroundColor: colorScheme.error.withValues(alpha: 0.08),
-          icon: Icon(Icons.sync_problem_rounded, color: colorScheme.error, size: 15),
+          icon: Icon(
+            Icons.sync_problem_rounded,
+            color: colorScheme.error,
+            size: 15,
+          ),
           text: 'Sync error. Tap to retry.',
           textColor: colorScheme.error,
         ),
@@ -60,7 +65,11 @@ class SyncStatusBar extends StatelessWidget {
       offline: () => _StatusContainer(
         key: const ValueKey('offline'),
         backgroundColor: colorScheme.onSurface.withValues(alpha: 0.05),
-        icon: Icon(Icons.cloud_off_rounded, color: colorScheme.onSurfaceVariant, size: 15),
+        icon: Icon(
+          Icons.cloud_off_rounded,
+          color: colorScheme.onSurfaceVariant,
+          size: 15,
+        ),
         text: 'Working offline',
         textColor: colorScheme.onSurfaceVariant,
       ),
@@ -124,7 +133,8 @@ class _RotatingSyncIcon extends StatefulWidget {
   State<_RotatingSyncIcon> createState() => _RotatingSyncIconState();
 }
 
-class _RotatingSyncIconState extends State<_RotatingSyncIcon> with SingleTickerProviderStateMixin {
+class _RotatingSyncIconState extends State<_RotatingSyncIcon>
+    with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
   @override

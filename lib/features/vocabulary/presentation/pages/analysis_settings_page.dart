@@ -29,10 +29,7 @@ class _AnalysisSettingsView extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Analysis Settings',
-          style: TextStyle(
-            fontFamily: 'Outfit',
-            fontWeight: FontWeight.w600,
-          ),
+          style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w600),
         ),
         elevation: 0,
         backgroundColor: Colors.transparent,
@@ -70,33 +67,76 @@ class _AnalysisSettingsView extends StatelessWidget {
             loaded: (config, isSaving, error) => ListView(
               padding: const EdgeInsets.all(24),
               children: [
-                _buildSectionHeader(context, 'Core Configuration', Icons.settings_rounded),
+                _buildSectionHeader(
+                  context,
+                  'Core Configuration',
+                  Icons.settings_rounded,
+                ),
                 const SizedBox(height: 16),
                 _buildCard(
                   context,
                   child: Column(
                     children: [
                       ListTile(
-                        leading: Icon(Icons.language_rounded, color: colorScheme.primary),
-                        title: Text('Primary Language', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w500)),
-                        subtitle: Text(config.language.toUpperCase(), style: const TextStyle(fontFamily: 'Outfit', fontSize: 12)),
+                        leading: Icon(
+                          Icons.language_rounded,
+                          color: colorScheme.primary,
+                        ),
+                        title: Text(
+                          'Primary Language',
+                          style: TextStyle(
+                            fontFamily: 'Outfit',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          config.language.toUpperCase(),
+                          style: const TextStyle(
+                            fontFamily: 'Outfit',
+                            fontSize: 12,
+                          ),
+                        ),
                         trailing: DropdownButton<String>(
                           value: config.language,
                           underline: const SizedBox(),
                           items: const [
-                            DropdownMenuItem(value: 'english', child: Text('English')),
-                            DropdownMenuItem(value: 'spanish', child: Text('Spanish')),
+                            DropdownMenuItem(
+                              value: 'english',
+                              child: Text('English'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'spanish',
+                              child: Text('Spanish'),
+                            ),
                           ],
                           onChanged: (val) {
-                            if (val != null) context.read<AnalysisSettingsCubit>().updateLanguage(val);
+                            if (val != null)
+                              context
+                                  .read<AnalysisSettingsCubit>()
+                                  .updateLanguage(val);
                           },
                         ),
                       ),
                       const Divider(height: 1, indent: 64),
                       ListTile(
-                        leading: Icon(Icons.short_text_rounded, color: colorScheme.primary),
-                        title: Text('Minimum Word Length', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w500)),
-                        subtitle: Text('${config.minWordLength} characters', style: const TextStyle(fontFamily: 'Outfit', fontSize: 12)),
+                        leading: Icon(
+                          Icons.short_text_rounded,
+                          color: colorScheme.primary,
+                        ),
+                        title: Text(
+                          'Minimum Word Length',
+                          style: TextStyle(
+                            fontFamily: 'Outfit',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          '${config.minWordLength} characters',
+                          style: const TextStyle(
+                            fontFamily: 'Outfit',
+                            fontSize: 12,
+                          ),
+                        ),
                         trailing: SizedBox(
                           width: 120,
                           child: Slider(
@@ -106,36 +146,76 @@ class _AnalysisSettingsView extends StatelessWidget {
                             divisions: 4,
                             label: config.minWordLength.toString(),
                             onChanged: (val) {
-                              context.read<AnalysisSettingsCubit>().updateMinWordLength(val.toInt());
+                              context
+                                  .read<AnalysisSettingsCubit>()
+                                  .updateMinWordLength(val.toInt());
                             },
                           ),
                         ),
                       ),
                       const Divider(height: 1, indent: 64),
                       SwitchListTile(
-                        secondary: Icon(Icons.merge_type_rounded, color: colorScheme.primary),
-                        title: Text('Merge Contractions', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w500)),
-                        subtitle: Text("Treat 'don't' as one word", style: const TextStyle(fontFamily: 'Outfit', fontSize: 12)),
+                        secondary: Icon(
+                          Icons.merge_type_rounded,
+                          color: colorScheme.primary,
+                        ),
+                        title: Text(
+                          'Merge Contractions',
+                          style: TextStyle(
+                            fontFamily: 'Outfit',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          "Treat 'don't' as one word",
+                          style: const TextStyle(
+                            fontFamily: 'Outfit',
+                            fontSize: 12,
+                          ),
+                        ),
                         value: config.includeContractionsAsOne,
                         onChanged: (val) {
-                          context.read<AnalysisSettingsCubit>().toggleContractions(val);
+                          context
+                              .read<AnalysisSettingsCubit>()
+                              .toggleContractions(val);
                         },
                       ),
                       const Divider(height: 1, indent: 64),
                       SwitchListTile(
-                        secondary: Icon(Icons.account_tree_rounded, color: colorScheme.primary),
-                        title: Text('Group Word Variants', style: TextStyle(fontFamily: 'Outfit', fontWeight: FontWeight.w500)),
-                        subtitle: Text("Count 'runs' and 'running' as 'run' (Stemming)", style: const TextStyle(fontFamily: 'Outfit', fontSize: 12)),
+                        secondary: Icon(
+                          Icons.account_tree_rounded,
+                          color: colorScheme.primary,
+                        ),
+                        title: Text(
+                          'Group Word Variants',
+                          style: TextStyle(
+                            fontFamily: 'Outfit',
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        subtitle: Text(
+                          "Count 'runs' and 'running' as 'run' (Stemming)",
+                          style: const TextStyle(
+                            fontFamily: 'Outfit',
+                            fontSize: 12,
+                          ),
+                        ),
                         value: config.useStemming,
                         onChanged: (val) {
-                          context.read<AnalysisSettingsCubit>().toggleStemming(val);
+                          context.read<AnalysisSettingsCubit>().toggleStemming(
+                            val,
+                          );
                         },
                       ),
                     ],
                   ),
                 ),
                 const SizedBox(height: 32),
-                _buildSectionHeader(context, 'Stopwords Manager', Icons.block_rounded),
+                _buildSectionHeader(
+                  context,
+                  'Stopwords Manager',
+                  Icons.block_rounded,
+                ),
                 const SizedBox(height: 16),
                 _buildCard(
                   context,
@@ -146,19 +226,24 @@ class _AnalysisSettingsView extends StatelessWidget {
                       children: [
                         Text(
                           'Words listed here will be ignored during text analysis. Language-specific defaults are included by default.',
-                          style: theme.textTheme.bodySmall?.copyWith(height: 1.5),
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            height: 1.5,
+                          ),
                         ),
                         const SizedBox(height: 20),
                         TextField(
                           decoration: InputDecoration(
                             hintText: 'Add custom stopword...',
                             suffixIcon: IconButton(
-                              icon: const Icon(Icons.add_circle_outline_rounded),
+                              icon: const Icon(
+                                Icons.add_circle_outline_rounded,
+                              ),
                               onPressed: () {},
                             ),
                             prefixIcon: const Icon(Icons.search_rounded),
                             filled: true,
-                            fillColor: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                            fillColor: colorScheme.surfaceContainerHighest
+                                .withValues(alpha: 0.3),
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(16),
                               borderSide: BorderSide.none,
@@ -166,7 +251,9 @@ class _AnalysisSettingsView extends StatelessWidget {
                           ),
                           onSubmitted: (val) {
                             if (val.isNotEmpty) {
-                              context.read<AnalysisSettingsCubit>().addStopword(val);
+                              context.read<AnalysisSettingsCubit>().addStopword(
+                                val,
+                              );
                             }
                           },
                         ),
@@ -176,10 +263,21 @@ class _AnalysisSettingsView extends StatelessWidget {
                           runSpacing: 8,
                           children: config.stopWords.take(50).map((word) {
                             return Chip(
-                              label: Text(word, style: const TextStyle(fontFamily: 'Outfit', fontSize: 12)),
-                              onDeleted: () => context.read<AnalysisSettingsCubit>().removeStopword(word),
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                              backgroundColor: colorScheme.primaryContainer.withValues(alpha: 0.4),
+                              label: Text(
+                                word,
+                                style: const TextStyle(
+                                  fontFamily: 'Outfit',
+                                  fontSize: 12,
+                                ),
+                              ),
+                              onDeleted: () => context
+                                  .read<AnalysisSettingsCubit>()
+                                  .removeStopword(word),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              backgroundColor: colorScheme.primaryContainer
+                                  .withValues(alpha: 0.4),
                               deleteIconColor: colorScheme.primary,
                             );
                           }).toList(),
@@ -204,7 +302,11 @@ class _AnalysisSettingsView extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader(BuildContext context, String title, IconData icon) {
+  Widget _buildSectionHeader(
+    BuildContext context,
+    String title,
+    IconData icon,
+  ) {
     final colorScheme = Theme.of(context).colorScheme;
     return Row(
       children: [
@@ -229,7 +331,11 @@ class _AnalysisSettingsView extends StatelessWidget {
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -238,10 +344,7 @@ class _AnalysisSettingsView extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: child,
-      ),
+      child: ClipRRect(borderRadius: BorderRadius.circular(24), child: child),
     );
   }
 }

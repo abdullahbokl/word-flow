@@ -70,9 +70,8 @@ class _SyncStatusBannerState extends State<SyncStatusBanner> {
                 showModalBottomSheet<void>(
                   context: context,
                   isScrollControlled: true,
-                  builder: (_) => SyncIssuesSheet(
-                    repository: deadLetterRepository,
-                  ),
+                  builder: (_) =>
+                      SyncIssuesSheet(repository: deadLetterRepository),
                 );
               },
             );
@@ -98,19 +97,20 @@ class _SyncStatusBannerState extends State<SyncStatusBanner> {
             }
 
             // Show banner only if there's active state to display
-            final shouldShowBanner = !(_showSyncedMessage ||
-                syncState.maybeWhen(
-                  idle: (pendingCount, _, failure) =>
-                      pendingCount == 0 && failure == null,
-                  orElse: () => false,
-                ) ||
-                (deadLetterCount == 0 &&
+            final shouldShowBanner =
+                !(_showSyncedMessage ||
                     syncState.maybeWhen(
-                      idle: (_, __, ___) => true,
-                      syncing: (_, __) => false,
-                      error: (_, __, ___) => false,
+                      idle: (pendingCount, _, failure) =>
+                          pendingCount == 0 && failure == null,
                       orElse: () => false,
-                    )));
+                    ) ||
+                    (deadLetterCount == 0 &&
+                        syncState.maybeWhen(
+                          idle: (_, __, ___) => true,
+                          syncing: (_, __) => false,
+                          error: (_, __, ___) => false,
+                          orElse: () => false,
+                        )));
 
             return AnimatedSwitcher(
               duration: const Duration(milliseconds: 300),
@@ -120,15 +120,14 @@ class _SyncStatusBannerState extends State<SyncStatusBanner> {
                     begin: const Offset(0, -1),
                     end: Offset.zero,
                   ).animate(animation),
-                  child: FadeTransition(
-                    opacity: animation,
-                    child: child,
-                  ),
+                  child: FadeTransition(opacity: animation, child: child),
                 );
               },
               child: _showSyncedMessage
                   ? _buildSyncedMessage(colorScheme)
-                  : (shouldShowBanner ? bannerContent : const SizedBox.shrink()),
+                  : (shouldShowBanner
+                        ? bannerContent
+                        : const SizedBox.shrink()),
             );
           },
         );
@@ -225,15 +224,14 @@ class _SyncStatusBannerState extends State<SyncStatusBanner> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 8,
+                ),
                 child: Row(
                   children: [
                     const SizedBox(width: 12),
-                    Icon(
-                      Icons.sync,
-                      color: colorScheme.primary,
-                      size: 20,
-                    ),
+                    Icon(Icons.sync, color: colorScheme.primary, size: 20),
                     const SizedBox(width: 12),
                     Expanded(
                       child: Text(
@@ -252,8 +250,7 @@ class _SyncStatusBannerState extends State<SyncStatusBanner> {
               LinearProgressIndicator(
                 minHeight: 2,
                 backgroundColor: colorScheme.primary.withValues(alpha: 0.15),
-                valueColor:
-                    AlwaysStoppedAnimation<Color>(colorScheme.primary),
+                valueColor: AlwaysStoppedAnimation<Color>(colorScheme.primary),
               ),
             ],
           ),
@@ -268,11 +265,7 @@ class _SyncStatusBannerState extends State<SyncStatusBanner> {
             child: Row(
               children: [
                 const SizedBox(width: 12),
-                Icon(
-                  Icons.error_outline,
-                  color: colorScheme.error,
-                  size: 20,
-                ),
+                Icon(Icons.error_outline, color: colorScheme.error, size: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(
@@ -341,9 +334,7 @@ class _BannerContainer extends StatelessWidget {
       key: ValueKey<String>(backgroundColor.toString()),
       decoration: BoxDecoration(
         color: backgroundColor,
-        border: Border(
-          bottom: BorderSide(color: borderColor, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: borderColor, width: 1)),
       ),
       child: child,
     );

@@ -7,7 +7,6 @@ import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cu
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_state.dart';
 
 class WorkspaceListeners extends StatelessWidget {
-
   const WorkspaceListeners({super.key, required this.child});
   final Widget child;
 
@@ -21,7 +20,10 @@ class WorkspaceListeners extends StatelessWidget {
               pendingMerge: (s) => showDialog(
                 context: context,
                 barrierDismissible: false,
-                builder: (_) => MergeConflictDialog(user: s.user, guestCount: s.guestWordCount),
+                builder: (_) => MergeConflictDialog(
+                  user: s.user,
+                  guestCount: s.guestWordCount,
+                ),
               ),
               orElse: () {},
             );
@@ -29,10 +31,21 @@ class WorkspaceListeners extends StatelessWidget {
         ),
         BlocListener<WorkspaceCubit, WorkspaceState>(
           listenWhen: (previous, current) {
-            final previousLoadedError = previous.maybeMap(results: (s) => s.lastError, orElse: () => null);
-            final currentLoadedError = current.maybeMap(results: (s) => s.lastError, orElse: () => null);
-            final hasNewLoadedError = currentLoadedError != null && currentLoadedError != previousLoadedError;
-            final hasCatastrophicError = current.maybeMap(error: (_) => true, orElse: () => false);
+            final previousLoadedError = previous.maybeMap(
+              results: (s) => s.lastError,
+              orElse: () => null,
+            );
+            final currentLoadedError = current.maybeMap(
+              results: (s) => s.lastError,
+              orElse: () => null,
+            );
+            final hasNewLoadedError =
+                currentLoadedError != null &&
+                currentLoadedError != previousLoadedError;
+            final hasCatastrophicError = current.maybeMap(
+              error: (_) => true,
+              orElse: () => false,
+            );
             return hasNewLoadedError || hasCatastrophicError;
           },
           listener: (context, state) {
@@ -44,16 +57,17 @@ class WorkspaceListeners extends StatelessWidget {
                       content: Text(s.lastError!),
                       action: SnackBarAction(
                         label: 'Dismiss',
-                        onPressed: () => context.read<WorkspaceCubit>().clearError(),
+                        onPressed: () =>
+                            context.read<WorkspaceCubit>().clearError(),
                       ),
                     ),
                   );
                   context.read<WorkspaceCubit>().clearError();
                 }
               },
-              error: (e) => ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(e.message)),
-              ),
+              error: (e) => ScaffoldMessenger.of(
+                context,
+              ).showSnackBar(SnackBar(content: Text(e.message))),
               orElse: () {},
             );
           },

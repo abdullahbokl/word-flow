@@ -21,7 +21,8 @@ class SplashRoute extends GoRouteData with _$SplashRoute {
 class AnalysisSettingsRoute extends GoRouteData with _$AnalysisSettingsRoute {
   const AnalysisSettingsRoute();
   @override
-  Widget build(BuildContext context, GoRouterState state) => const AnalysisSettingsPage();
+  Widget build(BuildContext context, GoRouterState state) =>
+      const AnalysisSettingsPage();
 }
 
 @TypedGoRoute<AuthRoute>(path: '/auth')
@@ -43,19 +44,22 @@ class ResetPasswordRoute extends GoRouteData with _$ResetPasswordRoute {
 class WorkspaceRoute extends GoRouteData with _$WorkspaceRoute {
   const WorkspaceRoute();
   @override
-  Widget build(BuildContext context, GoRouterState state) => const WorkspacePage();
+  Widget build(BuildContext context, GoRouterState state) =>
+      const WorkspacePage();
 }
 
 @TypedGoRoute<LibraryRoute>(path: '/library')
 class LibraryRoute extends GoRouteData with _$LibraryRoute {
   const LibraryRoute();
   @override
-  Widget build(BuildContext context, GoRouterState state) => const LibraryPage();
+  Widget build(BuildContext context, GoRouterState state) =>
+      const LibraryPage();
 }
 
 @TypedGoRoute<ProfileRoute>(path: '/profile')
 class ProfileRoute extends GoRouteData with _$ProfileRoute {
   const ProfileRoute();
   @override
-  Widget build(BuildContext context, GoRouterState state) => const ProfilePage();
+  Widget build(BuildContext context, GoRouterState state) =>
+      const ProfilePage();
 }

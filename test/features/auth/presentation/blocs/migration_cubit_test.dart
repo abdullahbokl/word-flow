@@ -14,9 +14,11 @@ import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:word_flow/features/auth/presentation/blocs/migration_cubit.dart';
 import 'package:word_flow/features/auth/presentation/blocs/migration_state.dart';
 
-class MockSignInWithEmailUseCase extends Mock implements SignInWithEmailUseCase {}
+class MockSignInWithEmailUseCase extends Mock
+    implements SignInWithEmailUseCase {}
 
-class MockSignUpWithEmailUseCase extends Mock implements SignUpWithEmailUseCase {}
+class MockSignUpWithEmailUseCase extends Mock
+    implements SignUpWithEmailUseCase {}
 
 class MockMigrationService extends Mock implements MigrationService {}
 
@@ -36,8 +38,8 @@ class _CooldownRateLimiter extends RateLimiter {
   _CooldownRateLimiter({
     required DateTime Function() now,
     required Duration initialCooldown,
-  })  : _now = now,
-        super(storage: _NoopRateLimiterStorage(), storageKey: 'migration_test') {
+  }) : _now = now,
+       super(storage: _NoopRateLimiterStorage(), storageKey: 'migration_test') {
     _cooldownUntil = _now().add(initialCooldown);
   }
 
@@ -96,18 +98,24 @@ void main() {
     when(() => mockRateLimiter.recordAttempt()).thenAnswer((_) async {});
     when(() => mockRateLimiter.reset()).thenAnswer((_) async {});
     when(() => mockRateLimiter.remainingCooldown).thenReturn(null);
-    when(() => mockAuthCubit.onAuthenticatedWithMerge(testUser)).thenReturn(null);
-    when(() => mockAuthCubit.onAuthenticatedWithDiscard(testUser)).thenReturn(null);
+    when(
+      () => mockAuthCubit.onAuthenticatedWithMerge(testUser),
+    ).thenReturn(null);
+    when(
+      () => mockAuthCubit.onAuthenticatedWithDiscard(testUser),
+    ).thenReturn(null);
   });
 
   group('MigrationCubit.signIn', () {
     blocTest<MigrationCubit, MigrationState>(
       'signIn() with guestCount=0 -> no merge dialog, emits success',
       build: () {
-        when(() => mockSignInUseCase('user@example.com', 'Password1'))
-            .thenAnswer((_) async => const Right(testUser));
-        when(() => mockMigrationService.getGuestWordsCount())
-            .thenAnswer((_) async => const Right(0));
+        when(
+          () => mockSignInUseCase('user@example.com', 'Password1'),
+        ).thenAnswer((_) async => const Right(testUser));
+        when(
+          () => mockMigrationService.getGuestWordsCount(),
+        ).thenAnswer((_) async => const Right(0));
         return buildCubit();
       },
       act: (cubit) => cubit.signIn('user@example.com', 'Password1'),
@@ -117,17 +125,21 @@ void main() {
       ],
       verify: (_) {
         verify(() => mockMigrationService.getGuestWordsCount()).called(1);
-        verify(() => mockAuthCubit.onAuthenticatedWithMerge(testUser)).called(1);
+        verify(
+          () => mockAuthCubit.onAuthenticatedWithMerge(testUser),
+        ).called(1);
       },
     );
 
     blocTest<MigrationCubit, MigrationState>(
       'signIn() with guestCount=5 -> emits pendingMerge(user, 5)',
       build: () {
-        when(() => mockSignInUseCase('user@example.com', 'Password1'))
-            .thenAnswer((_) async => const Right(testUser));
-        when(() => mockMigrationService.getGuestWordsCount())
-            .thenAnswer((_) async => const Right(5));
+        when(
+          () => mockSignInUseCase('user@example.com', 'Password1'),
+        ).thenAnswer((_) async => const Right(testUser));
+        when(
+          () => mockMigrationService.getGuestWordsCount(),
+        ).thenAnswer((_) async => const Right(5));
         return buildCubit();
       },
       act: (cubit) => cubit.signIn('user@example.com', 'Password1'),
@@ -144,8 +156,9 @@ void main() {
       'Rate limiting in signIn',
       build: () {
         when(() => mockRateLimiter.canAttempt()).thenReturn(false);
-        when(() => mockRateLimiter.remainingCooldown)
-            .thenReturn(const Duration(seconds: 20));
+        when(
+          () => mockRateLimiter.remainingCooldown,
+        ).thenReturn(const Duration(seconds: 20));
         return buildCubit();
       },
       act: (cubit) => cubit.signIn('user@example.com', 'Password1'),
@@ -160,8 +173,9 @@ void main() {
     blocTest<MigrationCubit, MigrationState>(
       'mergeAndSignIn(user) -> calls migrateGuestData, emits success',
       build: () {
-        when(() => mockMigrationService.migrateGuestData(testUser.id))
-            .thenAnswer((_) async => const Right(3));
+        when(
+          () => mockMigrationService.migrateGuestData(testUser.id),
+        ).thenAnswer((_) async => const Right(3));
         return buildCubit();
       },
       act: (cubit) => cubit.mergeAndSignIn(testUser),
@@ -170,16 +184,21 @@ void main() {
         const MigrationState.success(),
       ],
       verify: (_) {
-        verify(() => mockMigrationService.migrateGuestData(testUser.id)).called(1);
-        verify(() => mockAuthCubit.onAuthenticatedWithMerge(testUser)).called(1);
+        verify(
+          () => mockMigrationService.migrateGuestData(testUser.id),
+        ).called(1);
+        verify(
+          () => mockAuthCubit.onAuthenticatedWithMerge(testUser),
+        ).called(1);
       },
     );
 
     blocTest<MigrationCubit, MigrationState>(
       'discardGuestAndSignIn(user) -> calls discardGuestData, emits success',
       build: () {
-        when(() => mockMigrationService.discardGuestData())
-            .thenAnswer((_) async => const Right(null));
+        when(
+          () => mockMigrationService.discardGuestData(),
+        ).thenAnswer((_) async => const Right(null));
         return buildCubit();
       },
       act: (cubit) => cubit.discardGuestAndSignIn(testUser),
@@ -189,17 +208,21 @@ void main() {
       ],
       verify: (_) {
         verify(() => mockMigrationService.discardGuestData()).called(1);
-        verify(() => mockAuthCubit.onAuthenticatedWithDiscard(testUser)).called(1);
+        verify(
+          () => mockAuthCubit.onAuthenticatedWithDiscard(testUser),
+        ).called(1);
       },
     );
 
     blocTest<MigrationCubit, MigrationState>(
       'signUp() -> calls migrateGuestData always (new users get their guest words migrated)',
       build: () {
-        when(() => mockSignUpUseCase('new@example.com', 'Password1'))
-            .thenAnswer((_) async => const Right(testUser));
-        when(() => mockMigrationService.migrateGuestData(testUser.id))
-            .thenAnswer((_) async => const Right(4));
+        when(
+          () => mockSignUpUseCase('new@example.com', 'Password1'),
+        ).thenAnswer((_) async => const Right(testUser));
+        when(
+          () => mockMigrationService.migrateGuestData(testUser.id),
+        ).thenAnswer((_) async => const Right(4));
         return buildCubit();
       },
       act: (cubit) => cubit.signUp('new@example.com', 'Password1'),
@@ -208,8 +231,12 @@ void main() {
         const MigrationState.success(),
       ],
       verify: (_) {
-        verify(() => mockMigrationService.migrateGuestData(testUser.id)).called(1);
-        verify(() => mockAuthCubit.onAuthenticatedWithMerge(testUser)).called(1);
+        verify(
+          () => mockMigrationService.migrateGuestData(testUser.id),
+        ).called(1);
+        verify(
+          () => mockAuthCubit.onAuthenticatedWithMerge(testUser),
+        ).called(1);
       },
     );
 
@@ -217,8 +244,9 @@ void main() {
       'Rate limiting in signUp',
       build: () {
         when(() => mockRateLimiter.canAttempt()).thenReturn(false);
-        when(() => mockRateLimiter.remainingCooldown)
-            .thenReturn(const Duration(seconds: 20));
+        when(
+          () => mockRateLimiter.remainingCooldown,
+        ).thenReturn(const Duration(seconds: 20));
         return buildCubit();
       },
       act: (cubit) => cubit.signUp('new@example.com', 'Password1'),
@@ -230,68 +258,75 @@ void main() {
   });
 
   group('MigrationCubit rate limiter with fake_async', () {
-    test('cooldown expires and signIn/signUp proceed after fake time elapses', () {
-      fakeAsync((async) {
-        final clock = async.getClock(DateTime(2026, 1, 1));
-        final limiter = _CooldownRateLimiter(
-          now: () => clock.now(),
-          initialCooldown: const Duration(seconds: 5),
-        );
+    test(
+      'cooldown expires and signIn/signUp proceed after fake time elapses',
+      () {
+        fakeAsync((async) {
+          final clock = async.getClock(DateTime(2026, 1, 1));
+          final limiter = _CooldownRateLimiter(
+            now: () => clock.now(),
+            initialCooldown: const Duration(seconds: 5),
+          );
 
-        when(() => mockSignInUseCase('user@example.com', 'Password1'))
-            .thenAnswer((_) async => const Right(testUser));
-        when(() => mockSignUpUseCase('new@example.com', 'Password1'))
-            .thenAnswer((_) async => const Right(testUser));
-        when(() => mockMigrationService.getGuestWordsCount())
-            .thenAnswer((_) async => const Right(0));
-        when(() => mockMigrationService.migrateGuestData(testUser.id))
-            .thenAnswer((_) async => const Right(2));
+          when(
+            () => mockSignInUseCase('user@example.com', 'Password1'),
+          ).thenAnswer((_) async => const Right(testUser));
+          when(
+            () => mockSignUpUseCase('new@example.com', 'Password1'),
+          ).thenAnswer((_) async => const Right(testUser));
+          when(
+            () => mockMigrationService.getGuestWordsCount(),
+          ).thenAnswer((_) async => const Right(0));
+          when(
+            () => mockMigrationService.migrateGuestData(testUser.id),
+          ).thenAnswer((_) async => const Right(2));
 
-        final cubit = buildCubit(rateLimiter: limiter);
-        final emitted = <MigrationState>[];
-        final sub = cubit.stream.listen(emitted.add);
+          final cubit = buildCubit(rateLimiter: limiter);
+          final emitted = <MigrationState>[];
+          final sub = cubit.stream.listen(emitted.add);
 
-        cubit.signIn('user@example.com', 'Password1');
-        async.flushMicrotasks();
-        expect(
-          emitted,
-          contains(const MigrationState.rateLimited(Duration(seconds: 5))),
-        );
+          cubit.signIn('user@example.com', 'Password1');
+          async.flushMicrotasks();
+          expect(
+            emitted,
+            contains(const MigrationState.rateLimited(Duration(seconds: 5))),
+          );
 
-        async.elapse(const Duration(seconds: 6));
-        cubit.signIn('user@example.com', 'Password1');
-        async.flushMicrotasks();
+          async.elapse(const Duration(seconds: 6));
+          cubit.signIn('user@example.com', 'Password1');
+          async.flushMicrotasks();
 
-        expect(emitted, contains(const MigrationState.success()));
+          expect(emitted, contains(const MigrationState.success()));
 
-        // Reset back to blocked to validate signUp path as well.
-        final secondLimiter = _CooldownRateLimiter(
-          now: () => clock.now(),
-          initialCooldown: const Duration(seconds: 3),
-        );
-        final cubit2 = buildCubit(rateLimiter: secondLimiter);
-        final emitted2 = <MigrationState>[];
-        final sub2 = cubit2.stream.listen(emitted2.add);
+          // Reset back to blocked to validate signUp path as well.
+          final secondLimiter = _CooldownRateLimiter(
+            now: () => clock.now(),
+            initialCooldown: const Duration(seconds: 3),
+          );
+          final cubit2 = buildCubit(rateLimiter: secondLimiter);
+          final emitted2 = <MigrationState>[];
+          final sub2 = cubit2.stream.listen(emitted2.add);
 
-        cubit2.signUp('new@example.com', 'Password1');
-        async.flushMicrotasks();
-        expect(
-          emitted2,
-          contains(const MigrationState.rateLimited(Duration(seconds: 3))),
-        );
+          cubit2.signUp('new@example.com', 'Password1');
+          async.flushMicrotasks();
+          expect(
+            emitted2,
+            contains(const MigrationState.rateLimited(Duration(seconds: 3))),
+          );
 
-        async.elapse(const Duration(seconds: 4));
-        cubit2.signUp('new@example.com', 'Password1');
-        async.flushMicrotasks();
+          async.elapse(const Duration(seconds: 4));
+          cubit2.signUp('new@example.com', 'Password1');
+          async.flushMicrotasks();
 
-        expect(emitted2, contains(const MigrationState.success()));
+          expect(emitted2, contains(const MigrationState.success()));
 
-        unawaited(sub.cancel());
-        unawaited(sub2.cancel());
-        unawaited(cubit.close());
-        unawaited(cubit2.close());
-        async.flushMicrotasks();
-      });
-    });
+          unawaited(sub.cancel());
+          unawaited(sub2.cancel());
+          unawaited(cubit.close());
+          unawaited(cubit2.close());
+          async.flushMicrotasks();
+        });
+      },
+    );
   });
 }

@@ -34,24 +34,22 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
   final ToggleKnownWord toggleKnownWordUseCase;
 
   ScriptSummary get summary => state.maybeMap(
-        results: (s) => s.summary,
-        orElse: () => const ScriptSummary.empty(),
-      );
+    results: (s) => s.summary,
+    orElse: () => const ScriptSummary.empty(),
+  );
 
   List<ProcessedWord> get words => state.maybeMap(
-        results: (s) => s.words,
-        orElse: () => const <ProcessedWord>[],
-      );
+    results: (s) => s.words,
+    orElse: () => const <ProcessedWord>[],
+  );
 
   Set<String> get pendingKnownWords => state.maybeMap(
-        results: (s) => s.pendingKnownWords,
-        orElse: () => const <String>{},
-      );
+    results: (s) => s.pendingKnownWords,
+    orElse: () => const <String>{},
+  );
 
-  bool get isProcessing => state.maybeMap(
-        processing: (_) => true,
-        orElse: () => false,
-      );
+  bool get isProcessing =>
+      state.maybeMap(processing: (_) => true, orElse: () => false);
 
   @override
   Future<void> close() {
@@ -61,51 +59,51 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
 
   Future<void> analyze(String text, {String? userId}) async {
     if (text.trim().isEmpty) return emit(const WorkspaceState.initial());
-    
+
     final nextRevision = state.maybeMap(
       results: (s) => s.revision + 1,
       orElse: () => 1,
     );
-    
+
     final totalWords = _estimateWordCount(text);
     emit(WorkspaceState.processing(progress: 0, totalWords: totalWords));
     _startProgressSimulation(totalWords);
-    
+
     final configResult = await _getAnalysisConfig();
-    final config = configResult.getOrElse((_) => const TextAnalysisConfig(
-      stopWords: {},
-      language: 'english',
-    ));
-    
+    final config = configResult.getOrElse(
+      (_) => const TextAnalysisConfig(stopWords: {}, language: 'english'),
+    );
+
     final result = await _processScript(text, userId: userId, config: config);
 
     _stopProgressSimulation();
-    
-    result.fold(
-      (f) => emit(WorkspaceState.error(f.message, failure: f)),
-      (a) {
-        emit(WorkspaceState.results(
+
+    result.fold((f) => emit(WorkspaceState.error(f.message, failure: f)), (a) {
+      emit(
+        WorkspaceState.results(
           words: a.words,
           summary: a.summary,
           config: config,
           pendingKnownWords: const <String>{},
           revision: nextRevision,
-        ));
-        
-        _saveProcessedWords(a.words, userId: userId).then(
-          (_) => logger.debug('Words saved successfully'),
-          onError: (e, st) {
-            logger.error('Failed to save processed words', e, st);
-            if (!isClosed) {
-              emit(WorkspaceState.error(
+        ),
+      );
+
+      _saveProcessedWords(a.words, userId: userId).then(
+        (_) => logger.debug('Words saved successfully'),
+        onError: (e, st) {
+          logger.error('Failed to save processed words', e, st);
+          if (!isClosed) {
+            emit(
+              WorkspaceState.error(
                 'Failed to save words: please try again',
                 failure: DatabaseFailure(e.toString()),
-              ));
-            }
-          },
-        );
-      },
-    );
+              ),
+            );
+          }
+        },
+      );
+    });
   }
 
   int _estimateWordCount(String text) {
@@ -126,7 +124,9 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
         processing: (s) {
           final next = (s.progress + 0.05).clamp(0.0, 0.9);
           if (next > s.progress) {
-            emit(WorkspaceState.processing(progress: next, totalWords: totalWords));
+            emit(
+              WorkspaceState.processing(progress: next, totalWords: totalWords),
+            );
           }
         },
         orElse: () => timer.cancel(),
@@ -143,15 +143,19 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
     state.maybeMap(
       results: (s) {
         if (s.pendingKnownWords.contains(wordText)) return;
-        
-        final targetText = s.config.useStemming ? PorterStemmer().stem(wordText) : wordText;
-        
+
+        final targetText = s.config.useStemming
+            ? PorterStemmer().stem(wordText)
+            : wordText;
+
         final nextPending = <String>{...s.pendingKnownWords, wordText};
-        emit(s.copyWith(
-          pendingKnownWords: nextPending,
-          summary: rebuildWorkspaceSummary(s.summary, s.words, nextPending),
-        ));
-        
+        emit(
+          s.copyWith(
+            pendingKnownWords: nextPending,
+            summary: rebuildWorkspaceSummary(s.summary, s.words, nextPending),
+          ),
+        );
+
         Future.value().then(
           (_) => persistToggle(
             targetText,

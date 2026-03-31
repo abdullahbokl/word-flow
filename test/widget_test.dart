@@ -31,7 +31,7 @@ class MockAuthCubit extends MockCubit<AuthState> implements AuthCubit {}
 class MockSyncCubit extends MockCubit<SyncState> implements SyncCubit {}
 
 class MockMigrationCubit extends MockCubit<MigrationState>
-  implements MigrationCubit {}
+    implements MigrationCubit {}
 
 class MockSyncDeadLetterRepository extends Mock
     implements SyncDeadLetterRepository {}
@@ -74,8 +74,9 @@ void main() {
     // Ensure getIt has a SyncDeadLetterRepository so SyncStatusBadge can lookup
     // without initializing the full DI graph.
     final mockDeadLetter = MockSyncDeadLetterRepository();
-    when(() => mockDeadLetter.watchDeadLetterCount())
-        .thenAnswer((_) => Stream<int>.value(0));
+    when(
+      () => mockDeadLetter.watchDeadLetterCount(),
+    ).thenAnswer((_) => Stream<int>.value(0));
     if (!getIt.isRegistered<SyncDeadLetterRepository>()) {
       getIt.registerSingleton<SyncDeadLetterRepository>(mockDeadLetter);
     }

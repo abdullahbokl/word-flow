@@ -9,15 +9,19 @@ import 'package:uuid/uuid.dart';
 
 @lazySingleton
 class SaveProcessedWords {
-
   SaveProcessedWords(this._repository);
   final WordRepository _repository;
 
-  Future<Either<Failure, void>> call(List<ProcessedWord> processedWords, {String? userId}) async {
+  Future<Either<Failure, void>> call(
+    List<ProcessedWord> processedWords, {
+    String? userId,
+  }) async {
     if (processedWords.isEmpty) return const Right(null);
     try {
-     
-      final words = await compute(_mapToWords, _MapParams(processedWords, userId));
+      final words = await compute(
+        _mapToWords,
+        _MapParams(processedWords, userId),
+      );
       return await _repository.saveWords(words);
     } catch (e) {
       return Left(DatabaseFailure(e.toString()));
@@ -34,12 +38,16 @@ class _MapParams {
 List<WordEntity> _mapToWords(_MapParams params) {
   final now = DateTime.now().toUtc();
   const uuid = Uuid();
-  return params.processed.map((e) => WordEntity(
-    id: uuid.v4(),
-    userId: params.userId,
-    wordText: e.wordText,
-    totalCount: e.totalCount,
-    isKnown: e.isKnown,
-    lastUpdated: now,
-  )).toList();
+  return params.processed
+      .map(
+        (e) => WordEntity(
+          id: uuid.v4(),
+          userId: params.userId,
+          wordText: e.wordText,
+          totalCount: e.totalCount,
+          isKnown: e.isKnown,
+          lastUpdated: now,
+        ),
+      )
+      .toList();
 }

@@ -147,8 +147,24 @@ class PorterStemmer {
 
   String _step4(String w) {
     const suffixes = [
-      'al', 'ance', 'ence', 'er', 'ic', 'able', 'ible', 'ant', 'ement',
-      'ment', 'ent', 'ou', 'ism', 'ate', 'iti', 'ous', 'ive', 'ize'
+      'al',
+      'ance',
+      'ence',
+      'er',
+      'ic',
+      'able',
+      'ible',
+      'ant',
+      'ement',
+      'ment',
+      'ent',
+      'ou',
+      'ism',
+      'ate',
+      'iti',
+      'ous',
+      'ive',
+      'ize',
     ];
 
     for (final s in suffixes) {
@@ -160,10 +176,11 @@ class PorterStemmer {
     }
 
     if (w.endsWith('ion')) {
-        final stem = w.substring(0, w.length - 3);
-        if (_countMeasure(stem) > 1 && (stem.endsWith('s') || stem.endsWith('t'))) {
-            return stem;
-        }
+      final stem = w.substring(0, w.length - 3);
+      if (_countMeasure(stem) > 1 &&
+          (stem.endsWith('s') || stem.endsWith('t'))) {
+        return stem;
+      }
     }
 
     return w;
@@ -229,7 +246,7 @@ class PorterStemmer {
 
   bool _hasVowel(String w) {
     for (int i = 0; i < w.length; i++) {
-        if (!_isConsonant(w, i)) return true;
+      if (!_isConsonant(w, i)) return true;
     }
     return false;
   }

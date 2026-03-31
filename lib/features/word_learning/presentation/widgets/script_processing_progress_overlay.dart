@@ -35,10 +35,7 @@ class _ScriptProcessingProgressOverlayState
       vsync: this,
       duration: const Duration(milliseconds: 260),
     );
-    _scale = CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutBack,
-    );
+    _scale = CurvedAnimation(parent: _controller, curve: Curves.easeOutBack);
   }
 
   void didUpdateWidget(covariant ScriptProcessingProgressOverlay oldWidget) {
@@ -103,8 +100,9 @@ class _ScriptProcessingProgressOverlayState
                       value: progress,
                       minHeight: 6,
                       borderRadius: BorderRadius.circular(999),
-                      backgroundColor:
-                          colorScheme.primary.withValues(alpha: 0.15),
+                      backgroundColor: colorScheme.primary.withValues(
+                        alpha: 0.15,
+                      ),
                       valueColor: AlwaysStoppedAnimation<Color>(
                         colorScheme.primary,
                       ),

@@ -95,11 +95,11 @@ class WordRepositoryImpl
       handleAdoptGuestWords(userId);
 
   @override
-    Future<Either<Failure, void>> clearLocalWords(String userId) =>
+  Future<Either<Failure, void>> clearLocalWords(String userId) =>
       handleClearLocalWords(userId);
 
-    @override
-    Future<Either<Failure, void>> clearGuestWords() => handleClearGuestWords();
+  @override
+  Future<Either<Failure, void>> clearGuestWords() => handleClearGuestWords();
 
   @override
   Future<Either<Failure, int>> getGuestWordsCount() =>

@@ -17,8 +17,9 @@ void main() {
 
   group('GetPendingCount', () {
     test('should return count from repository', () async {
-      when(() => mockRepository.getPendingCount())
-          .thenAnswer((_) async => const Right(10));
+      when(
+        () => mockRepository.getPendingCount(),
+      ).thenAnswer((_) async => const Right(10));
 
       final result = await useCase(const NoParams());
 

@@ -456,8 +456,9 @@ void main() {
         serverTimestamp: DateTime.utc(2025, 1, 1, 10),
       );
 
-      when(() => mockPreferences.getLastPullTimestamp(userId))
-          .thenAnswer((_) async => null);
+      when(
+        () => mockPreferences.getLastPullTimestamp(userId),
+      ).thenAnswer((_) async => null);
       when(
         () => mockRemote.fetchUserWords(
           userId,
@@ -465,134 +466,188 @@ void main() {
           cursorTime: null,
           cursorId: null,
         ),
-      ).thenAnswer(
-        (_) async => Right(
-          PaginatedSyncResult(words: [remote]),
-        ),
-      );
-      when(() => mockLocal.getWordById('remote-new')).thenAnswer((_) async => null);
-      when(() => mockLocal.saveWordsInTransaction(any())).thenAnswer((_) async {});
-      when(() => mockPreferences.setLastPullTimestamp(userId, any()))
-          .thenAnswer((_) async {});
+      ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
+      when(
+        () => mockLocal.getWordById('remote-new'),
+      ).thenAnswer((_) async => null);
+      when(
+        () => mockLocal.saveWordsInTransaction(any()),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockPreferences.setLastPullTimestamp(userId, any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.pullRemoteChanges(userId);
 
       expect(result, const Right<Failure, int>(1));
-      final captured = verify(
-        () => mockLocal.saveWordsInTransaction(captureAny()),
-      ).captured.single as List<WordsCompanion>;
+      final captured =
+          verify(
+                () => mockLocal.saveWordsInTransaction(captureAny()),
+              ).captured.single
+              as List<WordsCompanion>;
       expect(captured, hasLength(1));
       expect(captured.first.id.value, 'remote-new');
       expect(captured.first.totalCount.value, 2);
     });
 
-    test('Remote word exists locally, remote has higher count -> mergedCount takes remote value', () async {
-      final remote = remoteDto(
-        id: 'same-id',
-        wordText: 'sync',
-        totalCount: 9,
-        isKnown: false,
-        lastUpdated: DateTime.utc(2025, 1, 2, 10),
-        serverTimestamp: DateTime.utc(2025, 1, 2, 10),
-      );
-      final local = localRow(
-        id: 'same-id',
-        wordText: 'sync',
-        totalCount: 3,
-        isKnown: false,
-        lastUpdated: DateTime.utc(2025, 1, 1, 10),
-        serverTimestamp: DateTime.utc(2025, 1, 1, 10),
-      );
+    test(
+      'Remote word exists locally, remote has higher count -> mergedCount takes remote value',
+      () async {
+        final remote = remoteDto(
+          id: 'same-id',
+          wordText: 'sync',
+          totalCount: 9,
+          isKnown: false,
+          lastUpdated: DateTime.utc(2025, 1, 2, 10),
+          serverTimestamp: DateTime.utc(2025, 1, 2, 10),
+        );
+        final local = localRow(
+          id: 'same-id',
+          wordText: 'sync',
+          totalCount: 3,
+          isKnown: false,
+          lastUpdated: DateTime.utc(2025, 1, 1, 10),
+          serverTimestamp: DateTime.utc(2025, 1, 1, 10),
+        );
 
-      when(() => mockPreferences.getLastPullTimestamp(userId))
-          .thenAnswer((_) async => null);
-      when(() => mockRemote.fetchUserWords(userId, limit: 500, cursorTime: null, cursorId: null))
-          .thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
-      when(() => mockLocal.getWordById('same-id')).thenAnswer((_) async => local);
-      when(() => mockLocal.saveWordsInTransaction(any())).thenAnswer((_) async {});
-      when(() => mockPreferences.setLastPullTimestamp(userId, any()))
-          .thenAnswer((_) async {});
+        when(
+          () => mockPreferences.getLastPullTimestamp(userId),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockRemote.fetchUserWords(
+            userId,
+            limit: 500,
+            cursorTime: null,
+            cursorId: null,
+          ),
+        ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
+        when(
+          () => mockLocal.getWordById('same-id'),
+        ).thenAnswer((_) async => local);
+        when(
+          () => mockLocal.saveWordsInTransaction(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockPreferences.setLastPullTimestamp(userId, any()),
+        ).thenAnswer((_) async {});
 
-      final result = await repo.pullRemoteChanges(userId);
+        final result = await repo.pullRemoteChanges(userId);
 
-      expect(result, const Right<Failure, int>(1));
-      final captured = verify(
-        () => mockLocal.saveWordsInTransaction(captureAny()),
-      ).captured.single as List<WordsCompanion>;
-      expect(captured.single.totalCount.value, 9);
-    });
+        expect(result, const Right<Failure, int>(1));
+        final captured =
+            verify(
+                  () => mockLocal.saveWordsInTransaction(captureAny()),
+                ).captured.single
+                as List<WordsCompanion>;
+        expect(captured.single.totalCount.value, 9);
+      },
+    );
 
-    test('Remote word exists locally, local has higher count -> mergedCount keeps local value', () async {
-      final remote = remoteDto(
-        id: 'same-id',
-        wordText: 'sync',
-        totalCount: 2,
-        isKnown: false,
-        lastUpdated: DateTime.utc(2025, 1, 2, 10),
-        serverTimestamp: DateTime.utc(2025, 1, 2, 10),
-      );
-      final local = localRow(
-        id: 'same-id',
-        wordText: 'sync',
-        totalCount: 8,
-        isKnown: false,
-        lastUpdated: DateTime.utc(2025, 1, 1, 10),
-        serverTimestamp: DateTime.utc(2025, 1, 1, 10),
-      );
+    test(
+      'Remote word exists locally, local has higher count -> mergedCount keeps local value',
+      () async {
+        final remote = remoteDto(
+          id: 'same-id',
+          wordText: 'sync',
+          totalCount: 2,
+          isKnown: false,
+          lastUpdated: DateTime.utc(2025, 1, 2, 10),
+          serverTimestamp: DateTime.utc(2025, 1, 2, 10),
+        );
+        final local = localRow(
+          id: 'same-id',
+          wordText: 'sync',
+          totalCount: 8,
+          isKnown: false,
+          lastUpdated: DateTime.utc(2025, 1, 1, 10),
+          serverTimestamp: DateTime.utc(2025, 1, 1, 10),
+        );
 
-      when(() => mockPreferences.getLastPullTimestamp(userId))
-          .thenAnswer((_) async => null);
-      when(() => mockRemote.fetchUserWords(userId, limit: 500, cursorTime: null, cursorId: null))
-          .thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
-      when(() => mockLocal.getWordById('same-id')).thenAnswer((_) async => local);
-      when(() => mockLocal.saveWordsInTransaction(any())).thenAnswer((_) async {});
-      when(() => mockPreferences.setLastPullTimestamp(userId, any()))
-          .thenAnswer((_) async {});
+        when(
+          () => mockPreferences.getLastPullTimestamp(userId),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockRemote.fetchUserWords(
+            userId,
+            limit: 500,
+            cursorTime: null,
+            cursorId: null,
+          ),
+        ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
+        when(
+          () => mockLocal.getWordById('same-id'),
+        ).thenAnswer((_) async => local);
+        when(
+          () => mockLocal.saveWordsInTransaction(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockPreferences.setLastPullTimestamp(userId, any()),
+        ).thenAnswer((_) async {});
 
-      final result = await repo.pullRemoteChanges(userId);
+        final result = await repo.pullRemoteChanges(userId);
 
-      expect(result, const Right<Failure, int>(1));
-      final captured = verify(
-        () => mockLocal.saveWordsInTransaction(captureAny()),
-      ).captured.single as List<WordsCompanion>;
-      expect(captured.single.totalCount.value, 8);
-    });
+        expect(result, const Right<Failure, int>(1));
+        final captured =
+            verify(
+                  () => mockLocal.saveWordsInTransaction(captureAny()),
+                ).captured.single
+                as List<WordsCompanion>;
+        expect(captured.single.totalCount.value, 8);
+      },
+    );
 
-    test('Remote isKnown=true, local isKnown=false -> merged isKnown=true (OR logic)', () async {
-      final remote = remoteDto(
-        id: 'same-id',
-        wordText: 'sync',
-        totalCount: 2,
-        isKnown: true,
-        lastUpdated: DateTime.utc(2025, 1, 2, 10),
-        serverTimestamp: DateTime.utc(2025, 1, 2, 10),
-      );
-      final local = localRow(
-        id: 'same-id',
-        wordText: 'sync',
-        totalCount: 2,
-        isKnown: false,
-        lastUpdated: DateTime.utc(2025, 1, 1, 10),
-        serverTimestamp: DateTime.utc(2025, 1, 1, 10),
-      );
+    test(
+      'Remote isKnown=true, local isKnown=false -> merged isKnown=true (OR logic)',
+      () async {
+        final remote = remoteDto(
+          id: 'same-id',
+          wordText: 'sync',
+          totalCount: 2,
+          isKnown: true,
+          lastUpdated: DateTime.utc(2025, 1, 2, 10),
+          serverTimestamp: DateTime.utc(2025, 1, 2, 10),
+        );
+        final local = localRow(
+          id: 'same-id',
+          wordText: 'sync',
+          totalCount: 2,
+          isKnown: false,
+          lastUpdated: DateTime.utc(2025, 1, 1, 10),
+          serverTimestamp: DateTime.utc(2025, 1, 1, 10),
+        );
 
-      when(() => mockPreferences.getLastPullTimestamp(userId))
-          .thenAnswer((_) async => null);
-      when(() => mockRemote.fetchUserWords(userId, limit: 500, cursorTime: null, cursorId: null))
-          .thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
-      when(() => mockLocal.getWordById('same-id')).thenAnswer((_) async => local);
-      when(() => mockLocal.saveWordsInTransaction(any())).thenAnswer((_) async {});
-      when(() => mockPreferences.setLastPullTimestamp(userId, any()))
-          .thenAnswer((_) async {});
+        when(
+          () => mockPreferences.getLastPullTimestamp(userId),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockRemote.fetchUserWords(
+            userId,
+            limit: 500,
+            cursorTime: null,
+            cursorId: null,
+          ),
+        ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
+        when(
+          () => mockLocal.getWordById('same-id'),
+        ).thenAnswer((_) async => local);
+        when(
+          () => mockLocal.saveWordsInTransaction(any()),
+        ).thenAnswer((_) async {});
+        when(
+          () => mockPreferences.setLastPullTimestamp(userId, any()),
+        ).thenAnswer((_) async {});
 
-      final result = await repo.pullRemoteChanges(userId);
+        final result = await repo.pullRemoteChanges(userId);
 
-      expect(result, const Right<Failure, int>(1));
-      final captured = verify(
-        () => mockLocal.saveWordsInTransaction(captureAny()),
-      ).captured.single as List<WordsCompanion>;
-      expect(captured.single.isKnown.value, isTrue);
-    });
+        expect(result, const Right<Failure, int>(1));
+        final captured =
+            verify(
+                  () => mockLocal.saveWordsInTransaction(captureAny()),
+                ).captured.single
+                as List<WordsCompanion>;
+        expect(captured.single.isKnown.value, isTrue);
+      },
+    );
 
     test('Remote newer timestamp -> mergedLastUpdated = remote', () async {
       final remote = remoteDto(
@@ -612,21 +667,35 @@ void main() {
         serverTimestamp: DateTime.utc(2025, 1, 1, 10),
       );
 
-      when(() => mockPreferences.getLastPullTimestamp(userId))
-          .thenAnswer((_) async => null);
-      when(() => mockRemote.fetchUserWords(userId, limit: 500, cursorTime: null, cursorId: null))
-          .thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
-      when(() => mockLocal.getWordById('same-id')).thenAnswer((_) async => local);
-      when(() => mockLocal.saveWordsInTransaction(any())).thenAnswer((_) async {});
-      when(() => mockPreferences.setLastPullTimestamp(userId, any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockPreferences.getLastPullTimestamp(userId),
+      ).thenAnswer((_) async => null);
+      when(
+        () => mockRemote.fetchUserWords(
+          userId,
+          limit: 500,
+          cursorTime: null,
+          cursorId: null,
+        ),
+      ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
+      when(
+        () => mockLocal.getWordById('same-id'),
+      ).thenAnswer((_) async => local);
+      when(
+        () => mockLocal.saveWordsInTransaction(any()),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockPreferences.setLastPullTimestamp(userId, any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.pullRemoteChanges(userId);
 
       expect(result, const Right<Failure, int>(1));
-      final captured = verify(
-        () => mockLocal.saveWordsInTransaction(captureAny()),
-      ).captured.single as List<WordsCompanion>;
+      final captured =
+          verify(
+                () => mockLocal.saveWordsInTransaction(captureAny()),
+              ).captured.single
+              as List<WordsCompanion>;
       expect(captured.single.lastUpdated.value, remote.lastUpdated);
     });
 
@@ -648,21 +717,35 @@ void main() {
         serverTimestamp: DateTime.utc(2025, 1, 5, 10),
       );
 
-      when(() => mockPreferences.getLastPullTimestamp(userId))
-          .thenAnswer((_) async => null);
-      when(() => mockRemote.fetchUserWords(userId, limit: 500, cursorTime: null, cursorId: null))
-          .thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
-      when(() => mockLocal.getWordById('same-id')).thenAnswer((_) async => local);
-      when(() => mockLocal.saveWordsInTransaction(any())).thenAnswer((_) async {});
-      when(() => mockPreferences.setLastPullTimestamp(userId, any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockPreferences.getLastPullTimestamp(userId),
+      ).thenAnswer((_) async => null);
+      when(
+        () => mockRemote.fetchUserWords(
+          userId,
+          limit: 500,
+          cursorTime: null,
+          cursorId: null,
+        ),
+      ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
+      when(
+        () => mockLocal.getWordById('same-id'),
+      ).thenAnswer((_) async => local);
+      when(
+        () => mockLocal.saveWordsInTransaction(any()),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockPreferences.setLastPullTimestamp(userId, any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.pullRemoteChanges(userId);
 
       expect(result, const Right<Failure, int>(1));
-      final captured = verify(
-        () => mockLocal.saveWordsInTransaction(captureAny()),
-      ).captured.single as List<WordsCompanion>;
+      final captured =
+          verify(
+                () => mockLocal.saveWordsInTransaction(captureAny()),
+              ).captured.single
+              as List<WordsCompanion>;
       expect(captured.single.lastUpdated.value, local.lastUpdated);
     });
 
@@ -685,13 +768,23 @@ void main() {
         serverTimestamp: now,
       );
 
-      when(() => mockPreferences.getLastPullTimestamp(userId))
-          .thenAnswer((_) async => null);
-      when(() => mockRemote.fetchUserWords(userId, limit: 500, cursorTime: null, cursorId: null))
-          .thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
-      when(() => mockLocal.getWordById('same-id')).thenAnswer((_) async => local);
-      when(() => mockPreferences.setLastPullTimestamp(userId, any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockPreferences.getLastPullTimestamp(userId),
+      ).thenAnswer((_) async => null);
+      when(
+        () => mockRemote.fetchUserWords(
+          userId,
+          limit: 500,
+          cursorTime: null,
+          cursorId: null,
+        ),
+      ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
+      when(
+        () => mockLocal.getWordById('same-id'),
+      ).thenAnswer((_) async => local);
+      when(
+        () => mockPreferences.setLastPullTimestamp(userId, any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.pullRemoteChanges(userId);
 
@@ -709,32 +802,55 @@ void main() {
         serverTimestamp: DateTime.utc(2025, 1, 1, 10),
       );
 
-      when(() => mockPreferences.getLastPullTimestamp(userId))
-          .thenAnswer((_) async => null);
-      when(() => mockRemote.fetchUserWords(userId, limit: 500, cursorTime: null, cursorId: null))
-          .thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
-      when(() => mockLocal.getWordById('remote-new')).thenAnswer((_) async => null);
-      when(() => mockLocal.saveWordsInTransaction(any()))
-          .thenThrow(Exception('transaction failed'));
+      when(
+        () => mockPreferences.getLastPullTimestamp(userId),
+      ).thenAnswer((_) async => null);
+      when(
+        () => mockRemote.fetchUserWords(
+          userId,
+          limit: 500,
+          cursorTime: null,
+          cursorId: null,
+        ),
+      ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
+      when(
+        () => mockLocal.getWordById('remote-new'),
+      ).thenAnswer((_) async => null);
+      when(
+        () => mockLocal.saveWordsInTransaction(any()),
+      ).thenThrow(Exception('transaction failed'));
 
       final result = await repo.pullRemoteChanges(userId);
 
-      expect(result, const Left<Failure, int>(SyncFailure('Pull transaction failed')));
+      expect(
+        result,
+        const Left<Failure, int>(SyncFailure('Pull transaction failed')),
+      );
       verifyNever(() => mockPreferences.setLastPullTimestamp(userId, any()));
     });
 
-    test('Remote source returns Left -> pullRemoteChanges returns Left', () async {
-      const remoteFailure = ServerFailure('upstream down');
-      when(() => mockPreferences.getLastPullTimestamp(userId))
-          .thenAnswer((_) async => null);
-      when(() => mockRemote.fetchUserWords(userId, limit: 500, cursorTime: null, cursorId: null))
-          .thenAnswer((_) async => const Left(remoteFailure));
+    test(
+      'Remote source returns Left -> pullRemoteChanges returns Left',
+      () async {
+        const remoteFailure = ServerFailure('upstream down');
+        when(
+          () => mockPreferences.getLastPullTimestamp(userId),
+        ).thenAnswer((_) async => null);
+        when(
+          () => mockRemote.fetchUserWords(
+            userId,
+            limit: 500,
+            cursorTime: null,
+            cursorId: null,
+          ),
+        ).thenAnswer((_) async => const Left(remoteFailure));
 
-      final result = await repo.pullRemoteChanges(userId);
+        final result = await repo.pullRemoteChanges(userId);
 
-      expect(result, const Left<Failure, int>(remoteFailure));
-      verifyNever(() => mockPreferences.setLastPullTimestamp(userId, any()));
-    });
+        expect(result, const Left<Failure, int>(remoteFailure));
+        verifyNever(() => mockPreferences.setLastPullTimestamp(userId, any()));
+      },
+    );
 
     test('Paginated: hasMore=true triggers second page fetch', () async {
       final firstPageWord = remoteDto(
@@ -754,18 +870,25 @@ void main() {
         serverTimestamp: DateTime.utc(2025, 1, 1, 2),
       );
 
-      when(() => mockPreferences.getLastPullTimestamp(userId))
-          .thenAnswer((_) async => null);
-      when(() => mockRemote.fetchUserWords(userId, limit: 500, cursorTime: null, cursorId: null))
-          .thenAnswer(
-            (_) async => Right(
-              PaginatedSyncResult(
-                words: [firstPageWord],
-                nextCursorTime: firstPageWord.lastUpdated.toUtc().toIso8601String(),
-                nextCursorId: firstPageWord.id,
-              ),
-            ),
-          );
+      when(
+        () => mockPreferences.getLastPullTimestamp(userId),
+      ).thenAnswer((_) async => null);
+      when(
+        () => mockRemote.fetchUserWords(
+          userId,
+          limit: 500,
+          cursorTime: null,
+          cursorId: null,
+        ),
+      ).thenAnswer(
+        (_) async => Right(
+          PaginatedSyncResult(
+            words: [firstPageWord],
+            nextCursorTime: firstPageWord.lastUpdated.toUtc().toIso8601String(),
+            nextCursorId: firstPageWord.id,
+          ),
+        ),
+      );
       when(
         () => mockRemote.fetchUserWords(
           userId,
@@ -778,9 +901,12 @@ void main() {
       );
       when(() => mockLocal.getWordById('word-1')).thenAnswer((_) async => null);
       when(() => mockLocal.getWordById('word-2')).thenAnswer((_) async => null);
-      when(() => mockLocal.saveWordsInTransaction(any())).thenAnswer((_) async {});
-      when(() => mockPreferences.setLastPullTimestamp(userId, any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockLocal.saveWordsInTransaction(any()),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockPreferences.setLastPullTimestamp(userId, any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.pullRemoteChanges(userId);
 

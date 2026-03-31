@@ -7,11 +7,11 @@ class AuthPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+      backgroundColor: Theme.of(
+        context,
+      ).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
       body: const Center(
-        child: SingleChildScrollView(
-          child: AuthBottomSheet(),
-        ),
+        child: SingleChildScrollView(child: AuthBottomSheet()),
       ),
     );
   }

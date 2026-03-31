@@ -7,7 +7,13 @@ abstract class AuthRepository {
   Stream<AuthStateChange> get authStateStream;
   AuthUser? get currentUser;
   String? get currentUserId;
-  Future<Either<Failure, AuthUser>> signInWithEmail(String email, String password);
-  Future<Either<Failure, AuthUser>> signUpWithEmail(String email, String password);
+  Future<Either<Failure, AuthUser>> signInWithEmail(
+    String email,
+    String password,
+  );
+  Future<Either<Failure, AuthUser>> signUpWithEmail(
+    String email,
+    String password,
+  );
   Future<Either<Failure, void>> signOut();
 }

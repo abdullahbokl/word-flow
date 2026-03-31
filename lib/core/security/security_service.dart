@@ -3,7 +3,10 @@ import 'package:word_flow/core/errors/failures.dart';
 
 abstract class SecurityService {
   /// Persists a sensitive value securely.
-  Future<Either<Failure, Unit>> write({required String key, required String value});
+  Future<Either<Failure, Unit>> write({
+    required String key,
+    required String value,
+  });
 
   /// Retrieves a sensitive value from secure storage.
   Future<Either<Failure, String?>> read({required String key});

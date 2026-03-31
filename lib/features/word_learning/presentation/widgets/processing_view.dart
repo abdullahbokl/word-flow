@@ -10,9 +10,7 @@ class ProcessingView extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: 12),
       child: Column(
         children: [
-          AppLoader(
-            color: Theme.of(context).colorScheme.primary,
-          ),
+          AppLoader(color: Theme.of(context).colorScheme.primary),
           const SizedBox(height: 16),
           Text(
             'Analyzing your text offline-first...',

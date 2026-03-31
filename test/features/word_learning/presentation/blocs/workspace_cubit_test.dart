@@ -16,9 +16,13 @@ import 'package:word_flow/features/word_learning/presentation/blocs/workspace_st
 import 'package:word_flow/core/logging/app_logger.dart';
 
 class MockProcessScript extends Mock implements ProcessScript {}
+
 class MockSaveProcessedWords extends Mock implements SaveProcessedWords {}
+
 class MockToggleKnownWord extends Mock implements ToggleKnownWord {}
+
 class MockGetTextAnalysisConfig extends Mock implements GetTextAnalysisConfig {}
+
 class MockAppLogger extends Mock implements AppLogger {}
 
 void main() {
@@ -51,10 +55,11 @@ void main() {
 
     registerFallbackValue(tConfig);
     registerFallbackValue(<ProcessedWord>[]);
-    
+
     // Default mock response for config
-    when(() => mockGetTextAnalysisConfig())
-        .thenAnswer((_) async => const Right(tConfig));
+    when(
+      () => mockGetTextAnalysisConfig(),
+    ).thenAnswer((_) async => const Right(tConfig));
   });
 
   const tUserId = 'user-123';
@@ -77,10 +82,16 @@ void main() {
     blocTest<WorkspaceCubit, WorkspaceState>(
       'should emit processing then results on success',
       build: () {
-        when(() => mockProcessScript(any(), userId: any(named: 'userId'), config: any(named: 'config')))
-            .thenAnswer((_) async => Right(tAnalysis));
-        when(() => mockSaveProcessedWords(any(), userId: any(named: 'userId')))
-            .thenAnswer((_) async => const Right(null));
+        when(
+          () => mockProcessScript(
+            any(),
+            userId: any(named: 'userId'),
+            config: any(named: 'config'),
+          ),
+        ).thenAnswer((_) async => Right(tAnalysis));
+        when(
+          () => mockSaveProcessedWords(any(), userId: any(named: 'userId')),
+        ).thenAnswer((_) async => const Right(null));
         return cubit;
       },
       act: (cubit) => cubit.analyze('hello hello', userId: tUserId),
@@ -95,15 +106,22 @@ void main() {
         ),
       ],
       verify: (_) {
-        verify(() => mockSaveProcessedWords(tProcessedWords, userId: tUserId)).called(1);
+        verify(
+          () => mockSaveProcessedWords(tProcessedWords, userId: tUserId),
+        ).called(1);
       },
     );
 
     blocTest<WorkspaceCubit, WorkspaceState>(
       'should emit error when process fails',
       build: () {
-        when(() => mockProcessScript(any(), userId: any(named: 'userId'), config: any(named: 'config')))
-            .thenAnswer((_) async => const Left(ProcessingFailure('fail')));
+        when(
+          () => mockProcessScript(
+            any(),
+            userId: any(named: 'userId'),
+            config: any(named: 'config'),
+          ),
+        ).thenAnswer((_) async => const Left(ProcessingFailure('fail')));
         return cubit;
       },
       act: (cubit) => cubit.analyze('error', userId: tUserId),

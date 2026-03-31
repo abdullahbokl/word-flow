@@ -13,7 +13,6 @@ abstract class SyncLocalSource {
 
 @LazySingleton(as: SyncLocalSource)
 class SyncLocalSourceImpl implements SyncLocalSource {
-
   SyncLocalSourceImpl(this._db);
   final WordFlowDatabase _db;
 

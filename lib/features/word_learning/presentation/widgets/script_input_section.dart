@@ -7,7 +7,6 @@ import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cu
 import 'package:word_flow/features/word_learning/presentation/widgets/script_input_field.dart';
 
 class ScriptInputSection extends StatelessWidget {
-
   const ScriptInputSection({
     super.key,
     required this.controller,
@@ -20,7 +19,8 @@ class ScriptInputSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return SectionCard(
       title: 'Paste your text',
-      subtitle: 'Drop in a script, article, or study note. Large blocks stay smooth.',
+      subtitle:
+          'Drop in a script, article, or study note. Large blocks stay smooth.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -38,7 +38,10 @@ class ScriptInputSection extends StatelessWidget {
                   isLoading: isProcessing,
                   onPressed: () {
                     final userId = context.read<AuthCubit>().currentUserId;
-                    context.read<WorkspaceCubit>().analyze(controller.text, userId: userId);
+                    context.read<WorkspaceCubit>().analyze(
+                      controller.text,
+                      userId: userId,
+                    );
                   },
                 ),
               ),

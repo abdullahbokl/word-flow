@@ -21,22 +21,19 @@ class DatabaseKeyManager {
   Future<String> getOrCreateKey() async {
     final result = await _securityService.read(key: _keyName);
 
-    return result.fold(
-      (failure) => _generateAndStoreKey(),
-      (key) {
-        if (key != null && key.isNotEmpty) {
-          if (_isValidHexKey(key)) {
-            return key;
-          }
-
-          // Migrate legacy non-hex keys (old base64url format) without
-          // changing underlying key bytes.
-          return _migrateLegacyKeyOrRegenerate(key);
-        } else {
-          return _generateAndStoreKey();
+    return result.fold((failure) => _generateAndStoreKey(), (key) {
+      if (key != null && key.isNotEmpty) {
+        if (_isValidHexKey(key)) {
+          return key;
         }
-      },
-    );
+
+        // Migrate legacy non-hex keys (old base64url format) without
+        // changing underlying key bytes.
+        return _migrateLegacyKeyOrRegenerate(key);
+      } else {
+        return _generateAndStoreKey();
+      }
+    });
   }
 
   Future<String> _generateAndStoreKey() async {
@@ -79,17 +76,17 @@ class DatabaseKeyManager {
     // Critical: never return an unpersisted key, otherwise a restart can orphan
     // previously encrypted local data. Retry first, then fail hard.
     for (var attempt = 1; attempt <= _maxWriteAttempts; attempt++) {
-      final writeResult = await _securityService.write(key: _keyName, value: key);
-      final persisted = writeResult.fold(
-        (failure) {
-          lastFailureMessage = failure.message;
-          _logger.warning(
-            'Database key persistence attempt $attempt/$_maxWriteAttempts failed: ${failure.message}',
-          );
-          return false;
-        },
-        (_) => true,
+      final writeResult = await _securityService.write(
+        key: _keyName,
+        value: key,
       );
+      final persisted = writeResult.fold((failure) {
+        lastFailureMessage = failure.message;
+        _logger.warning(
+          'Database key persistence attempt $attempt/$_maxWriteAttempts failed: ${failure.message}',
+        );
+        return false;
+      }, (_) => true);
 
       if (persisted) {
         return;

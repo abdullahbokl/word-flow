@@ -21,10 +21,13 @@ class EnvConfig {
   EnvConfig._();
 
   static const String supabaseUrl = String.fromEnvironment('SUPABASE_URL');
-  static const String supabaseAnonKey =
-      String.fromEnvironment('SUPABASE_ANON_KEY');
-  static const String sentryDsn =
-      String.fromEnvironment('SENTRY_DSN', defaultValue: '');
+  static const String supabaseAnonKey = String.fromEnvironment(
+    'SUPABASE_ANON_KEY',
+  );
+  static const String sentryDsn = String.fromEnvironment(
+    'SENTRY_DSN',
+    defaultValue: '',
+  );
 
   /// Check if Supabase is configured.
   static bool get isConfigured =>
@@ -58,8 +61,7 @@ class EnvConfig {
     if (supabaseAnonKey.isEmpty) missing.add('SUPABASE_ANON_KEY');
 
     if (missing.isNotEmpty) {
-      throw StateError(
-        '''
+      throw StateError('''
 ╔════════════════════════════════════════════════════════════════╗
 ║              ENVIRONMENT CONFIGURATION ERROR                   ║
 ╚════════════════════════════════════════════════════════════════╝
@@ -77,8 +79,7 @@ Missing required dart-define variables: ${missing.join(', ')}
 - For CI/CD: Use GitHub Actions secrets via --dart-define
 
 **Reference:** docs/environment-setup.md
-        ''',
-      );
+        ''');
     }
   }
 
@@ -103,10 +104,13 @@ Missing required dart-define variables: ${missing.join(', ')}
   static String getConfigStatus() {
     final buffer = StringBuffer();
     buffer.writeln('Environment Configuration:');
-    buffer.writeln('- Supabase: ${isConfigured ? '✅ Configured' : '❌ Missing'}');
-    buffer.writeln('- Sentry: ${isSentryConfigured ? '✅ Configured' : '⚠️  Optional'}');
+    buffer.writeln(
+      '- Supabase: ${isConfigured ? '✅ Configured' : '❌ Missing'}',
+    );
+    buffer.writeln(
+      '- Sentry: ${isSentryConfigured ? '✅ Configured' : '⚠️  Optional'}',
+    );
     buffer.writeln('- Debug Mode: ${kDebugMode ? '🔧️ ON' : '🔒 OFF'}');
     return buffer.toString();
   }
 }
-

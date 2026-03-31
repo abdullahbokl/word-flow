@@ -65,7 +65,9 @@ class _StyledFilterChip extends StatelessWidget {
           color: isSelected ? scheme.primaryContainer : Colors.transparent,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isSelected ? scheme.primary : scheme.outlineVariant.withValues(alpha: 0.5),
+            color: isSelected
+                ? scheme.primary
+                : scheme.outlineVariant.withValues(alpha: 0.5),
             width: 1,
           ),
         ),
@@ -74,7 +76,9 @@ class _StyledFilterChip extends StatelessWidget {
           style: TextStyle(
             fontSize: 13,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-            color: isSelected ? scheme.onPrimaryContainer : scheme.onSurfaceVariant,
+            color: isSelected
+                ? scheme.onPrimaryContainer
+                : scheme.onSurfaceVariant,
           ),
         ),
       ),
