@@ -66,8 +66,13 @@ void main() {
     when(() => mockLogger.syncEvent(any())).thenReturn(null);
     when(() => mockLogger.debug(any())).thenReturn(null);
     when(() => mockLogger.info(any())).thenReturn(null);
-    when(() => mockLogger.warning(any())).thenReturn(null);
-    when(() => mockLogger.error(any(), any(), any())).thenReturn(null);
+    when(() => mockLogger.warning(any(), category: any(named: 'category'))).thenReturn(null);
+    when(() => mockLogger.error(
+          any(),
+          error: any(named: 'error'),
+          stackTrace: any(named: 'stackTrace'),
+          category: any(named: 'category'),
+        )).thenReturn(null);
 
     wordRepo = WordRepositoryImpl(
       localSource,

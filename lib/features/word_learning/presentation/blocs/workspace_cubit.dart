@@ -92,7 +92,12 @@ class WorkspaceCubit extends Cubit<WorkspaceState> with WorkspaceCubitHelpers {
       _saveProcessedWords(a.words, userId: userId).then(
         (_) => logger.debug('Words saved successfully'),
         onError: (e, st) {
-          logger.error('Failed to save processed words', e, st);
+          logger.error(
+            'Failed to save processed words',
+            error: e,
+            stackTrace: st,
+            category: LogCategory.database,
+          );
           if (!isClosed) {
             emit(
               WorkspaceState.error(

@@ -36,16 +36,16 @@ class RateLimiter {
       // Persist cleanup result so stale attempts don't linger forever.
       await _storage.saveAttempts(_storageKey, _attempts);
     } catch (e, stackTrace) {
-      _logger.warning(
-        'RateLimiter initialize failed for key=$_storageKey: $e',
-        'rate_limiter',
-      );
-      _logger.error(
-        'RateLimiter initialize fallback to empty attempts',
-        e,
-        stackTrace,
-        'rate_limiter',
-      );
+        _logger.warning(
+          'RateLimiter initialize failed for key=$_storageKey: $e',
+          category: LogCategory.network,
+        );
+        _logger.error(
+          'RateLimiter initialize fallback to empty attempts',
+          error: e,
+          stackTrace: stackTrace,
+          category: LogCategory.network,
+        );
       _attempts.clear();
     }
 
@@ -64,12 +64,12 @@ class RateLimiter {
     try {
       await _storage.saveAttempts(_storageKey, _attempts);
     } catch (e, stackTrace) {
-      _logger.error(
-        'Failed to persist rate limiter attempt for key=$_storageKey',
-        e,
-        stackTrace,
-        'rate_limiter',
-      );
+        _logger.error(
+          'Failed to persist rate limiter attempt for key=$_storageKey',
+          error: e,
+          stackTrace: stackTrace,
+          category: LogCategory.network,
+        );
     }
   }
 
@@ -83,7 +83,12 @@ class RateLimiter {
     try {
       await _storage.saveAttempts(_storageKey, _attempts);
     } catch (e, stackTrace) {
-      _logger.error('Failed to persist rate limiter attempt', e, stackTrace);
+        _logger.error(
+          'Failed to persist rate limiter attempt',
+          error: e,
+          stackTrace: stackTrace,
+          category: LogCategory.network,
+        );
     }
     return true;
   }
@@ -94,12 +99,12 @@ class RateLimiter {
     try {
       await _storage.saveAttempts(_storageKey, const []);
     } catch (e, stackTrace) {
-      _logger.error(
-        'Failed to persist rate limiter reset for key=$_storageKey',
-        e,
-        stackTrace,
-        'rate_limiter',
-      );
+        _logger.error(
+          'Failed to persist rate limiter reset for key=$_storageKey',
+          error: e,
+          stackTrace: stackTrace,
+          category: LogCategory.network,
+        );
     }
   }
 

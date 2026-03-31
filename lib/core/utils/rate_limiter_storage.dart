@@ -30,6 +30,7 @@ class RateLimiterStorageImpl implements RateLimiterStorage {
       if (decoded is! List) {
         _logger.warning(
           'RateLimiterStorage invalid payload type for key=$key: ${decoded.runtimeType}',
+          category: LogCategory.database,
         );
         return [];
       }
@@ -50,8 +51,9 @@ class RateLimiterStorageImpl implements RateLimiterStorage {
       // Never block user auth flow due to storage issues.
       _logger.error(
         'RateLimiterStorage load failed for key=$key; falling back to empty attempts',
-        e,
-        stackTrace,
+        error: e,
+        stackTrace: stackTrace,
+        category: LogCategory.database,
       );
       return [];
     }

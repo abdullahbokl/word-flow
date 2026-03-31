@@ -59,10 +59,16 @@ Future<void> main() async {
         } else {
           logger.warning(
             'Warning: Supabase credentials not found. Remote sync will be disabled.',
+            category: LogCategory.network,
           );
         }
       } catch (e, stackTrace) {
-        logger.error('Supabase initialization failed', e, stackTrace);
+        logger.error(
+          'Supabase initialization failed',
+          error: e,
+          stackTrace: stackTrace,
+          category: LogCategory.network,
+        );
         // Report to Sentry as well
         await Sentry.captureException(e, stackTrace: stackTrace);
       }

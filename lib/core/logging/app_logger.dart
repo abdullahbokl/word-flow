@@ -3,7 +3,8 @@ import 'package:talker/talker.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:word_flow/core/observability/sentry_breadcrumbs.dart';
-
+ 
+enum LogCategory { sync, auth, database, network, app }
 @lazySingleton
 class AppLogger {
   /// Create AppLogger with build-mode-aware settings
@@ -84,35 +85,92 @@ class AppLogger {
 
   /// Log at warning level + forward to Sentry
   /// Logged in both DEBUG and RELEASE builds
-  void warning(String message, [String category = 'general']) {
-    _talker.warning('[$category] $message');
-    // Forward to Sentry as breadcrumb
-    SentryBreadcrumbs.addSyncBreadcrumb(
-      message,
-      data: {'category': category},
-      level: SentryLevel.warning,
-    );
+  void warning(String message, {LogCategory category = LogCategory.app}) {
+    _talker.warning('[${category.name}] $message');
+    // Forward to Sentry as breadcrumb with category-specific mapping
+    switch (category) {
+      case LogCategory.sync:
+        SentryBreadcrumbs.addSyncBreadcrumb(message, level: SentryLevel.warning);
+        break;
+      case LogCategory.auth:
+        SentryBreadcrumbs.addAuthBreadcrumb(message, level: SentryLevel.warning);
+        break;
+      case LogCategory.database:
+        SentryBreadcrumbs.addDBBreadcrumb(message, level: SentryLevel.warning);
+        break;
+      case LogCategory.network:
+        SentryBreadcrumbs.addNetworkBreadcrumb(message, level: SentryLevel.warning);
+        break;
+      case LogCategory.app:
+        // Fallback to sync breadcrumb for app-level warnings
+        SentryBreadcrumbs.addSyncBreadcrumb(message, level: SentryLevel.warning);
+        break;
+    }
   }
 
   /// Log at error level + forward to Sentry
   /// Logged in both DEBUG and RELEASE builds
   void error(
-    String message, [
+    String message, {
     Object? error,
     StackTrace? stackTrace,
-    String category = 'general',
-  ]) {
-    _talker.error('[$category] $message', error, stackTrace);
-    // Forward to Sentry as breadcrumb
-    SentryBreadcrumbs.addSyncBreadcrumb(
-      message,
-      data: {
-        'category': category,
-        'error': error?.toString(),
-        'errorType': error?.runtimeType.toString(),
-      },
-      level: SentryLevel.error,
-    );
+    LogCategory category = LogCategory.app,
+  }) {
+    _talker.error('[${category.name}] $message', error, stackTrace);
+    // Forward to Sentry as breadcrumb with category-specific mapping
+    switch (category) {
+      case LogCategory.sync:
+        SentryBreadcrumbs.addSyncBreadcrumb(
+          message,
+          data: {
+            'error': error?.toString(),
+            'errorType': error?.runtimeType.toString(),
+          },
+          level: SentryLevel.error,
+        );
+        break;
+      case LogCategory.auth:
+        SentryBreadcrumbs.addAuthBreadcrumb(
+          message,
+          data: {
+            'error': error?.toString(),
+            'errorType': error?.runtimeType.toString(),
+          },
+          level: SentryLevel.error,
+        );
+        break;
+      case LogCategory.database:
+        SentryBreadcrumbs.addDBBreadcrumb(
+          message,
+          data: {
+            'error': error?.toString(),
+            'errorType': error?.runtimeType.toString(),
+          },
+          level: SentryLevel.error,
+        );
+        break;
+      case LogCategory.network:
+        SentryBreadcrumbs.addNetworkBreadcrumb(
+          message,
+          data: {
+            'error': error?.toString(),
+            'errorType': error?.runtimeType.toString(),
+          },
+          level: SentryLevel.error,
+        );
+        break;
+      case LogCategory.app:
+        // Fallback to sync breadcrumb for app-level errors
+        SentryBreadcrumbs.addSyncBreadcrumb(
+          message,
+          data: {
+            'error': error?.toString(),
+            'errorType': error?.runtimeType.toString(),
+          },
+          level: SentryLevel.error,
+        );
+        break;
+    }
   }
 
   /// Sync-specific event log

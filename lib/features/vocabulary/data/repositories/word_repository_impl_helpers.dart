@@ -131,7 +131,12 @@ mixin WordRepositoryImplHelpers {
       );
       return Right(count);
     } catch (e, stackTrace) {
-      logger.error('Guest data migration failed', e, stackTrace);
+      logger.error(
+        'Guest data migration failed',
+        error: e,
+        stackTrace: stackTrace,
+        category: LogCategory.database,
+      );
       try {
         await Sentry.captureException(e, stackTrace: stackTrace);
       } catch (_) {}

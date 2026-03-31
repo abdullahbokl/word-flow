@@ -90,6 +90,7 @@ Missing required dart-define variables: ${missing.join(', ')}
       logger.warning(
         '⚠️  Supabase configuration not found. '
         'Remote sync is disabled. App will work in offline-only mode.',
+        category: LogCategory.network,
       );
     }
 

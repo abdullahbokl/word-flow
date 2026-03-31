@@ -140,7 +140,11 @@ class SyncOrchestrator {
 
       pushResult.fold(
         (failure) {
-          _logger.error('SyncOrchestrator: push failed - ${failure.message}');
+          _logger.error(
+            'SyncOrchestrator: push failed - ${failure.message}',
+            error: failure,
+            category: LogCategory.sync,
+          );
           pushFailed = true;
           // Breadcrumb: Push failed
           SentryBreadcrumbs.addSyncBreadcrumb(
@@ -173,7 +177,11 @@ class SyncOrchestrator {
 
       pullResult.fold(
         (failure) {
-          _logger.error('SyncOrchestrator: pull failed - ${failure.message}');
+          _logger.error(
+            'SyncOrchestrator: pull failed - ${failure.message}',
+            error: failure,
+            category: LogCategory.sync,
+          );
           pullFailed = true;
           // Breadcrumb: Pull failed
           SentryBreadcrumbs.addSyncBreadcrumb(
@@ -196,6 +204,7 @@ class SyncOrchestrator {
       if (pushFailed || pullFailed) {
         _logger.warning(
           'SyncOrchestrator: Sync partially failed (push:$pushFailed, pull:$pullFailed)',
+          category: LogCategory.sync,
         );
         SentryBreadcrumbs.addSyncBreadcrumb(
           'Sync cycle partially failed',
@@ -223,8 +232,9 @@ class SyncOrchestrator {
     } catch (error, stackTrace) {
       _logger.error(
         'SyncOrchestrator: Unhandled sync exception',
-        error,
-        stackTrace,
+        error: error,
+        stackTrace: stackTrace,
+        category: LogCategory.sync,
       );
       SentryBreadcrumbs.addSyncBreadcrumb(
         'Sync cycle failed with exception',

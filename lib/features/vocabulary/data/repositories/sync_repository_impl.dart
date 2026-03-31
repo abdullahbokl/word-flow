@@ -108,6 +108,7 @@ class SyncRepositoryImpl implements SyncRepository {
 
           _logger.warning(
             'Moved queue item to dead letters: $queueId (unknown operation: ${item.operation})',
+            category: LogCategory.sync,
           );
           await _syncSource.removeFromSyncQueue(queueId);
           continue;
@@ -144,6 +145,7 @@ class SyncRepositoryImpl implements SyncRepository {
 
           _logger.warning(
             'Moved queue item to dead letters: $queueId (retries: $retryCount)',
+            category: LogCategory.sync,
           );
           await _syncSource.removeFromSyncQueue(queueId);
           continue;
@@ -176,7 +178,8 @@ class SyncRepositoryImpl implements SyncRepository {
                 if (mapFailure != null) {
                   _logger.error(
                     'Skipping invalid local word during sync: $wordId',
-                    mapFailure,
+                    error: mapFailure,
+                    category: LogCategory.sync,
                   );
                   await _syncSource.removeFromSyncQueue(queueId);
                   continue;
@@ -211,8 +214,9 @@ class SyncRepositoryImpl implements SyncRepository {
         } catch (e, stackTrace) {
           _logger.error(
             'Error syncing operation: ${operation.name} on word $wordId',
-            e,
-            stackTrace,
+            error: e,
+            stackTrace: stackTrace,
+            category: LogCategory.sync,
           );
           // Report to Sentry
           try {
@@ -271,7 +275,8 @@ class SyncRepositoryImpl implements SyncRepository {
         if (fetchFailure != null) {
           _logger.error(
             'Failed fetching remote changes at cursor ($cursorTime, $cursorId)',
-            fetchFailure,
+            error: fetchFailure,
+            category: LogCategory.sync,
           );
           return Left(fetchFailure);
         }
@@ -303,7 +308,8 @@ class SyncRepositoryImpl implements SyncRepository {
             if (mapFailure != null) {
               _logger.error(
                 'Skipping invalid remote word during pull: ${remoteDto.id}',
-                mapFailure,
+                error: mapFailure,
+                category: LogCategory.sync,
               );
               pageSkippedCount++;
               continue;
@@ -367,7 +373,8 @@ class SyncRepositoryImpl implements SyncRepository {
             if (mapFailure != null) {
               _logger.error(
                 'Skipping invalid merged remote word during pull: ${updatedDto.id}',
-                mapFailure,
+                error: mapFailure,
+                category: LogCategory.sync,
               );
               pageSkippedCount++;
               continue;
@@ -397,8 +404,9 @@ class SyncRepositoryImpl implements SyncRepository {
         } catch (e, stackTrace) {
           _logger.error(
             'Pull transaction failed at cursor ($cursorTime, $cursorId)',
-            e,
-            stackTrace,
+            error: e,
+            stackTrace: stackTrace,
+            category: LogCategory.sync,
           );
           try {
             await Sentry.captureException(e, stackTrace: stackTrace);

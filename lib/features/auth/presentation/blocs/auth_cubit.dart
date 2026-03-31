@@ -99,7 +99,10 @@ class AuthCubit extends Cubit<AuthState> {
         );
         break;
       case AuthStateChange.unknown:
-        _logger.warning('Unknown auth event received — re-checking session');
+        _logger.warning(
+          'Unknown auth event received — re-checking session',
+          category: LogCategory.auth,
+        );
         SentryBreadcrumbs.addAuthBreadcrumb(
           'Unknown auth event received',
           level: SentryLevel.warning,

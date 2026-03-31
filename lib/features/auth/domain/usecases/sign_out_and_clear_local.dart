@@ -62,15 +62,17 @@ class SignOutAndClearLocal {
       } catch (e, stackTrace) {
         logger.error(
           'SignOutAndClearLocal cleanup failed at clear all sync timestamps',
-          e,
-          stackTrace,
+          error: e,
+          stackTrace: stackTrace,
+          category: LogCategory.auth,
         );
       }
     } catch (e, stackTrace) {
       logger.error(
         'SignOutAndClearLocal unexpected cleanup error',
-        e,
-        stackTrace,
+        error: e,
+        stackTrace: stackTrace,
+        category: LogCategory.auth,
       );
     }
 

@@ -3,6 +3,20 @@ import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
 
 void main() {
   group('WordEntity.validated', () {
+    test('allows timestamps within 5 minutes of now (clock skew tolerance)', () {
+      final withinTolerance = DateTime.now().toUtc().add(
+        const Duration(minutes: 4, seconds: 59),
+      );
+
+      final entity = WordEntity.validated(
+        id: 'word-2',
+        wordText: 'example',
+        lastUpdated: withinTolerance,
+      );
+
+      expect(entity.lastUpdated, withinTolerance);
+    });
+
     test('throws when lastUpdated is more than 5 minutes in the future', () {
       final futureDate = DateTime.now().toUtc().add(const Duration(minutes: 6));
 
@@ -21,22 +35,27 @@ void main() {
         ),
       );
     });
+  });
 
-    test(
-      'allows timestamps within 5 minutes of now (clock skew tolerance)',
-      () {
-        final withinTolerance = DateTime.now().toUtc().add(
-          const Duration(minutes: 4, seconds: 59),
-        );
-
-        final entity = WordEntity.validated(
-          id: 'word-2',
-          wordText: 'example',
-          lastUpdated: withinTolerance,
-        );
-
-        expect(entity.lastUpdated, withinTolerance);
-      },
+  test('copyWith(totalCount: 0) throws ArgumentError', () {
+    final now = DateTime.now().toUtc();
+    final base = WordEntity.validated(
+      id: 'id-1',
+      wordText: 'hello',
+      lastUpdated: now,
     );
+
+    expect(() => base.copyWith(totalCount: 0), throwsArgumentError);
+  });
+
+  test('copyWith(wordText: "") throws ArgumentError', () {
+    final now = DateTime.now().toUtc();
+    final base = WordEntity.validated(
+      id: 'id-1',
+      wordText: 'hello',
+      lastUpdated: now,
+    );
+
+    expect(() => base.copyWith(wordText: ''), throwsArgumentError);
   });
 }

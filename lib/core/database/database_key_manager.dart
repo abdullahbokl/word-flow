@@ -84,7 +84,7 @@ class DatabaseKeyManager {
         lastFailureMessage = failure.message;
         _logger.warning(
           'Database key persistence attempt $attempt/$_maxWriteAttempts failed: ${failure.message}',
-          'database',
+          category: LogCategory.database,
         );
         return false;
       }, (_) => true);
@@ -105,9 +105,9 @@ class DatabaseKeyManager {
 
     _logger.error(
       'Database key persistence failed after retries',
-      exception,
-      stackTrace,
-      'database',
+      error: exception,
+      stackTrace: stackTrace,
+      category: LogCategory.database,
     );
     await Sentry.captureException(exception, stackTrace: stackTrace);
 

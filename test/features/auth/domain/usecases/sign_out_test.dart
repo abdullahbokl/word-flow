@@ -88,9 +88,12 @@ void main() {
       when(
         () => mockAuthRepository.signOut(),
       ).thenAnswer((_) async => const Right(null));
-      when(
-        () => mockLogger.error(any(), any<dynamic>(), any<dynamic>()),
-      ).thenReturn(null);
+      when(() => mockLogger.error(
+            any(),
+            error: any(named: 'error'),
+            stackTrace: any(named: 'stackTrace'),
+            category: any(named: 'category'),
+          )).thenReturn(null);
 
       final result = await useCase();
 

@@ -85,6 +85,7 @@ class WordRepositoryImpl
           mapped.match((failure) {
             logger.warning(
               'Skipping invalid word row in watch stream: ${failure.message}',
+              category: LogCategory.database,
             );
           }, entities.add);
         }

@@ -23,7 +23,12 @@ class ErrorMapper {
     AppLogger logger,
   ) {
     // Log the raw error first – this is always useful for debugging.
-    logger.error('Exception caught in repository', error, stackTrace);
+    logger.error(
+      'Exception caught in repository',
+      error: error,
+      stackTrace: stackTrace,
+      category: LogCategory.app,
+    );
 
     // Report to Sentry for non‑auth errors.
     if (error is! AuthException) {

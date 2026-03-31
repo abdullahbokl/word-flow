@@ -27,7 +27,12 @@ class LocalWriteQueue {
         await item.$1();
         item.$2.complete();
       } catch (e, st) {
-        _logger.error('LocalWriteQueue operation failed', e, st);
+        _logger.error(
+          'LocalWriteQueue operation failed',
+          error: e,
+          stackTrace: st,
+          category: LogCategory.database,
+        );
         item.$2.completeError(e, st);
       } finally {
         _pendingCount--;
@@ -41,6 +46,7 @@ class LocalWriteQueue {
     if (_pendingCount >= _maxDepth) {
       _logger.warning(
         'LocalWriteQueue max depth reached ($_maxDepth). Skipping.',
+        category: LogCategory.database,
       );
       return Future.value();
     }

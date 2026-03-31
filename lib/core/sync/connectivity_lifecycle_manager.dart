@@ -18,9 +18,22 @@ class ConnectivityLifecycleManager with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.detached) {
-      _monitor.dispose();
-      stop();
+    switch (state) {
+      case AppLifecycleState.paused:
+        // App moved to background (iOS: suspended, Android: background)
+        // Cancel debounce timers to stop background network probes.
+        _monitor.pauseConnectivityChecks();
+        break;
+      case AppLifecycleState.resumed:
+        // App returned to foreground — re-evaluate connectivity.
+        _monitor.resumeConnectivityChecks();
+        break;
+      case AppLifecycleState.detached:
+        _monitor.dispose();
+        stop();
+        break;
+      default:
+        break;
     }
   }
 

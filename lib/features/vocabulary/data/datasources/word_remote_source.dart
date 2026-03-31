@@ -106,7 +106,11 @@ class WordRemoteSourceImpl implements WordRemoteSource {
         final failure = ServerFailure(
           'Unexpected response format: ${response.runtimeType}',
         );
-        _logger.error('fetchUserWords: unexpected response format', failure);
+        _logger.error(
+          'fetchUserWords: unexpected response format',
+          error: failure,
+          category: LogCategory.network,
+        );
         return Left(failure);
       }
       final Object validatedResponse = response;
@@ -131,21 +135,28 @@ class WordRemoteSourceImpl implements WordRemoteSource {
         final failure = ServerFailure('Failed to parse word: $e');
         _logger.error(
           'fetchUserWords: failed to parse word',
-          failure,
-          stackTrace,
+          error: failure,
+          stackTrace: stackTrace,
+          category: LogCategory.network,
         );
         return Left(failure);
       }
     } on PostgrestException catch (e, stackTrace) {
       final failure = ServerFailure(e.message);
-      _logger.error('fetchUserWords: postgrest exception', failure, stackTrace);
+      _logger.error(
+        'fetchUserWords: postgrest exception',
+        error: failure,
+        stackTrace: stackTrace,
+        category: LogCategory.network,
+      );
       return Left(failure);
     } catch (e) {
       final failure = ServerFailure(e.toString());
       _logger.error(
         'fetchUserWords: unexpected exception',
-        failure,
-        StackTrace.current,
+        error: failure,
+        stackTrace: StackTrace.current,
+        category: LogCategory.network,
       );
       return Left(failure);
     }
@@ -184,7 +195,8 @@ class WordRemoteSourceImpl implements WordRemoteSource {
         );
         _logger.error(
           'fetchWordsUpdatedSince: unexpected response format',
-          failure,
+          error: failure,
+          category: LogCategory.network,
         );
         return Left(failure);
       }
@@ -210,8 +222,9 @@ class WordRemoteSourceImpl implements WordRemoteSource {
         final failure = ServerFailure('Failed to parse word: $e');
         _logger.error(
           'fetchWordsUpdatedSince: failed to parse word',
-          failure,
-          stackTrace,
+          error: failure,
+          stackTrace: stackTrace,
+          category: LogCategory.network,
         );
         return Left(failure);
       }
@@ -219,16 +232,18 @@ class WordRemoteSourceImpl implements WordRemoteSource {
       final failure = ServerFailure(e.message);
       _logger.error(
         'fetchWordsUpdatedSince: postgrest exception',
-        failure,
-        stackTrace,
+        error: failure,
+        stackTrace: stackTrace,
+        category: LogCategory.network,
       );
       return Left(failure);
     } catch (e) {
       final failure = ServerFailure(e.toString());
       _logger.error(
         'fetchWordsUpdatedSince: unexpected exception',
-        failure,
-        StackTrace.current,
+        error: failure,
+        stackTrace: StackTrace.current,
+        category: LogCategory.network,
       );
       return Left(failure);
     }

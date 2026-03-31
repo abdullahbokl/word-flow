@@ -85,6 +85,18 @@ class ConnectivityMonitor {
     return await _checker.hasInternetAccess;
   }
 
+  /// Pause ongoing connectivity checks (cancel debounce timer) — useful when
+  /// app is backgrounded on iOS to conserve resources and avoid background
+  /// network probes.
+  void pauseConnectivityChecks() {
+    _debounceTimer?.cancel();
+  }
+
+  /// Resume connectivity evaluation when app returns to foreground.
+  void resumeConnectivityChecks() {
+    if (!_isDisposed) _evaluateConnectivity();
+  }
+
   @disposeMethod
   void dispose() {
     if (_isDisposed) return;

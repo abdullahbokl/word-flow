@@ -18,7 +18,11 @@ class MigrationService {
     final result = await _adoptGuestWords(userId);
     return result.fold(
       (failure) {
-        _logger.error('Failed to migrate guest data', failure);
+        _logger.error(
+          'Failed to migrate guest data',
+          error: failure,
+          category: LogCategory.database,
+        );
         return Left(failure);
       },
       (count) {
@@ -33,7 +37,11 @@ class MigrationService {
     final result = await _wordRepository.clearGuestWords();
     return result.fold(
       (failure) {
-        _logger.error('Failed to discard guest data', failure);
+        _logger.error(
+          'Failed to discard guest data',
+          error: failure,
+          category: LogCategory.database,
+        );
         return Left(failure);
       },
       (_) {

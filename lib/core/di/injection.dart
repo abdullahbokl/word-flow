@@ -78,7 +78,12 @@ Future<void> resetAppData(WordFlowDatabase database) async {
   try {
     await database.close();
   } catch (error, stackTrace) {
-    logger.error('Failed to close database during reset', error, stackTrace);
+    logger.error(
+      'Failed to close database during reset',
+      error: error,
+      stackTrace: stackTrace,
+      category: LogCategory.database,
+    );
   }
 
   if (databasePath != null) {
@@ -90,8 +95,9 @@ Future<void> resetAppData(WordFlowDatabase database) async {
     } catch (error, stackTrace) {
       logger.error(
         'Failed deleting database file during reset',
-        error,
-        stackTrace,
+        error: error,
+        stackTrace: stackTrace,
+        category: LogCategory.database,
       );
       await Sentry.captureException(error, stackTrace: stackTrace);
     }
@@ -103,8 +109,9 @@ Future<void> resetAppData(WordFlowDatabase database) async {
   } catch (error, stackTrace) {
     logger.error(
       'Failed regenerating secure storage key during reset',
-      error,
-      stackTrace,
+      error: error,
+      stackTrace: stackTrace,
+      category: LogCategory.app,
     );
     await Sentry.captureException(error, stackTrace: stackTrace);
   }
@@ -244,7 +251,12 @@ abstract class RegisterModule {
         final logger = getIt.isRegistered<AppLogger>()
             ? getIt<AppLogger>()
             : AppLogger();
-        logger.error(message, exception, stackTrace);
+        logger.error(
+          message,
+          error: exception,
+          stackTrace: stackTrace,
+          category: LogCategory.database,
+        );
         await Sentry.captureException(exception, stackTrace: stackTrace);
         _scheduleDatabaseRecoveryDialog(database);
       }
@@ -257,8 +269,9 @@ abstract class RegisterModule {
 
       logger.error(
         'Database initialization failed due to secure storage persistence error',
-        error,
-        stackTrace,
+        error: error,
+        stackTrace: stackTrace,
+        category: LogCategory.database,
       );
       await Sentry.captureException(error, stackTrace: stackTrace);
       _scheduleSecureStorageUnavailableDialog();
