@@ -147,7 +147,7 @@ class SentryBreadcrumbs {
   ///   await tx.finish();
   /// }
   /// ```
-  static ISentryTransaction startSyncTransaction() {
+  static dynamic startSyncTransaction() {
     return Sentry.startTransaction(
       'sync_cycle',
       'background',
@@ -166,7 +166,7 @@ class SentryBreadcrumbs {
   ///   await tx.finish();
   /// }
   /// ```
-  static ISentryTransaction startAuthTransaction(String operation) {
+  static dynamic startAuthTransaction(String operation) {
     return Sentry.startTransaction(
       'auth_$operation',
       'auth',
