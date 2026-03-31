@@ -99,6 +99,11 @@ class SyncOrchestrator {
   Future<void> _performSync() async {
     if (_isSyncing) return;
 
+    // NOTE: previously this method tracked `lastPullTime` to avoid re-pulling
+    // unchanged data. That variable was unused and caused confusion; it has
+    // been intentionally removed. Sync control is handled by `pendingCountStream`
+    // and the periodic/debounce scheduling above.
+
     final userId = _authRepository.currentUserId;
     if (userId == null) {
       _logger.debug(

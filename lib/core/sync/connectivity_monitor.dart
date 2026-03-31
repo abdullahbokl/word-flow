@@ -1,9 +1,7 @@
 import 'dart:async';
 import 'package:connectivity_plus/connectivity_plus.dart';
-import 'package:http/http.dart' as http;
 import 'package:injectable/injectable.dart';
 import 'package:internet_connection_checker_plus/internet_connection_checker_plus.dart';
-import 'package:word_flow/core/config/env_config.dart';
 
 enum ConnectivityStatus { online, offline }
 
@@ -17,6 +15,7 @@ class ConnectivityMonitor {
   final InternetConnection _checker;
 
   ConnectivityStatus? _lastStatus;
+  bool _isEvaluating = false;
   final _controller = StreamController<ConnectivityStatus>.broadcast();
   StreamSubscription? _connectivitySubscription;
   StreamSubscription? _internetSubscription;
@@ -38,33 +37,37 @@ class ConnectivityMonitor {
     // Initial check
     _evaluateConnectivity();
   }
-
   Future<void> _evaluateConnectivity() async {
     if (_isDisposed) return;
+    if (_isEvaluating) return;
+    _isEvaluating = true;
+    try {
+      final results = await _connectivity.checkConnectivity();
+      if (_isDisposed) return;
 
-    final results = await _connectivity.checkConnectivity();
-    if (_isDisposed) return;
+      final hasInterface = !results.contains(ConnectivityResult.none);
+      final hasInternet = await _checker.hasInternetAccess;
+      if (_isDisposed) return;
 
-    final hasInterface = !results.contains(ConnectivityResult.none);
-    final hasInternet = await _checker.hasInternetAccess;
-    if (_isDisposed) return;
+      final newStatus = (hasInterface && hasInternet)
+          ? ConnectivityStatus.online
+          : ConnectivityStatus.offline;
 
-    final newStatus = (hasInterface && hasInternet)
-        ? ConnectivityStatus.online
-        : ConnectivityStatus.offline;
-
-    if (newStatus == ConnectivityStatus.offline) {
-      _debounceTimer?.cancel();
-      _emitIfChanged(ConnectivityStatus.offline);
-    } else {
-      if (_lastStatus != ConnectivityStatus.online &&
-          !(_debounceTimer?.isActive ?? false)) {
-        _debounceTimer = Timer(reconnectDebounce, () async {
-          if (await _checker.hasInternetAccess) {
-            _emitIfChanged(ConnectivityStatus.online);
-          }
-        });
+      if (newStatus == ConnectivityStatus.offline) {
+        _debounceTimer?.cancel();
+        _emitIfChanged(ConnectivityStatus.offline);
+      } else {
+        if (_lastStatus != ConnectivityStatus.online &&
+            !(_debounceTimer?.isActive ?? false)) {
+          _debounceTimer = Timer(reconnectDebounce, () async {
+            if (await _checker.hasInternetAccess) {
+              _emitIfChanged(ConnectivityStatus.online);
+            }
+          });
+        }
       }
+    } finally {
+      _isEvaluating = false;
     }
   }
 
@@ -75,21 +78,6 @@ class ConnectivityMonitor {
       _controller.add(status);
     }
   }
-
-  Future<bool> checkReachability() async {
-    if (!EnvConfig.isConfigured) return false;
-
-    try {
-      final response = await http
-          .head(Uri.parse('${EnvConfig.supabaseUrl}/health'))
-          .timeout(const Duration(seconds: 5));
-
-      return response.statusCode >= 200 && response.statusCode < 300;
-    } catch (_) {
-      return false;
-    }
-  }
-
   Future<bool> get isOnline async {
     if (_isDisposed) return false;
     final results = await _connectivity.checkConnectivity();

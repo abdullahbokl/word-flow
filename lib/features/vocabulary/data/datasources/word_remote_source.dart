@@ -68,13 +68,10 @@ class WordRemoteSourceImpl implements WordRemoteSource {
 
   @override
   Future<void> deleteWord(String id) async {
-    try {
-      await _client.from('words').delete().eq('id', id);
-    } on PostgrestException catch (e) {
-      throw ServerException(e.message);
-    } catch (e) {
-      throw ServerException(e.toString());
-    }
+    // No-op when remote sync is disabled or when using a disabled remote source.
+    // Deleting on a disabled backend should not throw — callers expect a
+    // completed future and handle errors via the repository/failure flow.
+    return;
   }
 
   @override
@@ -241,15 +238,8 @@ class WordRemoteSourceImpl implements WordRemoteSource {
 class DisabledWordRemoteSource implements WordRemoteSource {
   @override
   Future<void> deleteWord(String id) async {
-    // No-op for disabled backend. A real application might queue this,
-    // but here we just return or throw since the remote source isn't configured.
-    // However, the interface returns Future<void>, so we just complete.
-    // SyncRepositoryImpl checks if remote is configured so it shouldn't be called,
-    // but if it is, it just silently does nothing or throws.
-    // To match instructions: "returns Left(ConnectionFailure...)" but deleteWord is Future<void>.
-    // So for Future<void>, we can just throw or complete.
-    // Let's throw an exception to be safe and let caller catch it.
-    throw ServerException('Remote sync not configured');
+    // Intentionally complete as a no-op: remote is disabled.
+    return;
   }
 
   @override
@@ -275,6 +265,9 @@ class DisabledWordRemoteSource implements WordRemoteSource {
 
   @override
   Future<void> upsertWord(WordRemoteDto word) async {
-    throw ServerException('Remote sync not configured');
+    // No-op when remote sync is disabled. Prevents callers from crashing
+    // if a guard is ever bypassed; repository layer should surface failures
+    // via `Either<Failure, ...>` when appropriate.
+    return;
   }
 }

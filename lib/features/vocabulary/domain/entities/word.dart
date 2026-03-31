@@ -83,14 +83,22 @@ class WordEntity extends Equatable {
     DateTime? lastUpdated,
     DateTime? serverTimestamp,
   }) {
-    return WordEntity(
-      id: id ?? this.id,
-      userId: userId ?? this.userId,
-      wordText: wordText ?? this.wordText,
-      totalCount: totalCount ?? this.totalCount,
-      isKnown: isKnown ?? this.isKnown,
-      lastUpdated: lastUpdated ?? this.lastUpdated,
-      serverTimestamp: serverTimestamp ?? this.serverTimestamp,
+    final newId = id ?? this.id;
+    final newUserId = userId ?? this.userId;
+    final newWordText = wordText ?? this.wordText;
+    final newTotalCount = totalCount ?? this.totalCount;
+    final newIsKnown = isKnown ?? this.isKnown;
+    final newLastUpdated = lastUpdated ?? this.lastUpdated;
+    final newServerTimestamp = serverTimestamp ?? this.serverTimestamp;
+
+    return WordEntity.validated(
+      id: newId,
+      userId: newUserId,
+      wordText: newWordText,
+      totalCount: newTotalCount,
+      isKnown: newIsKnown,
+      lastUpdated: newLastUpdated,
+      serverTimestamp: newServerTimestamp,
     );
   }
 }

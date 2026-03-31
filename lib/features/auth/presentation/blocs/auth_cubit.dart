@@ -45,6 +45,7 @@ class AuthCubit extends Cubit<AuthState> {
     await _rateLimiter.initialize();
     emit(const AuthState.loading());
     _checkInitialSession();
+    // Cancel any existing subscription before creating a new one (defensive).
     await _authSubscription?.cancel();
     _authSubscription = authRepository.authStateStream.listen(
       _handleAuthStateChange,
