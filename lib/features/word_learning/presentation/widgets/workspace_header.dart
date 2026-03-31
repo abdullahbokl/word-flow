@@ -6,7 +6,6 @@ import 'package:word_flow/app/router/routes.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/metric_tile.dart';
 
 class WorkspaceHeader extends StatelessWidget {
-
   const WorkspaceHeader({super.key, required this.summary});
   final ScriptSummary summary;
 
@@ -65,14 +64,31 @@ class _MetricsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final tileWidth = constraints.maxWidth >= 420 ? (constraints.maxWidth - 16) / 3 : (constraints.maxWidth - 8) / 2;
+        final tileWidth = constraints.maxWidth >= 420
+            ? (constraints.maxWidth - 16) / 3
+            : (constraints.maxWidth - 8) / 2;
         return Wrap(
           spacing: 8,
           runSpacing: 8,
           children: [
-            MetricTile(width: tileWidth, label: 'Total words', value: summary.totalWords.toString(), icon: Icons.short_text_rounded),
-            MetricTile(width: tileWidth, label: 'Unique words', value: summary.uniqueWords.toString(), icon: Icons.fingerprint_rounded),
-            MetricTile(width: tileWidth, label: 'New words', value: summary.newWords.toString(), icon: Icons.auto_awesome_rounded),
+            MetricTile(
+              width: tileWidth,
+              label: 'Total words',
+              value: summary.totalWords.toString(),
+              icon: Icons.short_text_rounded,
+            ),
+            MetricTile(
+              width: tileWidth,
+              label: 'Unique words',
+              value: summary.uniqueWords.toString(),
+              icon: Icons.fingerprint_rounded,
+            ),
+            MetricTile(
+              width: tileWidth,
+              label: 'New words',
+              value: summary.newWords.toString(),
+              icon: Icons.auto_awesome_rounded,
+            ),
           ],
         );
       },

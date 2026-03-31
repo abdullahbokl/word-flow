@@ -28,5 +28,6 @@ class KeyPersistenceException implements Exception {
   final String? message;
 
   @override
-  String toString() => 'KeyPersistenceException: ${message ?? 'No message provided'}';
+  String toString() =>
+      'KeyPersistenceException: ${message ?? 'No message provided'}';
 }

@@ -9,6 +9,7 @@ import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart';
 
 class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
+
 class MockAuthRepository extends Mock implements AuthRepository {}
 
 void main() {
@@ -27,8 +28,9 @@ void main() {
       () => mockSyncOrchestrator.statusStream,
     ).thenAnswer((_) => const Stream.empty());
     when(() => mockSyncOrchestrator.retrySync()).thenReturn(null);
-    when(() => mockAuthRepository.authStateStream)
-      .thenAnswer((_) => const Stream.empty());
+    when(
+      () => mockAuthRepository.authStateStream,
+    ).thenAnswer((_) => const Stream.empty());
     when(() => mockAuthRepository.currentUserId).thenReturn('user-1');
 
     cubit = SyncCubit(mockSyncOrchestrator, mockAuthRepository);
@@ -50,9 +52,7 @@ void main() {
     blocTest<SyncCubit, SyncState>(
       'maps orchestrator status stream into UI states',
       build: () {
-        when(
-          () => mockSyncOrchestrator.statusStream,
-        ).thenAnswer(
+        when(() => mockSyncOrchestrator.statusStream).thenAnswer(
           (_) => Stream<SyncStatus>.fromIterable([
             const SyncStatus.syncing(),
             const SyncStatus.error('boom'),

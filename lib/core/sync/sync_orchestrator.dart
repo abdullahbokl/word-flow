@@ -71,7 +71,9 @@ class SyncOrchestrator {
     _periodicTimer?.cancel();
 
     if (_authRepository.currentUserId == null) {
-      _logger.debug('SyncOrchestrator: User is not authenticated. Periodic sync disabled.');
+      _logger.debug(
+        'SyncOrchestrator: User is not authenticated. Periodic sync disabled.',
+      );
       return;
     }
 
@@ -89,7 +91,9 @@ class SyncOrchestrator {
 
     final userId = _authRepository.currentUserId;
     if (userId == null) {
-      _logger.debug('SyncOrchestrator: User is not authenticated (guest). Skipping sync.');
+      _logger.debug(
+        'SyncOrchestrator: User is not authenticated (guest). Skipping sync.',
+      );
       _periodicTimer?.cancel();
       return;
     }
@@ -108,10 +112,7 @@ class SyncOrchestrator {
       // Breadcrumb: Sync started
       SentryBreadcrumbs.addSyncBreadcrumb(
         'Sync cycle started',
-        data: {
-          'userId': userId,
-          'pendingCount': pendingCount,
-        },
+        data: {'userId': userId, 'pendingCount': pendingCount},
       );
 
       // 1. Push pending changes
@@ -174,16 +175,15 @@ class SyncOrchestrator {
           // Breadcrumb: Pull completed
           SentryBreadcrumbs.addSyncBreadcrumb(
             'Pull phase completed',
-            data: {
-              'pulledCount': count,
-              'mergedItemsCount': count,
-            },
+            data: {'pulledCount': count, 'mergedItemsCount': count},
           );
         },
       );
 
       if (pushFailed || pullFailed) {
-        _logger.warning('SyncOrchestrator: Sync partially failed (push:$pushFailed, pull:$pullFailed)');
+        _logger.warning(
+          'SyncOrchestrator: Sync partially failed (push:$pushFailed, pull:$pullFailed)',
+        );
         SentryBreadcrumbs.addSyncBreadcrumb(
           'Sync cycle partially failed',
           data: {
@@ -208,7 +208,11 @@ class SyncOrchestrator {
         _statusController.add(const SyncStatus.idle());
       }
     } catch (error, stackTrace) {
-      _logger.error('SyncOrchestrator: Unhandled sync exception', error, stackTrace);
+      _logger.error(
+        'SyncOrchestrator: Unhandled sync exception',
+        error,
+        stackTrace,
+      );
       SentryBreadcrumbs.addSyncBreadcrumb(
         'Sync cycle failed with exception',
         data: {

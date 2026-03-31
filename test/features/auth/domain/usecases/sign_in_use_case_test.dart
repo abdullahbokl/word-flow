@@ -52,9 +52,7 @@ void main() {
         result,
         const Left<Failure, AuthUser>(AuthFailure('Invalid email format')),
       );
-      verifyNever(
-        () => mockAuthRepository.signInWithEmail(any(), any()),
-      );
+      verifyNever(() => mockAuthRepository.signInWithEmail(any(), any()));
     });
 
     test('Empty password -> Left(AuthFailure)', () async {
@@ -66,9 +64,7 @@ void main() {
           AuthFailure('Password must be at least 8 characters'),
         ),
       );
-      verifyNever(
-        () => mockAuthRepository.signInWithEmail(any(), any()),
-      );
+      verifyNever(() => mockAuthRepository.signInWithEmail(any(), any()));
     });
 
     test('Password too short -> Left(AuthFailure)', () async {
@@ -80,23 +76,24 @@ void main() {
           AuthFailure('Password must be at least 8 characters'),
         ),
       );
-      verifyNever(
-        () => mockAuthRepository.signInWithEmail(any(), any()),
-      );
+      verifyNever(() => mockAuthRepository.signInWithEmail(any(), any()));
     });
 
-    test('Repository returns Left(AuthFailure) -> propagated correctly', () async {
-      when(
-        () => mockAuthRepository.signInWithEmail(validEmail, validPassword),
-      ).thenAnswer((_) async => const Left(repoFailure));
+    test(
+      'Repository returns Left(AuthFailure) -> propagated correctly',
+      () async {
+        when(
+          () => mockAuthRepository.signInWithEmail(validEmail, validPassword),
+        ).thenAnswer((_) async => const Left(repoFailure));
 
-      final result = await signInWithEmailUseCase(validEmail, validPassword);
+        final result = await signInWithEmailUseCase(validEmail, validPassword);
 
-      expect(result, const Left<Failure, AuthUser>(repoFailure));
-      verify(
-        () => mockAuthRepository.signInWithEmail(validEmail, validPassword),
-      ).called(1);
-    });
+        expect(result, const Left<Failure, AuthUser>(repoFailure));
+        verify(
+          () => mockAuthRepository.signInWithEmail(validEmail, validPassword),
+        ).called(1);
+      },
+    );
   });
 
   group('SignUpWithEmailUseCase', () {
@@ -120,22 +117,23 @@ void main() {
         result,
         const Left<Failure, AuthUser>(AuthFailure('Invalid email format')),
       );
-      verifyNever(
-        () => mockAuthRepository.signUpWithEmail(any(), any()),
-      );
+      verifyNever(() => mockAuthRepository.signUpWithEmail(any(), any()));
     });
 
-    test('Repository returns Left(AuthFailure) -> propagated correctly', () async {
-      when(
-        () => mockAuthRepository.signUpWithEmail(validEmail, validPassword),
-      ).thenAnswer((_) async => const Left(repoFailure));
+    test(
+      'Repository returns Left(AuthFailure) -> propagated correctly',
+      () async {
+        when(
+          () => mockAuthRepository.signUpWithEmail(validEmail, validPassword),
+        ).thenAnswer((_) async => const Left(repoFailure));
 
-      final result = await signUpWithEmailUseCase(validEmail, validPassword);
+        final result = await signUpWithEmailUseCase(validEmail, validPassword);
 
-      expect(result, const Left<Failure, AuthUser>(repoFailure));
-      verify(
-        () => mockAuthRepository.signUpWithEmail(validEmail, validPassword),
-      ).called(1);
-    });
+        expect(result, const Left<Failure, AuthUser>(repoFailure));
+        verify(
+          () => mockAuthRepository.signUpWithEmail(validEmail, validPassword),
+        ).called(1);
+      },
+    );
   });
 }

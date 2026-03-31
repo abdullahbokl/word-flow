@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:word_flow/features/auth/presentation/widgets/auth_status_widgets.dart';
 
 class GuestUserStatus extends StatelessWidget {
-
   const GuestUserStatus({
     super.key,
     required this.isCompact,
@@ -29,7 +28,11 @@ class GuestUserStatus extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.account_circle_outlined, size: 16, color: scheme.onSurfaceVariant),
+              Icon(
+                Icons.account_circle_outlined,
+                size: 16,
+                color: scheme.onSurfaceVariant,
+              ),
               const SizedBox(width: 8),
               label,
             ],
@@ -43,7 +46,11 @@ class GuestUserStatus extends StatelessWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.account_circle_outlined, size: 16, color: scheme.onSurfaceVariant),
+        Icon(
+          Icons.account_circle_outlined,
+          size: 16,
+          color: scheme.onSurfaceVariant,
+        ),
         const SizedBox(width: 8),
         label,
         const SizedBox(width: 12),

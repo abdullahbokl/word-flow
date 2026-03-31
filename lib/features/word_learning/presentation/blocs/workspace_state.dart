@@ -22,5 +22,6 @@ sealed class WorkspaceState with _$WorkspaceState {
     String? lastError,
     Failure? failure,
   }) = _Results;
-  const factory WorkspaceState.error(String message, {Failure? failure}) = _Error;
+  const factory WorkspaceState.error(String message, {Failure? failure}) =
+      _Error;
 }

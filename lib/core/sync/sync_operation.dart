@@ -4,9 +4,8 @@ enum SyncOperation {
 
   String get value => name;
 
-  static SyncOperation fromString(String s) =>
-      SyncOperation.values.firstWhere(
-        (e) => e.value == s,
-        orElse: () => throw ArgumentError('Unknown sync operation: $s'),
-      );
+  static SyncOperation fromString(String s) => SyncOperation.values.firstWhere(
+    (e) => e.value == s,
+    orElse: () => throw ArgumentError('Unknown sync operation: $s'),
+  );
 }

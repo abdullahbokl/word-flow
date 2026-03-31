@@ -17,8 +17,9 @@ void main() {
 
   group('GetGuestWordsCount', () {
     test('should return count from repository', () async {
-      when(() => mockRepository.getGuestWordsCount())
-          .thenAnswer((_) async => const Right(5));
+      when(
+        () => mockRepository.getGuestWordsCount(),
+      ).thenAnswer((_) async => const Right(5));
 
       final result = await useCase(const NoParams());
 

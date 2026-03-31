@@ -5,7 +5,6 @@ import 'package:injectable/injectable.dart';
 
 @lazySingleton
 class ToggleKnownWord {
-
   ToggleKnownWord(this._repository);
   final WordRepository _repository;
 

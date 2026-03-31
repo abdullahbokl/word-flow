@@ -5,7 +5,6 @@ import 'package:word_flow/features/vocabulary/domain/repositories/word_repositor
 
 @lazySingleton
 class AdoptGuestWords {
-
   AdoptGuestWords(this._repository);
   final WordRepository _repository;
 

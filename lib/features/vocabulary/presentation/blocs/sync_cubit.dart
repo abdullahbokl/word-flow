@@ -41,10 +41,8 @@ class SyncCubit extends Cubit<SyncState> {
             lastSyncTime: s.lastSyncTime,
             failure: s.failure,
           ),
-          syncing: (s) => SyncState.syncing(
-            pendingCount: count,
-            failure: s.failure,
-          ),
+          syncing: (s) =>
+              SyncState.syncing(pendingCount: count, failure: s.failure),
           error: (s) => SyncState.error(
             pendingCount: count,
             message: s.message,

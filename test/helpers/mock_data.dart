@@ -73,11 +73,7 @@ const testEmptyScriptSummary = ScriptSummary.empty();
 
 const testScriptAnalysis = ScriptAnalysis(
   summary: testScriptSummary,
-  words: [
-    testProcessedWord,
-    testProcessedKnownWord,
-    testProcessedWord2,
-  ],
+  words: [testProcessedWord, testProcessedKnownWord, testProcessedWord2],
 );
 
 const testScriptAnalysisEmpty = ScriptAnalysis(
@@ -89,11 +85,7 @@ const testScriptAnalysisEmpty = ScriptAnalysis(
 // WORD LIST TEST FIXTURES
 // ============================================================================
 
-final testWordList = [
-  testWord,
-  testKnownWord,
-  testWord2,
-];
+final testWordList = [testWord, testKnownWord, testWord2];
 
 final testEmptyWordList = <WordEntity>[];
 
@@ -137,10 +129,6 @@ final testWordRow2 = WordRow(
   lastUpdated: DateTime(2024, 1, 1),
 );
 
-final testWordRowList = [
-  testWordRow,
-  testKnownWordRow,
-  testWordRow2,
-];
+final testWordRowList = [testWordRow, testKnownWordRow, testWordRow2];
 
 final testEmptyWordRowList = <WordRow>[];

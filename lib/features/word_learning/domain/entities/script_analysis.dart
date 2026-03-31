@@ -9,11 +9,7 @@ class ScriptSummary extends Equatable {
   });
 
   const ScriptSummary.empty()
-      : this(
-          totalWords: 0,
-          uniqueWords: 0,
-          newWords: 0,
-        );
+    : this(totalWords: 0, uniqueWords: 0, newWords: 0);
 
   final int totalWords;
   final int uniqueWords;

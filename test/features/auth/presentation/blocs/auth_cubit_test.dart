@@ -18,9 +18,11 @@ import 'package:word_flow/features/auth/presentation/blocs/auth_state.dart';
 
 class MockAuthRepository extends Mock implements AuthRepository {}
 
-class MockSignInWithEmailUseCase extends Mock implements SignInWithEmailUseCase {}
+class MockSignInWithEmailUseCase extends Mock
+    implements SignInWithEmailUseCase {}
 
-class MockSignUpWithEmailUseCase extends Mock implements SignUpWithEmailUseCase {}
+class MockSignUpWithEmailUseCase extends Mock
+    implements SignUpWithEmailUseCase {}
 
 class MockSignOutAndClearLocal extends Mock implements SignOutAndClearLocal {}
 
@@ -38,8 +40,8 @@ class _CooldownRateLimiter extends RateLimiter {
   _CooldownRateLimiter({
     required DateTime Function() now,
     required Duration initialCooldown,
-  })  : _now = now,
-        super(storage: _NoopRateLimiterStorage(), storageKey: 'auth_test') {
+  }) : _now = now,
+       super(storage: _NoopRateLimiterStorage(), storageKey: 'auth_test') {
     _cooldownUntil = _now().add(initialCooldown);
   }
 
@@ -95,8 +97,9 @@ void main() {
     mockRateLimiter = MockRateLimiter();
     authStateController = StreamController<AuthStateChange>.broadcast();
 
-    when(() => mockAuthRepository.authStateStream)
-        .thenAnswer((_) => authStateController.stream);
+    when(
+      () => mockAuthRepository.authStateStream,
+    ).thenAnswer((_) => authStateController.stream);
     when(() => mockRateLimiter.initialize()).thenAnswer((_) async {});
     when(() => mockRateLimiter.canAttempt()).thenReturn(true);
     when(() => mockRateLimiter.recordAttempt()).thenAnswer((_) async {});
@@ -226,8 +229,9 @@ void main() {
     blocTest<AuthCubit, AuthState>(
       'signIn() valid -> emits [loading, authenticated]',
       build: () {
-        when(() => mockSignInUseCase('user@example.com', 'Password1'))
-            .thenAnswer((_) async => const Right(testUser));
+        when(
+          () => mockSignInUseCase('user@example.com', 'Password1'),
+        ).thenAnswer((_) async => const Right(testUser));
         return buildCubit();
       },
       act: (cubit) => cubit.signIn('user@example.com', 'Password1'),
@@ -236,8 +240,9 @@ void main() {
         const AuthState.authenticated(testUser),
       ],
       verify: (_) {
-        verify(() => mockSignInUseCase('user@example.com', 'Password1'))
-            .called(1);
+        verify(
+          () => mockSignInUseCase('user@example.com', 'Password1'),
+        ).called(1);
       },
     );
 
@@ -256,9 +261,7 @@ void main() {
       ],
       verify: (_) {
         verify(() => mockSignInUseCase('invalid-email', 'Password1')).called(1);
-        verifyNever(
-          () => mockAuthRepository.signInWithEmail(any(), any()),
-        );
+        verifyNever(() => mockAuthRepository.signInWithEmail(any(), any()));
       },
     );
 
@@ -266,8 +269,9 @@ void main() {
       'signIn() rate limited -> emits rateLimited with remainingCooldown',
       build: () {
         when(() => mockRateLimiter.canAttempt()).thenReturn(false);
-        when(() => mockRateLimiter.remainingCooldown)
-            .thenReturn(const Duration(seconds: 30));
+        when(
+          () => mockRateLimiter.remainingCooldown,
+        ).thenReturn(const Duration(seconds: 30));
         return buildCubit();
       },
       act: (cubit) => cubit.signIn('user@example.com', 'Password1'),
@@ -280,8 +284,9 @@ void main() {
     blocTest<AuthCubit, AuthState>(
       'logOut() -> emits [loading, guest]',
       build: () {
-        when(() => mockSignOutUseCase())
-            .thenAnswer((_) async => const Right(null));
+        when(
+          () => mockSignOutUseCase(),
+        ).thenAnswer((_) async => const Right(null));
         return buildCubit();
       },
       act: (cubit) => cubit.logOut(),
@@ -301,10 +306,12 @@ void main() {
           initialCooldown: const Duration(seconds: 5),
         );
 
-        when(() => mockAuthRepository.authStateStream)
-            .thenAnswer((_) => const Stream.empty());
-        when(() => mockSignInUseCase('user@example.com', 'Password1'))
-            .thenAnswer((_) async => const Right(testUser));
+        when(
+          () => mockAuthRepository.authStateStream,
+        ).thenAnswer((_) => const Stream.empty());
+        when(
+          () => mockSignInUseCase('user@example.com', 'Password1'),
+        ).thenAnswer((_) async => const Right(testUser));
 
         final cubit = buildCubit(rateLimiter: limiter);
         final emitted = <AuthState>[];

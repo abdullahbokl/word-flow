@@ -37,11 +37,7 @@ class ErrorStateWidget extends StatelessWidget {
                 color: colorScheme.errorContainer.withValues(alpha: 0.4),
                 shape: BoxShape.circle,
               ),
-              child: Icon(
-                icon,
-                size: 64,
-                color: colorScheme.error,
-              ),
+              child: Icon(icon, size: 64, color: colorScheme.error),
             ),
             const SizedBox(height: 32),
             Text(

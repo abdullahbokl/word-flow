@@ -3,7 +3,6 @@ import 'package:word_flow/shared/widgets/word_card_base.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 
 class WordResultsAnimatedItem extends StatelessWidget {
-
   const WordResultsAnimatedItem({
     super.key,
     required this.animation,
@@ -20,7 +19,6 @@ class WordResultsAnimatedItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-   
     final curvedAnimation = CurvedAnimation(
       parent: animation,
       curve: Curves.easeOutCubic,

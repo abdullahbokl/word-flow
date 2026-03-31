@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class EmptyState extends StatelessWidget {
-  
   const EmptyState({
     super.key,
     required this.icon,
@@ -23,26 +22,25 @@ class EmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              icon, 
-              size: 64, 
-              color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
+              icon,
+              size: 64,
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurfaceVariant.withValues(alpha: 0.4),
             ),
             const SizedBox(height: 16),
             Text(
-              title, 
+              title,
               style: Theme.of(context).textTheme.titleMedium,
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 8),
             Text(
-              subtitle, 
-              style: Theme.of(context).textTheme.bodySmall, 
-              textAlign: TextAlign.center
+              subtitle,
+              style: Theme.of(context).textTheme.bodySmall,
+              textAlign: TextAlign.center,
             ),
-            if (action != null) ...[
-              const SizedBox(height: 24), 
-              action!
-            ],
+            if (action != null) ...[const SizedBox(height: 24), action!],
           ],
         ),
       ),

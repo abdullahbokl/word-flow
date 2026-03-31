@@ -22,8 +22,9 @@ void main() {
 
     test('should call repository.syncPendingWords', () async {
       // Arrange
-      when(() => mockRepository.syncPendingWords())
-          .thenAnswer((_) async => const Right(testSyncedCount));
+      when(
+        () => mockRepository.syncPendingWords(),
+      ).thenAnswer((_) async => const Right(testSyncedCount));
 
       // Act
       await useCase(const NoParams());
@@ -34,8 +35,9 @@ void main() {
 
     test('should return Right(count) on success', () async {
       // Arrange
-      when(() => mockRepository.syncPendingWords())
-          .thenAnswer((_) async => const Right(testSyncedCount));
+      when(
+        () => mockRepository.syncPendingWords(),
+      ).thenAnswer((_) async => const Right(testSyncedCount));
 
       // Act
       final result = await useCase(const NoParams());
@@ -47,8 +49,9 @@ void main() {
 
     test('should return Right(0) when nothing to sync', () async {
       // Arrange
-      when(() => mockRepository.syncPendingWords())
-          .thenAnswer((_) async => const Right(0));
+      when(
+        () => mockRepository.syncPendingWords(),
+      ).thenAnswer((_) async => const Right(0));
 
       // Act
       final result = await useCase(const NoParams());
@@ -61,8 +64,9 @@ void main() {
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
       const failure = SyncFailure('Failed to sync pending words');
-      when(() => mockRepository.syncPendingWords())
-          .thenAnswer((_) async => const Left(failure));
+      when(
+        () => mockRepository.syncPendingWords(),
+      ).thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(const NoParams());
@@ -74,8 +78,9 @@ void main() {
     test('should return Left(Failure) on server error', () async {
       // Arrange
       const failure = ServerFailure('Server error during sync');
-      when(() => mockRepository.syncPendingWords())
-          .thenAnswer((_) async => const Left(failure));
+      when(
+        () => mockRepository.syncPendingWords(),
+      ).thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(const NoParams());

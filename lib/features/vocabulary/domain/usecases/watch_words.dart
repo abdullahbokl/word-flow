@@ -12,6 +12,8 @@ class WatchWords extends BaseStreamUseCase<List<WordEntity>, UserIdParams> {
 
   @override
   Stream<Either<Failure, List<WordEntity>>> call(UserIdParams params) {
-    return _repository.watchWords(userId: params.userId).map((words) => Right(words));
+    return _repository
+        .watchWords(userId: params.userId)
+        .map((words) => Right(words));
   }
 }

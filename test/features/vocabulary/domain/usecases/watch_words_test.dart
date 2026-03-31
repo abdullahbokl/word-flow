@@ -28,8 +28,9 @@ void main() {
 
     test('should call repository.watchWords with correct userId', () {
       // Arrange
-      when(() => mockRepository.watchWords(userId: any(named: 'userId')))
-          .thenAnswer((_) => Stream.value(testWordList));
+      when(
+        () => mockRepository.watchWords(userId: any(named: 'userId')),
+      ).thenAnswer((_) => Stream.value(testWordList));
 
       // Act
       useCase(const UserIdParams(userId: testUserId));
@@ -38,22 +39,27 @@ void main() {
       verify(() => mockRepository.watchWords(userId: testUserId)).called(1);
     });
 
-    test('should call repository.watchWords with null userId when not provided', () {
-      // Arrange
-      when(() => mockRepository.watchWords(userId: any(named: 'userId')))
-          .thenAnswer((_) => Stream.value(testWordList));
+    test(
+      'should call repository.watchWords with null userId when not provided',
+      () {
+        // Arrange
+        when(
+          () => mockRepository.watchWords(userId: any(named: 'userId')),
+        ).thenAnswer((_) => Stream.value(testWordList));
 
-      // Act
-      useCase(const UserIdParams());
+        // Act
+        useCase(const UserIdParams());
 
-      // Assert
-      verify(() => mockRepository.watchWords(userId: null)).called(1);
-    });
+        // Assert
+        verify(() => mockRepository.watchWords(userId: null)).called(1);
+      },
+    );
 
     test('should return a stream from repository', () {
       // Arrange
-      when(() => mockRepository.watchWords(userId: any(named: 'userId')))
-          .thenAnswer((_) => Stream.value(testWordList));
+      when(
+        () => mockRepository.watchWords(userId: any(named: 'userId')),
+      ).thenAnswer((_) => Stream.value(testWordList));
 
       // Act
       final stream = useCase(const UserIdParams(userId: testUserId));
@@ -64,55 +70,70 @@ void main() {
 
     test('should emit word list from repository stream', () {
       // Arrange
-      when(() => mockRepository.watchWords(userId: any(named: 'userId')))
-          .thenAnswer((_) => Stream.value(testWordList));
+      when(
+        () => mockRepository.watchWords(userId: any(named: 'userId')),
+      ).thenAnswer((_) => Stream.value(testWordList));
 
       // Act
       final stream = useCase(const UserIdParams(userId: testUserId));
 
       // Assert
-      expectLater(stream, emits(Right<Failure, List<WordEntity>>(testWordList)));
+      expectLater(
+        stream,
+        emits(Right<Failure, List<WordEntity>>(testWordList)),
+      );
     });
 
     test('should emit empty list when no words', () {
       // Arrange
-      when(() => mockRepository.watchWords(userId: any(named: 'userId')))
-          .thenAnswer((_) => Stream.value(testEmptyWordList));
+      when(
+        () => mockRepository.watchWords(userId: any(named: 'userId')),
+      ).thenAnswer((_) => Stream.value(testEmptyWordList));
 
       // Act
       final stream = useCase(const UserIdParams(userId: testUserId));
 
       // Assert
-      expectLater(stream, emits(Right<Failure, List<WordEntity>>(testEmptyWordList)));
+      expectLater(
+        stream,
+        emits(Right<Failure, List<WordEntity>>(testEmptyWordList)),
+      );
     });
 
     test('should emit multiple word lists over time', () {
       final singleWordList = [testWord];
 
       // Arrange
-      when(() => mockRepository.watchWords(userId: any(named: 'userId')))
-          .thenAnswer((_) => Stream.fromIterable([
-            testEmptyWordList,
-            singleWordList,
-            testWordList,
-          ]));
+      when(
+        () => mockRepository.watchWords(userId: any(named: 'userId')),
+      ).thenAnswer(
+        (_) => Stream.fromIterable([
+          testEmptyWordList,
+          singleWordList,
+          testWordList,
+        ]),
+      );
 
       // Act
       final stream = useCase(const UserIdParams(userId: testUserId));
 
       // Assert
-      expectLater(stream, emitsInOrder([
-        Right<Failure, List<WordEntity>>(testEmptyWordList),
-        Right<Failure, List<WordEntity>>(singleWordList),
-        Right<Failure, List<WordEntity>>(testWordList),
-      ]));
+      expectLater(
+        stream,
+        emitsInOrder([
+          Right<Failure, List<WordEntity>>(testEmptyWordList),
+          Right<Failure, List<WordEntity>>(singleWordList),
+          Right<Failure, List<WordEntity>>(testWordList),
+        ]),
+      );
     });
 
     test('should propagate errors from repository stream', () {
       // Arrange
       final error = Exception('Stream error');
-      when(() => mockRepository.watchWords(userId: any(named: 'userId')))
-          .thenAnswer((_) => Stream.error(error));
+      when(
+        () => mockRepository.watchWords(userId: any(named: 'userId')),
+      ).thenAnswer((_) => Stream.error(error));
 
       // Act
       final stream = useCase(const UserIdParams(userId: testUserId));

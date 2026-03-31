@@ -44,10 +44,17 @@ class WordCardBase extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             child: Row(
               children: [
-                ExcludeSemantics(child: StatusIndicator(isKnown: isKnown, color: statusColor)),
+                ExcludeSemantics(
+                  child: StatusIndicator(isKnown: isKnown, color: statusColor),
+                ),
                 const SizedBox(width: 14),
                 Expanded(
-                  child: WordInfo(text: text, count: count, isKnown: isKnown, variants: variants),
+                  child: WordInfo(
+                    text: text,
+                    count: count,
+                    isKnown: isKnown,
+                    variants: variants,
+                  ),
                 ),
                 ToggleButton(
                   isKnown: isKnown,
@@ -56,7 +63,8 @@ class WordCardBase extends StatelessWidget {
                   statusColor: statusColor,
                 ),
                 ..._buildActions(context),
-                if (isPending && mode == WordCardMode.workspace && !enabled) AppLoader(size: 16, color: statusColor),
+                if (isPending && mode == WordCardMode.workspace && !enabled)
+                  AppLoader(size: 16, color: statusColor),
               ],
             ),
           ),
@@ -100,7 +108,10 @@ class WordCardBase extends StatelessWidget {
       case WordCardMode.workspace:
         final workspaceWord = word as ProcessedWord;
         final userId = context.read<AuthCubit>().currentUserId;
-        context.read<WorkspaceCubit>().toggleKnown(workspaceWord.wordText, userId: userId);
+        context.read<WorkspaceCubit>().toggleKnown(
+          workspaceWord.wordText,
+          userId: userId,
+        );
       case WordCardMode.library:
         final libraryWord = word as WordEntity;
         context.read<LibraryCubit>().toggleKnown(libraryWord);

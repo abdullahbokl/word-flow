@@ -1,7 +1,6 @@
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/database/app_database.dart';
 
-
 abstract class WordLocalSource {
   Future<void> saveWord(WordsCompanion word);
   Future<void> saveWords(List<WordsCompanion> words);
@@ -22,7 +21,6 @@ abstract class WordLocalSource {
 
 @LazySingleton(as: WordLocalSource)
 class WordLocalSourceImpl implements WordLocalSource {
-
   WordLocalSourceImpl(this._db);
   final WordFlowDatabase _db;
 
@@ -65,7 +63,10 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Future<List<WordRow>> getWordsByTexts(List<String> texts, {String? userId}) async {
+  Future<List<WordRow>> getWordsByTexts(
+    List<String> texts, {
+    String? userId,
+  }) async {
     return _db.getWordsByTexts(texts, userId: userId);
   }
 

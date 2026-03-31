@@ -7,7 +7,6 @@ import 'package:word_flow/features/word_learning/presentation/widgets/analysis_c
 import 'package:word_flow/shared/widgets/word_card_shimmer.dart';
 
 class ResultsStateSwitcher extends StatelessWidget {
-
   const ResultsStateSwitcher({
     super.key,
     required this.state,
@@ -33,35 +32,33 @@ class _InitialState extends StatelessWidget {
   const _InitialState();
   @override
   Widget build(BuildContext context) => const SliverToBoxAdapter(
-        child: SectionCard(
-          title: 'Analysis results',
-          subtitle: 'New and recognized words from your text.',
-          child: EmptyStateView(
-            icon: Icons.auto_awesome_rounded,
-            title: 'Ready when you are',
-            message: 'Paste a text block and analyze it to surface unfamiliar words.',
-          ),
-        ),
-      );
+    child: SectionCard(
+      title: 'Analysis results',
+      subtitle: 'New and recognized words from your text.',
+      child: EmptyStateView(
+        icon: Icons.auto_awesome_rounded,
+        title: 'Ready when you are',
+        message:
+            'Paste a text block and analyze it to surface unfamiliar words.',
+      ),
+    ),
+  );
 }
 
 class _LoadingState extends StatelessWidget {
   const _LoadingState();
   @override
   Widget build(BuildContext context) => const SliverToBoxAdapter(
-        child: SectionCard(
-          title: 'Analysis results',
-          subtitle: 'New and recognized words from your text.',
-          trailing: AnalysisChip(
-            icon: Icons.hourglass_top_rounded,
-            label: 'Analyzing',
-          ),
-          child: SizedBox(
-            height: 220,
-            child: ShimmerList(count: 4),
-          ),
-        ),
-      );
+    child: SectionCard(
+      title: 'Analysis results',
+      subtitle: 'New and recognized words from your text.',
+      trailing: AnalysisChip(
+        icon: Icons.hourglass_top_rounded,
+        label: 'Analyzing',
+      ),
+      child: SizedBox(height: 220, child: ShimmerList(count: 4)),
+    ),
+  );
 }
 
 class _ErrorState extends StatelessWidget {
@@ -69,14 +66,14 @@ class _ErrorState extends StatelessWidget {
   final String message;
   @override
   Widget build(BuildContext context) => SliverToBoxAdapter(
-        child: SectionCard(
-          title: 'Analysis results',
-          subtitle: 'New and recognized words from your text.',
-          child: EmptyStateView(
-            icon: Icons.error_outline_rounded,
-            title: 'Could not analyze the text',
-            message: message,
-          ),
-        ),
-      );
+    child: SectionCard(
+      title: 'Analysis results',
+      subtitle: 'New and recognized words from your text.',
+      child: EmptyStateView(
+        icon: Icons.error_outline_rounded,
+        title: 'Could not analyze the text',
+        message: message,
+      ),
+    ),
+  );
 }

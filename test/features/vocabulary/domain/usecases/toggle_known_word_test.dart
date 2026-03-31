@@ -20,43 +20,59 @@ void main() {
   const tUserId = 'user-123';
 
   group('ToggleKnownWord', () {
-    test('should return Right(null) when call to repository is successful', () async {
-      // arrange
-      when(() => mockRepository.toggleKnown(any(), userId: any(named: 'userId')))
-          .thenAnswer((_) async => const Right(null));
+    test(
+      'should return Right(null) when call to repository is successful',
+      () async {
+        // arrange
+        when(
+          () => mockRepository.toggleKnown(any(), userId: any(named: 'userId')),
+        ).thenAnswer((_) async => const Right(null));
 
-      // act
-      final result = await useCase(tWordText, userId: tUserId);
+        // act
+        final result = await useCase(tWordText, userId: tUserId);
 
-      // assert
-      expect(result, const Right(null));
-      verify(() => mockRepository.toggleKnown(tWordText, userId: tUserId)).called(1);
-    });
+        // assert
+        expect(result, const Right(null));
+        verify(
+          () => mockRepository.toggleKnown(tWordText, userId: tUserId),
+        ).called(1);
+      },
+    );
 
-    test('should return Left(DatabaseFailure) when call to repository fails', () async {
-      // arrange
-      const tFailure = DatabaseFailure('database error');
-      when(() => mockRepository.toggleKnown(any(), userId: any(named: 'userId')))
-          .thenAnswer((_) async => const Left(tFailure));
+    test(
+      'should return Left(DatabaseFailure) when call to repository fails',
+      () async {
+        // arrange
+        const tFailure = DatabaseFailure('database error');
+        when(
+          () => mockRepository.toggleKnown(any(), userId: any(named: 'userId')),
+        ).thenAnswer((_) async => const Left(tFailure));
 
-      // act
-      final result = await useCase(tWordText, userId: tUserId);
+        // act
+        final result = await useCase(tWordText, userId: tUserId);
 
-      // assert
-      expect(result, const Left(tFailure));
-    });
+        // assert
+        expect(result, const Left(tFailure));
+      },
+    );
 
-    test('should successfuly toggle with null userId (guest mode) and pass to repository', () async {
-      // arrange
-      when(() => mockRepository.toggleKnown(any(), userId: null))
-          .thenAnswer((_) async => const Right(null));
+    test(
+      'should successfuly toggle with null userId (guest mode) and pass to repository',
+      () async {
+        // arrange
+        when(
+          () => mockRepository.toggleKnown(any(), userId: null),
+        ).thenAnswer((_) async => const Right(null));
 
-      // act
-      final result = await useCase(tWordText, userId: null);
+        // act
+        final result = await useCase(tWordText, userId: null);
 
-      // assert
-      expect(result, const Right(null));
-      verify(() => mockRepository.toggleKnown(tWordText, userId: null)).called(1);
-    });
+        // assert
+        expect(result, const Right(null));
+        verify(
+          () => mockRepository.toggleKnown(tWordText, userId: null),
+        ).called(1);
+      },
+    );
   });
 }

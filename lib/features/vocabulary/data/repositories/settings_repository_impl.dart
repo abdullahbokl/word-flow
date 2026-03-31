@@ -25,7 +25,8 @@ class SettingsRepositoryImpl implements SettingsRepository {
     try {
       final lang = await _getSetting(_keyLang) ?? 'english';
       final minLenStr = await _getSetting(_keyMinLen) ?? '2';
-      final includeContStr = await _getSetting(_keyIncludeContractions) ?? 'true';
+      final includeContStr =
+          await _getSetting(_keyIncludeContractions) ?? 'true';
       final useStemmingStr = await _getSetting(_keyUseStemming) ?? 'false';
       final customSwStr = await _getSetting(_keyCustomStopwords) ?? '[]';
 
@@ -33,15 +34,19 @@ class SettingsRepositoryImpl implements SettingsRepository {
       final List<dynamic> customList = json.decode(customSwStr);
       final customStopwords = customList.cast<String>().toSet();
 
-      return Right(TextAnalysisConfig(
-        stopWords: {...assetStopwords, ...customStopwords},
-        language: lang,
-        minWordLength: int.tryParse(minLenStr) ?? 2,
-        includeContractionsAsOne: includeContStr == 'true',
-        useStemming: useStemmingStr == 'true',
-      ));
+      return Right(
+        TextAnalysisConfig(
+          stopWords: {...assetStopwords, ...customStopwords},
+          language: lang,
+          minWordLength: int.tryParse(minLenStr) ?? 2,
+          includeContractionsAsOne: includeContStr == 'true',
+          useStemming: useStemmingStr == 'true',
+        ),
+      );
     } catch (e) {
-      return Left(DatabaseFailure('Failed to load analysis settings: ${e.toString()}'));
+      return Left(
+        DatabaseFailure('Failed to load analysis settings: ${e.toString()}'),
+      );
     }
   }
 
@@ -93,7 +98,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
       await _saveSetting(_keyCustomStopwords, json.encode(set.toList()));
       return const Right(null);
     } catch (e) {
-      return Left(DatabaseFailure('Failed to remove stopword: ${e.toString()}'));
+      return Left(
+        DatabaseFailure('Failed to remove stopword: ${e.toString()}'),
+      );
     }
   }
 
@@ -104,7 +111,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
   }
 
   Future<void> _saveSetting(String key, String value) async {
-    await _db.into(_db.appSettings).insertOnConflictUpdate(
+    await _db
+        .into(_db.appSettings)
+        .insertOnConflictUpdate(
           AppSettingsCompanion.insert(key: key, value: value),
         );
   }

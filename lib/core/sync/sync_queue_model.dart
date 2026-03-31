@@ -1,5 +1,4 @@
 class SyncQueueModel {
-
   SyncQueueModel({
     required this.id,
     required this.wordId,

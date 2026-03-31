@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class EmptyStateView extends StatelessWidget {
-
   const EmptyStateView({
     super.key,
     required this.icon,

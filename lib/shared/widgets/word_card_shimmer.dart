@@ -17,14 +17,24 @@ class WordCardShimmer extends StatelessWidget {
             child: Row(
               children: [
                 // Word text placeholder
-                Container(height: 16, width: 120, decoration: BoxDecoration(
-                  color: colorScheme.surface, borderRadius: BorderRadius.circular(4),
-                )),
+                Container(
+                  height: 16,
+                  width: 120,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                ),
                 const Spacer(),
                 // Count badge placeholder
-                Container(height: 24, width: 40, decoration: BoxDecoration(
-                  color: colorScheme.surface, borderRadius: BorderRadius.circular(12),
-                )),
+                Container(
+                  height: 24,
+                  width: 40,
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
               ],
             ),
           ),
