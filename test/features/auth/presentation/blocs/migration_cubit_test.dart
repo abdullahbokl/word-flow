@@ -5,6 +5,7 @@ import 'package:fake_async/fake_async.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/services/migration_service.dart';
 import 'package:word_flow/core/utils/rate_limiter.dart';
 import 'package:word_flow/core/utils/rate_limiter_storage.dart';
@@ -39,7 +40,11 @@ class _CooldownRateLimiter extends RateLimiter {
     required DateTime Function() now,
     required Duration initialCooldown,
   }) : _now = now,
-       super(storage: _NoopRateLimiterStorage(), storageKey: 'migration_test') {
+       super(
+         storage: _NoopRateLimiterStorage(),
+         storageKey: 'migration_test',
+         logger: AppLogger(),
+       ) {
     _cooldownUntil = _now().add(initialCooldown);
   }
 

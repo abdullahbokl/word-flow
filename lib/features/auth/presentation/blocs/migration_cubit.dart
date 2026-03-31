@@ -73,9 +73,27 @@ class MigrationCubit extends Cubit<MigrationState> {
       (failure) async => emit(MigrationState.error(failure.message)),
       (user) async {
         await _rateLimiter.reset();
-        await migrationService.migrateGuestData(user.id);
-        authCubit.onAuthenticatedWithMerge(user);
-        emit(const MigrationState.success());
+        final migrationResult = await migrationService.migrateGuestData(
+          user.id,
+        );
+        migrationResult.fold(
+          (failure) {
+            // Sign-up succeeded but migration failed. Show error with retry option.
+            // The user IS authenticated but guest words were not migrated.
+            emit(
+              MigrationState.error(
+                'Account created but vocabulary migration failed: ${failure.message}. '
+                'Please try signing in again to retry migration.',
+              ),
+            );
+            // Still authenticate the user — account was created successfully.
+            authCubit.onAuthenticatedWithMerge(user);
+          },
+          (count) {
+            authCubit.onAuthenticatedWithMerge(user);
+            emit(const MigrationState.success());
+          },
+        );
       },
     );
   }

@@ -84,20 +84,30 @@ class AppLogger {
 
   /// Log at warning level + forward to Sentry
   /// Logged in both DEBUG and RELEASE builds
-  void warning(String message) {
-    _talker.warning(message);
+  void warning(String message, [String category = 'general']) {
+    _talker.warning('[$category] $message');
     // Forward to Sentry as breadcrumb
-    SentryBreadcrumbs.addSyncBreadcrumb(message, level: SentryLevel.warning);
+    SentryBreadcrumbs.addSyncBreadcrumb(
+      message,
+      data: {'category': category},
+      level: SentryLevel.warning,
+    );
   }
 
   /// Log at error level + forward to Sentry
   /// Logged in both DEBUG and RELEASE builds
-  void error(String message, [Object? error, StackTrace? stackTrace]) {
-    _talker.error(message, error, stackTrace);
+  void error(
+    String message, [
+    Object? error,
+    StackTrace? stackTrace,
+    String category = 'general',
+  ]) {
+    _talker.error('[$category] $message', error, stackTrace);
     // Forward to Sentry as breadcrumb
     SentryBreadcrumbs.addSyncBreadcrumb(
       message,
       data: {
+        'category': category,
         'error': error?.toString(),
         'errorType': error?.runtimeType.toString(),
       },

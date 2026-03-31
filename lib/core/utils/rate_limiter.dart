@@ -5,16 +5,18 @@ class RateLimiter {
   RateLimiter({
     required RateLimiterStorage storage,
     required String storageKey,
+    required AppLogger logger,
     this.maxAttempts = 5,
     this.windowDuration = const Duration(minutes: 1),
   }) : _storage = storage,
-       _storageKey = storageKey;
+       _storageKey = storageKey,
+       _logger = logger;
 
   final int maxAttempts;
   final Duration windowDuration;
   final RateLimiterStorage _storage;
   final String _storageKey;
-  final AppLogger _logger = AppLogger();
+  final AppLogger _logger;
 
   final List<DateTime> _attempts = [];
   bool _initialized = false;
@@ -34,11 +36,15 @@ class RateLimiter {
       // Persist cleanup result so stale attempts don't linger forever.
       await _storage.saveAttempts(_storageKey, _attempts);
     } catch (e, stackTrace) {
-      _logger.warning('RateLimiter initialize failed for key=$_storageKey: $e');
+      _logger.warning(
+        'RateLimiter initialize failed for key=$_storageKey: $e',
+        'rate_limiter',
+      );
       _logger.error(
         'RateLimiter initialize fallback to empty attempts',
         e,
         stackTrace,
+        'rate_limiter',
       );
       _attempts.clear();
     }
@@ -62,8 +68,24 @@ class RateLimiter {
         'Failed to persist rate limiter attempt for key=$_storageKey',
         e,
         stackTrace,
+        'rate_limiter',
       );
     }
+  }
+
+  Future<bool> tryRecordAttempt() async {
+    _cleanup();
+    if (_attempts.length >= maxAttempts) return false;
+
+    _attempts.add(DateTime.now());
+    _cleanup();
+
+    try {
+      await _storage.saveAttempts(_storageKey, _attempts);
+    } catch (e, stackTrace) {
+      _logger.error('Failed to persist rate limiter attempt', e, stackTrace);
+    }
+    return true;
   }
 
   Future<void> reset() async {
@@ -76,6 +98,7 @@ class RateLimiter {
         'Failed to persist rate limiter reset for key=$_storageKey',
         e,
         stackTrace,
+        'rate_limiter',
       );
     }
   }

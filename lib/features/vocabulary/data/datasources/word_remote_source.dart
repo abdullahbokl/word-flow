@@ -36,9 +36,9 @@ abstract class WordRemoteSource {
 }
 
 class WordRemoteSourceImpl implements WordRemoteSource {
-  WordRemoteSourceImpl(this._client);
+  WordRemoteSourceImpl(this._client, this._logger);
   final SupabaseClient _client;
-  final AppLogger _logger = AppLogger();
+  final AppLogger _logger;
 
   @override
   Future<void> upsertWord(WordRemoteDto word) async {

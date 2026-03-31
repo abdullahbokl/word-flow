@@ -9,14 +9,14 @@ import 'package:word_flow/core/security/security_service.dart';
 
 @lazySingleton
 class DatabaseKeyManager {
-  DatabaseKeyManager(this._securityService);
+  DatabaseKeyManager(this._securityService, this._logger);
 
   static const String _keyName = 'wordflow_database_key';
   static final RegExp _hexKeyPattern = RegExp(r'^[0-9a-f]{64}$');
   static const int _maxWriteAttempts = 3;
   static const Duration _retryDelay = Duration(milliseconds: 100);
   final SecurityService _securityService;
-  final AppLogger _logger = AppLogger();
+  final AppLogger _logger;
 
   Future<String> getOrCreateKey() async {
     final result = await _securityService.read(key: _keyName);
@@ -84,6 +84,7 @@ class DatabaseKeyManager {
         lastFailureMessage = failure.message;
         _logger.warning(
           'Database key persistence attempt $attempt/$_maxWriteAttempts failed: ${failure.message}',
+          'database',
         );
         return false;
       }, (_) => true);
@@ -106,6 +107,7 @@ class DatabaseKeyManager {
       'Database key persistence failed after retries',
       exception,
       stackTrace,
+      'database',
     );
     await Sentry.captureException(exception, stackTrace: stackTrace);
 

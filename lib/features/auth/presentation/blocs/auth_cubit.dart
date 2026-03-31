@@ -20,13 +20,14 @@ class AuthCubit extends Cubit<AuthState> {
     this._signUpUseCase,
     this._signOutAndClearLocalUseCase,
     @Named('auth_rate_limiter') this._rateLimiter,
+    this._logger,
   ) : super(const AuthState.initial());
 
   final SignInWithEmailUseCase _signInUseCase;
   final SignUpWithEmailUseCase _signUpUseCase;
   final SignOutAndClearLocal _signOutAndClearLocalUseCase;
   final RateLimiter _rateLimiter;
-  final AppLogger _logger = AppLogger();
+  final AppLogger _logger;
 
   final AuthRepository authRepository;
 
@@ -136,7 +137,8 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> _signIn(String email, String password) async {
-    if (!_rateLimiter.canAttempt()) {
+    final allowed = await _rateLimiter.tryRecordAttempt();
+    if (!allowed) {
       emit(
         AuthState.rateLimited(_rateLimiter.remainingCooldown ?? Duration.zero),
       );
@@ -150,7 +152,6 @@ class AuthCubit extends Cubit<AuthState> {
       );
       return;
     }
-    await _rateLimiter.recordAttempt();
 
     // Start auth transaction
     final transaction = SentryBreadcrumbs.startAuthTransaction('sign_in');
@@ -189,7 +190,8 @@ class AuthCubit extends Cubit<AuthState> {
   }
 
   Future<void> _signUp(String email, String password) async {
-    if (!_rateLimiter.canAttempt()) {
+    final allowed = await _rateLimiter.tryRecordAttempt();
+    if (!allowed) {
       emit(
         AuthState.rateLimited(_rateLimiter.remainingCooldown ?? Duration.zero),
       );
@@ -203,7 +205,6 @@ class AuthCubit extends Cubit<AuthState> {
       );
       return;
     }
-    await _rateLimiter.recordAttempt();
 
     // Start auth transaction
     final transaction = SentryBreadcrumbs.startAuthTransaction('sign_up');

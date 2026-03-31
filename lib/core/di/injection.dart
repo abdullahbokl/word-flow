@@ -182,20 +182,27 @@ abstract class RegisterModule {
 
   @lazySingleton
   @Named('auth_rate_limiter')
-  RateLimiter authRateLimiter(RateLimiterStorage storage) {
-    return RateLimiter(storage: storage, storageKey: 'auth');
+  RateLimiter authRateLimiter(RateLimiterStorage storage, AppLogger logger) {
+    return RateLimiter(storage: storage, storageKey: 'auth', logger: logger);
   }
 
   @lazySingleton
   @Named('migration_rate_limiter')
-  RateLimiter migrationRateLimiter(RateLimiterStorage storage) {
-    return RateLimiter(storage: storage, storageKey: 'migration');
+  RateLimiter migrationRateLimiter(
+    RateLimiterStorage storage,
+    AppLogger logger,
+  ) {
+    return RateLimiter(
+      storage: storage,
+      storageKey: 'migration',
+      logger: logger,
+    );
   }
 
   @lazySingleton
-  WordRemoteSource get wordRemoteSource {
+  WordRemoteSource wordRemoteSource(AppLogger logger) {
     if (EnvConfig.isConfigured) {
-      return WordRemoteSourceImpl(supabaseClient);
+      return WordRemoteSourceImpl(supabaseClient, logger);
     }
     return DisabledWordRemoteSource();
   }

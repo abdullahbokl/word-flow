@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/core/database/database_key_manager.dart';
 import 'package:word_flow/core/errors/exceptions.dart';
 import 'package:word_flow/core/errors/failures.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/security/security_service.dart';
 
 class MockSecurityService extends Mock implements SecurityService {}
@@ -14,7 +15,7 @@ void main() {
 
   setUp(() {
     securityService = MockSecurityService();
-    manager = DatabaseKeyManager(securityService);
+    manager = DatabaseKeyManager(securityService, AppLogger());
   });
 
   test('persists key successfully on the second retry attempt', () async {

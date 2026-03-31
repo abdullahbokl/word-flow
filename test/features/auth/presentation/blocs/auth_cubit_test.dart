@@ -6,6 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/core/errors/failures.dart';
+import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/utils/rate_limiter.dart';
 import 'package:word_flow/core/utils/rate_limiter_storage.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_state_change.dart';
@@ -41,7 +42,11 @@ class _CooldownRateLimiter extends RateLimiter {
     required DateTime Function() now,
     required Duration initialCooldown,
   }) : _now = now,
-       super(storage: _NoopRateLimiterStorage(), storageKey: 'auth_test') {
+       super(
+         storage: _NoopRateLimiterStorage(),
+         storageKey: 'auth_test',
+         logger: AppLogger(),
+       ) {
     _cooldownUntil = _now().add(initialCooldown);
   }
 
@@ -62,6 +67,15 @@ class _CooldownRateLimiter extends RateLimiter {
 
   @override
   Future<void> recordAttempt() async {}
+
+  @override
+  Future<bool> tryRecordAttempt() async {
+    if (!canAttempt()) {
+      return false;
+    }
+    _cooldownUntil = _now();
+    return true;
+  }
 
   @override
   Future<void> reset() async {
@@ -86,6 +100,7 @@ void main() {
       mockSignUpUseCase,
       mockSignOutUseCase,
       rateLimiter ?? mockRateLimiter,
+      AppLogger(),
     );
   }
 
@@ -101,8 +116,9 @@ void main() {
       () => mockAuthRepository.authStateStream,
     ).thenAnswer((_) => authStateController.stream);
     when(() => mockRateLimiter.initialize()).thenAnswer((_) async {});
-    when(() => mockRateLimiter.canAttempt()).thenReturn(true);
-    when(() => mockRateLimiter.recordAttempt()).thenAnswer((_) async {});
+    when(
+      () => mockRateLimiter.tryRecordAttempt(),
+    ).thenAnswer((_) async => true);
     when(() => mockRateLimiter.reset()).thenAnswer((_) async {});
     when(() => mockRateLimiter.remainingCooldown).thenReturn(null);
   });
@@ -268,7 +284,9 @@ void main() {
     blocTest<AuthCubit, AuthState>(
       'signIn() rate limited -> emits rateLimited with remainingCooldown',
       build: () {
-        when(() => mockRateLimiter.canAttempt()).thenReturn(false);
+        when(
+          () => mockRateLimiter.tryRecordAttempt(),
+        ).thenAnswer((_) async => false);
         when(
           () => mockRateLimiter.remainingCooldown,
         ).thenReturn(const Duration(seconds: 30));

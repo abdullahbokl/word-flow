@@ -38,8 +38,11 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
         throw AuthException('Signed in but user data is missing.');
       }
       return AuthUser(id: response.user!.id, email: response.user!.email!);
-    } catch (e) {
-      throw AuthException(e.toString());
+    } on supabase.AuthException catch (e) {
+      final message = e.message.isNotEmpty
+          ? e.message
+          : 'Authentication error occurred';
+      throw AuthException(message);
     }
   }
 
@@ -57,8 +60,11 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
         throw AuthException('Signed up but user data is missing.');
       }
       return AuthUser(id: response.user!.id, email: response.user!.email!);
-    } catch (e) {
-      throw AuthException(e.toString());
+    } on supabase.AuthException catch (e) {
+      final message = e.message.isNotEmpty
+          ? e.message
+          : 'Authentication error occurred';
+      throw AuthException(message);
     }
   }
 
@@ -66,8 +72,11 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
   Future<void> signOut() async {
     try {
       await _supabaseClient.auth.signOut();
-    } catch (e) {
-      throw AuthException(e.toString());
+    } on supabase.AuthException catch (e) {
+      final message = e.message.isNotEmpty
+          ? e.message
+          : 'Authentication error occurred';
+      throw AuthException(message);
     }
   }
 
