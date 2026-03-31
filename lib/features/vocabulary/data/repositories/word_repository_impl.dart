@@ -10,6 +10,7 @@ import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source
 import 'package:word_flow/features/vocabulary/data/mappers/word_mapper.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/features/vocabulary/data/repositories/word_repository_impl_helpers.dart';
+import 'package:word_flow/core/database/constants.dart';
 
 @LazySingleton(as: WordRepository)
 class WordRepositoryImpl
@@ -40,7 +41,7 @@ class WordRepositoryImpl
     String? userId,
   }) async {
     try {
-      return Right(await localSource.getKnownWordTexts(userId: userId));
+      return Right(await localSource.getKnownWordTexts(userId: userId ?? guestUserId));
     } catch (e) {
       return Left(DatabaseFailure(e.toString()));
     }
@@ -48,14 +49,14 @@ class WordRepositoryImpl
 
   @override
   Future<Either<Failure, void>> toggleKnown(String text, {String? userId}) =>
-      handleToggleKnown(text, userId: userId);
+      handleToggleKnown(text, userId: userId ?? guestUserId);
 
   @override
   Future<Either<Failure, List<WordEntity>>> getKnownWords({
     String? userId,
   }) async {
     try {
-      final rows = await localSource.getWords(userId: userId);
+      final rows = await localSource.getWords(userId: userId ?? guestUserId);
       final entities = <WordEntity>[];
       for (final row in rows.where((e) => e.isKnown)) {
         final mapped = WordMapper.fromRow(row);
@@ -75,9 +76,9 @@ class WordRepositoryImpl
     }
   }
 
-  @override
-  Stream<List<WordEntity>> watchWords({String? userId}) =>
-      localSource.watchWords(userId: userId).map((rows) {
+    @override
+    Stream<List<WordEntity>> watchWords({String? userId}) =>
+      localSource.watchWords(userId: userId ?? guestUserId).map((rows) {
         final entities = <WordEntity>[];
         for (final row in rows) {
           final mapped = WordMapper.fromRow(row);
@@ -126,7 +127,7 @@ class WordRepositoryImpl
       await writeQueue.enqueue(() async {
         final companion = WordMapper.toCompanion(word);
         await localSource.saveWord(companion);
-        if (word.userId != null) {
+        if (word.userId != guestUserId) {
           await syncSource.enqueueSyncOperation(
             word.id,
             SyncOperation.upsert.value,

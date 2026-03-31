@@ -4,11 +4,12 @@ import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 import 'package:word_flow/core/database/app_database.dart';
+import 'package:word_flow/core/database/constants.dart';
 
 // Sample Base Data
 final tNow = DateTime.now().toUtc();
 const tUserId = 'user-123';
-const tGuestId = null;
+final tGuestId = guestUserId;
 
 // Word Entities
 final tWordKnown = WordEntity(
@@ -74,7 +75,7 @@ WordEntity createWord({
 }) {
   return WordEntity(
     id: id ?? 'id-${wordText ?? "word"}',
-    userId: userId,
+    userId: userId ?? guestUserId,
     wordText: wordText ?? 'sample',
     isKnown: isKnown ?? false,
     lastUpdated: lastUpdated ?? tNow,

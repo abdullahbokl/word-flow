@@ -169,7 +169,7 @@ void main() {
           // 5. Verify guest word is deleted
           final guestWords = await (db.select(
             db.words,
-          )..where((t) => t.userId.isNull())).get();
+          )..where((t) => t.userId.equals('GUEST'))).get();
           expect(guestWords, isEmpty);
         },
       );

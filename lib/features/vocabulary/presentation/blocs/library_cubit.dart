@@ -10,6 +10,7 @@ import 'package:word_flow/features/vocabulary/domain/usecases/watch_words.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_state.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_optimistic_updates.dart';
 import 'package:word_flow/core/errors/failures.dart';
+import 'package:word_flow/core/database/constants.dart';
 
 @injectable
 class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
@@ -116,7 +117,7 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   Future<void> addWord(String text, bool isKnown, {String? userId}) async {
     final word = WordEntity(
       id: UuidGenerator.generate(),
-      userId: userId,
+      userId: userId ?? guestUserId,
       wordText: text,
       isKnown: isKnown,
       lastUpdated: DateTime.now().toUtc(),

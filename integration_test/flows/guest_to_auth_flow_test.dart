@@ -147,7 +147,7 @@ void main() {
 
       final guestWordsAfterSave = await sl<WordFlowDatabase>().watchWords(userId: null).first;
       expect(guestWordsAfterSave.length, 4);
-      expect(guestWordsAfterSave.every((w) => w.userId == null), isTrue);
+      expect(guestWordsAfterSave.every((w) => w.userId == 'GUEST'), isTrue);
 
       // 2. Mark flutter as known.
       final toggleResult = await wordRepo.toggleKnown('flutter', userId: null);

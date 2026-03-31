@@ -10,6 +10,7 @@ import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
 import 'package:word_flow/core/sync/sync_operation.dart';
 import 'package:word_flow/core/utils/uuid_generator.dart';
 import 'package:word_flow/core/database/write_queue.dart';
+import 'package:word_flow/core/database/constants.dart';
 
 mixin WordRepositoryImplHelpers {
   WordLocalSource get localSource;
@@ -53,7 +54,7 @@ mixin WordRepositoryImplHelpers {
             companions.add(
               WordMapper.toCompanion(word.copyWith(lastUpdated: now)),
             );
-            if (word.userId != null) syncIds.add(word.id);
+            if (word.userId != guestUserId) syncIds.add(word.id);
           } else {
             final existingEntity = WordMapper.fromRow(
               existing,
@@ -64,7 +65,7 @@ mixin WordRepositoryImplHelpers {
               lastUpdated: now,
             );
             companions.add(WordMapper.toCompanion(merged));
-            if (merged.userId != null) syncIds.add(merged.id);
+            if (merged.userId != guestUserId) syncIds.add(merged.id);
           }
         }
 
@@ -81,7 +82,7 @@ mixin WordRepositoryImplHelpers {
 
   Future<Either<Failure, void>> handleToggleKnown(
     String text, {
-    String? userId,
+    String userId = guestUserId,
   }) async {
     try {
       await writeQueue.enqueue(() async {
@@ -108,7 +109,7 @@ mixin WordRepositoryImplHelpers {
         }
 
         await localSource.saveWord(WordMapper.toCompanion(entity));
-        if (entity.userId != null) {
+        if (entity.userId != guestUserId) {
           await syncSource.enqueueSyncOperation(
             entity.id,
             SyncOperation.upsert.value,

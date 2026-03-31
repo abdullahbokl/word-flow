@@ -1,19 +1,20 @@
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/database/app_database.dart';
+import 'package:word_flow/core/database/constants.dart';
 
 abstract class WordLocalSource {
   Future<void> saveWord(WordsCompanion word);
   Future<void> saveWords(List<WordsCompanion> words);
   Future<void> saveWordsInTransaction(List<WordsCompanion> companions);
-  Future<Map<String, WordRow>> getWordTextMap({String? userId});
-  Future<List<WordRow>> getWords({String? userId});
-  Future<List<WordRow>> getWordsByTexts(List<String> texts, {String? userId});
+  Future<Map<String, WordRow>> getWordTextMap({String userId = guestUserId});
+  Future<List<WordRow>> getWords({String userId = guestUserId});
+  Future<List<WordRow>> getWordsByTexts(List<String> texts, {String userId = guestUserId});
   Future<Map<String, WordRow>> getWordsByIds(List<String> ids);
-  Future<List<String>> getKnownWordTexts({String? userId});
+  Future<List<String>> getKnownWordTexts({String userId = guestUserId});
   Future<WordRow?> getWordById(String id);
-  Future<WordRow?> getWordByText(String text, {String? userId});
+  Future<WordRow?> getWordByText(String text, {String userId = guestUserId});
   Future<void> deleteWord(String id);
-  Stream<List<WordRow>> watchWords({String? userId});
+  Stream<List<WordRow>> watchWords({String userId = guestUserId});
   Future<int> adoptGuestWords(String userId);
   Future<void> clearLocalWords(String userId);
   Future<void> clearGuestWords();
@@ -42,14 +43,8 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Future<Map<String, WordRow>> getWordTextMap({String? userId}) async {
-    final query = _db.select(_db.words);
-    if (userId != null) {
-      query.where((t) => t.userId.equals(userId));
-    } else {
-      query.where((t) => t.userId.isNull());
-    }
-    final rows = await query.get();
+  Future<Map<String, WordRow>> getWordTextMap({String userId = guestUserId}) async {
+    final rows = await _db.watchWords(userId: userId).first;
     return {for (final row in rows) row.wordText: row};
   }
 
@@ -59,14 +54,14 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Future<List<WordRow>> getWords({String? userId}) async {
+  Future<List<WordRow>> getWords({String userId = guestUserId}) async {
     return _db.watchWords(userId: userId).first;
   }
 
   @override
   Future<List<WordRow>> getWordsByTexts(
     List<String> texts, {
-    String? userId,
+    String userId = guestUserId,
   }) async {
     return _db.getWordsByTexts(texts, userId: userId);
   }
@@ -77,7 +72,7 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Future<List<String>> getKnownWordTexts({String? userId}) async {
+  Future<List<String>> getKnownWordTexts({String userId = guestUserId}) async {
     return _db.getKnownWordTexts(userId: userId);
   }
 
@@ -87,7 +82,7 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Future<WordRow?> getWordByText(String text, {String? userId}) async {
+  Future<WordRow?> getWordByText(String text, {String userId = guestUserId}) async {
     return _db.getWordByText(text, userId: userId);
   }
 
@@ -97,7 +92,7 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Stream<List<WordRow>> watchWords({String? userId}) {
+  Stream<List<WordRow>> watchWords({String userId = guestUserId}) {
     return _db.watchWords(userId: userId);
   }
 

@@ -1,10 +1,13 @@
+
 import 'package:equatable/equatable.dart';
+import 'package:word_flow/core/database/constants.dart';
 
 class WordEntity extends Equatable {
   /// Internal/trusted constructor. Prefer [WordEntity.validated] for external input.
+
   const WordEntity({
     required this.id,
-    this.userId,
+    this.userId = guestUserId,
     required this.wordText,
     this.totalCount = 1,
     this.isKnown = false,
@@ -14,7 +17,7 @@ class WordEntity extends Equatable {
 
   factory WordEntity.validated({
     required String id,
-    String? userId,
+    String userId = guestUserId,
     required String wordText,
     int totalCount = 1,
     bool isKnown = false,
@@ -53,7 +56,7 @@ class WordEntity extends Equatable {
     );
   }
   final String id;
-  final String? userId;
+  final String userId;
   final String wordText;
   final int totalCount;
   final bool isKnown;

@@ -3,7 +3,8 @@ import 'package:drift/drift.dart';
 @DataClassName('WordRow')
 class Words extends Table {
   TextColumn get id => text()();
-  TextColumn get userId => text().nullable().named('user_id')();
+    TextColumn get userId =>
+      text().named('user_id').withDefault(const Constant('GUEST'))();
   TextColumn get wordText => text().named('word_text')();
   IntColumn get totalCount =>
       integer().named('total_count').withDefault(const Constant(1))();
@@ -49,6 +50,8 @@ class AppSettings extends Table {
 }
 
 class SyncDeadLetters extends Table {
+  // Intentionally no FK to `words`: we retain failure evidence even when the
+  // original word row has been deleted or compacted.
   IntColumn get id => integer().autoIncrement()();
   TextColumn get wordId => text().named('word_id')();
   TextColumn get wordText => text().named('word_text')();

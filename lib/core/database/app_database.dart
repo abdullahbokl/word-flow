@@ -2,7 +2,9 @@ import 'dart:async';
 
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
+
 import 'package:word_flow/core/database/tables.dart';
+import 'package:word_flow/core/database/constants.dart';
 
 part 'app_database.g.dart';
 
@@ -13,6 +15,9 @@ class WordFlowDatabase extends _$WordFlowDatabase {
 
   // Test constructor: allow passing a custom QueryExecutor (e.g. in-memory DB)
   WordFlowDatabase.test(super.executor);
+
+  // guestUserId is now imported from constants.dart
+  static const int _maxDeadLetterRows = 200;
 
   static final Map<int, Future<void> Function(WordFlowDatabase)>
   _migrationSteps = {
@@ -25,7 +30,14 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     8: _migrate7To8,
     9: _migrate8To9,
     10: _migrate9To10,
+    11: _migrate10To11,
   };
+
+  static Future<void> _migrate10To11(WordFlowDatabase db) async {
+    // Set all NULL user_id to 'GUEST' for words table
+    await db.customStatement("UPDATE words SET user_id = '$guestUserId' WHERE user_id IS NULL;");
+    // No user_id in word_sync_queue, nothing to do there
+  }
 
   static Future<void> _createAllIndices(DatabaseConnectionUser db) async {
     await db.customStatement(
@@ -52,7 +64,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   // schemaVersion bumps without a corresponding upgrade path.
   @override
   int get schemaVersion {
-    const expectedVersion = 10;
+    const expectedVersion = 11;
     assert(() {
       final maxStep = _migrationSteps.keys.reduce((a, b) => a > b ? a : b);
       if (maxStep != expectedVersion) {
@@ -83,7 +95,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
         }
       });
       assert(() {
-        if (to != 10) {
+        if (to != 11) {
           throw AssertionError(
             'Missing migration steps or wrong target schema version',
           );
@@ -93,21 +105,28 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     },
   );
 
+  String _normalizeUserId(String? userId) => userId ?? guestUserId;
+
+  WordsCompanion _normalizeGuestUserCompanion(WordsCompanion row) {
+    final userId = row.userId;
+    if (userId.present && userId.value == null) {
+      return row.copyWith(userId: const Value(guestUserId));
+    }
+    return row;
+  }
+
   Stream<List<WordRow>> watchWords({String? userId}) {
-    final query = select(words)
-      ..where(
-        (t) => userId == null ? t.userId.isNull() : t.userId.equals(userId),
-      );
+    final resolvedUserId = _normalizeUserId(userId);
+    final query = select(words)..where((t) => t.userId.equals(resolvedUserId));
     return query.watch();
   }
 
   Future<List<String>> getKnownWordTexts({String? userId}) async {
+    final resolvedUserId = _normalizeUserId(userId);
     final query = selectOnly(words)
       ..addColumns([words.wordText])
       ..where(words.isKnown.equals(true))
-      ..where(
-        userId == null ? words.userId.isNull() : words.userId.equals(userId),
-      );
+      ..where(words.userId.equals(resolvedUserId));
     final rows = await query.get();
     return rows.map((r) => r.read(words.wordText)!).toList(growable: false);
   }
@@ -130,24 +149,22 @@ class WordFlowDatabase extends _$WordFlowDatabase {
     List<String> texts, {
     String? userId,
   }) async {
+    final resolvedUserId = _normalizeUserId(userId);
     final query = select(words)
       ..where((t) {
         final textIn = t.wordText.isIn(texts);
-        final userMatch = userId == null
-            ? t.userId.isNull()
-            : t.userId.equals(userId);
+        final userMatch = t.userId.equals(resolvedUserId);
         return textIn & userMatch;
       });
     return query.get();
   }
 
   Future<WordRow?> getWordByText(String text, {String? userId}) async {
+    final resolvedUserId = _normalizeUserId(userId);
     final query = select(words)
       ..where((t) {
         final textMatch = t.wordText.equals(text);
-        final userMatch = userId == null
-            ? t.userId.isNull()
-            : t.userId.equals(userId);
+        final userMatch = t.userId.equals(resolvedUserId);
         return textMatch & userMatch;
       })
       ..orderBy([(t) => OrderingTerm.desc(t.lastUpdated)])
@@ -158,8 +175,9 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   }
 
   Future<void> upsertWords(List<WordsCompanion> rows) async {
+    final normalizedRows = rows.map(_normalizeGuestUserCompanion).toList();
     await batch((b) {
-      b.insertAllOnConflictUpdate(words, rows);
+      b.insertAllOnConflictUpdate(words, normalizedRows);
     });
   }
 
@@ -171,7 +189,7 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   }
 
   Future<void> upsertWord(WordsCompanion row) async {
-    await into(words).insertOnConflictUpdate(row);
+    await into(words).insertOnConflictUpdate(_normalizeGuestUserCompanion(row));
   }
 
   Future<void> deleteWordById(String id) async {
@@ -179,13 +197,19 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   }
 
   Future<int> adoptGuestWords(String userId) async {
-    return transaction(() async {
-      // 1. Get all guest words (userId == null)
+    // Step 1: Perform all merge/adopt writes atomically and return the
+    // resulting count + IDs to sync.
+    final result = await transaction<(int, Set<String>)>(() async {
+      int adoptedCount = 0;
+      final now = DateTime.now().toUtc();
+      final Set<String> changedWordIds = {};
+
+      // 1. Get all guest words assigned to the sentinel user.
       final guestWords = await (select(
         words,
-      )..where((t) => t.userId.isNull())).get();
+      )..where((t) => t.userId.equals(guestUserId))).get();
 
-      if (guestWords.isEmpty) return 0;
+      if (guestWords.isEmpty) return (0, <String>{});
 
       // 2. Get existing user words as a map [wordText -> WordRow]
       final existingUserWordsQuery = select(words)
@@ -195,15 +219,11 @@ class WordFlowDatabase extends _$WordFlowDatabase {
         for (final word in existingUserWords) word.wordText: word,
       };
 
-      int adoptedCount = 0;
-      final now = DateTime.now().toUtc();
-      final Set<String> changedWordIds = {};
-
       // 3. Merge Strategy:
       // - If user DOES NOT have the word: reassign guest word to user (keeps local UUID).
       // - If user DOES have the word: merge guest stats (highest count, union isKnown)
       //   into the existing user word and delete the guest duplicate.
-      // - To save bandwidth, only the IDs in changedWordIds are enqueued for sync.
+      // - To save bandwidth, only changedWordIds are enqueued for sync after commit.
       for (final guest in guestWords) {
         final existing = existingMap[guest.wordText];
 
@@ -234,13 +254,19 @@ class WordFlowDatabase extends _$WordFlowDatabase {
         adoptedCount++;
       }
 
-      // 4. Enqueue ONLY the migrated/merged items for cloud sync
-      for (final wordId in changedWordIds) {
-        await enqueueSyncOperation(wordId, 'upsert');
-      }
-
-      return adoptedCount;
+      return (adoptedCount, changedWordIds);
     });
+
+    final adoptedCount = result.$1;
+    final changedWordIds = result.$2;
+
+    // Step 2: Enqueue sync operations only after the outer transaction commits.
+    // This prevents enqueue failures from rolling back word migration.
+    for (final wordId in changedWordIds) {
+      await enqueueSyncOperation(wordId, 'upsert');
+    }
+
+    return adoptedCount;
   }
 
   Future<void> clearLocalWords(String userId) async {
@@ -248,14 +274,14 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   }
 
   Future<void> clearGuestWords() async {
-    await (delete(words)..where((t) => t.userId.isNull())).go();
+    await (delete(words)..where((t) => t.userId.equals(guestUserId))).go();
   }
 
   Future<int> getGuestWordsCount() async {
     final countExp = words.id.count();
     final query = selectOnly(words)
       ..addColumns([countExp])
-      ..where(words.userId.isNull());
+      ..where(words.userId.equals(guestUserId));
     final row = await query.getSingle();
     return row.read(countExp) ?? 0;
   }
@@ -349,6 +375,16 @@ WHERE word_id NOT IN (SELECT id FROM words)
     await (delete(appSettings)..where((t) => t.key.equals(key))).go();
   }
 
+  Future<void> deleteAppSettingsByPrefix(String prefix) async {
+    await customStatement(
+      '''
+DELETE FROM app_settings
+WHERE "key" LIKE ?
+''',
+      ['$prefix%'],
+    );
+  }
+
   Future<void> insertDeadLetter({
     required String wordId,
     required String wordText,
@@ -356,15 +392,27 @@ WHERE word_id NOT IN (SELECT id FROM words)
     required String lastError,
     required DateTime failedAt,
   }) async {
-    await into(syncDeadLetters).insert(
-      SyncDeadLettersCompanion.insert(
-        wordId: wordId,
-        wordText: wordText,
-        operation: operation,
-        lastError: lastError,
-        failedAt: failedAt,
-      ),
-    );
+    await transaction(() async {
+      await into(syncDeadLetters).insert(
+        SyncDeadLettersCompanion.insert(
+          wordId: wordId,
+          wordText: wordText,
+          operation: operation,
+          lastError: lastError,
+          failedAt: failedAt,
+        ),
+      );
+
+      await customStatement('''
+DELETE FROM sync_dead_letters
+WHERE id NOT IN (
+  SELECT id
+  FROM sync_dead_letters
+  ORDER BY failed_at DESC
+  LIMIT $_maxDeadLetterRows
+)
+''');
+    });
   }
 
   Future<List<SyncDeadLetter>> getUnacknowledgedDeadLetters() {
@@ -604,6 +652,14 @@ CREATE TABLE IF NOT EXISTS sync_dead_letters (
   failed_at TEXT NOT NULL,
   is_acknowledged INTEGER NOT NULL DEFAULT 0
 )
+''');
+}
+
+Future<void> _migrate10To11(WordFlowDatabase db) async {
+  await db.customStatement('''
+UPDATE words
+SET user_id = '${guestUserId}'
+WHERE user_id IS NULL
 ''');
 }
 

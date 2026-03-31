@@ -422,7 +422,7 @@ void main() {
 
         // Verify guest duplicate was deleted
         final guestWords = await db.getWordByText('hello');
-        expect(guestWords, isNull);
+        expect(guestWords, isEmpty);
       },
     );
 
@@ -623,7 +623,7 @@ void main() {
 
         expect(queueAfterReequeue.length, 1);
         expect(queueAfterReequeue.first.retryCount, 0); // Reset to 0
-        expect(queueAfterReequeue.first.lastError, isNull); // Error cleared
+        expect(queueAfterReequeue.first.lastError, isNull); // Error cleared (unchanged, not userId)
       },
     );
 
@@ -876,7 +876,7 @@ void main() {
       final u1Words = await db.getWordByText('w1', userId: 'u1');
       final guestWords = await db.getWordByText('w2');
 
-      expect(u1Words, isNull);
+      expect(u1Words, isEmpty);
       expect(guestWords, isNotNull);
     });
 

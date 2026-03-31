@@ -29,6 +29,7 @@ class SyncStatusBanner extends StatefulWidget {
 class _SyncStatusBannerState extends State<SyncStatusBanner> {
   Timer? _dismissTimer;
   bool _showSyncedMessage = false;
+  DateTime? _lastSeenSyncTime;
 
   @override
   void dispose() {
@@ -76,25 +77,31 @@ class _SyncStatusBannerState extends State<SyncStatusBanner> {
               },
             );
 
-            // Handle auto-dismiss for synced state
-            if (syncState.maybeWhen(
-              idle: (pendingCount, _, __) => pendingCount == 0,
-              orElse: () => false,
-            )) {
-              if (!_showSyncedMessage) {
-                WidgetsBinding.instance.addPostFrameCallback((_) {
-                  if (mounted) {
-                    setState(() => _showSyncedMessage = true);
-                    _startAutoDismiss();
-                  }
-                });
-              }
-            } else {
-              _dismissTimer?.cancel();
-              if (mounted) {
-                setState(() => _showSyncedMessage = false);
-              }
-            }
+                    // Handle auto-dismiss for synced state only when a new sync completed.
+                    final currentLastSyncTime = syncState.maybeWhen(
+                      idle: (pendingCount, lastSyncTime, __) => lastSyncTime,
+                      orElse: () => null,
+                    );
+
+                    final shouldShowSynced = currentLastSyncTime != null &&
+                        ( _lastSeenSyncTime == null || currentLastSyncTime.isAfter(_lastSeenSyncTime!) ) &&
+                        syncState.maybeWhen(idle: (pendingCount, _, __) => pendingCount == 0, orElse: () => false);
+
+                    if (shouldShowSynced) {
+                      _lastSeenSyncTime = currentLastSyncTime;
+                      WidgetsBinding.instance.addPostFrameCallback((_) {
+                        if (mounted) {
+                          setState(() => _showSyncedMessage = true);
+                          _startAutoDismiss();
+                        }
+                      });
+                    } else if (!syncState.maybeWhen(idle: (pendingCount, _, __) => pendingCount == 0, orElse: () => false)) {
+                      // If not idle (or there are pending items), ensure we don't show the synced message.
+                      _dismissTimer?.cancel();
+                      if (mounted) {
+                        setState(() => _showSyncedMessage = false);
+                      }
+                    }
 
             // Show banner only if there's active state to display
             final shouldShowBanner =

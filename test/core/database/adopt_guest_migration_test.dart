@@ -68,7 +68,7 @@ void main() {
       // Verify guest rows removed
       final guests = await (db.select(
         db.words,
-      )..where((t) => t.userId.isNull())).get();
+      )..where((t) => t.userId.equals('GUEST'))).get();
       expect(guests, isEmpty);
 
       // Verify user words: 'flutter' has max count (5) and 'dart' is reassigned

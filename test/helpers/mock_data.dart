@@ -2,6 +2,7 @@ import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
 import 'package:word_flow/core/database/app_database.dart';
+import 'package:word_flow/core/database/constants.dart';
 
 // ============================================================================
 // WORD ENTITY TEST FIXTURES
@@ -24,7 +25,7 @@ final testKnownWord = testWord.copyWith(
 
 final testGuestWord = WordEntity(
   id: 'test-id-3',
-  userId: null,
+  userId: guestUserId,
   wordText: 'hello',
   totalCount: 5,
   isKnown: false,
@@ -113,7 +114,7 @@ final testKnownWordRow = WordRow(
 
 final testGuestWordRow = WordRow(
   id: 'test-id-3',
-  userId: null,
+  userId: guestUserId,
   wordText: 'hello',
   totalCount: 5,
   isKnown: false,

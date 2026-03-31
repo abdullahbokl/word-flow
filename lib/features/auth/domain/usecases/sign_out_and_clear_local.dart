@@ -48,17 +48,6 @@ class SignOutAndClearLocal {
           await wordRepository.clearLocalWords(userId),
           'clear authenticated user words',
         );
-
-        try {
-          // Clear per-user sync cursor to avoid stale pull windows next login.
-          await syncPreferences.clearUserTimestamp(userId);
-        } catch (e, stackTrace) {
-          logger.error(
-            'SignOutAndClearLocal cleanup failed at clear user timestamp',
-            e,
-            stackTrace,
-          );
-        }
       }
 
       // Also clear any remaining guest words.
@@ -66,6 +55,17 @@ class SignOutAndClearLocal {
         await wordRepository.clearGuestWords(),
         'clear guest words',
       );
+
+      try {
+        // Clear ALL sync cursors unconditionally — handles dirty sign-out where userId may be null.
+        await syncPreferences.clearAllTimestamps();
+      } catch (e, stackTrace) {
+        logger.error(
+          'SignOutAndClearLocal cleanup failed at clear all sync timestamps',
+          e,
+          stackTrace,
+        );
+      }
     } catch (e, stackTrace) {
       logger.error(
         'SignOutAndClearLocal unexpected cleanup error',

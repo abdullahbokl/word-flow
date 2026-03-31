@@ -4,6 +4,7 @@ import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
 import 'package:word_flow/features/vocabulary/data/models/word_remote_dto.dart';
 import 'package:word_flow/core/database/app_database.dart';
+import 'package:word_flow/core/database/constants.dart';
 
 class WordMapper {
   static Either<Failure, WordEntity> fromRemoteDto(WordRemoteDto dto) {
@@ -11,7 +12,7 @@ class WordMapper {
       return Right(
         WordEntity.validated(
           id: dto.id,
-          userId: dto.userId,
+          userId: dto.userId ?? guestUserId,
           wordText: dto.wordText,
           totalCount: dto.totalCount,
           isKnown: dto.isKnown,
@@ -43,7 +44,7 @@ class WordMapper {
       return Right(
         WordEntity.validated(
           id: row.id,
-          userId: row.userId,
+          userId: row.userId ?? guestUserId,
           wordText: row.wordText,
           totalCount: row.totalCount,
           isKnown: row.isKnown,

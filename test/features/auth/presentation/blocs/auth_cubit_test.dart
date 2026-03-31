@@ -116,9 +116,7 @@ void main() {
       () => mockAuthRepository.authStateStream,
     ).thenAnswer((_) => authStateController.stream);
     when(() => mockRateLimiter.initialize()).thenAnswer((_) async {});
-    when(
-      () => mockRateLimiter.tryRecordAttempt(),
-    ).thenAnswer((_) async => true);
+    when(() => mockRateLimiter.tryRecordAttempt()).thenAnswer((_) async => true);
     when(() => mockRateLimiter.reset()).thenAnswer((_) async {});
     when(() => mockRateLimiter.remainingCooldown).thenReturn(null);
   });

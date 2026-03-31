@@ -34,6 +34,8 @@ class SyncRepositoryImpl implements SyncRepository {
   final SyncPreferences _preferences;
   final AppLogger _logger;
 
+  static const int _syncBatchSize = 100;
+
   Failure _mapSyncFailure(dynamic error, StackTrace stackTrace) {
     final mapped = ErrorMapper.mapException(error, stackTrace, _logger);
     if (mapped is SyncFailure) {
@@ -64,7 +66,7 @@ class SyncRepositoryImpl implements SyncRepository {
 
     try {
       _logger.syncEvent('Starting sync of pending words');
-      final queueItems = await _syncSource.getSyncQueue(20);
+      final queueItems = await _syncSource.getSyncQueue(_syncBatchSize);
       _logger.syncEvent(
         'Found ${queueItems.length} items in sync queue limit query',
       );

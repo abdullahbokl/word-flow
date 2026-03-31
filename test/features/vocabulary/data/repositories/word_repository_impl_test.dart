@@ -5,6 +5,7 @@ import 'package:word_flow/core/database/write_queue.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/sync/sync_operation.dart';
 import 'package:word_flow/features/vocabulary/data/repositories/word_repository_impl.dart';
+import 'package:word_flow/core/database/constants.dart';
 
 import '../../../../helpers/fakes.dart';
 import '../../../../helpers/mock_data.dart';
@@ -122,7 +123,7 @@ void main() {
 
     test('should NOT enqueue sync for guest users', () async {
       when(
-        () => mockLocal.getWordsByTexts(any(), userId: null),
+        () => mockLocal.getWordsByTexts(any(), userId: guestUserId),
       ).thenAnswer((_) async => []);
 
       when(() => mockLocal.saveWords(any())).thenAnswer((_) async {});
@@ -224,11 +225,11 @@ void main() {
 
     test('should NOT enqueue sync for guest users', () async {
       when(
-        () => mockLocal.getWordByText('hello', userId: null),
+        () => mockLocal.getWordByText('hello', userId: guestUserId),
       ).thenAnswer((_) async => testGuestWordRow);
       when(() => mockLocal.saveWord(any())).thenAnswer((_) async {});
 
-      await repo.toggleKnown('hello', userId: null);
+      await repo.toggleKnown('hello', userId: guestUserId);
 
       verifyNever(() => mockSync.enqueueSyncOperation(any(), any()));
     });
@@ -318,7 +319,7 @@ void main() {
     test('should NOT enqueue sync for guest users', () async {
       when(() => mockLocal.deleteWord(any())).thenAnswer((_) async {});
 
-      await repo.deleteWord('test-id-1', userId: null);
+      await repo.deleteWord('test-id-1', userId: guestUserId);
 
       verifyNever(() => mockSync.enqueueSyncOperation(any(), any()));
     });

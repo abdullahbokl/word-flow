@@ -6,6 +6,7 @@ import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
 import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
+import 'package:word_flow/core/database/constants.dart';
 
 @lazySingleton
 class SaveProcessedWords {
@@ -42,7 +43,7 @@ List<WordEntity> _mapToWords(_MapParams params) {
       .map(
         (e) => WordEntity(
           id: uuid.v4(),
-          userId: params.userId,
+          userId: params.userId ?? guestUserId,
           wordText: e.wordText,
           totalCount: e.totalCount,
           isKnown: e.isKnown,

@@ -24,4 +24,13 @@ class SyncPreferences {
   Future<void> clearUserTimestamp(String userId) async {
     await _db.deleteAppSetting('$_lastPullPrefix$userId');
   }
+
+  /// Clears ALL per-user pull timestamps.
+  /// Call on sign-out to ensure no stale cursors remain for any user.
+  Future<void> clearAllTimestamps() async {
+    // Delete all rows where key starts with the pull prefix.
+    await _db.customStatement(
+      "DELETE FROM app_settings WHERE key LIKE '$_lastPullPrefix%'",
+    );
+  }
 }
