@@ -49,12 +49,14 @@ class _LibrarySearchBarState extends State<LibrarySearchBar> {
         duration: const Duration(milliseconds: 250),
         curve: Curves.easeInOut,
         decoration: BoxDecoration(
-          color: _isFocused 
-              ? scheme.surfaceContainerHighest.withValues(alpha: 0.15) 
+          color: _isFocused
+              ? scheme.surfaceContainerHighest.withValues(alpha: 0.15)
               : scheme.surfaceContainerHighest.withValues(alpha: 0.4),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: _isFocused ? scheme.primary.withValues(alpha: 0.6) : Colors.transparent,
+            color: _isFocused
+                ? scheme.primary.withValues(alpha: 0.6)
+                : Colors.transparent,
             width: 1.5,
           ),
         ),
@@ -68,21 +70,24 @@ class _LibrarySearchBarState extends State<LibrarySearchBar> {
               fontSize: 15,
             ),
             prefixIcon: Icon(
-              Icons.search_rounded, 
+              Icons.search_rounded,
               color: _isFocused ? scheme.primary : scheme.onSurfaceVariant,
               size: 22,
             ),
-            suffixIcon: widget.controller.text.isNotEmpty 
-              ? IconButton(
-                  icon: const Icon(Icons.clear_rounded, size: 20),
-                  onPressed: () {
-                    widget.onClear();
-                    setState(() {}); // Reflect clear state
-                  },
-                )
-              : null,
+            suffixIcon: widget.controller.text.isNotEmpty
+                ? IconButton(
+                    icon: const Icon(Icons.clear_rounded, size: 20),
+                    onPressed: () {
+                      widget.onClear();
+                      setState(() {}); // Reflect clear state
+                    },
+                  )
+                : null,
             border: InputBorder.none,
-            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 16,
+              vertical: 14,
+            ),
           ),
           onChanged: (value) {
             widget.onChanged(value);

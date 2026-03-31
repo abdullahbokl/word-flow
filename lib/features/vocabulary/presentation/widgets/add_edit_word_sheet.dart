@@ -5,12 +5,7 @@ import 'package:word_flow/core/widgets/app_button.dart';
 import 'package:word_flow/core/widgets/app_text_field.dart';
 
 class AddEditWordSheet extends StatefulWidget {
-
-  const AddEditWordSheet({
-    super.key,
-    this.word,
-    required this.onSave,
-  });
+  const AddEditWordSheet({super.key, this.word, required this.onSave});
   final WordEntity? word;
   final Function(String text, bool isKnown) onSave;
 
@@ -53,7 +48,10 @@ class _AddEditWordSheetState extends State<AddEditWordSheet> {
         children: [
           Row(
             children: [
-              Icon(widget.word == null ? Icons.add_rounded : Icons.edit_rounded, color: scheme.primary),
+              Icon(
+                widget.word == null ? Icons.add_rounded : Icons.edit_rounded,
+                color: scheme.primary,
+              ),
               const SizedBox(width: 8),
               Text(
                 widget.word == null ? 'Add word' : 'Edit word',
@@ -71,11 +69,15 @@ class _AddEditWordSheetState extends State<AddEditWordSheet> {
           const SizedBox(height: 16),
           SwitchListTile(
             title: const Text('Already Known?'),
-            subtitle: const Text('Mark this word as known to skip it during analysis.'),
+            subtitle: const Text(
+              'Mark this word as known to skip it during analysis.',
+            ),
             value: _isKnown,
             onChanged: (v) => setState(() => _isKnown = v),
             contentPadding: EdgeInsets.zero,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
           ),
           const SizedBox(height: 24),
           AppButton(

@@ -17,10 +17,10 @@ class TextAnalysisConfig extends Equatable {
 
   @override
   List<Object?> get props => [
-        stopWords,
-        language,
-        minWordLength,
-        includeContractionsAsOne,
-        useStemming,
-      ];
+    stopWords,
+    language,
+    minWordLength,
+    includeContractionsAsOne,
+    useStemming,
+  ];
 }

@@ -15,8 +15,13 @@ import 'package:word_flow/features/word_learning/presentation/blocs/workspace_st
 import 'package:word_flow/features/word_learning/presentation/pages/workspace_page.dart';
 import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:word_flow/features/auth/presentation/blocs/auth_state.dart';
+import 'package:word_flow/features/auth/presentation/blocs/migration_cubit.dart';
+import 'package:word_flow/features/auth/presentation/blocs/migration_state.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart';
+import 'package:word_flow/core/di/injection.dart';
+import 'package:word_flow/features/vocabulary/data/repositories/sync_dead_letter_repository.dart';
+import 'package:word_flow/core/sync/sync_orchestrator.dart';
 
 class MockWorkspaceCubit extends MockCubit<WorkspaceState>
     implements WorkspaceCubit {}
@@ -25,13 +30,30 @@ class MockAuthCubit extends MockCubit<AuthState> implements AuthCubit {}
 
 class MockSyncCubit extends MockCubit<SyncState> implements SyncCubit {}
 
+class MockMigrationCubit extends MockCubit<MigrationState>
+    implements MigrationCubit {}
+
+class MockSyncDeadLetterRepository extends Mock
+    implements SyncDeadLetterRepository {}
+
+class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
+
 void main() {
   late MockAuthCubit authCubit;
   late MockSyncCubit syncCubit;
+  late MockMigrationCubit migrationCubit;
 
   setUp(() {
     authCubit = MockAuthCubit();
     syncCubit = MockSyncCubit();
+    // Provide a migration cubit mock for widgets that listen for migration events
+    migrationCubit = MockMigrationCubit();
+    when(() => migrationCubit.state).thenReturn(const MigrationState.initial());
+    whenListen(
+      migrationCubit,
+      Stream<MigrationState>.fromIterable([const MigrationState.initial()]),
+      initialState: const MigrationState.initial(),
+    );
 
     when(() => authCubit.state).thenReturn(const AuthState.guest());
     whenListen(
@@ -48,6 +70,30 @@ void main() {
       Stream<SyncState>.fromIterable([const SyncState.idle(pendingCount: 0)]),
       initialState: const SyncState.idle(pendingCount: 0),
     );
+
+    // Ensure getIt has a SyncDeadLetterRepository so SyncStatusBadge can lookup
+    // without initializing the full DI graph.
+    final mockDeadLetter = MockSyncDeadLetterRepository();
+    when(
+      () => mockDeadLetter.watchDeadLetterCount(),
+    ).thenAnswer((_) => Stream<int>.value(0));
+    if (!getIt.isRegistered<SyncDeadLetterRepository>()) {
+      getIt.registerSingleton<SyncDeadLetterRepository>(mockDeadLetter);
+    }
+    final mockOrch = MockSyncOrchestrator();
+    when(() => mockOrch.retrySync()).thenReturn(null);
+    if (!getIt.isRegistered<SyncOrchestrator>()) {
+      getIt.registerSingleton<SyncOrchestrator>(mockOrch);
+    }
+  });
+
+  tearDown(() {
+    if (getIt.isRegistered<SyncDeadLetterRepository>()) {
+      getIt.unregister<SyncDeadLetterRepository>();
+    }
+    if (getIt.isRegistered<SyncOrchestrator>()) {
+      getIt.unregister<SyncOrchestrator>();
+    }
   });
 
   testWidgets('app shell wires both themes', (tester) async {
@@ -73,6 +119,7 @@ void main() {
     await tester.pumpWidget(
       MultiBlocProvider(
         providers: [
+          BlocProvider<MigrationCubit>.value(value: migrationCubit),
           BlocProvider<AuthCubit>.value(value: authCubit),
           BlocProvider<SyncCubit>.value(value: syncCubit),
         ],

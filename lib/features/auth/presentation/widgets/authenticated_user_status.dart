@@ -4,7 +4,6 @@ import 'package:word_flow/features/auth/presentation/widgets/auth_status_widgets
 import 'package:word_flow/app/router/routes.dart';
 
 class AuthenticatedUserStatus extends StatelessWidget {
-
   const AuthenticatedUserStatus({
     super.key,
     required this.user,
@@ -35,7 +34,11 @@ class AuthenticatedUserStatus extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.person_outline_rounded, size: 16, color: scheme.primary),
+              Icon(
+                Icons.person_outline_rounded,
+                size: 16,
+                color: scheme.primary,
+              ),
               const SizedBox(width: 8),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 180),

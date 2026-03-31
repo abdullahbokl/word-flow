@@ -21,7 +21,6 @@ abstract class AuthRemoteSource {
 
 @LazySingleton(as: AuthRemoteSource)
 class AuthRemoteSourceImpl implements AuthRemoteSource {
-
   AuthRemoteSourceImpl(this._supabaseClient);
   final supabase.SupabaseClient _supabaseClient;
 
@@ -38,10 +37,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
       if (response.user == null) {
         throw AuthException('Signed in but user data is missing.');
       }
-      return AuthUser(
-        id: response.user!.id,
-        email: response.user!.email!,
-      );
+      return AuthUser(id: response.user!.id, email: response.user!.email!);
     } catch (e) {
       throw AuthException(e.toString());
     }
@@ -60,10 +56,7 @@ class AuthRemoteSourceImpl implements AuthRemoteSource {
       if (response.user == null) {
         throw AuthException('Signed up but user data is missing.');
       }
-      return AuthUser(
-        id: response.user!.id,
-        email: response.user!.email!,
-      );
+      return AuthUser(id: response.user!.id, email: response.user!.email!);
     } catch (e) {
       throw AuthException(e.toString());
     }

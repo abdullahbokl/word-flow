@@ -20,8 +20,12 @@ void main() {
     const tValue = 'test_value';
 
     test('should return right(unit) when write is successful', () async {
-      when(() => mockStorage.write(key: any(named: 'key'), value: any(named: 'value')))
-          .thenAnswer((_) async {});
+      when(
+        () => mockStorage.write(
+          key: any(named: 'key'),
+          value: any(named: 'value'),
+        ),
+      ).thenAnswer((_) async {});
 
       final result = await service.write(key: tKey, value: tValue);
 
@@ -30,8 +34,9 @@ void main() {
     });
 
     test('should return right(value) when read is successful', () async {
-      when(() => mockStorage.read(key: any(named: 'key')))
-          .thenAnswer((_) async => tValue);
+      when(
+        () => mockStorage.read(key: any(named: 'key')),
+      ).thenAnswer((_) async => tValue);
 
       final result = await service.read(key: tKey);
 

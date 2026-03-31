@@ -20,7 +20,6 @@ class StatusBarWrapper extends StatelessWidget {
 }
 
 class ActionButton extends StatelessWidget {
-
   const ActionButton({
     super.key,
     required this.label,
@@ -39,9 +38,9 @@ class ActionButton extends StatelessWidget {
       child: Text(
         label,
         style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isDestructive ? scheme.error : scheme.primary,
-              fontWeight: FontWeight.bold,
-            ),
+          color: isDestructive ? scheme.error : scheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
       ),
     );
   }

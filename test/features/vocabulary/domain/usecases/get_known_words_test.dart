@@ -26,8 +26,9 @@ void main() {
 
     test('should call repository.getKnownWords with correct userId', () async {
       // Arrange
-      when(() => mockRepository.getKnownWords(userId: any(named: 'userId')))
-          .thenAnswer((_) async => Right(testWordList));
+      when(
+        () => mockRepository.getKnownWords(userId: any(named: 'userId')),
+      ).thenAnswer((_) async => Right(testWordList));
 
       // Act
       await useCase(const UserIdParams(userId: testUserId));
@@ -36,22 +37,27 @@ void main() {
       verify(() => mockRepository.getKnownWords(userId: testUserId)).called(1);
     });
 
-    test('should call repository.getKnownWords with null userId when not provided', () async {
-      // Arrange
-      when(() => mockRepository.getKnownWords(userId: any(named: 'userId')))
-          .thenAnswer((_) async => Right(testWordList));
+    test(
+      'should call repository.getKnownWords with null userId when not provided',
+      () async {
+        // Arrange
+        when(
+          () => mockRepository.getKnownWords(userId: any(named: 'userId')),
+        ).thenAnswer((_) async => Right(testWordList));
 
-      // Act
-      await useCase(const UserIdParams());
+        // Act
+        await useCase(const UserIdParams());
 
-      // Assert
-      verify(() => mockRepository.getKnownWords(userId: null)).called(1);
-    });
+        // Assert
+        verify(() => mockRepository.getKnownWords(userId: null)).called(1);
+      },
+    );
 
     test('should return Right(wordList) on success', () async {
       // Arrange
-      when(() => mockRepository.getKnownWords(userId: any(named: 'userId')))
-          .thenAnswer((_) async => Right(testWordList));
+      when(
+        () => mockRepository.getKnownWords(userId: any(named: 'userId')),
+      ).thenAnswer((_) async => Right(testWordList));
 
       // Act
       final result = await useCase(const UserIdParams(userId: testUserId));
@@ -63,8 +69,9 @@ void main() {
 
     test('should return Right(emptyList) when no words found', () async {
       // Arrange
-      when(() => mockRepository.getKnownWords(userId: any(named: 'userId')))
-          .thenAnswer((_) async => const Right([]));
+      when(
+        () => mockRepository.getKnownWords(userId: any(named: 'userId')),
+      ).thenAnswer((_) async => const Right([]));
 
       // Act
       final result = await useCase(const UserIdParams(userId: testUserId));
@@ -77,8 +84,9 @@ void main() {
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
       const failure = DatabaseFailure('Failed to fetch known words');
-      when(() => mockRepository.getKnownWords(userId: any(named: 'userId')))
-          .thenAnswer((_) async => const Left(failure));
+      when(
+        () => mockRepository.getKnownWords(userId: any(named: 'userId')),
+      ).thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(const UserIdParams(userId: testUserId));

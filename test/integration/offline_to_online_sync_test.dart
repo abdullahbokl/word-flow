@@ -40,19 +40,21 @@ void main() {
       ]);
 
       // Verify words persisted
-      final localWords = await (db.select(db.words)
-            ..where((w) => w.userId.equals(userId)))
-          .get();
+      final localWords = await (db.select(
+        db.words,
+      )..where((w) => w.userId.equals(userId))).get();
       expect(localWords.length, 2);
 
       // User marks word as known while offline
-      await db.upsertWord(WordsCompanion(
-        id: const Value('word-1'),
-        userId: const Value(userId),
-        wordText: const Value('flutter'),
-        isKnown: const Value(true),
-        lastUpdated: Value(now.add(const Duration(minutes: 1))),
-      ));
+      await db.upsertWord(
+        WordsCompanion(
+          id: const Value('word-1'),
+          userId: const Value(userId),
+          wordText: const Value('flutter'),
+          isKnown: const Value(true),
+          lastUpdated: Value(now.add(const Duration(minutes: 1))),
+        ),
+      );
 
       // Verify update persisted
       final updatedWord = await db.getWordById('word-1');
@@ -64,26 +66,30 @@ void main() {
       final baseTime = DateTime.now().toUtc();
 
       // Create word offline
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'tracked-word',
-        userId: const Value(userId),
-        wordText: 'modification-test',
-        totalCount: const Value(1),
-        isKnown: const Value(false),
-        lastUpdated: baseTime,
-      ));
+      await db.upsertWord(
+        WordsCompanion.insert(
+          id: 'tracked-word',
+          userId: const Value(userId),
+          wordText: 'modification-test',
+          totalCount: const Value(1),
+          isKnown: const Value(false),
+          lastUpdated: baseTime,
+        ),
+      );
 
       // Update multiple times offline
       for (int i = 2; i <= 4; i++) {
         await Future.delayed(const Duration(milliseconds: 50));
-        await db.upsertWord(WordsCompanion(
-          id: const Value('tracked-word'),
-          userId: const Value(userId),
-          wordText: const Value('modification-test'),
-          totalCount: Value(i),
-          isKnown: Value(i > 2),
-          lastUpdated: Value(baseTime.add(Duration(milliseconds: i * 50))),
-        ));
+        await db.upsertWord(
+          WordsCompanion(
+            id: const Value('tracked-word'),
+            userId: const Value(userId),
+            wordText: const Value('modification-test'),
+            totalCount: Value(i),
+            isKnown: Value(i > 2),
+            lastUpdated: Value(baseTime.add(Duration(milliseconds: i * 50))),
+          ),
+        );
       }
 
       // Final state should be preserved
@@ -119,24 +125,29 @@ void main() {
       // Verify queue has both entries
       final queue = await db.getSyncQueue(10);
       expect(queue.length, 2);
-      expect(queue.map((e) => e.wordId).toSet(), {'sync-word-1', 'sync-word-2'});
+      expect(queue.map((e) => e.wordId).toSet(), {
+        'sync-word-1',
+        'sync-word-2',
+      });
     });
 
-    test('Phase 4: Sync queue idempotency - same operation deduplication',
-        () async {
-      const wordId = 'dedup-word';
+    test(
+      'Phase 4: Sync queue idempotency - same operation deduplication',
+      () async {
+        const wordId = 'dedup-word';
 
-      // Enqueue same operation twice
-      await db.enqueueSyncOperation(wordId, 'upsert');
-      await db.enqueueSyncOperation(wordId, 'upsert');
+        // Enqueue same operation twice
+        await db.enqueueSyncOperation(wordId, 'upsert');
+        await db.enqueueSyncOperation(wordId, 'upsert');
 
-      // Should still be 1 entry
-      final queue = await db.getSyncQueue(10);
-      expect(queue.length, 1);
+        // Should still be 1 entry
+        final queue = await db.getSyncQueue(10);
+        expect(queue.length, 1);
 
-      // Retry count should be reset to 0
-      expect(queue.first.retryCount, 0);
-    });
+        // Retry count should be reset to 0
+        expect(queue.first.retryCount, 0);
+      },
+    );
 
     test('Phase 5: Sync queue cross-operation replacement', () async {
       const wordId = 'cross-op-word';
@@ -190,19 +201,24 @@ void main() {
 
       // Retrieve in order - should be by createdAt (enqueue order = first, second, third)
       final queue = await db.getSyncQueue(10);
-      expect(queue.map((e) => e.wordId).toList(),
-          ['third-word', 'first-word', 'second-word']);
+      expect(queue.map((e) => e.wordId).toList(), [
+        'third-word',
+        'first-word',
+        'second-word',
+      ]);
     });
 
     test('Phase 7: Retry tracking with error messages', () async {
       const wordId = 'retry-word';
 
       // Create word
-      await db.upsertWord(WordsCompanion.insert(
-        id: wordId,
-        wordText: 'retry-me',
-        lastUpdated: DateTime.now().toUtc(),
-      ));
+      await db.upsertWord(
+        WordsCompanion.insert(
+          id: wordId,
+          wordText: 'retry-me',
+          lastUpdated: DateTime.now().toUtc(),
+        ),
+      );
 
       // Enqueue
       await db.enqueueSyncOperation(wordId, 'upsert');
@@ -214,7 +230,7 @@ void main() {
       // Simulate retry with error
       final queueId = queue.first.id;
       final word = await db.getWordById(wordId);
-      
+
       // In real code, this would be done by repository
       // For this test, we verify the database supports it
       expect(word, isNotNull);
@@ -226,12 +242,14 @@ void main() {
       final now = DateTime.now().toUtc();
 
       // Create word
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'delete-word',
-        userId: const Value(userId),
-        wordText: 'will-be-deleted',
-        lastUpdated: now,
-      ));
+      await db.upsertWord(
+        WordsCompanion.insert(
+          id: 'delete-word',
+          userId: const Value(userId),
+          wordText: 'will-be-deleted',
+          lastUpdated: now,
+        ),
+      );
 
       // Verify word exists
       var word = await db.getWordById('delete-word');
@@ -270,13 +288,15 @@ void main() {
       ]);
 
       // Modify persist-word
-      await db.upsertWord(WordsCompanion(
-        id: const Value('persist-word'),
-        userId: const Value(userId),
-        wordText: const Value('persistent'),
-        totalCount: const Value(5),
-        lastUpdated: Value(baseTime.add(const Duration(minutes: 1))),
-      ));
+      await db.upsertWord(
+        WordsCompanion(
+          id: const Value('persist-word'),
+          userId: const Value(userId),
+          wordText: const Value('persistent'),
+          totalCount: const Value(5),
+          lastUpdated: Value(baseTime.add(const Duration(minutes: 1))),
+        ),
+      );
 
       // 2. Enqueue for sync
       await db.enqueueSyncOperation('persist-word', 'upsert');
@@ -286,9 +306,9 @@ void main() {
       var queue = await db.getSyncQueue(10);
       expect(queue.length, 2);
 
-      var localWords = await (db.select(db.words)
-            ..where((w) => w.userId.equals(userId)))
-          .get();
+      var localWords = await (db.select(
+        db.words,
+      )..where((w) => w.userId.equals(userId))).get();
       expect(localWords.length, 2);
 
       // Verify the modified persist-word has correct count
@@ -305,9 +325,9 @@ void main() {
       expect(queue.isEmpty, true);
 
       // Local words still there (sync clears queue, not words)
-      localWords = await (db.select(db.words)
-            ..where((w) => w.userId.equals(userId)))
-          .get();
+      localWords = await (db.select(
+        db.words,
+      )..where((w) => w.userId.equals(userId))).get();
       expect(localWords.length, 2);
     });
   });

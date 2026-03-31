@@ -7,7 +7,7 @@ import 'package:word_flow/features/vocabulary/presentation/blocs/analysis_settin
 @injectable
 class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
   AnalysisSettingsCubit(this._getConfig, this._repository)
-      : super(const AnalysisSettingsState.initial());
+    : super(const AnalysisSettingsState.initial());
 
   final GetTextAnalysisConfig _getConfig;
   final SettingsRepository _repository;
@@ -26,7 +26,9 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
       loaded: (config, isSaving, error) async {
         final result = await _repository.updateLanguage(lang);
         result.fold(
-          (f) => emit(AnalysisSettingsState.loaded(config: config, error: f.message)),
+          (f) => emit(
+            AnalysisSettingsState.loaded(config: config, error: f.message),
+          ),
           (_) => load(),
         );
       },
@@ -39,7 +41,9 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
       loaded: (config, isSaving, error) async {
         final result = await _repository.updateMinWordLength(length);
         result.fold(
-          (f) => emit(AnalysisSettingsState.loaded(config: config, error: f.message)),
+          (f) => emit(
+            AnalysisSettingsState.loaded(config: config, error: f.message),
+          ),
           (_) => load(),
         );
       },
@@ -52,7 +56,9 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
       loaded: (config, isSaving, error) async {
         final result = await _repository.updateIncludeContractions(enabled);
         result.fold(
-          (f) => emit(AnalysisSettingsState.loaded(config: config, error: f.message)),
+          (f) => emit(
+            AnalysisSettingsState.loaded(config: config, error: f.message),
+          ),
           (_) => load(),
         );
       },
@@ -65,7 +71,9 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
       loaded: (config, isSaving, error) async {
         final result = await _repository.updateUseStemming(enabled);
         result.fold(
-          (f) => emit(AnalysisSettingsState.loaded(config: config, error: f.message)),
+          (f) => emit(
+            AnalysisSettingsState.loaded(config: config, error: f.message),
+          ),
           (_) => load(),
         );
       },
@@ -77,9 +85,13 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
     if (word.trim().isEmpty) return;
     await state.maybeWhen(
       loaded: (config, isSaving, error) async {
-        final result = await _repository.addCustomStopword(word.trim().toLowerCase());
+        final result = await _repository.addCustomStopword(
+          word.trim().toLowerCase(),
+        );
         result.fold(
-          (f) => emit(AnalysisSettingsState.loaded(config: config, error: f.message)),
+          (f) => emit(
+            AnalysisSettingsState.loaded(config: config, error: f.message),
+          ),
           (_) => load(),
         );
       },
@@ -92,7 +104,9 @@ class AnalysisSettingsCubit extends Cubit<AnalysisSettingsState> {
       loaded: (config, isSaving, error) async {
         final result = await _repository.removeCustomStopword(word);
         result.fold(
-          (f) => emit(AnalysisSettingsState.loaded(config: config, error: f.message)),
+          (f) => emit(
+            AnalysisSettingsState.loaded(config: config, error: f.message),
+          ),
           (_) => load(),
         );
       },

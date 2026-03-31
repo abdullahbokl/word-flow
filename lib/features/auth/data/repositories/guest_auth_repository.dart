@@ -15,13 +15,27 @@ class GuestAuthRepository implements AuthRepository {
   String? get currentUserId => null;
 
   @override
-  Future<Either<Failure, AuthUser>> signInWithEmail(String email, String password) async {
-    return const Left(AuthFailure('Remote authentication is disabled. Check your environment configuration.'));
+  Future<Either<Failure, AuthUser>> signInWithEmail(
+    String email,
+    String password,
+  ) async {
+    return const Left(
+      AuthFailure(
+        'Remote authentication is disabled. Check your environment configuration.',
+      ),
+    );
   }
 
   @override
-  Future<Either<Failure, AuthUser>> signUpWithEmail(String email, String password) async {
-    return const Left(AuthFailure('Remote authentication is disabled. Check your environment configuration.'));
+  Future<Either<Failure, AuthUser>> signUpWithEmail(
+    String email,
+    String password,
+  ) async {
+    return const Left(
+      AuthFailure(
+        'Remote authentication is disabled. Check your environment configuration.',
+      ),
+    );
   }
 
   @override

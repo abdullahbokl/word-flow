@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class AppLoader extends StatelessWidget {
-
   const AppLoader({
     super.key,
     this.size = 24,

@@ -23,7 +23,10 @@ class LibraryPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final userId = context.read<AuthCubit>().currentUserId;
-    return BlocProvider(create: (context) => getIt<LibraryCubit>()..init(userId), child: const LibraryView());
+    return BlocProvider(
+      create: (context) => getIt<LibraryCubit>()..init(userId),
+      child: const LibraryView(),
+    );
   }
 }
 
@@ -47,8 +50,14 @@ class _LibraryViewState extends State<LibraryView> {
     final userId = context.read<AuthCubit>().currentUserId;
     return BlocListener<LibraryCubit, LibraryState>(
       listenWhen: (previous, current) {
-        final previousError = previous.maybeMap(loaded: (s) => s.lastError, orElse: () => null);
-        final currentError = current.maybeMap(loaded: (s) => s.lastError, orElse: () => null);
+        final previousError = previous.maybeMap(
+          loaded: (s) => s.lastError,
+          orElse: () => null,
+        );
+        final currentError = current.maybeMap(
+          loaded: (s) => s.lastError,
+          orElse: () => null,
+        );
         return currentError != null && currentError != previousError;
       },
       listener: (context, state) {
@@ -104,23 +113,29 @@ class _LibraryViewState extends State<LibraryView> {
             _SyncErrorBanner(),
             Expanded(
               child: BlocBuilder<LibraryCubit, LibraryState>(
-                buildWhen: (previous, current) => previous.runtimeType != current.runtimeType,
+                buildWhen: (previous, current) =>
+                    previous.runtimeType != current.runtimeType,
                 builder: (context, state) => state.when(
                   initial: () => const Center(child: SizedBox.shrink()),
                   loading: () => const ShimmerList(),
-                  loaded: (words, filter, query, pendingIds, error, failure) => _LibraryLoadedContent(
-                    searchController: _searchController,
-                    onClearSearch: () => _clearSearch(context),
-                  ),
+                  loaded: (words, filter, query, pendingIds, error, failure) =>
+                      _LibraryLoadedContent(
+                        searchController: _searchController,
+                        onClearSearch: () => _clearSearch(context),
+                      ),
                   error: (message, failure) {
                     final isAuth = failure is AuthFailure;
                     return ErrorStateWidget(
                       title: failure?.title ?? 'Library Error',
                       message: failure?.friendlyMessage ?? message,
                       icon: failure?.icon ?? Icons.error_outline_rounded,
-                      onRetry: isAuth ? null : () => context.read<LibraryCubit>().init(userId),
+                      onRetry: isAuth
+                          ? null
+                          : () => context.read<LibraryCubit>().init(userId),
                       actionLabel: isAuth ? 'Sign In Again' : null,
-                      onAction: isAuth ? () => context.read<AuthCubit>().logOut() : null,
+                      onAction: isAuth
+                          ? () => context.read<AuthCubit>().logOut()
+                          : null,
                     );
                   },
                 ),
@@ -150,7 +165,11 @@ class _LibraryViewState extends State<LibraryView> {
         word: word,
         onSave: (text, isKnown) {
           if (word == null) {
-            outerContext.read<LibraryCubit>().addWord(text, isKnown, userId: userId);
+            outerContext.read<LibraryCubit>().addWord(
+              text,
+              isKnown,
+              userId: userId,
+            );
           } else {
             outerContext.read<LibraryCubit>().updateWord(word, text, isKnown);
           }
@@ -185,35 +204,46 @@ class _LibraryLoadedContent extends StatelessWidget {
           ),
           builder: (context, selectedFilter) => LibraryFilterRow(
             selectedFilter: selectedFilter,
-            onFilterChanged: (filter) => context.read<LibraryCubit>().setFilter(filter),
+            onFilterChanged: (filter) =>
+                context.read<LibraryCubit>().setFilter(filter),
           ),
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: BlocSelector<LibraryCubit, LibraryState, ({List<WordEntity> words, WordsFilter filter, String searchQuery, Set<String> pendingWordIds})>(
-            selector: (state) => state.maybeMap(
-              loaded: (s) => (
-                words: s.words,
-                filter: s.filter,
-                searchQuery: s.searchQuery,
-                pendingWordIds: s.pendingWordIds,
+          child:
+              BlocSelector<
+                LibraryCubit,
+                LibraryState,
+                ({
+                  List<WordEntity> words,
+                  WordsFilter filter,
+                  String searchQuery,
+                  Set<String> pendingWordIds,
+                })
+              >(
+                selector: (state) => state.maybeMap(
+                  loaded: (s) => (
+                    words: s.words,
+                    filter: s.filter,
+                    searchQuery: s.searchQuery,
+                    pendingWordIds: s.pendingWordIds,
+                  ),
+                  orElse: () => (
+                    words: const <WordEntity>[],
+                    filter: WordsFilter.all,
+                    searchQuery: '',
+                    pendingWordIds: const <String>{},
+                  ),
+                ),
+                builder: (context, data) => RepaintBoundary(
+                  child: LibraryResultsList(
+                    words: data.words,
+                    filter: data.filter,
+                    searchQuery: data.searchQuery,
+                    pendingWordIds: data.pendingWordIds,
+                  ),
+                ),
               ),
-              orElse: () => (
-                words: const <WordEntity>[],
-                filter: WordsFilter.all,
-                searchQuery: '',
-                pendingWordIds: const <String>{},
-              ),
-            ),
-            builder: (context, data) => RepaintBoundary(
-              child: LibraryResultsList(
-                words: data.words,
-                filter: data.filter,
-                searchQuery: data.searchQuery,
-                pendingWordIds: data.pendingWordIds,
-              ),
-            ),
-          ),
         ),
       ],
     );
@@ -232,7 +262,11 @@ class _SyncErrorBanner extends StatelessWidget {
             color: Colors.orange.withValues(alpha: 0.1),
             child: Row(
               children: [
-                const Icon(Icons.sync_problem_rounded, color: Colors.orange, size: 20),
+                const Icon(
+                  Icons.sync_problem_rounded,
+                  color: Colors.orange,
+                  size: 20,
+                ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Text(

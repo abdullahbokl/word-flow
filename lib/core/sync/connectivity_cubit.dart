@@ -16,11 +16,13 @@ class ConnectivityCubit extends Cubit<ConnectivityState> {
 
   void _init() {
     _subscription = _monitor.statusStream.listen((status) {
-      emit(status == ConnectivityStatus.online
-          ? ConnectivityState.online
-          : ConnectivityState.offline);
+      emit(
+        status == ConnectivityStatus.online
+            ? ConnectivityState.online
+            : ConnectivityState.offline,
+      );
     });
-    
+
     // Initial state check
     _checkInitial();
   }

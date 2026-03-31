@@ -36,10 +36,7 @@ final tGuestWord = WordEntity(
 );
 
 // Auth Users
-const tAuthUser = AuthUser(
-  id: tUserId,
-  email: 'test@example.com',
-);
+const tAuthUser = AuthUser(id: tUserId, email: 'test@example.com');
 
 // Script Analysis
 const tScriptSummary = ScriptSummary(
@@ -85,10 +82,7 @@ WordEntity createWord({
 }
 
 AuthUser createAuthUser({String? id, String? email}) {
-  return AuthUser(
-    id: id ?? tUserId,
-    email: email ?? 'test@test.com',
-  );
+  return AuthUser(id: id ?? tUserId, email: email ?? 'test@test.com');
 }
 
 WordSyncQueueData createSyncQueueItem({

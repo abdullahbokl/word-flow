@@ -22,7 +22,10 @@ class ErrorPage extends StatelessWidget {
             ),
             if (error != null) ...[
               const SizedBox(height: 8),
-              Text(error.toString(), style: const TextStyle(color: Colors.grey)),
+              Text(
+                error.toString(),
+                style: const TextStyle(color: Colors.grey),
+              ),
             ],
             const SizedBox(height: 24),
             ElevatedButton(

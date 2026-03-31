@@ -19,22 +19,27 @@ void main() {
     const testUserId = 'user-1';
     const testCount = 5;
 
-    test('should call repository.adoptGuestWords with correct userId', () async {
-      // Arrange
-      when(() => mockRepository.adoptGuestWords(any()))
-          .thenAnswer((_) async => const Right(testCount));
+    test(
+      'should call repository.adoptGuestWords with correct userId',
+      () async {
+        // Arrange
+        when(
+          () => mockRepository.adoptGuestWords(any()),
+        ).thenAnswer((_) async => const Right(testCount));
 
-      // Act
-      await useCase(testUserId);
+        // Act
+        await useCase(testUserId);
 
-      // Assert
-      verify(() => mockRepository.adoptGuestWords(testUserId)).called(1);
-    });
+        // Assert
+        verify(() => mockRepository.adoptGuestWords(testUserId)).called(1);
+      },
+    );
 
     test('should return Right(count) on success', () async {
       // Arrange
-      when(() => mockRepository.adoptGuestWords(any()))
-          .thenAnswer((_) async => const Right(testCount));
+      when(
+        () => mockRepository.adoptGuestWords(any()),
+      ).thenAnswer((_) async => const Right(testCount));
 
       // Act
       final result = await useCase(testUserId);
@@ -47,8 +52,9 @@ void main() {
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
       const failure = ServerFailure('Adoption failed');
-      when(() => mockRepository.adoptGuestWords(any()))
-          .thenAnswer((_) async => const Left(failure));
+      when(
+        () => mockRepository.adoptGuestWords(any()),
+      ).thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(testUserId);

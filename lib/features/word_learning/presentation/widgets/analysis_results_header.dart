@@ -2,11 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/analysis_chip.dart';
 
 class AnalysisResultsHeader extends StatelessWidget {
-
-  const AnalysisResultsHeader({
-    super.key,
-    required this.isProcessing,
-  });
+  const AnalysisResultsHeader({super.key, required this.isProcessing});
   final bool isProcessing;
 
   @override

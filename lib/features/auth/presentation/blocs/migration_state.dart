@@ -9,10 +9,8 @@ class MigrationState with _$MigrationState {
   const factory MigrationState.loading() = MigrationLoading;
   const factory MigrationState.success() = MigrationSuccess;
   const factory MigrationState.error(String message) = MigrationError;
-  const factory MigrationState.pendingMerge(
-    AuthUser user,
-    int guestWordCount,
-  ) = MigrationPendingMerge;
+  const factory MigrationState.pendingMerge(AuthUser user, int guestWordCount) =
+      MigrationPendingMerge;
   const factory MigrationState.rateLimited(Duration cooldown) =
       MigrationRateLimited;
 }

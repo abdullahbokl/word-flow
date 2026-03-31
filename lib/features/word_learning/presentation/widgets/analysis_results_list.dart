@@ -39,7 +39,10 @@ class _AnalysisResultsListState extends State<AnalysisResultsList> {
           child: SectionCard(
             title: 'Analysis results',
             subtitle: 'New and recognized words from your text.',
-            trailing: AnalysisChip(icon: Icons.hourglass_top_rounded, label: 'Analyzing'),
+            trailing: AnalysisChip(
+              icon: Icons.hourglass_top_rounded,
+              label: 'Analyzing',
+            ),
             child: SizedBox(height: 220, child: ShimmerList(count: 4)),
           ),
         );
@@ -62,22 +65,28 @@ class _AnalysisResultsListState extends State<AnalysisResultsList> {
 
     return SliverMainAxisGroup(
       slivers: [
-        if (widget.isRefreshing) RefreshingIndicator(scheme: scheme, textTheme: textTheme),
+        if (widget.isRefreshing)
+          RefreshingIndicator(scheme: scheme, textTheme: textTheme),
         if (widget.unknownWords.isNotEmpty) ...[
-          SectionTitle(title: 'Unknown (${widget.unknownWords.length})', color: scheme.primary),
+          SectionTitle(
+            title: 'Unknown (${widget.unknownWords.length})',
+            color: scheme.primary,
+          ),
           WordResultsList(
             words: widget.unknownWords,
             pendingWordTexts: widget.pendingWordTexts,
             enabled: !widget.isProcessing,
           ),
         ],
-        if (widget.unknownWords.isNotEmpty && widget.knownWords.isNotEmpty) const AnalysisDivider(),
+        if (widget.unknownWords.isNotEmpty && widget.knownWords.isNotEmpty)
+          const AnalysisDivider(),
         if (widget.knownWords.isNotEmpty) ...[
           SliverToBoxAdapter(
             child: KnownWordsHeader(
               count: widget.knownWords.length,
               isExpanded: _isKnownExpanded,
-              onToggle: () => setState(() => _isKnownExpanded = !_isKnownExpanded),
+              onToggle: () =>
+                  setState(() => _isKnownExpanded = !_isKnownExpanded),
             ),
           ),
           if (_isKnownExpanded)

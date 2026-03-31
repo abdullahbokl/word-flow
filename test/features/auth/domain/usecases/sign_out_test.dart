@@ -49,14 +49,18 @@ void main() {
   group('SignOutAndClearLocal', () {
     test('Successful sign out clears correct userId words', () async {
       when(() => mockAuthRepository.currentUserId).thenReturn(userId);
-      when(() => mockWordRepository.clearLocalWords(userId))
-          .thenAnswer((_) async => const Right(null));
-      when(() => mockSyncPreferences.clearUserTimestamp(userId))
-          .thenAnswer((_) async {});
-      when(() => mockWordRepository.clearGuestWords())
-          .thenAnswer((_) async => const Right(null));
-      when(() => mockAuthRepository.signOut())
-          .thenAnswer((_) async => const Right(null));
+      when(
+        () => mockWordRepository.clearLocalWords(userId),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        () => mockSyncPreferences.clearUserTimestamp(userId),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockWordRepository.clearGuestWords(),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        () => mockAuthRepository.signOut(),
+      ).thenAnswer((_) async => const Right(null));
 
       final result = await useCase();
 
@@ -68,10 +72,12 @@ void main() {
 
     test('Sign out still succeeds even if clearLocalWords throws', () async {
       when(() => mockAuthRepository.currentUserId).thenReturn(userId);
-      when(() => mockWordRepository.clearLocalWords(userId))
-          .thenThrow(Exception('disk io error'));
-      when(() => mockAuthRepository.signOut())
-          .thenAnswer((_) async => const Right(null));
+      when(
+        () => mockWordRepository.clearLocalWords(userId),
+      ).thenThrow(Exception('disk io error'));
+      when(
+        () => mockAuthRepository.signOut(),
+      ).thenAnswer((_) async => const Right(null));
       when(
         () => mockLogger.error(any(), any<dynamic>(), any<dynamic>()),
       ).thenReturn(null);
@@ -85,14 +91,18 @@ void main() {
 
     test('Sync timestamps are cleared for the userId', () async {
       when(() => mockAuthRepository.currentUserId).thenReturn(userId);
-      when(() => mockWordRepository.clearLocalWords(userId))
-          .thenAnswer((_) async => const Right(null));
-      when(() => mockSyncPreferences.clearUserTimestamp(userId))
-          .thenAnswer((_) async {});
-      when(() => mockWordRepository.clearGuestWords())
-          .thenAnswer((_) async => const Right(null));
-      when(() => mockAuthRepository.signOut())
-          .thenAnswer((_) async => const Right(null));
+      when(
+        () => mockWordRepository.clearLocalWords(userId),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        () => mockSyncPreferences.clearUserTimestamp(userId),
+      ).thenAnswer((_) async {});
+      when(
+        () => mockWordRepository.clearGuestWords(),
+      ).thenAnswer((_) async => const Right(null));
+      when(
+        () => mockAuthRepository.signOut(),
+      ).thenAnswer((_) async => const Right(null));
 
       final result = await useCase();
 

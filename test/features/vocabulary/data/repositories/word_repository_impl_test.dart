@@ -36,7 +36,6 @@ void main() {
     registerFallbackValue(<WordsCompanion>[]);
     registerFallbackValue(<String>[]);
     registerFallbackValue(<WordRow>[]);
-
   });
 
   setUp(() {
@@ -54,7 +53,6 @@ void main() {
 
   group('saveWords', () {
     test('should merge counts for existing words', () async {
-
       // Arrange: existing word with count 3
       final existingWord = WordRow(
         id: 'test-id-1',
@@ -64,12 +62,14 @@ void main() {
         isKnown: false,
         lastUpdated: DateTime(2024, 1, 1),
       );
-      when(() => mockLocal.getWordsByTexts(any(), userId: 'user-1'))
-          .thenAnswer((_) async => [existingWord]);
+      when(
+        () => mockLocal.getWordsByTexts(any(), userId: 'user-1'),
+      ).thenAnswer((_) async => [existingWord]);
 
       when(() => mockLocal.saveWords(any())).thenAnswer((_) async {});
-      when(() => mockSync.enqueueSyncOperation(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.enqueueSyncOperation(any(), any()),
+      ).thenAnswer((_) async {});
 
       // Act: save word with count 2
       final newWord = testWord.copyWith(totalCount: 2);
@@ -85,13 +85,14 @@ void main() {
     });
 
     test('should create new entries for unknown words', () async {
-
-      when(() => mockLocal.getWordsByTexts(any(), userId: 'user-1'))
-          .thenAnswer((_) async => []);
+      when(
+        () => mockLocal.getWordsByTexts(any(), userId: 'user-1'),
+      ).thenAnswer((_) async => []);
 
       when(() => mockLocal.saveWords(any())).thenAnswer((_) async {});
-      when(() => mockSync.enqueueSyncOperation(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.enqueueSyncOperation(any(), any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.saveWords([testWord]);
 
@@ -100,26 +101,29 @@ void main() {
     });
 
     test('should enqueue sync for authenticated users', () async {
-
-      when(() => mockLocal.getWordsByTexts(any(), userId: 'user-1'))
-          .thenAnswer((_) async => []);
+      when(
+        () => mockLocal.getWordsByTexts(any(), userId: 'user-1'),
+      ).thenAnswer((_) async => []);
 
       when(() => mockLocal.saveWords(any())).thenAnswer((_) async {});
-      when(() => mockSync.enqueueSyncOperation(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.enqueueSyncOperation(any(), any()),
+      ).thenAnswer((_) async {});
 
       await repo.saveWords([testWord]);
 
-      verify(() => mockSync.enqueueSyncOperation(
-            testWord.id,
-            SyncOperation.upsert.value,
-          )).called(1);
+      verify(
+        () => mockSync.enqueueSyncOperation(
+          testWord.id,
+          SyncOperation.upsert.value,
+        ),
+      ).called(1);
     });
 
     test('should NOT enqueue sync for guest users', () async {
-
-      when(() => mockLocal.getWordsByTexts(any(), userId: null))
-          .thenAnswer((_) async => []);
+      when(
+        () => mockLocal.getWordsByTexts(any(), userId: null),
+      ).thenAnswer((_) async => []);
 
       when(() => mockLocal.saveWords(any())).thenAnswer((_) async {});
 
@@ -129,13 +133,14 @@ void main() {
     });
 
     test('should handle multiple words batching', () async {
-
-      when(() => mockLocal.getWordsByTexts(any(), userId: 'user-1'))
-          .thenAnswer((_) async => []);
+      when(
+        () => mockLocal.getWordsByTexts(any(), userId: 'user-1'),
+      ).thenAnswer((_) async => []);
 
       when(() => mockLocal.saveWords(any())).thenAnswer((_) async {});
-      when(() => mockSync.enqueueSyncOperation(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.enqueueSyncOperation(any(), any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.saveWords([testWord, testWord2]);
 
@@ -146,10 +151,9 @@ void main() {
     });
 
     test('should return DatabaseFailure on error', () async {
-
-      when(() => mockLocal.getWordsByTexts(any(), userId: any(named: 'userId')))
-          .thenThrow(Exception('DB Error'));
-
+      when(
+        () => mockLocal.getWordsByTexts(any(), userId: any(named: 'userId')),
+      ).thenThrow(Exception('DB Error'));
 
       final result = await repo.saveWords([testWord]);
 
@@ -163,7 +167,6 @@ void main() {
 
   group('toggleKnown', () {
     test('should toggle isKnown flag via local source', () async {
-
       final unknownWord = WordRow(
         id: 'test-id-1',
         userId: 'user-1',
@@ -172,11 +175,13 @@ void main() {
         isKnown: false,
         lastUpdated: DateTime(2024, 1, 1),
       );
-      when(() => mockLocal.getWordByText('flutter', userId: 'user-1'))
-          .thenAnswer((_) async => unknownWord);
+      when(
+        () => mockLocal.getWordByText('flutter', userId: 'user-1'),
+      ).thenAnswer((_) async => unknownWord);
       when(() => mockLocal.saveWord(any())).thenAnswer((_) async {});
-      when(() => mockSync.enqueueSyncOperation(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.enqueueSyncOperation(any(), any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.toggleKnown('flutter', userId: 'user-1');
 
@@ -185,12 +190,13 @@ void main() {
     });
 
     test('should create new word if not found', () async {
-
-      when(() => mockLocal.getWordByText('new-word', userId: 'user-1'))
-          .thenAnswer((_) async => null);
+      when(
+        () => mockLocal.getWordByText('new-word', userId: 'user-1'),
+      ).thenAnswer((_) async => null);
       when(() => mockLocal.saveWord(any())).thenAnswer((_) async {});
-      when(() => mockSync.enqueueSyncOperation(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.enqueueSyncOperation(any(), any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.toggleKnown('new-word', userId: 'user-1');
 
@@ -203,12 +209,13 @@ void main() {
     });
 
     test('should enqueue sync for authenticated users', () async {
-
-      when(() => mockLocal.getWordByText('flutter', userId: 'user-1'))
-          .thenAnswer((_) async => testWordRow);
+      when(
+        () => mockLocal.getWordByText('flutter', userId: 'user-1'),
+      ).thenAnswer((_) async => testWordRow);
       when(() => mockLocal.saveWord(any())).thenAnswer((_) async {});
-      when(() => mockSync.enqueueSyncOperation(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.enqueueSyncOperation(any(), any()),
+      ).thenAnswer((_) async {});
 
       await repo.toggleKnown('flutter', userId: 'user-1');
 
@@ -216,9 +223,9 @@ void main() {
     });
 
     test('should NOT enqueue sync for guest users', () async {
-
-      when(() => mockLocal.getWordByText('hello', userId: null))
-          .thenAnswer((_) async => testGuestWordRow);
+      when(
+        () => mockLocal.getWordByText('hello', userId: null),
+      ).thenAnswer((_) async => testGuestWordRow);
       when(() => mockLocal.saveWord(any())).thenAnswer((_) async {});
 
       await repo.toggleKnown('hello', userId: null);
@@ -227,9 +234,9 @@ void main() {
     });
 
     test('should return DatabaseFailure on error', () async {
-
-      when(() => mockLocal.getWordByText(any(), userId: any(named: 'userId')))
-          .thenThrow(Exception('DB Error'));
+      when(
+        () => mockLocal.getWordByText(any(), userId: any(named: 'userId')),
+      ).thenThrow(Exception('DB Error'));
 
       final result = await repo.toggleKnown('flutter', userId: 'user-1');
 
@@ -243,10 +250,10 @@ void main() {
 
   group('updateWord', () {
     test('should update word in local source', () async {
-
       when(() => mockLocal.saveWord(any())).thenAnswer((_) async {});
-      when(() => mockSync.enqueueSyncOperation(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.enqueueSyncOperation(any(), any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.updateWord(testWord);
 
@@ -255,21 +262,22 @@ void main() {
     });
 
     test('should enqueue sync for authenticated users', () async {
-
       when(() => mockLocal.saveWord(any())).thenAnswer((_) async {});
-      when(() => mockSync.enqueueSyncOperation(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.enqueueSyncOperation(any(), any()),
+      ).thenAnswer((_) async {});
 
       await repo.updateWord(testWord);
 
-      verify(() => mockSync.enqueueSyncOperation(
-            testWord.id,
-            SyncOperation.upsert.value,
-          )).called(1);
+      verify(
+        () => mockSync.enqueueSyncOperation(
+          testWord.id,
+          SyncOperation.upsert.value,
+        ),
+      ).called(1);
     });
 
     test('should NOT enqueue sync for guest users', () async {
-
       when(() => mockLocal.saveWord(any())).thenAnswer((_) async {});
 
       await repo.updateWord(testGuestWord);
@@ -280,10 +288,10 @@ void main() {
 
   group('deleteWord', () {
     test('should delete word from local source', () async {
-
       when(() => mockLocal.deleteWord(any())).thenAnswer((_) async {});
-      when(() => mockSync.enqueueSyncOperation(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.enqueueSyncOperation(any(), any()),
+      ).thenAnswer((_) async {});
 
       final result = await repo.deleteWord('test-id-1', userId: 'user-1');
 
@@ -292,21 +300,22 @@ void main() {
     });
 
     test('should enqueue delete sync for authenticated users', () async {
-
       when(() => mockLocal.deleteWord(any())).thenAnswer((_) async {});
-      when(() => mockSync.enqueueSyncOperation(any(), any()))
-          .thenAnswer((_) async {});
+      when(
+        () => mockSync.enqueueSyncOperation(any(), any()),
+      ).thenAnswer((_) async {});
 
       await repo.deleteWord('test-id-1', userId: 'user-1');
 
-      verify(() => mockSync.enqueueSyncOperation(
-            'test-id-1',
-            SyncOperation.delete.value,
-          )).called(1);
+      verify(
+        () => mockSync.enqueueSyncOperation(
+          'test-id-1',
+          SyncOperation.delete.value,
+        ),
+      ).called(1);
     });
 
     test('should NOT enqueue sync for guest users', () async {
-
       when(() => mockLocal.deleteWord(any())).thenAnswer((_) async {});
 
       await repo.deleteWord('test-id-1', userId: null);
@@ -315,7 +324,6 @@ void main() {
     });
 
     test('should return DatabaseFailure on error', () async {
-
       when(() => mockLocal.deleteWord(any())).thenThrow(Exception('DB Error'));
 
       final result = await repo.deleteWord('test-id-1', userId: 'user-1');
@@ -330,8 +338,9 @@ void main() {
 
   group('getKnownWordTexts', () {
     test('should return list of known word texts', () async {
-      when(() => mockLocal.getKnownWordTexts(userId: 'user-1'))
-          .thenAnswer((_) async => ['flutter', 'dart']);
+      when(
+        () => mockLocal.getKnownWordTexts(userId: 'user-1'),
+      ).thenAnswer((_) async => ['flutter', 'dart']);
 
       final result = await repo.getKnownWordTexts(userId: 'user-1');
 
@@ -343,8 +352,9 @@ void main() {
     });
 
     test('should return empty list when no known words', () async {
-      when(() => mockLocal.getKnownWordTexts(userId: 'user-1'))
-          .thenAnswer((_) async => []);
+      when(
+        () => mockLocal.getKnownWordTexts(userId: 'user-1'),
+      ).thenAnswer((_) async => []);
 
       final result = await repo.getKnownWordTexts(userId: 'user-1');
 
@@ -356,8 +366,9 @@ void main() {
     });
 
     test('should return DatabaseFailure on error', () async {
-      when(() => mockLocal.getKnownWordTexts(userId: any(named: 'userId')))
-          .thenThrow(Exception('DB Error'));
+      when(
+        () => mockLocal.getKnownWordTexts(userId: any(named: 'userId')),
+      ).thenThrow(Exception('DB Error'));
 
       final result = await repo.getKnownWordTexts(userId: 'user-1');
 
@@ -371,8 +382,9 @@ void main() {
 
   group('getKnownWords', () {
     test('should return known words only', () async {
-      when(() => mockLocal.getWords(userId: 'user-1'))
-          .thenAnswer((_) async => [testWordRow, testKnownWordRow]);
+      when(
+        () => mockLocal.getWords(userId: 'user-1'),
+      ).thenAnswer((_) async => [testWordRow, testKnownWordRow]);
 
       final result = await repo.getKnownWords(userId: 'user-1');
 
@@ -384,8 +396,9 @@ void main() {
     });
 
     test('should return empty list when no known words', () async {
-      when(() => mockLocal.getWords(userId: 'user-1'))
-          .thenAnswer((_) async => [testWordRow]); // Only unknown
+      when(
+        () => mockLocal.getWords(userId: 'user-1'),
+      ).thenAnswer((_) async => [testWordRow]); // Only unknown
 
       final result = await repo.getKnownWords(userId: 'user-1');
 
@@ -400,7 +413,9 @@ void main() {
   group('watchWords', () {
     test('should emit words stream from local source', () async {
       final testStream = Stream.value(testWordRowList);
-      when(() => mockLocal.watchWords(userId: 'user-1')).thenAnswer((_) => testStream);
+      when(
+        () => mockLocal.watchWords(userId: 'user-1'),
+      ).thenAnswer((_) => testStream);
 
       final stream = repo.watchWords(userId: 'user-1');
 
@@ -414,23 +429,20 @@ void main() {
 
   group('adoptGuestWords', () {
     test('should call local source with userId', () async {
-      when(() => mockLocal.adoptGuestWords('user-1'))
-          .thenAnswer((_) async => 5);
+      when(
+        () => mockLocal.adoptGuestWords('user-1'),
+      ).thenAnswer((_) async => 5);
 
       final result = await repo.adoptGuestWords('user-1');
 
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Expected right'),
-        (count) => expect(count, 5),
-      );
+      result.fold((_) => fail('Expected right'), (count) => expect(count, 5));
     });
   });
 
   group('clearLocalWords', () {
     test('should clear words for specified user', () async {
-      when(() => mockLocal.clearLocalWords('user-1'))
-          .thenAnswer((_) async {});
+      when(() => mockLocal.clearLocalWords('user-1')).thenAnswer((_) async {});
 
       final result = await repo.clearLocalWords('user-1');
 
@@ -455,10 +467,7 @@ void main() {
       final result = await repo.getGuestWordsCount();
 
       expect(result.isRight(), true);
-      result.fold(
-        (_) => fail('Expected right'),
-        (count) => expect(count, 10),
-      );
+      result.fold((_) => fail('Expected right'), (count) => expect(count, 10));
     });
   });
 }

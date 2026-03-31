@@ -46,7 +46,10 @@ class AuthRepositoryImpl implements AuthRepository {
   String? get currentUserId => _supabase.auth.currentUser?.id;
 
   @override
-  Future<Either<Failure, AuthUser>> signInWithEmail(String email, String password) async {
+  Future<Either<Failure, AuthUser>> signInWithEmail(
+    String email,
+    String password,
+  ) async {
     try {
       final user = await _remoteSource.signInWithEmail(
         email: email,
@@ -62,7 +65,10 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<Either<Failure, AuthUser>> signUpWithEmail(String email, String password) async {
+  Future<Either<Failure, AuthUser>> signUpWithEmail(
+    String email,
+    String password,
+  ) async {
     try {
       final user = await _remoteSource.signUpWithEmail(
         email: email,

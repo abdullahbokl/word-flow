@@ -39,10 +39,9 @@ class _AuthFormState extends State<AuthForm> {
       return;
     }
     setState(() {
-      _emailError = EmailValidator.validate(value.trim()).fold(
-        (failure) => failure.message,
-        (_) => null,
-      );
+      _emailError = EmailValidator.validate(
+        value.trim(),
+      ).fold((failure) => failure.message, (_) => null);
     });
   }
 
@@ -52,24 +51,24 @@ class _AuthFormState extends State<AuthForm> {
       return;
     }
     setState(() {
-      _passwordError = PasswordValidator.validate(value).fold(
-        (failure) => failure.message,
-        (_) => null,
-      );
+      _passwordError = PasswordValidator.validate(
+        value,
+      ).fold((failure) => failure.message, (_) => null);
     });
   }
 
   void _startCooldown(Duration duration) {
     _cooldownTimer?.cancel();
     var secondsRemaining = duration.inSeconds;
-    
+
     void updateError() {
       if (secondsRemaining <= 0) {
         setState(() => _rateLimitError = null);
         _cooldownTimer?.cancel();
       } else {
         setState(() {
-          _rateLimitError = 'Too many attempts. Try again in ${secondsRemaining}s';
+          _rateLimitError =
+              'Too many attempts. Try again in ${secondsRemaining}s';
         });
       }
     }
@@ -81,7 +80,8 @@ class _AuthFormState extends State<AuthForm> {
     });
   }
 
-  bool get _hasErrors => _emailError != null || _passwordError != null || _rateLimitError != null;
+  bool get _hasErrors =>
+      _emailError != null || _passwordError != null || _rateLimitError != null;
   bool get _canSubmit =>
       widget.emailController.text.isNotEmpty &&
       widget.passwordController.text.isNotEmpty &&
@@ -131,9 +131,9 @@ class _AuthFormState extends State<AuthForm> {
                 state.maybeMap(
                   authenticated: (_) => Navigator.pop(context),
                   rateLimited: (s) => _startCooldown(s.cooldown),
-                  error: (e) => ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.message)),
-                  ),
+                  error: (e) => ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.message))),
                   orElse: () {},
                 );
               },
@@ -143,9 +143,9 @@ class _AuthFormState extends State<AuthForm> {
                 state.maybeMap(
                   success: (_) => Navigator.pop(context),
                   rateLimited: (s) => _startCooldown(s.cooldown),
-                  error: (e) => ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(e.message)),
-                  ),
+                  error: (e) => ScaffoldMessenger.of(
+                    context,
+                  ).showSnackBar(SnackBar(content: Text(e.message))),
                   orElse: () {},
                 );
               },

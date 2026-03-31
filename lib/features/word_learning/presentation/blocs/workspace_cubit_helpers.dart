@@ -21,12 +21,19 @@ mixin WorkspaceCubitHelpers on Cubit<WorkspaceState> {
         final snapshot = state.maybeMap(results: (s) => s, orElse: () => null);
         if (snapshot == null || snapshot.revision != revision) return;
 
-        final nextPending = <String>{...snapshot.pendingKnownWords}..remove(text);
-        emit(snapshot.copyWith(
-          pendingKnownWords: nextPending,
-          summary: rebuildWorkspaceSummary(fallbackSummary, snapshot.words, nextPending),
-          lastError: f.message,
-        ));
+        final nextPending = <String>{...snapshot.pendingKnownWords}
+          ..remove(text);
+        emit(
+          snapshot.copyWith(
+            pendingKnownWords: nextPending,
+            summary: rebuildWorkspaceSummary(
+              fallbackSummary,
+              snapshot.words,
+              nextPending,
+            ),
+            lastError: f.message,
+          ),
+        );
       },
       (_) async {
         await Future.delayed(const Duration(milliseconds: 280));
@@ -35,13 +42,20 @@ mixin WorkspaceCubitHelpers on Cubit<WorkspaceState> {
         final snapshot = state.maybeMap(results: (s) => s, orElse: () => null);
         if (snapshot == null || snapshot.revision != revision) return;
 
-        final nextPending = <String>{...snapshot.pendingKnownWords}..remove(text);
-        final nextWords = snapshot.words.where((w) => w.wordText != text).toList(growable: false);
+        final nextPending = <String>{...snapshot.pendingKnownWords}
+          ..remove(text);
+        final nextWords = snapshot.words
+            .where((w) => w.wordText != text)
+            .toList(growable: false);
         emit(
           snapshot.copyWith(
             words: nextWords,
             pendingKnownWords: nextPending,
-            summary: rebuildWorkspaceSummary(fallbackSummary, nextWords, nextPending),
+            summary: rebuildWorkspaceSummary(
+              fallbackSummary,
+              nextWords,
+              nextPending,
+            ),
             lastError: null,
           ),
         );
@@ -53,10 +67,11 @@ mixin WorkspaceCubitHelpers on Cubit<WorkspaceState> {
     ScriptSummary base,
     Iterable<ProcessedWord> ws,
     Set<String> pending,
-  ) =>
-      ScriptSummary(
-        totalWords: base.totalWords,
-        uniqueWords: base.uniqueWords,
-        newWords: ws.where((w) => !w.isKnown && !pending.contains(w.wordText)).length,
-      );
+  ) => ScriptSummary(
+    totalWords: base.totalWords,
+    uniqueWords: base.uniqueWords,
+    newWords: ws
+        .where((w) => !w.isKnown && !pending.contains(w.wordText))
+        .length,
+  );
 }

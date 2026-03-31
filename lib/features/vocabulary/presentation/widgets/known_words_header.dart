@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 class KnownWordsHeader extends StatelessWidget {
-
   const KnownWordsHeader({
     super.key,
     required this.count,

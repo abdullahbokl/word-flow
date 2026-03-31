@@ -46,7 +46,9 @@ class _LibraryResultsListState extends State<LibraryResultsList> {
         WordsFilter.known => w.isKnown,
         WordsFilter.unknown => !w.isKnown,
       };
-      final matchesSearch = w.wordText.toLowerCase().contains(widget.searchQuery.toLowerCase());
+      final matchesSearch = w.wordText.toLowerCase().contains(
+        widget.searchQuery.toLowerCase(),
+      );
       return matchesFilter && matchesSearch;
     }).toList();
   }
@@ -58,7 +60,7 @@ class _LibraryResultsListState extends State<LibraryResultsList> {
 
     // Check for "hard reset" (e.g. search changed or list length changed drastically)
     // For small changes, animate. For large ones, just rebuild.
-    if (widget.searchQuery != oldWidget.searchQuery || 
+    if (widget.searchQuery != oldWidget.searchQuery ||
         widget.filter != oldWidget.filter ||
         (targetItems.length - _visibleItems.length).abs() > 3) {
       setState(() {
@@ -72,7 +74,9 @@ class _LibraryResultsListState extends State<LibraryResultsList> {
     final newSet = targetItems.toSet();
 
     // Handle removals
-    final toRemove = _visibleItems.where((item) => !newSet.contains(item)).toList();
+    final toRemove = _visibleItems
+        .where((item) => !newSet.contains(item))
+        .toList();
     for (final item in toRemove) {
       final index = _visibleItems.indexOf(item);
       if (index != -1) {
@@ -103,18 +107,17 @@ class _LibraryResultsListState extends State<LibraryResultsList> {
 
   void _insertItem(int index, WordEntity item) {
     // Ensure index is valid for current visible state
-    final safeIndex = index > _visibleItems.length ? _visibleItems.length : index;
+    final safeIndex = index > _visibleItems.length
+        ? _visibleItems.length
+        : index;
     _visibleItems.insert(safeIndex, item);
-    _listKey.currentState?.insertItem(
-      safeIndex,
-      duration: _insertDuration,
-    );
+    _listKey.currentState?.insertItem(safeIndex, duration: _insertDuration);
   }
 
   @override
   Widget build(BuildContext context) {
     Widget content;
-    
+
     if (widget.words.isEmpty && widget.searchQuery.isEmpty) {
       content = EmptyState(
         key: const ValueKey('empty_none'),
@@ -159,7 +162,10 @@ class _LibraryResultsListState extends State<LibraryResultsList> {
     );
   }
 
-  void _showAddEditSheet(BuildContext outerContext, {required WordEntity word}) {
+  void _showAddEditSheet(
+    BuildContext outerContext, {
+    required WordEntity word,
+  }) {
     showModalBottomSheet(
       context: outerContext,
       isScrollControlled: true,
@@ -179,10 +185,16 @@ class _LibraryResultsListState extends State<LibraryResultsList> {
         title: const Text('Delete word?'),
         content: Text('Are you sure you want to delete "${word.wordText}"?'),
         actions: [
-          TextButton(onPressed: () => context.pop(), child: const Text('Cancel')),
+          TextButton(
+            onPressed: () => context.pop(),
+            child: const Text('Cancel'),
+          ),
           TextButton(
             onPressed: () {
-              outerContext.read<LibraryCubit>().deleteWord(word.id, userId: word.userId);
+              outerContext.read<LibraryCubit>().deleteWord(
+                word.id,
+                userId: word.userId,
+              );
               context.pop();
             },
             child: const Text('Delete', style: TextStyle(color: Colors.red)),

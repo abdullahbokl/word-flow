@@ -12,10 +12,12 @@ class SignInWithEmailUseCase {
 
   Future<Either<Failure, AuthUser>> call(String email, String password) async {
     final emailRes = EmailValidator.validate(email);
-    if (emailRes.isLeft()) return Left(emailRes.fold((l) => l, (r) => throw UnimplementedError()));
-    
+    if (emailRes.isLeft())
+      return Left(emailRes.fold((l) => l, (r) => throw UnimplementedError()));
+
     final passRes = PasswordValidator.validate(password);
-    if (passRes.isLeft()) return Left(passRes.fold((l) => l, (r) => throw UnimplementedError()));
+    if (passRes.isLeft())
+      return Left(passRes.fold((l) => l, (r) => throw UnimplementedError()));
 
     return await authRepository.signInWithEmail(email, password);
   }
@@ -28,10 +30,12 @@ class SignUpWithEmailUseCase {
 
   Future<Either<Failure, AuthUser>> call(String email, String password) async {
     final emailRes = EmailValidator.validate(email);
-    if (emailRes.isLeft()) return Left(emailRes.fold((l) => l, (r) => throw UnimplementedError()));
-    
+    if (emailRes.isLeft())
+      return Left(emailRes.fold((l) => l, (r) => throw UnimplementedError()));
+
     final passRes = PasswordValidator.validate(password);
-    if (passRes.isLeft()) return Left(passRes.fold((l) => l, (r) => throw UnimplementedError()));
+    if (passRes.isLeft())
+      return Left(passRes.fold((l) => l, (r) => throw UnimplementedError()));
 
     return await authRepository.signUpWithEmail(email, password);
   }

@@ -2,7 +2,11 @@ import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_state.dart';
 
 mixin LibraryOptimisticUpdates {
-  LibraryState applyOptimisticReplace(LibraryState state, WordEntity word, Set<String> pendingIds) {
+  LibraryState applyOptimisticReplace(
+    LibraryState state,
+    WordEntity word,
+    Set<String> pendingIds,
+  ) {
     return state.maybeMap(
       loaded: (s) {
         final updated = s.words
@@ -14,12 +18,18 @@ mixin LibraryOptimisticUpdates {
     );
   }
 
-  LibraryState applyOptimisticUpsert(LibraryState state, WordEntity word, Set<String> pendingIds) {
+  LibraryState applyOptimisticUpsert(
+    LibraryState state,
+    WordEntity word,
+    Set<String> pendingIds,
+  ) {
     return state.maybeMap(
       loaded: (s) {
         final exists = s.words.any((w) => w.id == word.id);
         final next = exists
-            ? s.words.map((w) => w.id == word.id ? word : w).toList(growable: false)
+            ? s.words
+                  .map((w) => w.id == word.id ? word : w)
+                  .toList(growable: false)
             : <WordEntity>[word, ...s.words];
         return s.copyWith(words: next, pendingWordIds: pendingIds);
       },
@@ -27,7 +37,11 @@ mixin LibraryOptimisticUpdates {
     );
   }
 
-  LibraryState applyOptimisticRemove(LibraryState state, String id, Set<String> pendingIds) {
+  LibraryState applyOptimisticRemove(
+    LibraryState state,
+    String id,
+    Set<String> pendingIds,
+  ) {
     return state.maybeMap(
       loaded: (s) {
         final next = s.words.where((w) => w.id != id).toList(growable: false);

@@ -11,10 +11,7 @@ class ProfilePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Profile'),
-        centerTitle: true,
-      ),
+      appBar: AppBar(title: const Text('Profile'), centerTitle: true),
       body: BlocBuilder<AuthCubit, AuthState>(
         builder: (context, state) {
           return state.maybeMap(
@@ -44,10 +41,7 @@ class _AuthenticatedProfile extends StatelessWidget {
             child: Icon(Icons.person_rounded, size: 40),
           ),
           const SizedBox(height: 16),
-          Text(
-            user.email,
-            style: theme.textTheme.titleLarge,
-          ),
+          Text(user.email, style: theme.textTheme.titleLarge),
           const SizedBox(height: 32),
           SectionCard(
             title: 'Account',
@@ -63,7 +57,10 @@ class _AuthenticatedProfile extends StatelessWidget {
                 const Divider(),
                 ListTile(
                   leading: const Icon(Icons.logout_rounded, color: Colors.red),
-                  title: const Text('Log out', style: TextStyle(color: Colors.red)),
+                  title: const Text(
+                    'Log out',
+                    style: TextStyle(color: Colors.red),
+                  ),
                   contentPadding: EdgeInsets.zero,
                   onTap: () {
                     context.read<AuthCubit>().logOut();
@@ -88,7 +85,11 @@ class _UnauthenticatedProfile extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.account_circle_outlined, size: 64, color: Colors.grey),
+          const Icon(
+            Icons.account_circle_outlined,
+            size: 64,
+            color: Colors.grey,
+          ),
           const SizedBox(height: 16),
           const Text('You are not logged in'),
           const SizedBox(height: 24),

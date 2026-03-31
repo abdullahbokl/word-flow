@@ -13,12 +13,8 @@ import 'package:word_flow/core/errors/failures.dart';
 
 @injectable
 class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
-
-  LibraryCubit(
-    this._watchWords,
-    this._updateWord,
-    this._deleteWord,
-  ) : super(const LibraryState.initial());
+  LibraryCubit(this._watchWords, this._updateWord, this._deleteWord)
+    : super(const LibraryState.initial());
   final WatchWords _watchWords;
   final UpdateWord _updateWord;
   final DeleteWord _deleteWord;
@@ -30,13 +26,21 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   void init(String? userId) {
     emit(const LibraryState.loading());
     _wordsSubscription?.cancel();
-    _wordsSubscription = _watchWords(UserIdParams(userId: userId)).listen((result) {
+    _wordsSubscription = _watchWords(UserIdParams(userId: userId)).listen((
+      result,
+    ) {
       result.fold(
         (failure) => _emitLoadedError(failure.message, failure: failure),
         (words) {
           state.maybeMap(
-            loaded: (s) => emit(s.copyWith(words: words, pendingWordIds: _pendingWordIds)),
-            orElse: () => emit(LibraryState.loaded(words: words, pendingWordIds: _pendingWordIds)),
+            loaded: (s) =>
+                emit(s.copyWith(words: words, pendingWordIds: _pendingWordIds)),
+            orElse: () => emit(
+              LibraryState.loaded(
+                words: words,
+                pendingWordIds: _pendingWordIds,
+              ),
+            ),
           );
         },
       );
@@ -78,17 +82,14 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     );
 
     final result = await _updateWord(updatedWord);
-    result.fold(
-      (f) {
-        _unmarkPending(word.id);
-        _optimisticallyReplace(prev);
-        _emitLoadedError(f.message, failure: f);
-        // Clear debounce timer on error to allow retry
-        _debounceTimers[word.id]?.cancel();
-        _debounceTimers.remove(word.id);
-      },
-      (_) => _unmarkPending(word.id),
-    );
+    result.fold((f) {
+      _unmarkPending(word.id);
+      _optimisticallyReplace(prev);
+      _emitLoadedError(f.message, failure: f);
+      // Clear debounce timer on error to allow retry
+      _debounceTimers[word.id]?.cancel();
+      _debounceTimers.remove(word.id);
+    }, (_) => _unmarkPending(word.id));
   }
 
   Future<void> deleteWord(String id, {String? userId}) async {
@@ -105,14 +106,11 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     _markPending(id);
     if (prevWord != null) _optimisticallyRemove(id);
     final result = await _deleteWord(DeleteWordParams(id: id, userId: userId));
-    result.fold(
-      (f) {
-        _unmarkPending(id);
-        if (prevWord != null) _optimisticallyUpsert(prevWord);
-        _emitLoadedError(f.message, failure: f);
-      },
-      (_) => _unmarkPending(id),
-    );
+    result.fold((f) {
+      _unmarkPending(id);
+      if (prevWord != null) _optimisticallyUpsert(prevWord);
+      _emitLoadedError(f.message, failure: f);
+    }, (_) => _unmarkPending(id));
   }
 
   Future<void> addWord(String text, bool isKnown, {String? userId}) async {
@@ -126,17 +124,18 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     _markPending(word.id);
     _optimisticallyUpsert(word);
     final result = await _updateWord(word);
-    result.fold(
-      (f) {
-        _unmarkPending(word.id);
-        _optimisticallyRemove(word.id);
-        _emitLoadedError(f.message, failure: f);
-      },
-      (_) => _unmarkPending(word.id),
-    );
+    result.fold((f) {
+      _unmarkPending(word.id);
+      _optimisticallyRemove(word.id);
+      _emitLoadedError(f.message, failure: f);
+    }, (_) => _unmarkPending(word.id));
   }
 
-  Future<void> updateWord(WordEntity word, String newText, bool newIsKnown) async {
+  Future<void> updateWord(
+    WordEntity word,
+    String newText,
+    bool newIsKnown,
+  ) async {
     final prev = word;
     final updatedWord = word.copyWith(
       wordText: newText,
@@ -146,14 +145,11 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     _markPending(word.id);
     _optimisticallyReplace(updatedWord);
     final result = await _updateWord(updatedWord);
-    result.fold(
-      (f) {
-        _unmarkPending(word.id);
-        _optimisticallyReplace(prev);
-        _emitLoadedError(f.message, failure: f);
-      },
-      (_) => _unmarkPending(word.id),
-    );
+    result.fold((f) {
+      _unmarkPending(word.id);
+      _optimisticallyReplace(prev);
+      _emitLoadedError(f.message, failure: f);
+    }, (_) => _unmarkPending(word.id));
   }
 
   void clearError() {
@@ -192,14 +188,14 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     );
   }
 
-  void _optimisticallyReplace(WordEntity word) => 
-    emit(applyOptimisticReplace(state, word, _pendingWordIds));
+  void _optimisticallyReplace(WordEntity word) =>
+      emit(applyOptimisticReplace(state, word, _pendingWordIds));
 
-  void _optimisticallyUpsert(WordEntity word) => 
-    emit(applyOptimisticUpsert(state, word, _pendingWordIds));
+  void _optimisticallyUpsert(WordEntity word) =>
+      emit(applyOptimisticUpsert(state, word, _pendingWordIds));
 
-  void _optimisticallyRemove(String id) => 
-    emit(applyOptimisticRemove(state, id, _pendingWordIds));
+  void _optimisticallyRemove(String id) =>
+      emit(applyOptimisticRemove(state, id, _pendingWordIds));
 
   @override
   Future<void> close() {

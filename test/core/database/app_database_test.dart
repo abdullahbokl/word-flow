@@ -51,7 +51,8 @@ void main() {
       final pragma = await db.customSelect('PRAGMA table_info(words)').get();
 
       final columns = {
-        for (final col in pragma) (col.data['name'] as String): col.data['type']
+        for (final col in pragma)
+          (col.data['name'] as String): col.data['type'],
       };
 
       expect(columns.keys, contains('id'));
@@ -69,18 +70,27 @@ void main() {
         WHERE type='index' AND tbl_name='word_sync_queue'
       ''').get();
 
-      final indexNames = uniqueIndices.map((i) => i.data['name'] as String).toList();
-      
+      final indexNames = uniqueIndices
+          .map((i) => i.data['name'] as String)
+          .toList();
+
       // Drift generates unique constraints as indices with 'unique=1'
       // For word_sync_queue, there should be a unique constraint on (word_id, operation)
-      expect(indexNames.isNotEmpty, true, reason: 'Should have at least one index');
+      expect(
+        indexNames.isNotEmpty,
+        true,
+        reason: 'Should have at least one index',
+      );
     });
 
     test('sync_dead_letters table is created with correct schema', () async {
-      final pragma = await db.customSelect('PRAGMA table_info(sync_dead_letters)').get();
+      final pragma = await db
+          .customSelect('PRAGMA table_info(sync_dead_letters)')
+          .get();
 
       final columns = {
-        for (final col in pragma) (col.data['name'] as String): col.data['type']
+        for (final col in pragma)
+          (col.data['name'] as String): col.data['type'],
       };
 
       expect(columns.keys, contains('id'));
@@ -93,10 +103,13 @@ void main() {
     });
 
     test('app_settings table has correct schema', () async {
-      final pragma = await db.customSelect('PRAGMA table_info(app_settings)').get();
+      final pragma = await db
+          .customSelect('PRAGMA table_info(app_settings)')
+          .get();
 
       final columns = {
-        for (final col in pragma) (col.data['name'] as String): col.data['type']
+        for (final col in pragma)
+          (col.data['name'] as String): col.data['type'],
       };
 
       expect(columns.keys, contains('key'));
@@ -107,86 +120,102 @@ void main() {
       // The migration 1→2 runs at database creation time and deduplicates existing data.
       // This test verifies the dedup migration logic works by checking
       // that we can't end up with duplicates after a fresh install.
-      
+
       final now = DateTime.now().toUtc();
-      
+
       // The unique constraint (user_id, word_text) is enforced,
       // so we verify insertOnConflictUpdate respects it by using the
       // updateable approach for duplicates.
-      
+
       // First insert of 'hello'
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'id1',
-        wordText: 'hello',
-        totalCount: const Value(5),
-        isKnown: const Value(false),
-        lastUpdated: now,
-      ));
+      await db.upsertWord(
+        WordsCompanion.insert(
+          id: 'id1',
+          wordText: 'hello',
+          totalCount: const Value(5),
+          isKnown: const Value(false),
+          lastUpdated: now,
+        ),
+      );
 
       // Try to insert same wordText again - the unique constraint will fail
       // unless the ID is the same. This test verifies that duplicates
       // must be handled via explicit updates.
-      
+
       final words = await db.getWordsByTexts(['hello']);
       expect(words.length, 1);
       expect(words.first.totalCount, 5);
     });
 
-    test('migration 2→3: UNIQUE(user_id, word_text) constraint enforced on new inserts', () async {
-      final now = DateTime.now().toUtc();
-      
-      // First insert succeeds - no constraint violation
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'id1',
-        userId: const Value('user-1'),
-        wordText: 'duplicate-text',
-        lastUpdated: now,
-      ));
+    test(
+      'migration 2→3: UNIQUE(user_id, word_text) constraint enforced on new inserts',
+      () async {
+        final now = DateTime.now().toUtc();
 
-      // Second insert with different ID but same (user_id, word_text)
-      // violates unique constraint. insertOnConflictUpdate only handles
-      // primary key conflicts, not unique constraint violations.
-      expect(
-        () => db.upsertWord(WordsCompanion.insert(
-          id: 'id2',
-          userId: const Value('user-1'),
-          wordText: 'duplicate-text',
-          totalCount: const Value(99),
-          lastUpdated: now.add(const Duration(seconds: 1)),
-        )),
-        throwsA(isA<Exception>()),
-      );
+        // First insert succeeds - no constraint violation
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'id1',
+            userId: const Value('user-1'),
+            wordText: 'duplicate-text',
+            lastUpdated: now,
+          ),
+        );
 
-      // Original word still exists unchanged
-      final words = await db.getWordsByTexts(['duplicate-text'], userId: 'user-1');
-      expect(words.length, 1);
-      expect(words.first.id, 'id1');
-    });
+        // Second insert with different ID but same (user_id, word_text)
+        // violates unique constraint. insertOnConflictUpdate only handles
+        // primary key conflicts, not unique constraint violations.
+        expect(
+          () => db.upsertWord(
+            WordsCompanion.insert(
+              id: 'id2',
+              userId: const Value('user-1'),
+              wordText: 'duplicate-text',
+              totalCount: const Value(99),
+              lastUpdated: now.add(const Duration(seconds: 1)),
+            ),
+          ),
+          throwsA(isA<Exception>()),
+        );
 
-    test('migration 4→5: UNIQUE(word_id, operation) prevents sync queue duplicates', () async {
-      final now = DateTime.now().toUtc();
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'word-1',
-        wordText: 'test',
-        lastUpdated: now,
-      ));
+        // Original word still exists unchanged
+        final words = await db.getWordsByTexts([
+          'duplicate-text',
+        ], userId: 'user-1');
+        expect(words.length, 1);
+        expect(words.first.id, 'id1');
+      },
+    );
 
-      // First enqueue
-      await db.enqueueSyncOperation('word-1', 'upsert');
-      var queue = await db.getSyncQueue(10);
-      expect(queue.length, 1);
+    test(
+      'migration 4→5: UNIQUE(word_id, operation) prevents sync queue duplicates',
+      () async {
+        final now = DateTime.now().toUtc();
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'word-1',
+            wordText: 'test',
+            lastUpdated: now,
+          ),
+        );
 
-      // Second enqueue with same (word_id, operation) should update, not duplicate
-      await db.enqueueSyncOperation('word-1', 'upsert');
-      queue = await db.getSyncQueue(10);
-      expect(queue.length, 1);
+        // First enqueue
+        await db.enqueueSyncOperation('word-1', 'upsert');
+        var queue = await db.getSyncQueue(10);
+        expect(queue.length, 1);
 
-      // Different operation replaces previous (cross-operation swap)
-      await db.enqueueSyncOperation('word-1', 'delete');
-      queue = await db.getSyncQueue(10);
-      expect(queue.length, 1);
-      expect(queue.first.operation, 'delete');
-    });
+        // Second enqueue with same (word_id, operation) should update, not duplicate
+        await db.enqueueSyncOperation('word-1', 'upsert');
+        queue = await db.getSyncQueue(10);
+        expect(queue.length, 1);
+
+        // Different operation replaces previous (cross-operation swap)
+        await db.enqueueSyncOperation('word-1', 'delete');
+        queue = await db.getSyncQueue(10);
+        expect(queue.length, 1);
+        expect(queue.first.operation, 'delete');
+      },
+    );
   });
 
   group('WordFlowDatabase - upsertWord Idempotency', () {
@@ -200,80 +229,101 @@ void main() {
       await db.close();
     });
 
-    test('insert same word twice with same ID → only one row (update on conflict)', () async {
-      final now = DateTime.now().toUtc();
-      const id = 'test-id-1';
+    test(
+      'insert same word twice with same ID → only one row (update on conflict)',
+      () async {
+        final now = DateTime.now().toUtc();
+        const id = 'test-id-1';
 
-      // First insert
-      await db.upsertWord(WordsCompanion.insert(
-        id: id,
-        wordText: 'hello',
-        totalCount: const Value(5),
-        lastUpdated: now,
-      ));
+        // First insert
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: id,
+            wordText: 'hello',
+            totalCount: const Value(5),
+            lastUpdated: now,
+          ),
+        );
 
-      // Second insert with same ID but different data
-      await db.upsertWord(WordsCompanion.insert(
-        id: id,
-        wordText: 'hello',
-        totalCount: const Value(10),
-        lastUpdated: now.add(const Duration(seconds: 1)),
-      ));
+        // Second insert with same ID but different data
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: id,
+            wordText: 'hello',
+            totalCount: const Value(10),
+            lastUpdated: now.add(const Duration(seconds: 1)),
+          ),
+        );
 
-      final words = await db.customSelect('SELECT * FROM words WHERE id = ?', variables: [Variable(id)]).get();
-      expect(words.length, 1);
-      
-      final word = await db.getWordById(id);
-      expect(word?.totalCount, 10); // Updated value
-      expect(word?.lastUpdated.isAfter(now), true);
-    });
+        final words = await db
+            .customSelect(
+              'SELECT * FROM words WHERE id = ?',
+              variables: [Variable(id)],
+            )
+            .get();
+        expect(words.length, 1);
 
-    test('insert same wordText for same userId with different IDs → fails due to unique constraint', () async {
-      final now = DateTime.now().toUtc();
-      const userId = 'user-1';
-      const wordText = 'flutter';
+        final word = await db.getWordById(id);
+        expect(word?.totalCount, 10); // Updated value
+        expect(word?.lastUpdated.isAfter(now), true);
+      },
+    );
 
-      // First insert succeeds
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'id-1',
-        userId: const Value(userId),
-        wordText: wordText,
-        totalCount: const Value(3),
-        lastUpdated: now,
-      ));
+    test(
+      'insert same wordText for same userId with different IDs → fails due to unique constraint',
+      () async {
+        final now = DateTime.now().toUtc();
+        const userId = 'user-1';
+        const wordText = 'flutter';
 
-      // Second insert with same (userId, wordText) but different id
-      // Should fail with UNIQUE constraint violation because insertOnConflictUpdate
-      // only handles primary key conflicts, not unique constraints
-      expect(
-        () => db.upsertWord(WordsCompanion.insert(
-          id: 'id-2',
-          userId: const Value(userId),
-          wordText: wordText,
-          totalCount: const Value(7),
-          lastUpdated: now.add(const Duration(seconds: 1)),
-        )),
-        throwsA(isA<Exception>()),
-      );
+        // First insert succeeds
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'id-1',
+            userId: const Value(userId),
+            wordText: wordText,
+            totalCount: const Value(3),
+            lastUpdated: now,
+          ),
+        );
 
-      // Original word should still have original count
-      final words = await db.getWordsByTexts([wordText], userId: userId);
-      expect(words.length, 1);
-      expect(words.first.id, 'id-1');
-      expect(words.first.totalCount, 3);
-    });
+        // Second insert with same (userId, wordText) but different id
+        // Should fail with UNIQUE constraint violation because insertOnConflictUpdate
+        // only handles primary key conflicts, not unique constraints
+        expect(
+          () => db.upsertWord(
+            WordsCompanion.insert(
+              id: 'id-2',
+              userId: const Value(userId),
+              wordText: wordText,
+              totalCount: const Value(7),
+              lastUpdated: now.add(const Duration(seconds: 1)),
+            ),
+          ),
+          throwsA(isA<Exception>()),
+        );
+
+        // Original word should still have original count
+        final words = await db.getWordsByTexts([wordText], userId: userId);
+        expect(words.length, 1);
+        expect(words.first.id, 'id-1');
+        expect(words.first.totalCount, 3);
+      },
+    );
 
     test('sequential upserts with increasing timestamps', () async {
       final baseTime = DateTime.now().toUtc();
       const id = 'sequential-test';
 
       for (int i = 0; i < 3; i++) {
-        await db.upsertWord(WordsCompanion.insert(
-          id: id,
-          wordText: 'word',
-          totalCount: Value(i + 1),
-          lastUpdated: baseTime.add(Duration(seconds: i)),
-        ));
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: id,
+            wordText: 'word',
+            totalCount: Value(i + 1),
+            lastUpdated: baseTime.add(Duration(seconds: i)),
+          ),
+        );
       }
 
       final word = await db.getWordById(id);
@@ -298,123 +348,149 @@ void main() {
       await db.close();
     });
 
-    test('guest word not in user words → reassigned to userId with sync queue entry', () async {
-      final now = DateTime.now().toUtc();
+    test(
+      'guest word not in user words → reassigned to userId with sync queue entry',
+      () async {
+        final now = DateTime.now().toUtc();
 
-      // Create guest word
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'guest-unique-word',
-        wordText: 'flutter',
-        totalCount: const Value(5),
-        lastUpdated: now,
-      ));
+        // Create guest word
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'guest-unique-word',
+            wordText: 'flutter',
+            totalCount: const Value(5),
+            lastUpdated: now,
+          ),
+        );
 
-      // Adopt for user
-      final adoptedCount = await db.adoptGuestWords('user-123');
+        // Adopt for user
+        final adoptedCount = await db.adoptGuestWords('user-123');
 
-      // Verify guest word was reassigned
-      final word = await db.getWordByText('flutter', userId: 'user-123');
-      expect(word, isNotNull);
-      expect(word?.id, 'guest-unique-word');
-      expect(word?.userId, 'user-123');
-      expect(adoptedCount, 1);
+        // Verify guest word was reassigned
+        final word = await db.getWordByText('flutter', userId: 'user-123');
+        expect(word, isNotNull);
+        expect(word?.id, 'guest-unique-word');
+        expect(word?.userId, 'user-123');
+        expect(adoptedCount, 1);
 
-      // Verify sync queue entry exists
-      final queue = await db.getSyncQueue(10);
-      expect(queue.length, 1);
-      expect(queue.first.wordId, 'guest-unique-word');
-      expect(queue.first.operation, 'upsert');
+        // Verify sync queue entry exists
+        final queue = await db.getSyncQueue(10);
+        expect(queue.length, 1);
+        expect(queue.first.wordId, 'guest-unique-word');
+        expect(queue.first.operation, 'upsert');
 
-      // Verify no guest words remain
-      final guestCount = await db.getGuestWordsCount();
-      expect(guestCount, 0);
-    });
+        // Verify no guest words remain
+        final guestCount = await db.getGuestWordsCount();
+        expect(guestCount, 0);
+      },
+    );
 
-    test('guest word conflicts with user word → merged with max count', () async {
-      final now = DateTime.now().toUtc();
+    test(
+      'guest word conflicts with user word → merged with max count',
+      () async {
+        final now = DateTime.now().toUtc();
 
-      // Guest word
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'guest-1',
-        wordText: 'hello',
-        totalCount: const Value(10),
-        isKnown: const Value(false),
-        lastUpdated: now,
-      ));
+        // Guest word
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'guest-1',
+            wordText: 'hello',
+            totalCount: const Value(10),
+            isKnown: const Value(false),
+            lastUpdated: now,
+          ),
+        );
 
-      // User word with lower count
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'user-1',
-        userId: const Value('user-123'),
-        wordText: 'hello',
-        totalCount: const Value(3),
-        isKnown: const Value(false),
-        lastUpdated: now,
-      ));
+        // User word with lower count
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'user-1',
+            userId: const Value('user-123'),
+            wordText: 'hello',
+            totalCount: const Value(3),
+            isKnown: const Value(false),
+            lastUpdated: now,
+          ),
+        );
 
-      final adoptedCount = await db.adoptGuestWords('user-123');
+        final adoptedCount = await db.adoptGuestWords('user-123');
 
-      // Verify merge
-      final word = await db.getWordByText('hello', userId: 'user-123');
-      expect(word?.totalCount, 10); // Higher count from guest
-      expect(adoptedCount, 1);
+        // Verify merge
+        final word = await db.getWordByText('hello', userId: 'user-123');
+        expect(word?.totalCount, 10); // Higher count from guest
+        expect(adoptedCount, 1);
 
-      // Verify guest duplicate was deleted
-      final guestWords = await db.getWordByText('hello');
-      expect(guestWords, isNull);
-    });
+        // Verify guest duplicate was deleted
+        final guestWords = await db.getWordByText('hello');
+        expect(guestWords, isNull);
+      },
+    );
 
-    test('guest isKnown=true, user isKnown=false → merged isKnown=true (OR logic)', () async {
-      final now = DateTime.now().toUtc();
+    test(
+      'guest isKnown=true, user isKnown=false → merged isKnown=true (OR logic)',
+      () async {
+        final now = DateTime.now().toUtc();
 
-      // Guest word with isKnown=true
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'guest-known',
-        wordText: 'dart',
-        isKnown: const Value(true),
-        lastUpdated: now,
-      ));
+        // Guest word with isKnown=true
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'guest-known',
+            wordText: 'dart',
+            isKnown: const Value(true),
+            lastUpdated: now,
+          ),
+        );
 
-      // User word with isKnown=false
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'user-unknown',
-        userId: const Value('user-456'),
-        wordText: 'dart',
-        isKnown: const Value(false),
-        lastUpdated: now,
-      ));
+        // User word with isKnown=false
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'user-unknown',
+            userId: const Value('user-456'),
+            wordText: 'dart',
+            isKnown: const Value(false),
+            lastUpdated: now,
+          ),
+        );
 
-      await db.adoptGuestWords('user-456');
+        await db.adoptGuestWords('user-456');
 
-      final word = await db.getWordByText('dart', userId: 'user-456');
-      expect(word?.isKnown, true); // OR: true | false = true
-    });
+        final word = await db.getWordByText('dart', userId: 'user-456');
+        expect(word?.isKnown, true); // OR: true | false = true
+      },
+    );
 
-    test('guest isKnown=false, user isKnown=true → merged isKnown=true (OR logic)', () async {
-      final now = DateTime.now().toUtc();
+    test(
+      'guest isKnown=false, user isKnown=true → merged isKnown=true (OR logic)',
+      () async {
+        final now = DateTime.now().toUtc();
 
-      // Guest word with isKnown=false
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'guest-unknown',
-        wordText: 'swift',
-        isKnown: const Value(false),
-        lastUpdated: now,
-      ));
+        // Guest word with isKnown=false
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'guest-unknown',
+            wordText: 'swift',
+            isKnown: const Value(false),
+            lastUpdated: now,
+          ),
+        );
 
-      // User word with isKnown=true
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'user-known',
-        userId: const Value('user-789'),
-        wordText: 'swift',
-        isKnown: const Value(true),
-        lastUpdated: now,
-      ));
+        // User word with isKnown=true
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'user-known',
+            userId: const Value('user-789'),
+            wordText: 'swift',
+            isKnown: const Value(true),
+            lastUpdated: now,
+          ),
+        );
 
-      await db.adoptGuestWords('user-789');
+        await db.adoptGuestWords('user-789');
 
-      final word = await db.getWordByText('swift', userId: 'user-789');
-      expect(word?.isKnown, true); // OR: false | true = true
-    });
+        final word = await db.getWordByText('swift', userId: 'user-789');
+        expect(word?.isKnown, true); // OR: false | true = true
+      },
+    );
 
     test('multiple guest words: mix of conflicts and non-conflicts', () async {
       final now = DateTime.now().toUtc();
@@ -442,27 +518,35 @@ void main() {
       ]);
 
       // User word (conflict)
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'user-1',
-        userId: const Value('user-999'),
-        wordText: 'conflict-word',
-        totalCount: const Value(3),
-        lastUpdated: now,
-      ));
+      await db.upsertWord(
+        WordsCompanion.insert(
+          id: 'user-1',
+          userId: const Value('user-999'),
+          wordText: 'conflict-word',
+          totalCount: const Value(3),
+          lastUpdated: now,
+        ),
+      );
 
       final adoptedCount = await db.adoptGuestWords('user-999');
 
       expect(adoptedCount, 3); // All 3 guest words processed
 
       // Check conflict was resolved with max count
-      final conflict = await db.getWordByText('conflict-word', userId: 'user-999');
+      final conflict = await db.getWordByText(
+        'conflict-word',
+        userId: 'user-999',
+      );
       expect(conflict?.totalCount, 8);
 
       // Check unique words were reassigned
       final unique = await db.getWordByText('unique-word', userId: 'user-999');
       expect(unique?.id, 'guest-2');
 
-      final anotherUnique = await db.getWordByText('another-unique', userId: 'user-999');
+      final anotherUnique = await db.getWordByText(
+        'another-unique',
+        userId: 'user-999',
+      );
       expect(anotherUnique?.id, 'guest-3');
 
       // Verify sync queue has 3 entries (all changed words)
@@ -497,11 +581,9 @@ void main() {
 
     test('enqueue upsert for word A → 1 entry', () async {
       final now = DateTime.now().toUtc();
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'word-a',
-        wordText: 'test',
-        lastUpdated: now,
-      ));
+      await db.upsertWord(
+        WordsCompanion.insert(id: 'word-a', wordText: 'test', lastUpdated: now),
+      );
 
       await db.enqueueSyncOperation('word-a', 'upsert');
 
@@ -512,103 +594,131 @@ void main() {
       expect(queue.first.retryCount, 0);
     });
 
-    test('enqueue upsert twice for same word → still 1 entry (retryCount reset to 0)', () async {
-      final now = DateTime.now().toUtc();
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'word-a',
-        wordText: 'test',
-        lastUpdated: now,
-      ));
+    test(
+      'enqueue upsert twice for same word → still 1 entry (retryCount reset to 0)',
+      () async {
+        final now = DateTime.now().toUtc();
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'word-a',
+            wordText: 'test',
+            lastUpdated: now,
+          ),
+        );
 
-      // First enqueue
-      await db.enqueueSyncOperation('word-a', 'upsert');
-      var queue = await db.getSyncQueue(10);
-      final firstId = queue.first.id;
+        // First enqueue
+        await db.enqueueSyncOperation('word-a', 'upsert');
+        var queue = await db.getSyncQueue(10);
+        final firstId = queue.first.id;
 
-      // Simulate retry by incrementing retry count
-      await db.updateSyncQueueRetry(firstId, 'Some error');
+        // Simulate retry by incrementing retry count
+        await db.updateSyncQueueRetry(firstId, 'Some error');
 
-      var queueAfterRetry = await db.getSyncQueue(10);
-      expect(queueAfterRetry.first.retryCount, 1);
+        var queueAfterRetry = await db.getSyncQueue(10);
+        expect(queueAfterRetry.first.retryCount, 1);
 
-      // Re-enqueue same operation
-      await db.enqueueSyncOperation('word-a', 'upsert');
-      var queueAfterReequeue = await db.getSyncQueue(10);
+        // Re-enqueue same operation
+        await db.enqueueSyncOperation('word-a', 'upsert');
+        var queueAfterReequeue = await db.getSyncQueue(10);
 
-      expect(queueAfterReequeue.length, 1);
-      expect(queueAfterReequeue.first.retryCount, 0); // Reset to 0
-      expect(queueAfterReequeue.first.lastError, isNull); // Error cleared
-    });
+        expect(queueAfterReequeue.length, 1);
+        expect(queueAfterReequeue.first.retryCount, 0); // Reset to 0
+        expect(queueAfterReequeue.first.lastError, isNull); // Error cleared
+      },
+    );
 
-    test('enqueue delete when upsert pending → upsert removed, delete added', () async {
-      final now = DateTime.now().toUtc();
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'word-x',
-        wordText: 'to-delete',
-        lastUpdated: now,
-      ));
+    test(
+      'enqueue delete when upsert pending → upsert removed, delete added',
+      () async {
+        final now = DateTime.now().toUtc();
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'word-x',
+            wordText: 'to-delete',
+            lastUpdated: now,
+          ),
+        );
 
-      // First enqueue upsert
-      await db.enqueueSyncOperation('word-x', 'upsert');
-      var queue = await db.getSyncQueue(10);
-      expect(queue.first.operation, 'upsert');
+        // First enqueue upsert
+        await db.enqueueSyncOperation('word-x', 'upsert');
+        var queue = await db.getSyncQueue(10);
+        expect(queue.first.operation, 'upsert');
 
-      // Now enqueue delete (cross-operation)
-      await db.enqueueSyncOperation('word-x', 'delete');
-      var queueAfterDelete = await db.getSyncQueue(10);
+        // Now enqueue delete (cross-operation)
+        await db.enqueueSyncOperation('word-x', 'delete');
+        var queueAfterDelete = await db.getSyncQueue(10);
 
-      expect(queueAfterDelete.length, 1);
-      expect(queueAfterDelete.first.operation, 'delete');
-    });
+        expect(queueAfterDelete.length, 1);
+        expect(queueAfterDelete.first.operation, 'delete');
+      },
+    );
 
-    test('enqueue upsert when delete pending → delete removed, upsert added', () async {
-      final now = DateTime.now().toUtc();
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'word-y',
-        wordText: 'to-restore',
-        lastUpdated: now,
-      ));
+    test(
+      'enqueue upsert when delete pending → delete removed, upsert added',
+      () async {
+        final now = DateTime.now().toUtc();
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'word-y',
+            wordText: 'to-restore',
+            lastUpdated: now,
+          ),
+        );
 
-      // First enqueue delete
-      await db.enqueueSyncOperation('word-y', 'delete');
-      var queue = await db.getSyncQueue(10);
-      expect(queue.first.operation, 'delete');
+        // First enqueue delete
+        await db.enqueueSyncOperation('word-y', 'delete');
+        var queue = await db.getSyncQueue(10);
+        expect(queue.first.operation, 'delete');
 
-      // Now enqueue upsert (cross-operation)
-      await db.enqueueSyncOperation('word-y', 'upsert');
-      var queueAfterUpsert = await db.getSyncQueue(10);
+        // Now enqueue upsert (cross-operation)
+        await db.enqueueSyncOperation('word-y', 'upsert');
+        var queueAfterUpsert = await db.getSyncQueue(10);
 
-      expect(queueAfterUpsert.length, 1);
-      expect(queueAfterUpsert.first.operation, 'upsert');
-    });
+        expect(queueAfterUpsert.length, 1);
+        expect(queueAfterUpsert.first.operation, 'upsert');
+      },
+    );
 
-    test('multiple cross-operations in sequence: delete→upsert→delete', () async {
-      final now = DateTime.now().toUtc();
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'flaky-word',
-        wordText: 'flaky',
-        lastUpdated: now,
-      ));
+    test(
+      'multiple cross-operations in sequence: delete→upsert→delete',
+      () async {
+        final now = DateTime.now().toUtc();
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'flaky-word',
+            wordText: 'flaky',
+            lastUpdated: now,
+          ),
+        );
 
-      // Sequence: delete → upsert → delete
-      await db.enqueueSyncOperation('flaky-word', 'delete');
-      var q1 = await db.getSyncQueue(10);
-      expect(q1.first.operation, 'delete');
+        // Sequence: delete → upsert → delete
+        await db.enqueueSyncOperation('flaky-word', 'delete');
+        var q1 = await db.getSyncQueue(10);
+        expect(q1.first.operation, 'delete');
 
-      await db.enqueueSyncOperation('flaky-word', 'upsert');
-      var q2 = await db.getSyncQueue(10);
-      expect(q2.first.operation, 'upsert');
+        await db.enqueueSyncOperation('flaky-word', 'upsert');
+        var q2 = await db.getSyncQueue(10);
+        expect(q2.first.operation, 'upsert');
 
-      await db.enqueueSyncOperation('flaky-word', 'delete');
-      var q3 = await db.getSyncQueue(10);
-      expect(q3.first.operation, 'delete');
-    });
+        await db.enqueueSyncOperation('flaky-word', 'delete');
+        var q3 = await db.getSyncQueue(10);
+        expect(q3.first.operation, 'delete');
+      },
+    );
 
     test('two different words can both be in queue independently', () async {
       final now = DateTime.now().toUtc();
       await db.upsertWords([
-        WordsCompanion.insert(id: 'word-1', wordText: 'first', lastUpdated: now),
-        WordsCompanion.insert(id: 'word-2', wordText: 'second', lastUpdated: now),
+        WordsCompanion.insert(
+          id: 'word-1',
+          wordText: 'first',
+          lastUpdated: now,
+        ),
+        WordsCompanion.insert(
+          id: 'word-2',
+          wordText: 'second',
+          lastUpdated: now,
+        ),
       ]);
 
       await db.enqueueSyncOperation('word-1', 'upsert');
@@ -616,10 +726,8 @@ void main() {
 
       final queue = await db.getSyncQueue(10);
       expect(queue.length, 2);
-      
-      final ops = {
-        for (final entry in queue) entry.wordId: entry.operation
-      };
+
+      final ops = {for (final entry in queue) entry.wordId: entry.operation};
       expect(ops['word-1'], 'upsert');
       expect(ops['word-2'], 'delete');
     });
@@ -636,72 +744,84 @@ void main() {
       await db.close();
     });
 
-    test('delete word → sync queue entries for that word are auto-deleted (FK CASCADE)', () async {
-      final now = DateTime.now().toUtc();
+    test(
+      'delete word → sync queue entries for that word are auto-deleted (FK CASCADE)',
+      () async {
+        final now = DateTime.now().toUtc();
 
-      // Enable foreign keys for cascade behavior
-      await db.customStatement('PRAGMA foreign_keys = ON;');
+        // Enable foreign keys for cascade behavior
+        await db.customStatement('PRAGMA foreign_keys = ON;');
 
-      // Create word and enqueue it
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'cascade-test-word',
-        wordText: 'delete-me',
-        lastUpdated: now,
-      ));
+        // Create word and enqueue it
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'cascade-test-word',
+            wordText: 'delete-me',
+            lastUpdated: now,
+          ),
+        );
 
-      await db.enqueueSyncOperation('cascade-test-word', 'upsert');
-      var queue = await db.getSyncQueue(10);
-      expect(queue.length, 1);
+        await db.enqueueSyncOperation('cascade-test-word', 'upsert');
+        var queue = await db.getSyncQueue(10);
+        expect(queue.length, 1);
 
-      // Delete the word
-      await db.deleteWordById('cascade-test-word');
+        // Delete the word
+        await db.deleteWordById('cascade-test-word');
 
-      // Verify word is gone
-      final word = await db.getWordById('cascade-test-word');
-      expect(word, isNull);
+        // Verify word is gone
+        final word = await db.getWordById('cascade-test-word');
+        expect(word, isNull);
 
-      // Verify sync queue entry was auto-deleted by CASCADE
-      var queueAfterDelete = await db.getSyncQueue(10);
-      expect(queueAfterDelete.isEmpty, true);
-    });
+        // Verify sync queue entry was auto-deleted by CASCADE
+        var queueAfterDelete = await db.getSyncQueue(10);
+        expect(queueAfterDelete.isEmpty, true);
+      },
+    );
 
-    test('delete word with multiple sync operations → all cascade deleted', () async {
-      final now = DateTime.now().toUtc();
+    test(
+      'delete word with multiple sync operations → all cascade deleted',
+      () async {
+        final now = DateTime.now().toUtc();
 
-      // Enable foreign keys for cascade behavior
-      await db.customStatement('PRAGMA foreign_keys = ON;');
+        // Enable foreign keys for cascade behavior
+        await db.customStatement('PRAGMA foreign_keys = ON;');
 
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'multi-op-word',
-        wordText: 'multi',
-        lastUpdated: now,
-      ));
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'multi-op-word',
+            wordText: 'multi',
+            lastUpdated: now,
+          ),
+        );
 
-      // Enqueue upsert first, then switch to delete
-      await db.enqueueSyncOperation('multi-op-word', 'upsert');
-      await db.enqueueSyncOperation('multi-op-word', 'delete');
+        // Enqueue upsert first, then switch to delete
+        await db.enqueueSyncOperation('multi-op-word', 'upsert');
+        await db.enqueueSyncOperation('multi-op-word', 'delete');
 
-      var queue = await db.getSyncQueue(10);
-      expect(queue.length, 1);
-      expect(queue.first.operation, 'delete');
+        var queue = await db.getSyncQueue(10);
+        expect(queue.length, 1);
+        expect(queue.first.operation, 'delete');
 
-      // Delete word
-      await db.deleteWordById('multi-op-word');
+        // Delete word
+        await db.deleteWordById('multi-op-word');
 
-      // All queue entries should be gone
-      var queueAfter = await db.getSyncQueue(10);
-      expect(queueAfter.isEmpty, true);
-    });
+        // All queue entries should be gone
+        var queueAfter = await db.getSyncQueue(10);
+        expect(queueAfter.isEmpty, true);
+      },
+    );
 
     test('cascade delete on orphaned entries with FK disabled', () async {
       final now = DateTime.now().toUtc();
 
       // Create word
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'orphan-test',
-        wordText: 'orphan',
-        lastUpdated: now,
-      ));
+      await db.upsertWord(
+        WordsCompanion.insert(
+          id: 'orphan-test',
+          wordText: 'orphan',
+          lastUpdated: now,
+        ),
+      );
 
       // Enqueue
       await db.enqueueSyncOperation('orphan-test', 'upsert');
@@ -827,26 +947,31 @@ void main() {
       expect(known, isNot(contains('other-known')));
     });
 
-    test('watchWords emits empty list initially, then updates on changes', () async {
-      final now = DateTime.now().toUtc();
-      final stream = db.watchWords(userId: 'watch-user');
+    test(
+      'watchWords emits empty list initially, then updates on changes',
+      () async {
+        final now = DateTime.now().toUtc();
+        final stream = db.watchWords(userId: 'watch-user');
 
-      // First emission should be empty
-      expect(await stream.first, isEmpty);
+        // First emission should be empty
+        expect(await stream.first, isEmpty);
 
-      // Insert word and collect next emission
-      final nextEmission = stream.skip(1).first;
-      await db.upsertWord(WordsCompanion.insert(
-        id: 'watch-1',
-        wordText: 'watched',
-        userId: const Value('watch-user'),
-        lastUpdated: now,
-      ));
+        // Insert word and collect next emission
+        final nextEmission = stream.skip(1).first;
+        await db.upsertWord(
+          WordsCompanion.insert(
+            id: 'watch-1',
+            wordText: 'watched',
+            userId: const Value('watch-user'),
+            lastUpdated: now,
+          ),
+        );
 
-      final words = await nextEmission;
-      expect(words.length, 1);
-      expect(words.first.wordText, 'watched');
-    });
+        final words = await nextEmission;
+        expect(words.length, 1);
+        expect(words.first.wordText, 'watched');
+      },
+    );
 
     test('getSyncQueue returns items in createdAt order', () async {
       final now = DateTime.now().toUtc();

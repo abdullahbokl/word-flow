@@ -59,9 +59,9 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
               _isSignUp
                   ? 'Sign up to sync your words across all your devices.'
                   : 'Sign in to access your saved word lists and collections.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: scheme.onSurfaceVariant,
-                  ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 32),
@@ -74,9 +74,11 @@ class _AuthBottomSheetState extends State<AuthBottomSheet> {
             const SizedBox(height: 16),
             TextButton(
               onPressed: () => setState(() => _isSignUp = !_isSignUp),
-              child: Text(_isSignUp
-                  ? 'Already have an account? Sign In'
-                  : 'Don\'t have an account? Create one'),
+              child: Text(
+                _isSignUp
+                    ? 'Already have an account? Sign In'
+                    : 'Don\'t have an account? Create one',
+              ),
             ),
           ],
         ),

@@ -15,7 +15,7 @@ class ConnectivityMonitor {
 
   final Connectivity _connectivity = Connectivity();
   final InternetConnection _checker;
-  
+
   ConnectivityStatus? _lastStatus;
   final _controller = StreamController<ConnectivityStatus>.broadcast();
   StreamSubscription? _connectivitySubscription;
@@ -28,8 +28,12 @@ class ConnectivityMonitor {
   Stream<ConnectivityStatus> get statusStream => _controller.stream;
 
   void _init() {
-    _connectivitySubscription = _connectivity.onConnectivityChanged.listen((_) => _evaluateConnectivity());
-    _internetSubscription = _checker.onStatusChange.listen((_) => _evaluateConnectivity());
+    _connectivitySubscription = _connectivity.onConnectivityChanged.listen(
+      (_) => _evaluateConnectivity(),
+    );
+    _internetSubscription = _checker.onStatusChange.listen(
+      (_) => _evaluateConnectivity(),
+    );
 
     // Initial check
     _evaluateConnectivity();
@@ -45,15 +49,16 @@ class ConnectivityMonitor {
     final hasInternet = await _checker.hasInternetAccess;
     if (_isDisposed) return;
 
-    final newStatus = (hasInterface && hasInternet) 
-        ? ConnectivityStatus.online 
+    final newStatus = (hasInterface && hasInternet)
+        ? ConnectivityStatus.online
         : ConnectivityStatus.offline;
 
     if (newStatus == ConnectivityStatus.offline) {
       _debounceTimer?.cancel();
       _emitIfChanged(ConnectivityStatus.offline);
     } else {
-      if (_lastStatus != ConnectivityStatus.online && !(_debounceTimer?.isActive ?? false)) {
+      if (_lastStatus != ConnectivityStatus.online &&
+          !(_debounceTimer?.isActive ?? false)) {
         _debounceTimer = Timer(reconnectDebounce, () async {
           if (await _checker.hasInternetAccess) {
             _emitIfChanged(ConnectivityStatus.online);
@@ -73,12 +78,12 @@ class ConnectivityMonitor {
 
   Future<bool> checkReachability() async {
     if (!EnvConfig.isConfigured) return false;
-    
+
     try {
-      final response = await http.head(
-        Uri.parse('${EnvConfig.supabaseUrl}/health'),
-      ).timeout(const Duration(seconds: 5));
-      
+      final response = await http
+          .head(Uri.parse('${EnvConfig.supabaseUrl}/health'))
+          .timeout(const Duration(seconds: 5));
+
       return response.statusCode >= 200 && response.statusCode < 300;
     } catch (_) {
       return false;

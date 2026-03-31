@@ -20,34 +20,45 @@ void main() {
     const testUserId = 'user-1';
     const testTexts = ['flutter', 'dart', 'widget'];
 
-    test('should call repository.getKnownWordTexts with correct userId', () async {
-      // Arrange
-      when(() => mockRepository.getKnownWordTexts(userId: any(named: 'userId')))
-          .thenAnswer((_) async => const Right(testTexts));
+    test(
+      'should call repository.getKnownWordTexts with correct userId',
+      () async {
+        // Arrange
+        when(
+          () => mockRepository.getKnownWordTexts(userId: any(named: 'userId')),
+        ).thenAnswer((_) async => const Right(testTexts));
 
-      // Act
-      await useCase(const UserIdParams(userId: testUserId));
+        // Act
+        await useCase(const UserIdParams(userId: testUserId));
 
-      // Assert
-      verify(() => mockRepository.getKnownWordTexts(userId: testUserId)).called(1);
-    });
+        // Assert
+        verify(
+          () => mockRepository.getKnownWordTexts(userId: testUserId),
+        ).called(1);
+      },
+    );
 
-    test('should call repository.getKnownWordTexts with null userId when not provided', () async {
-      // Arrange
-      when(() => mockRepository.getKnownWordTexts(userId: any(named: 'userId')))
-          .thenAnswer((_) async => const Right(testTexts));
+    test(
+      'should call repository.getKnownWordTexts with null userId when not provided',
+      () async {
+        // Arrange
+        when(
+          () => mockRepository.getKnownWordTexts(userId: any(named: 'userId')),
+        ).thenAnswer((_) async => const Right(testTexts));
 
-      // Act
-      await useCase(const UserIdParams());
+        // Act
+        await useCase(const UserIdParams());
 
-      // Assert
-      verify(() => mockRepository.getKnownWordTexts(userId: null)).called(1);
-    });
+        // Assert
+        verify(() => mockRepository.getKnownWordTexts(userId: null)).called(1);
+      },
+    );
 
     test('should return Right(textsList) on success', () async {
       // Arrange
-      when(() => mockRepository.getKnownWordTexts(userId: any(named: 'userId')))
-          .thenAnswer((_) async => const Right(testTexts));
+      when(
+        () => mockRepository.getKnownWordTexts(userId: any(named: 'userId')),
+      ).thenAnswer((_) async => const Right(testTexts));
 
       // Act
       final result = await useCase(const UserIdParams(userId: testUserId));
@@ -59,8 +70,9 @@ void main() {
 
     test('should return Right(emptyList) when no known words', () async {
       // Arrange
-      when(() => mockRepository.getKnownWordTexts(userId: any(named: 'userId')))
-          .thenAnswer((_) async => const Right([]));
+      when(
+        () => mockRepository.getKnownWordTexts(userId: any(named: 'userId')),
+      ).thenAnswer((_) async => const Right([]));
 
       // Act
       final result = await useCase(const UserIdParams(userId: testUserId));
@@ -73,8 +85,9 @@ void main() {
     test('should return Left(Failure) when repository fails', () async {
       // Arrange
       const failure = DatabaseFailure('Failed to fetch known word texts');
-      when(() => mockRepository.getKnownWordTexts(userId: any(named: 'userId')))
-          .thenAnswer((_) async => const Left(failure));
+      when(
+        () => mockRepository.getKnownWordTexts(userId: any(named: 'userId')),
+      ).thenAnswer((_) async => const Left(failure));
 
       // Act
       final result = await useCase(const UserIdParams(userId: testUserId));

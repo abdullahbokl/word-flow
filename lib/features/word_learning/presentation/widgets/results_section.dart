@@ -7,7 +7,6 @@ import 'package:word_flow/features/word_learning/presentation/widgets/analysis_r
 import 'package:word_flow/features/word_learning/presentation/widgets/analysis_results_header.dart';
 
 class ResultsSection extends StatefulWidget {
-
   const ResultsSection({super.key});
 
   @override

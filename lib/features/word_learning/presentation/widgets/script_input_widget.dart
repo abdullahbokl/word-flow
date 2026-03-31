@@ -25,7 +25,8 @@ class ScriptInputWidget extends StatelessWidget {
   Widget build(BuildContext context) {
     return SectionCard(
       title: 'Paste your text',
-      subtitle: 'Drop in a script, article, or study note. Large blocks stay smooth.',
+      subtitle:
+          'Drop in a script, article, or study note. Large blocks stay smooth.',
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -44,10 +45,13 @@ class ScriptInputWidget extends StatelessWidget {
                   onPressed: isProcessing
                       ? null
                       : () {
-                          final userId = context.read<AuthCubit>().currentUserId;
-                          context
-                              .read<WorkspaceCubit>()
-                              .analyze(controller.text, userId: userId);
+                          final userId = context
+                              .read<AuthCubit>()
+                              .currentUserId;
+                          context.read<WorkspaceCubit>().analyze(
+                            controller.text,
+                            userId: userId,
+                          );
                         },
                 ),
               ),

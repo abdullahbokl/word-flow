@@ -4,7 +4,6 @@ import 'package:word_flow/features/word_learning/domain/entities/processed_word.
 import 'package:word_flow/features/word_learning/presentation/widgets/word_results_animated_item.dart';
 
 class WordResultsList extends StatefulWidget {
-
   const WordResultsList({
     super.key,
     required this.words,
@@ -23,7 +22,8 @@ class _WordResultsListState extends State<WordResultsList> {
   static const _exitDuration = Duration(milliseconds: 700);
   static const _insertDuration = Duration(milliseconds: 600);
 
-  GlobalKey<SliverAnimatedListState> _listKey = GlobalKey<SliverAnimatedListState>();
+  GlobalKey<SliverAnimatedListState> _listKey =
+      GlobalKey<SliverAnimatedListState>();
   late List<ProcessedWord> _visibleWords;
 
   @override
@@ -43,15 +43,22 @@ class _WordResultsListState extends State<WordResultsList> {
       return;
     }
 
-    final newlyPending = widget.pendingWordTexts.difference(oldWidget.pendingWordTexts);
+    final newlyPending = widget.pendingWordTexts.difference(
+      oldWidget.pendingWordTexts,
+    );
     for (final text in newlyPending) {
       _removeByText(text, animated: true);
     }
 
-    final noLongerPending = oldWidget.pendingWordTexts.difference(widget.pendingWordTexts);
+    final noLongerPending = oldWidget.pendingWordTexts.difference(
+      widget.pendingWordTexts,
+    );
     for (final text in noLongerPending) {
-      final sourceWord = widget.words.where((w) => w.wordText == text).firstOrNull;
-      if (sourceWord != null && !_visibleWords.any((w) => w.wordText == text)) _insertAt(sourceWord);
+      final sourceWord = widget.words
+          .where((w) => w.wordText == text)
+          .firstOrNull;
+      if (sourceWord != null && !_visibleWords.any((w) => w.wordText == text))
+        _insertAt(sourceWord);
     }
   }
 
@@ -64,7 +71,11 @@ class _WordResultsListState extends State<WordResultsList> {
     );
   }
 
-  Widget _buildItem(int index, Animation<double> animation, {ProcessedWord? wordOverride}) {
+  Widget _buildItem(
+    int index,
+    Animation<double> animation, {
+    ProcessedWord? wordOverride,
+  }) {
     final word = wordOverride ?? _visibleWords[index];
     return WordResultsAnimatedItem(
       animation: animation,
@@ -104,7 +115,8 @@ class _WordResultsListState extends State<WordResultsList> {
   }
 
   bool _shouldHardReset(WordResultsList oldWidget) {
-    if (oldWidget.pendingWordTexts.isNotEmpty || widget.pendingWordTexts.isNotEmpty) {
+    if (oldWidget.pendingWordTexts.isNotEmpty ||
+        widget.pendingWordTexts.isNotEmpty) {
       return false;
     }
     if (oldWidget.words.length != widget.words.length) return true;
@@ -118,6 +130,9 @@ class _WordResultsListState extends State<WordResultsList> {
     return false;
   }
 
-  List<ProcessedWord> _targetWords(List<ProcessedWord> source, Set<String> pending) =>
+  List<ProcessedWord> _targetWords(
+    List<ProcessedWord> source,
+    Set<String> pending,
+  ) =>
       source.where((w) => !pending.contains(w.wordText)).toList(growable: true);
 }

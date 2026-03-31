@@ -51,8 +51,8 @@ class OfflineBannerWidget extends StatelessWidget {
               ],
             ),
           ),
-          crossFadeState: isOffline 
-              ? CrossFadeState.showSecond 
+          crossFadeState: isOffline
+              ? CrossFadeState.showSecond
               : CrossFadeState.showFirst,
           duration: const Duration(milliseconds: 300),
           sizeCurve: Curves.easeInOutBack,
