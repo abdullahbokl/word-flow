@@ -1,4 +1,4 @@
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 import 'package:word_flow/features/word_learning/domain/entities/script_analysis.dart';
 import 'package:word_flow/core/database/app_database.dart';

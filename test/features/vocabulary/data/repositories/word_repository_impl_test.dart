@@ -3,7 +3,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/core/database/app_database.dart';
 import 'package:word_flow/core/database/write_queue.dart';
 import 'package:word_flow/core/errors/failures.dart';
-import 'package:word_flow/core/sync/sync_operation.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_operation.dart';
 import 'package:word_flow/features/vocabulary/data/repositories/word_repository_impl.dart';
 import 'package:word_flow/core/database/constants.dart';
 

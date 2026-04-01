@@ -3,7 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/usecases/usecase.dart';
 import 'package:word_flow/core/utils/uuid_generator.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 import 'package:word_flow/features/vocabulary/domain/usecases/delete_word.dart';
 import 'package:word_flow/features/vocabulary/domain/usecases/update_word.dart';
 import 'package:word_flow/features/vocabulary/domain/usecases/watch_words.dart';

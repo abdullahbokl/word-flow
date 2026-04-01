@@ -4,7 +4,7 @@ import 'package:word_flow/core/theme/app_theme.dart';
 import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:word_flow/features/auth/presentation/blocs/migration_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart';
-import 'package:word_flow/core/sync/connectivity_cubit.dart';
+import 'package:word_flow/core/connectivity/connectivity_cubit.dart';
 import 'package:word_flow/app/router/app_router.dart';
 import 'package:word_flow/core/di/injection.dart';
 

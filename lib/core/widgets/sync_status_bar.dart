@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:word_flow/core/di/injection.dart';
-import 'package:word_flow/core/sync/sync_orchestrator.dart';
-import 'package:word_flow/core/sync/sync_status.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_orchestrator.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_status.dart';
 
 class SyncStatusBar extends StatelessWidget {
   const SyncStatusBar({super.key});

@@ -2,7 +2,7 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/usecases/usecase.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
 
 @lazySingleton

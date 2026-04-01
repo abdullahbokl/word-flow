@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:word_flow/core/widgets/empty_state_view.dart';
+import 'package:word_flow/core/widgets/empty_state.dart';
 import 'package:word_flow/core/widgets/section_card.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_state.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 import 'package:word_flow/features/word_learning/presentation/widgets/analysis_chip.dart';
-import 'package:word_flow/shared/widgets/word_card_shimmer.dart';
+import 'package:word_flow/core/widgets/word_card_shimmer.dart';
 
 class ResultsStateSwitcher extends StatelessWidget {
   const ResultsStateSwitcher({
@@ -35,10 +35,10 @@ class _InitialState extends StatelessWidget {
     child: SectionCard(
       title: 'Analysis results',
       subtitle: 'New and recognized words from your text.',
-      child: EmptyStateView(
+      child: EmptyState(
         icon: Icons.auto_awesome_rounded,
         title: 'Ready when you are',
-        message:
+        subtitle:
             'Paste a text block and analyze it to surface unfamiliar words.',
       ),
     ),
@@ -69,10 +69,10 @@ class _ErrorState extends StatelessWidget {
     child: SectionCard(
       title: 'Analysis results',
       subtitle: 'New and recognized words from your text.',
-      child: EmptyStateView(
+      child: EmptyState(
         icon: Icons.error_outline_rounded,
         title: 'Could not analyze the text',
-        message: message,
+        subtitle: message,
       ),
     ),
   );

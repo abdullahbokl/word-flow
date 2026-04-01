@@ -4,7 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/core/database/app_database.dart';
 import 'package:word_flow/core/database/write_queue.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
-import 'package:word_flow/core/sync/sync_preferences.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_preferences.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/sync_dead_letter_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/word_local_source.dart';
@@ -12,7 +12,7 @@ import 'package:word_flow/features/vocabulary/data/datasources/word_remote_sourc
 import 'package:word_flow/features/vocabulary/data/repositories/sync_repository_impl.dart';
 import 'package:word_flow/features/vocabulary/data/repositories/word_repository_impl.dart';
 import 'package:word_flow/features/vocabulary/data/models/word_remote_dto.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 
 class MockWordRemoteSource extends Mock implements WordRemoteSource {}
 
@@ -66,13 +66,17 @@ void main() {
     when(() => mockLogger.syncEvent(any())).thenReturn(null);
     when(() => mockLogger.debug(any())).thenReturn(null);
     when(() => mockLogger.info(any())).thenReturn(null);
-    when(() => mockLogger.warning(any(), category: any(named: 'category'))).thenReturn(null);
-    when(() => mockLogger.error(
-          any(),
-          error: any(named: 'error'),
-          stackTrace: any(named: 'stackTrace'),
-          category: any(named: 'category'),
-        )).thenReturn(null);
+    when(
+      () => mockLogger.warning(any(), category: any(named: 'category')),
+    ).thenReturn(null);
+    when(
+      () => mockLogger.error(
+        any(),
+        error: any(named: 'error'),
+        stackTrace: any(named: 'stackTrace'),
+        category: any(named: 'category'),
+      ),
+    ).thenReturn(null);
 
     wordRepo = WordRepositoryImpl(
       localSource,

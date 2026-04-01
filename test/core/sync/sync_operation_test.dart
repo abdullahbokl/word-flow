@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:word_flow/core/sync/sync_operation.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_operation.dart';
 
 void main() {
   test("SyncOperation.fromString('upsert') == SyncOperation.upsert", () {

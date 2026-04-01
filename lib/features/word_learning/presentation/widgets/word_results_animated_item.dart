@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:word_flow/shared/widgets/word_card_base.dart';
+import 'package:word_flow/core/widgets/word_card_base.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
 
 class WordResultsAnimatedItem extends StatelessWidget {

@@ -12,8 +12,8 @@ import 'package:word_flow/core/config/env_config.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/security/security_service.dart';
 import 'package:word_flow/core/security/supabase_secure_storage.dart';
-import 'package:word_flow/core/sync/connectivity_lifecycle_manager.dart';
-import 'package:word_flow/core/sync/sync_orchestrator.dart';
+import 'package:word_flow/core/connectivity/connectivity_lifecycle_manager.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_orchestrator.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();

@@ -4,7 +4,7 @@ import 'package:word_flow/core/widgets/app_loader.dart';
 import 'package:word_flow/core/widgets/word_card_widgets.dart';
 import 'package:word_flow/features/auth/presentation/blocs/auth_cubit.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_cubit.dart';
 import 'package:word_flow/features/word_learning/presentation/blocs/workspace_cubit.dart';
 

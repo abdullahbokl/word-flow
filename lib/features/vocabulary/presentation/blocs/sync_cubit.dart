@@ -3,14 +3,13 @@ import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/errors/failures.dart';
-import 'package:word_flow/core/sync/sync_orchestrator.dart';
-import 'package:word_flow/core/sync/sync_status.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_orchestrator.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_status.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart';
 
 @lazySingleton
 class SyncCubit extends Cubit<SyncState> {
-  SyncCubit(this._orchestrator)
-    : super(const SyncState.idle(pendingCount: 0));
+  SyncCubit(this._orchestrator) : super(const SyncState.idle(pendingCount: 0));
 
   final SyncOrchestrator _orchestrator;
 

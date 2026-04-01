@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:word_flow/core/errors/failures.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 import 'package:word_flow/features/vocabulary/data/models/word_remote_dto.dart';
 import 'package:word_flow/core/database/app_database.dart';
 import 'package:word_flow/core/database/constants.dart';

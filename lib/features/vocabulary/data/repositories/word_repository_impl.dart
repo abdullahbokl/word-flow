@@ -2,8 +2,8 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/database/write_queue.dart';
-import 'package:word_flow/core/sync/sync_operation.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_operation.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/word_local_source.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source.dart';
@@ -41,7 +41,9 @@ class WordRepositoryImpl
     String? userId,
   }) async {
     try {
-      return Right(await localSource.getKnownWordTexts(userId: userId ?? guestUserId));
+      return Right(
+        await localSource.getKnownWordTexts(userId: userId ?? guestUserId),
+      );
     } catch (e) {
       return Left(DatabaseFailure(e.toString()));
     }
@@ -76,8 +78,8 @@ class WordRepositoryImpl
     }
   }
 
-    @override
-    Stream<List<WordEntity>> watchWords({String? userId}) =>
+  @override
+  Stream<List<WordEntity>> watchWords({String? userId}) =>
       localSource.watchWords(userId: userId ?? guestUserId).map((rows) {
         final entities = <WordEntity>[];
         for (final row in rows) {

@@ -5,7 +5,7 @@ import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/features/word_learning/domain/usecases/save_processed_words.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 
 class MockWordRepository extends Mock implements WordRepository {}
 

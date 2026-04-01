@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
-import 'package:word_flow/shared/widgets/word_card_base.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
+import 'package:word_flow/core/widgets/word_card_base.dart';
 
 class LibraryAnimatedItem extends StatelessWidget {
   const LibraryAnimatedItem({

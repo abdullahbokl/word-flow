@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:word_flow/core/di/injection.dart';
-import 'package:word_flow/core/sync/sync_orchestrator.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_orchestrator.dart';
 import 'package:word_flow/features/vocabulary/data/repositories/sync_dead_letter_repository.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart';
@@ -77,31 +77,39 @@ class _SyncStatusBannerState extends State<SyncStatusBanner> {
               },
             );
 
-                    // Handle auto-dismiss for synced state only when a new sync completed.
-                    final currentLastSyncTime = syncState.maybeWhen(
-                      idle: (pendingCount, lastSyncTime, __) => lastSyncTime,
-                      orElse: () => null,
-                    );
+            // Handle auto-dismiss for synced state only when a new sync completed.
+            final currentLastSyncTime = syncState.maybeWhen(
+              idle: (pendingCount, lastSyncTime, __) => lastSyncTime,
+              orElse: () => null,
+            );
 
-                    final shouldShowSynced = currentLastSyncTime != null &&
-                        ( _lastSeenSyncTime == null || currentLastSyncTime.isAfter(_lastSeenSyncTime!) ) &&
-                        syncState.maybeWhen(idle: (pendingCount, _, __) => pendingCount == 0, orElse: () => false);
+            final shouldShowSynced =
+                currentLastSyncTime != null &&
+                (_lastSeenSyncTime == null ||
+                    currentLastSyncTime.isAfter(_lastSeenSyncTime!)) &&
+                syncState.maybeWhen(
+                  idle: (pendingCount, _, __) => pendingCount == 0,
+                  orElse: () => false,
+                );
 
-                    if (shouldShowSynced) {
-                      _lastSeenSyncTime = currentLastSyncTime;
-                      WidgetsBinding.instance.addPostFrameCallback((_) {
-                        if (mounted) {
-                          setState(() => _showSyncedMessage = true);
-                          _startAutoDismiss();
-                        }
-                      });
-                    } else if (!syncState.maybeWhen(idle: (pendingCount, _, __) => pendingCount == 0, orElse: () => false)) {
-                      // If not idle (or there are pending items), ensure we don't show the synced message.
-                      _dismissTimer?.cancel();
-                      if (mounted) {
-                        setState(() => _showSyncedMessage = false);
-                      }
-                    }
+            if (shouldShowSynced) {
+              _lastSeenSyncTime = currentLastSyncTime;
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                if (mounted) {
+                  setState(() => _showSyncedMessage = true);
+                  _startAutoDismiss();
+                }
+              });
+            } else if (!syncState.maybeWhen(
+              idle: (pendingCount, _, __) => pendingCount == 0,
+              orElse: () => false,
+            )) {
+              // If not idle (or there are pending items), ensure we don't show the synced message.
+              _dismissTimer?.cancel();
+              if (mounted) {
+                setState(() => _showSyncedMessage = false);
+              }
+            }
 
             // Show banner only if there's active state to display
             final shouldShowBanner =

@@ -21,7 +21,7 @@ import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart';
 import 'package:word_flow/core/di/injection.dart';
 import 'package:word_flow/features/vocabulary/data/repositories/sync_dead_letter_repository.dart';
-import 'package:word_flow/core/sync/sync_orchestrator.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_orchestrator.dart';
 
 class MockWorkspaceCubit extends MockCubit<WorkspaceState>
     implements WorkspaceCubit {}

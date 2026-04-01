@@ -1,6 +1,6 @@
 import 'package:flutter/widgets.dart';
 import 'package:injectable/injectable.dart';
-import 'package:word_flow/core/sync/connectivity_monitor.dart';
+import 'package:word_flow/core/connectivity/connectivity_monitor.dart';
 
 /// Ensures lazy singleton monitor resources are released when app detaches.
 @lazySingleton

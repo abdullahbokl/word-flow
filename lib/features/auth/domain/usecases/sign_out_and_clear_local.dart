@@ -2,8 +2,8 @@ import 'package:fpdart/fpdart.dart';
 import 'package:injectable/injectable.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
-import 'package:word_flow/core/sync/sync_orchestrator.dart';
-import 'package:word_flow/core/sync/sync_preferences.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_orchestrator.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_preferences.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
 

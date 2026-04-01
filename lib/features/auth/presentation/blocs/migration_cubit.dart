@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:word_flow/core/services/migration_service.dart';
+import 'package:word_flow/features/auth/data/services/migration_service.dart';
 import 'package:word_flow/core/utils/rate_limiter.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 import 'package:word_flow/features/auth/domain/usecases/auth_usecases.dart';

@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:word_flow/features/vocabulary/presentation/widgets/add_edit_word_sheet.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_state.dart';
 import 'package:word_flow/features/vocabulary/presentation/widgets/library_animated_item.dart';
-import 'package:word_flow/shared/widgets/empty_state.dart';
+import 'package:word_flow/core/widgets/empty_state.dart';
 
 class LibraryResultsList extends StatefulWidget {
   const LibraryResultsList({

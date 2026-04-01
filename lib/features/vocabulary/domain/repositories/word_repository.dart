@@ -1,6 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:word_flow/core/errors/failures.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 
 abstract class WordRepository {
   Future<Either<Failure, void>> saveWords(List<WordEntity> words);

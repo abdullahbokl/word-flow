@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
-import 'package:word_flow/core/sync/sync_orchestrator.dart';
-import 'package:word_flow/core/sync/sync_preferences.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_orchestrator.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_preferences.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/auth/domain/usecases/sign_out_and_clear_local.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
@@ -88,12 +88,14 @@ void main() {
       when(
         () => mockAuthRepository.signOut(),
       ).thenAnswer((_) async => const Right(null));
-      when(() => mockLogger.error(
-            any(),
-            error: any(named: 'error'),
-            stackTrace: any(named: 'stackTrace'),
-            category: any(named: 'category'),
-          )).thenReturn(null);
+      when(
+        () => mockLogger.error(
+          any(),
+          error: any(named: 'error'),
+          stackTrace: any(named: 'stackTrace'),
+          category: any(named: 'category'),
+        ),
+      ).thenReturn(null);
 
       final result = await useCase();
 

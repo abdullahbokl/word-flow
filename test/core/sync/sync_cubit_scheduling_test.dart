@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
-import 'package:word_flow/core/sync/sync_orchestrator.dart';
-import 'package:word_flow/core/sync/sync_status.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_orchestrator.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_status.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart';
 
 class MockSyncOrchestrator extends Mock implements SyncOrchestrator {}
@@ -20,10 +20,12 @@ void main() {
     pendingController = StreamController<int>.broadcast();
     statusController = StreamController<SyncStatus>.broadcast();
 
-    when(() => mockOrchestrator.pendingCountStream)
-        .thenAnswer((_) => pendingController.stream);
-    when(() => mockOrchestrator.statusStream)
-        .thenAnswer((_) => statusController.stream);
+    when(
+      () => mockOrchestrator.pendingCountStream,
+    ).thenAnswer((_) => pendingController.stream);
+    when(
+      () => mockOrchestrator.statusStream,
+    ).thenAnswer((_) => statusController.stream);
 
     cubit = SyncCubit(mockOrchestrator);
   });

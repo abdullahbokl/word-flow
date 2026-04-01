@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/features/word_learning/domain/entities/processed_word.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/word_repository.dart';
 import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';

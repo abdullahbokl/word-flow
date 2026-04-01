@@ -4,8 +4,8 @@ import 'package:injectable/injectable.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:word_flow/core/observability/sentry_breadcrumbs.dart';
-import 'package:word_flow/core/sync/connectivity_monitor.dart';
-import 'package:word_flow/core/sync/sync_status.dart';
+import 'package:word_flow/core/connectivity/connectivity_monitor.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_status.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source.dart';
 import 'package:word_flow/features/vocabulary/domain/repositories/sync_repository.dart';
@@ -74,7 +74,9 @@ class SyncOrchestrator {
     _debounceTimer = null;
     _isSyncing = false;
     _statusController.add(const SyncStatus.idle());
-    _logger.info('SyncOrchestrator: sync cancelled (sign-out or manual cancel)');
+    _logger.info(
+      'SyncOrchestrator: sync cancelled (sign-out or manual cancel)',
+    );
   }
 
   void _updatePeriodicScheduling() {
@@ -167,9 +169,7 @@ class SyncOrchestrator {
       // 2. Pull remote changes
       _logger.info('SyncOrchestrator: Starting pull phase...');
 
-      SentryBreadcrumbs.addSyncBreadcrumb(
-        'Pull phase started',
-      );
+      SentryBreadcrumbs.addSyncBreadcrumb('Pull phase started');
 
       final pullResult = await _syncRepository.pullRemoteChanges(userId);
       bool pullFailed = false;

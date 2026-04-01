@@ -7,7 +7,7 @@ import 'package:word_flow/features/vocabulary/data/datasources/word_remote_sourc
 import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source.dart';
 import 'package:word_flow/features/vocabulary/domain/services/text_analysis_service.dart';
 import 'package:word_flow/core/security/security_service.dart';
-import 'package:word_flow/core/sync/connectivity_monitor.dart';
+import 'package:word_flow/core/connectivity/connectivity_monitor.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 
 class MockWordRepository extends Mock implements WordRepository {}

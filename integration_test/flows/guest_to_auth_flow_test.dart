@@ -7,7 +7,7 @@ import 'package:word_flow/core/database/write_queue.dart';
 import 'package:word_flow/core/di/injection.dart' show getIt;
 import 'package:word_flow/core/errors/failures.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
-import 'package:word_flow/core/services/migration_service.dart';
+import 'package:word_flow/features/auth/data/services/migration_service.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_state_change.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';
 import 'package:word_flow/features/auth/domain/repositories/auth_repository.dart';
@@ -100,7 +100,9 @@ void main() {
       () => IsolateTextAnalysisService(),
     );
     sl.registerLazySingleton<ProcessScript>(() => ProcessScript(sl(), sl()));
-    sl.registerLazySingleton<SaveProcessedWords>(() => SaveProcessedWords(sl()));
+    sl.registerLazySingleton<SaveProcessedWords>(
+      () => SaveProcessedWords(sl()),
+    );
 
     sl.registerLazySingleton<AuthRepository>(() => _FakeAuthRepository());
     sl.registerLazySingleton<SignUpWithEmailUseCase>(
@@ -141,11 +143,16 @@ void main() {
       );
       expect(analysisResult.isRight(), isTrue);
 
-      final wordsToSave = analysisResult.fold((_) => throw StateError('Expected analysis to succeed'), (r) => r.words);
+      final wordsToSave = analysisResult.fold(
+        (_) => throw StateError('Expected analysis to succeed'),
+        (r) => r.words,
+      );
       final saveResult = await saveProcessedWords(wordsToSave, userId: null);
       expect(saveResult.isRight(), isTrue);
 
-      final guestWordsAfterSave = await sl<WordFlowDatabase>().watchWords(userId: null).first;
+      final guestWordsAfterSave = await sl<WordFlowDatabase>()
+          .watchWords(userId: null)
+          .first;
       expect(guestWordsAfterSave.length, 4);
       expect(guestWordsAfterSave.every((w) => w.userId == 'GUEST'), isTrue);
 
@@ -153,7 +160,8 @@ void main() {
       final toggleResult = await wordRepo.toggleKnown('flutter', userId: null);
       expect(toggleResult.isRight(), isTrue);
 
-      final flutterWordBeforeMigration = await sl<WordFlowDatabase>().getWordByText('flutter', userId: null);
+      final flutterWordBeforeMigration = await sl<WordFlowDatabase>()
+          .getWordByText('flutter', userId: null);
       expect(flutterWordBeforeMigration, isNotNull);
       expect(flutterWordBeforeMigration!.isKnown, isTrue);
 
@@ -173,17 +181,22 @@ void main() {
       expect(migrateResult, const Right<Failure, int>(4));
 
       // 5. Verify all 4 words now belong to the new user.
-      final userWords = await sl<WordFlowDatabase>().watchWords(userId: newUser.id).first;
+      final userWords = await sl<WordFlowDatabase>()
+          .watchWords(userId: newUser.id)
+          .first;
       expect(userWords.length, 4);
       expect(userWords.every((w) => w.userId == newUser.id), isTrue);
 
       // 6. Verify flutter remains known.
-      final flutterWordAfterMigration = await sl<WordFlowDatabase>().getWordByText('flutter', userId: newUser.id);
+      final flutterWordAfterMigration = await sl<WordFlowDatabase>()
+          .getWordByText('flutter', userId: newUser.id);
       expect(flutterWordAfterMigration, isNotNull);
       expect(flutterWordAfterMigration!.isKnown, isTrue);
 
       // 7. Verify no guest words remain.
-      final guestWordsAfterMigration = await sl<WordFlowDatabase>().watchWords(userId: null).first;
+      final guestWordsAfterMigration = await sl<WordFlowDatabase>()
+          .watchWords(userId: null)
+          .first;
       expect(guestWordsAfterMigration, isEmpty);
 
       // 8. Verify sync queue has 4 upsert entries.
@@ -211,18 +224,25 @@ void main() {
         config: config,
       );
       expect(analysisResult.isRight(), isTrue);
-      final wordsToSave = analysisResult.fold((_) => throw StateError('Expected analysis to succeed'), (r) => r.words);
+      final wordsToSave = analysisResult.fold(
+        (_) => throw StateError('Expected analysis to succeed'),
+        (r) => r.words,
+      );
       final saveResult = await saveProcessedWords(wordsToSave, userId: null);
       expect(saveResult.isRight(), isTrue);
 
-      final guestWordsBeforeDiscard = await sl<WordFlowDatabase>().watchWords(userId: null).first;
+      final guestWordsBeforeDiscard = await sl<WordFlowDatabase>()
+          .watchWords(userId: null)
+          .first;
       expect(guestWordsBeforeDiscard.length, 2);
 
       // 2. Discard guest data.
       final discardResult = await migrationService.discardGuestData();
       expect(discardResult, const Right<Failure, void>(null));
 
-      final guestWordsAfterDiscard = await sl<WordFlowDatabase>().watchWords(userId: null).first;
+      final guestWordsAfterDiscard = await sl<WordFlowDatabase>()
+          .watchWords(userId: null)
+          .first;
       expect(guestWordsAfterDiscard, isEmpty);
     });
   });

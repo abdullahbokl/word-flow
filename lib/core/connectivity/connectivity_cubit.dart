@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:word_flow/core/sync/connectivity_monitor.dart';
+import 'package:word_flow/core/connectivity/connectivity_monitor.dart';
 
 enum ConnectivityState { initial, online, offline }
 

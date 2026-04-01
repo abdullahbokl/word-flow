@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:word_flow/core/sync/connectivity_cubit.dart';
+import 'package:word_flow/core/connectivity/connectivity_cubit.dart';
 
 class OfflineBannerWidget extends StatelessWidget {
   const OfflineBannerWidget({super.key});

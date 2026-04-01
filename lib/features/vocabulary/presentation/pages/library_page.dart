@@ -7,12 +7,12 @@ import 'package:word_flow/features/vocabulary/presentation/blocs/library_cubit.d
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_state.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/sync_state.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 import 'package:word_flow/features/vocabulary/presentation/widgets/add_edit_word_sheet.dart';
 import 'package:word_flow/features/vocabulary/presentation/widgets/library_search_bar.dart';
 import 'package:word_flow/features/vocabulary/presentation/widgets/library_filter_row.dart';
 import 'package:word_flow/features/vocabulary/presentation/widgets/library_results_list.dart';
-import 'package:word_flow/shared/widgets/word_card_shimmer.dart';
+import 'package:word_flow/core/widgets/word_card_shimmer.dart';
 import 'package:word_flow/core/widgets/error_state_widget.dart';
 import 'package:word_flow/core/widgets/offline_banner_widget.dart';
 import 'package:word_flow/core/errors/failure_mapper.dart';

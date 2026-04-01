@@ -6,8 +6,8 @@ import 'package:word_flow/features/vocabulary/data/datasources/sync_local_source
 import 'package:word_flow/features/vocabulary/data/mappers/word_mapper.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
 import 'package:sentry_flutter/sentry_flutter.dart';
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
-import 'package:word_flow/core/sync/sync_operation.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_operation.dart';
 import 'package:word_flow/core/utils/uuid_generator.dart';
 import 'package:word_flow/core/database/write_queue.dart';
 import 'package:word_flow/core/database/constants.dart';

@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
-import 'package:word_flow/core/services/migration_service.dart';
+import 'package:word_flow/features/auth/data/services/migration_service.dart';
 import 'package:word_flow/core/utils/rate_limiter.dart';
 import 'package:word_flow/core/utils/rate_limiter_storage.dart';
 import 'package:word_flow/features/auth/domain/entities/auth_user.dart';

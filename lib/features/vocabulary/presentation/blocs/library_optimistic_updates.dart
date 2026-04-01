@@ -1,4 +1,4 @@
-import 'package:word_flow/features/vocabulary/domain/entities/word.dart';
+import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_state.dart';
 
 mixin LibraryOptimisticUpdates {

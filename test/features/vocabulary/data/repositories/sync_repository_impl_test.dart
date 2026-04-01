@@ -3,12 +3,12 @@ import 'package:mocktail/mocktail.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:word_flow/core/database/app_database.dart';
 import 'package:word_flow/core/errors/failures.dart';
-import 'package:word_flow/core/sync/sync_operation.dart';
-import 'package:word_flow/features/vocabulary/data/repositories/sync_repository_impl.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_operation.dart';
+import 'package:word_flow/features/vocabulary/data/sync/sync_preferences.dart';
 import 'package:word_flow/features/vocabulary/data/models/word_remote_dto.dart';
 import 'package:word_flow/features/vocabulary/data/datasources/word_remote_source.dart';
+import 'package:word_flow/features/vocabulary/data/repositories/sync_repository_impl.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
-import 'package:word_flow/core/sync/sync_preferences.dart';
 
 import '../../../../helpers/fakes.dart';
 import '../../../../helpers/mock_data.dart';
@@ -469,7 +469,7 @@ void main() {
       ).thenAnswer((_) async => Right(PaginatedSyncResult(words: [remote])));
       when(
         () => mockLocal.getWordsByIds(['remote-new']),
-      ).thenAnswer((_) async => {});  // Empty map - no local word
+      ).thenAnswer((_) async => {}); // Empty map - no local word
       when(
         () => mockLocal.saveWordsInTransaction(any()),
       ).thenAnswer((_) async {});
@@ -899,8 +899,12 @@ void main() {
       ).thenAnswer(
         (_) async => Right(PaginatedSyncResult(words: [secondPageWord])),
       );
-      when(() => mockLocal.getWordsByIds(['word-1'])).thenAnswer((_) async => {});
-      when(() => mockLocal.getWordsByIds(['word-2'])).thenAnswer((_) async => {});
+      when(
+        () => mockLocal.getWordsByIds(['word-1']),
+      ).thenAnswer((_) async => {});
+      when(
+        () => mockLocal.getWordsByIds(['word-2']),
+      ).thenAnswer((_) async => {});
       when(
         () => mockLocal.saveWordsInTransaction(any()),
       ).thenAnswer((_) async {});
