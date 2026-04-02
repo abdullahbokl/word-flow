@@ -8,13 +8,35 @@ abstract class WordLocalSource {
   Future<void> saveWordsInTransaction(List<WordsCompanion> companions);
   Future<Map<String, WordRow>> getWordTextMap({String userId = guestUserId});
   Future<List<WordRow>> getWords({String userId = guestUserId});
-  Future<List<WordRow>> getWordsByTexts(List<String> texts, {String userId = guestUserId});
+  Future<List<WordRow>> getWordsByTexts(
+    List<String> texts, {
+    String userId = guestUserId,
+  });
   Future<Map<String, WordRow>> getWordsByIds(List<String> ids);
   Future<List<String>> getKnownWordTexts({String userId = guestUserId});
   Future<WordRow?> getWordById(String id);
   Future<WordRow?> getWordByText(String text, {String userId = guestUserId});
   Future<void> deleteWord(String id);
   Stream<List<WordRow>> watchWords({String userId = guestUserId});
+  Future<int> countWords({
+    String userId = guestUserId,
+    String? searchQuery,
+    bool? isKnown,
+  });
+  Future<List<WordRow>> getWordsPaginated({
+    String userId = guestUserId,
+    required int limit,
+    required int offset,
+    String? searchQuery,
+    bool? isKnown,
+  });
+  Stream<List<WordRow>> watchWordsPaginated({
+    String userId = guestUserId,
+    required int limit,
+    required int offset,
+    String? searchQuery,
+    bool? isKnown,
+  });
   Future<int> adoptGuestWords(String userId);
   Future<void> clearLocalWords(String userId);
   Future<void> clearGuestWords();
@@ -43,7 +65,9 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Future<Map<String, WordRow>> getWordTextMap({String userId = guestUserId}) async {
+  Future<Map<String, WordRow>> getWordTextMap({
+    String userId = guestUserId,
+  }) async {
     final rows = await _db.watchWords(userId: userId).first;
     return {for (final row in rows) row.wordText: row};
   }
@@ -82,7 +106,10 @@ class WordLocalSourceImpl implements WordLocalSource {
   }
 
   @override
-  Future<WordRow?> getWordByText(String text, {String userId = guestUserId}) async {
+  Future<WordRow?> getWordByText(
+    String text, {
+    String userId = guestUserId,
+  }) async {
     return _db.getWordByText(text, userId: userId);
   }
 
@@ -109,5 +136,52 @@ class WordLocalSourceImpl implements WordLocalSource {
   @override
   Future<void> clearGuestWords() async {
     await _db.clearGuestWords();
+  }
+
+  @override
+  Future<int> countWords({
+    String userId = guestUserId,
+    String? searchQuery,
+    bool? isKnown,
+  }) {
+    return _db.countWords(
+      userId: userId,
+      searchQuery: searchQuery,
+      isKnown: isKnown,
+    );
+  }
+
+  @override
+  Future<List<WordRow>> getWordsPaginated({
+    String userId = guestUserId,
+    required int limit,
+    required int offset,
+    String? searchQuery,
+    bool? isKnown,
+  }) {
+    return _db.getWordsPaginated(
+      userId: userId,
+      limit: limit,
+      offset: offset,
+      searchQuery: searchQuery,
+      isKnown: isKnown,
+    );
+  }
+
+  @override
+  Stream<List<WordRow>> watchWordsPaginated({
+    String userId = guestUserId,
+    required int limit,
+    required int offset,
+    String? searchQuery,
+    bool? isKnown,
+  }) {
+    return _db.watchWordsPaginated(
+      userId: userId,
+      limit: limit,
+      offset: offset,
+      searchQuery: searchQuery,
+      isKnown: isKnown,
+    );
   }
 }

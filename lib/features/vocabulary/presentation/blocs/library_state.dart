@@ -15,6 +15,9 @@ class LibraryState with _$LibraryState {
     @Default(WordsFilter.all) WordsFilter filter,
     @Default('') String searchQuery,
     @Default(<String>{}) Set<String> pendingWordIds,
+    @Default(0) int totalCount,
+    @Default(false) bool hasMore,
+    @Default(false) bool isLoadingMore,
     String? lastError,
     Failure? failure,
   }) = _Loaded;

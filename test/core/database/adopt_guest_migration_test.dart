@@ -24,7 +24,7 @@ void main() {
           .insert(
             WordsCompanion.insert(
               id: 'g-flutter',
-              userId: const Value(null),
+              userId: const Value('GUEST'),
               wordText: 'flutter',
               totalCount: const Value(5),
               isKnown: const Value(false),
@@ -37,7 +37,7 @@ void main() {
           .insert(
             WordsCompanion.insert(
               id: 'g-dart',
-              userId: const Value(null),
+              userId: const Value('GUEST'),
               wordText: 'dart',
               totalCount: const Value(2),
               isKnown: const Value(false),

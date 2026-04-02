@@ -8,6 +8,18 @@ abstract class WordRepository {
   Future<Either<Failure, List<WordEntity>>> getKnownWords({String? userId});
   Future<Either<Failure, List<String>>> getKnownWordTexts({String? userId});
   Stream<List<WordEntity>> watchWords({String? userId});
+  Stream<List<WordEntity>> watchWordsPaginated({
+    String? userId,
+    required int limit,
+    required int offset,
+    String? searchQuery,
+    bool? isKnown,
+  });
+  Future<Either<Failure, int>> countWords({
+    String? userId,
+    String? searchQuery,
+    bool? isKnown,
+  });
   Future<Either<Failure, int>> adoptGuestWords(String userId);
   Future<Either<Failure, void>> clearLocalWords(String userId);
   Future<Either<Failure, void>> clearGuestWords();

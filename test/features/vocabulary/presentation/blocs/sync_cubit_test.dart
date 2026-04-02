@@ -48,18 +48,18 @@ void main() {
       await Future.delayed(const Duration(milliseconds: 100));
 
       // Now syncNow should call retrySync since pendingCount is > 0
-      testCubit.syncNow();
+      await testCubit.syncNow();
 
       // Verify retrySync was called
       verify(() => testMock.retrySync()).called(1);
     });
 
-    test('does not call retrySync when pendingCount == 0', () {
+    test('does not call retrySync when pendingCount == 0', () async {
       // Use the default setup from setUp() which has pendingCount = 0
       cubit.init();
 
       // syncNow() should return early since pendingCount == 0
-      cubit.syncNow();
+      await cubit.syncNow();
 
       // Verify retrySync was never called
       verifyNever(() => mockSyncOrchestrator.retrySync());

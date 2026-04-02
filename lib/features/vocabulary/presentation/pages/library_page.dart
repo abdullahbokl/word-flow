@@ -118,8 +118,18 @@ class _LibraryViewState extends State<LibraryView> {
                 builder: (context, state) => state.when(
                   initial: () => const Center(child: SizedBox.shrink()),
                   loading: () => const ShimmerList(),
-                  loaded: (words, filter, query, pendingIds, error, failure) =>
-                      _LibraryLoadedContent(
+                  loaded:
+                      (
+                        words,
+                        filter,
+                        query,
+                        pendingIds,
+                        totalCount,
+                        hasMore,
+                        isLoadingMore,
+                        error,
+                        failure,
+                      ) => _LibraryLoadedContent(
                         searchController: _searchController,
                         onClearSearch: () => _clearSearch(context),
                       ),
@@ -219,6 +229,8 @@ class _LibraryLoadedContent extends StatelessWidget {
                   WordsFilter filter,
                   String searchQuery,
                   Set<String> pendingWordIds,
+                  bool hasMore,
+                  bool isLoadingMore,
                 })
               >(
                 selector: (state) => state.maybeMap(
@@ -227,12 +239,16 @@ class _LibraryLoadedContent extends StatelessWidget {
                     filter: s.filter,
                     searchQuery: s.searchQuery,
                     pendingWordIds: s.pendingWordIds,
+                    hasMore: s.hasMore,
+                    isLoadingMore: s.isLoadingMore,
                   ),
                   orElse: () => (
                     words: const <WordEntity>[],
                     filter: WordsFilter.all,
                     searchQuery: '',
                     pendingWordIds: const <String>{},
+                    hasMore: false,
+                    isLoadingMore: false,
                   ),
                 ),
                 builder: (context, data) => RepaintBoundary(
@@ -241,6 +257,9 @@ class _LibraryLoadedContent extends StatelessWidget {
                     filter: data.filter,
                     searchQuery: data.searchQuery,
                     pendingWordIds: data.pendingWordIds,
+                    hasMore: data.hasMore,
+                    isLoadingMore: data.isLoadingMore,
+                    onLoadMore: () => context.read<LibraryCubit>().loadMore(),
                   ),
                 ),
               ),

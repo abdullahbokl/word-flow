@@ -29,7 +29,7 @@ void main() {
       expect(tableNames, contains('sync_dead_letters'));
 
       // Verify schema version
-      expect(db.schemaVersion, 10);
+      expect(db.schemaVersion, 11);
     });
 
     test('fresh install: all indices are created', () async {
@@ -258,7 +258,7 @@ void main() {
         final words = await db
             .customSelect(
               'SELECT * FROM words WHERE id = ?',
-              variables: [Variable(id)],
+              variables: [Variable<String>(id)],
             )
             .get();
         expect(words.length, 1);
@@ -608,18 +608,18 @@ void main() {
 
         // First enqueue
         await db.enqueueSyncOperation('word-a', 'upsert');
-        var queue = await db.getSyncQueue(10);
+        final queue = await db.getSyncQueue(10);
         final firstId = queue.first.id;
 
         // Simulate retry by incrementing retry count
         await db.updateSyncQueueRetry(firstId, 'Some error');
 
-        var queueAfterRetry = await db.getSyncQueue(10);
+        final queueAfterRetry = await db.getSyncQueue(10);
         expect(queueAfterRetry.first.retryCount, 1);
 
         // Re-enqueue same operation
         await db.enqueueSyncOperation('word-a', 'upsert');
-        var queueAfterReequeue = await db.getSyncQueue(10);
+        final queueAfterReequeue = await db.getSyncQueue(10);
 
         expect(queueAfterReequeue.length, 1);
         expect(queueAfterReequeue.first.retryCount, 0); // Reset to 0
@@ -641,12 +641,12 @@ void main() {
 
         // First enqueue upsert
         await db.enqueueSyncOperation('word-x', 'upsert');
-        var queue = await db.getSyncQueue(10);
+        final queue = await db.getSyncQueue(10);
         expect(queue.first.operation, 'upsert');
 
         // Now enqueue delete (cross-operation)
         await db.enqueueSyncOperation('word-x', 'delete');
-        var queueAfterDelete = await db.getSyncQueue(10);
+        final queueAfterDelete = await db.getSyncQueue(10);
 
         expect(queueAfterDelete.length, 1);
         expect(queueAfterDelete.first.operation, 'delete');
@@ -667,12 +667,12 @@ void main() {
 
         // First enqueue delete
         await db.enqueueSyncOperation('word-y', 'delete');
-        var queue = await db.getSyncQueue(10);
+        final queue = await db.getSyncQueue(10);
         expect(queue.first.operation, 'delete');
 
         // Now enqueue upsert (cross-operation)
         await db.enqueueSyncOperation('word-y', 'upsert');
-        var queueAfterUpsert = await db.getSyncQueue(10);
+        final queueAfterUpsert = await db.getSyncQueue(10);
 
         expect(queueAfterUpsert.length, 1);
         expect(queueAfterUpsert.first.operation, 'upsert');
@@ -693,15 +693,15 @@ void main() {
 
         // Sequence: delete → upsert → delete
         await db.enqueueSyncOperation('flaky-word', 'delete');
-        var q1 = await db.getSyncQueue(10);
+        final q1 = await db.getSyncQueue(10);
         expect(q1.first.operation, 'delete');
 
         await db.enqueueSyncOperation('flaky-word', 'upsert');
-        var q2 = await db.getSyncQueue(10);
+        final q2 = await db.getSyncQueue(10);
         expect(q2.first.operation, 'upsert');
 
         await db.enqueueSyncOperation('flaky-word', 'delete');
-        var q3 = await db.getSyncQueue(10);
+        final q3 = await db.getSyncQueue(10);
         expect(q3.first.operation, 'delete');
       },
     );
@@ -762,7 +762,7 @@ void main() {
         );
 
         await db.enqueueSyncOperation('cascade-test-word', 'upsert');
-        var queue = await db.getSyncQueue(10);
+        final queue = await db.getSyncQueue(10);
         expect(queue.length, 1);
 
         // Delete the word
@@ -773,7 +773,7 @@ void main() {
         expect(word, isNull);
 
         // Verify sync queue entry was auto-deleted by CASCADE
-        var queueAfterDelete = await db.getSyncQueue(10);
+        final queueAfterDelete = await db.getSyncQueue(10);
         expect(queueAfterDelete.isEmpty, true);
       },
     );
@@ -798,7 +798,7 @@ void main() {
         await db.enqueueSyncOperation('multi-op-word', 'upsert');
         await db.enqueueSyncOperation('multi-op-word', 'delete');
 
-        var queue = await db.getSyncQueue(10);
+        final queue = await db.getSyncQueue(10);
         expect(queue.length, 1);
         expect(queue.first.operation, 'delete');
 
@@ -806,7 +806,7 @@ void main() {
         await db.deleteWordById('multi-op-word');
 
         // All queue entries should be gone
-        var queueAfter = await db.getSyncQueue(10);
+        final queueAfter = await db.getSyncQueue(10);
         expect(queueAfter.isEmpty, true);
       },
     );
@@ -866,7 +866,7 @@ void main() {
         WordsCompanion.insert(
           id: '2',
           wordText: 'w2',
-          userId: const Value(null),
+          userId: const Value('GUEST'),
           lastUpdated: now,
         ),
       ]);
@@ -892,7 +892,7 @@ void main() {
         WordsCompanion.insert(
           id: '4',
           wordText: 'w4',
-          userId: const Value(null),
+          userId: const Value('GUEST'),
           lastUpdated: now,
         ),
       ]);

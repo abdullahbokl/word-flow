@@ -3,15 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:word_flow/core/errors/failures.dart';
-import 'package:word_flow/core/usecases/usecase.dart';
 import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
-import 'package:word_flow/features/vocabulary/domain/usecases/watch_words.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/watch_words_paginated.dart';
 import 'package:word_flow/features/vocabulary/domain/usecases/update_word.dart';
 import 'package:word_flow/features/vocabulary/domain/usecases/delete_word.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_cubit.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_state.dart';
 
-class MockWatchWords extends Mock implements WatchWords {}
+class MockWatchWordsPaginated extends Mock implements WatchWordsPaginated {}
 
 class MockUpdateWord extends Mock implements UpdateWord {}
 
@@ -19,16 +18,20 @@ class MockDeleteWord extends Mock implements DeleteWord {}
 
 void main() {
   late LibraryCubit cubit;
-  late MockWatchWords mockWatchWords;
+  late MockWatchWordsPaginated mockWatchWordsPaginated;
   late MockUpdateWord mockUpdateWord;
   late MockDeleteWord mockDeleteWord;
 
   setUp(() {
-    mockWatchWords = MockWatchWords();
+    mockWatchWordsPaginated = MockWatchWordsPaginated();
     mockUpdateWord = MockUpdateWord();
     mockDeleteWord = MockDeleteWord();
 
-    cubit = LibraryCubit(mockWatchWords, mockUpdateWord, mockDeleteWord);
+    cubit = LibraryCubit(
+      mockWatchWordsPaginated,
+      mockUpdateWord,
+      mockDeleteWord,
+    );
 
     registerFallbackValue(const DeleteWordParams(id: '1', userId: null));
     registerFallbackValue(
@@ -39,7 +42,9 @@ void main() {
         lastUpdated: DateTime.now(),
       ),
     );
-    registerFallbackValue(const UserIdParams());
+    registerFallbackValue(
+      const WatchWordsPaginatedParams(userId: null, limit: 50, offset: 0),
+    );
   });
 
   const tUserId = 'user-123';
@@ -57,35 +62,37 @@ void main() {
       'should emit loading then loaded when stream emits words',
       build: () {
         when(
-          () => mockWatchWords(any()),
+          () => mockWatchWordsPaginated(any()),
         ).thenAnswer((_) => Stream.value(Right(tWords)));
         return cubit;
       },
       act: (cubit) => cubit.init(tUserId),
       expect: () => [
         const LibraryState.loading(),
-        LibraryState.loaded(words: tWords, pendingWordIds: {}),
+        isA<LibraryState>().having(
+          (s) =>
+              s.maybeMap(loaded: (l) => l.words, orElse: () => <WordEntity>[]),
+          'words',
+          tWords,
+        ),
       ],
     );
 
     blocTest<LibraryCubit, LibraryState>(
-      'should update loaded words when stream emits new data',
+      'should emit hasMore=false when page is smaller than limit',
       build: () {
-        when(() => mockWatchWords(any())).thenAnswer(
-          (_) => Stream.fromIterable([
-            Right(tWords),
-            Right([tWord.copyWith(wordText: 'updated')]),
-          ]),
-        );
+        when(
+          () => mockWatchWordsPaginated(any()),
+        ).thenAnswer((_) => Stream.value(Right(tWords)));
         return cubit;
       },
       act: (cubit) => cubit.init(tUserId),
       expect: () => [
         const LibraryState.loading(),
-        LibraryState.loaded(words: tWords, pendingWordIds: {}),
-        LibraryState.loaded(
-          words: [tWord.copyWith(wordText: 'updated')],
-          pendingWordIds: {},
+        isA<LibraryState>().having(
+          (s) => s.maybeMap(loaded: (l) => l.hasMore, orElse: () => true),
+          'hasMore',
+          false,
         ),
       ],
     );
@@ -103,7 +110,6 @@ void main() {
       seed: () => LibraryState.loaded(words: tWords, pendingWordIds: {}),
       act: (cubit) => cubit.toggleKnown(tWord),
       expect: () => [
-        // 1. Mark pending
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.pendingWordIds.contains(tWord.id),
@@ -112,7 +118,6 @@ void main() {
           'pending',
           true,
         ),
-        // 2. Optimistic flip
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.words.first.isKnown,
@@ -121,7 +126,6 @@ void main() {
           'flipped',
           true,
         ),
-        // 3. Unmark pending
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.pendingWordIds.isEmpty,
@@ -144,7 +148,6 @@ void main() {
       seed: () => LibraryState.loaded(words: tWords, pendingWordIds: {}),
       act: (cubit) => cubit.toggleKnown(tWord),
       expect: () => [
-        // 1. Mark pending
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.pendingWordIds.contains(tWord.id),
@@ -153,7 +156,6 @@ void main() {
           'pending',
           true,
         ),
-        // 2. Optimistic flip
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.words.first.isKnown,
@@ -162,7 +164,6 @@ void main() {
           'flipped',
           true,
         ),
-        // 3. Unmark pending
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.pendingWordIds.isEmpty,
@@ -171,7 +172,6 @@ void main() {
           'unpending',
           true,
         ),
-        // 4. Rollback
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.words.first.isKnown == false,
@@ -180,7 +180,6 @@ void main() {
           'rolled back',
           true,
         ),
-        // 5. Error
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.lastError == 'update error',
@@ -205,7 +204,6 @@ void main() {
       seed: () => LibraryState.loaded(words: tWords, pendingWordIds: {}),
       act: (cubit) => cubit.deleteWord(tWord.id, userId: tUserId),
       expect: () => [
-        // 1. Mark pending
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.pendingWordIds.contains(tWord.id),
@@ -214,14 +212,12 @@ void main() {
           'pending',
           true,
         ),
-        // 2. Remove
         isA<LibraryState>().having(
           (s) =>
               s.maybeMap(loaded: (l) => l.words.isEmpty, orElse: () => false),
           'removed',
           true,
         ),
-        // 3. Unmark pending
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.pendingWordIds.isEmpty,
@@ -244,7 +240,6 @@ void main() {
       seed: () => LibraryState.loaded(words: tWords, pendingWordIds: {}),
       act: (cubit) => cubit.deleteWord(tWord.id, userId: tUserId),
       expect: () => [
-        // 1. Mark pending
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.pendingWordIds.contains(tWord.id),
@@ -253,14 +248,12 @@ void main() {
           'pending',
           true,
         ),
-        // 2. Temp removal
         isA<LibraryState>().having(
           (s) =>
               s.maybeMap(loaded: (l) => l.words.isEmpty, orElse: () => false),
           'removed',
           true,
         ),
-        // 3. Unmark pending
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.pendingWordIds.isEmpty,
@@ -269,7 +262,6 @@ void main() {
           'unpending',
           true,
         ),
-        // 4. Restoration
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.words.contains(tWord),
@@ -278,7 +270,6 @@ void main() {
           'restored',
           true,
         ),
-        // 5. Error
         isA<LibraryState>().having(
           (s) => s.maybeMap(
             loaded: (l) => l.lastError == 'delete error',
@@ -293,29 +284,61 @@ void main() {
 
   group('Filter and Search', () {
     blocTest<LibraryCubit, LibraryState>(
-      'should update filter in state',
-      build: () => cubit,
-      seed: () => LibraryState.loaded(words: tWords, pendingWordIds: {}),
-      act: (cubit) => cubit.setFilter(WordsFilter.known),
+      'should reset pagination when filter changes',
+      build: () {
+        when(
+          () => mockWatchWordsPaginated(any()),
+        ).thenAnswer((_) => Stream.value(Right(tWords)));
+        return cubit;
+      },
+      seed: () => LibraryState.loaded(
+        words: tWords,
+        filter: WordsFilter.all,
+        pendingWordIds: {},
+      ),
+      act: (cubit) {
+        cubit.init(tUserId);
+        cubit.setFilter(WordsFilter.known);
+      },
+      wait: const Duration(milliseconds: 50),
       expect: () => [
-        LibraryState.loaded(
-          words: tWords,
-          filter: WordsFilter.known,
-          pendingWordIds: {},
+        const LibraryState.loading(),
+        predicate<LibraryState>(
+          (s) => s.maybeMap(
+            loaded: (l) => l.filter == WordsFilter.known,
+            orElse: () => false,
+          ),
+          'filter is known',
         ),
       ],
     );
 
     blocTest<LibraryCubit, LibraryState>(
-      'should update searchQuery in state',
-      build: () => cubit,
-      seed: () => LibraryState.loaded(words: tWords, pendingWordIds: {}),
-      act: (cubit) => cubit.setSearch('hello'),
+      'should reset pagination when search changes',
+      build: () {
+        when(
+          () => mockWatchWordsPaginated(any()),
+        ).thenAnswer((_) => Stream.value(Right(tWords)));
+        return cubit;
+      },
+      seed: () => LibraryState.loaded(
+        words: tWords,
+        searchQuery: '',
+        pendingWordIds: {},
+      ),
+      act: (cubit) {
+        cubit.init(tUserId);
+        cubit.setSearch('hello');
+      },
+      wait: const Duration(milliseconds: 50),
       expect: () => [
-        LibraryState.loaded(
-          words: tWords,
-          searchQuery: 'hello',
-          pendingWordIds: {},
+        const LibraryState.loading(),
+        predicate<LibraryState>(
+          (s) => s.maybeMap(
+            loaded: (l) => l.searchQuery == 'hello',
+            orElse: () => false,
+          ),
+          'searchQuery is hello',
         ),
       ],
     );

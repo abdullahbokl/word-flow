@@ -150,10 +150,10 @@ void main() {
             children: [
               AppButton(label: 'Analyze script'),
               SizedBox(height: 12),
-              EmptyStateView(
+              EmptyState(
                 icon: Icons.auto_awesome_rounded,
                 title: 'Ready when you are',
-                message: 'Paste a script to begin.',
+                subtitle: 'Paste a script to begin.',
               ),
             ],
           ),

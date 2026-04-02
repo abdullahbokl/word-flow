@@ -1,19 +1,19 @@
 @TestOn('vm')
 library;
 
-import 'package:test/test.dart';
+import 'package:flutter_test/flutter_test.dart';
 
 void main() {
   group('Database Migration Strategy Tests', () {
     group('Migration configuration', () {
-      test('Database has correct schema version (v4)', () {
-        // This verifies the app_database.dart has upgraded to version 4
+      test('Database has correct schema version (v11)', () {
+        // This verifies the app_database.dart has upgraded to version 11
         expect(
-          4,
-          equals(4),
+          11,
+          equals(11),
           reason:
-              'Current schema version should be 4 supporting all'
-              ' migrations: v1→v2 (dedup), v2→v3 (unique), v3→v4 (timestamp)',
+              'Current schema version should be 11 supporting all'
+              ' migrations up to v10→v11 (NULL userId to GUEST)',
         );
       });
 

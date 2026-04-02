@@ -35,7 +35,9 @@ class WordFlowDatabase extends _$WordFlowDatabase {
 
   static Future<void> _migrate10To11(WordFlowDatabase db) async {
     // Set all NULL user_id to 'GUEST' for words table
-    await db.customStatement("UPDATE words SET user_id = '$guestUserId' WHERE user_id IS NULL;");
+    await db.customStatement(
+      "UPDATE words SET user_id = '$guestUserId' WHERE user_id IS NULL;",
+    );
     // No user_id in word_sync_queue, nothing to do there
   }
 
@@ -118,6 +120,75 @@ class WordFlowDatabase extends _$WordFlowDatabase {
   Stream<List<WordRow>> watchWords({String? userId}) {
     final resolvedUserId = _normalizeUserId(userId);
     final query = select(words)..where((t) => t.userId.equals(resolvedUserId));
+    return query.watch();
+  }
+
+  Future<int> countWords({
+    String? userId,
+    String? searchQuery,
+    bool? isKnown,
+  }) async {
+    final resolvedUserId = _normalizeUserId(userId);
+    final query = select(words)
+      ..where((t) {
+        var cond = t.userId.equals(resolvedUserId);
+        if (searchQuery != null && searchQuery.isNotEmpty) {
+          cond = cond & t.wordText.like('%$searchQuery%');
+        }
+        if (isKnown != null) {
+          cond = cond & t.isKnown.equals(isKnown);
+        }
+        return cond;
+      });
+    final rows = await query.get();
+    return rows.length;
+  }
+
+  Future<List<WordRow>> getWordsPaginated({
+    String? userId,
+    required int limit,
+    required int offset,
+    String? searchQuery,
+    bool? isKnown,
+  }) async {
+    final resolvedUserId = _normalizeUserId(userId);
+    final query = select(words)
+      ..where((t) {
+        var cond = t.userId.equals(resolvedUserId);
+        if (searchQuery != null && searchQuery.isNotEmpty) {
+          cond = cond & t.wordText.like('%$searchQuery%');
+        }
+        if (isKnown != null) {
+          cond = cond & t.isKnown.equals(isKnown);
+        }
+        return cond;
+      })
+      ..orderBy([(t) => OrderingTerm.desc(t.lastUpdated)])
+      ..limit(limit, offset: offset);
+    return query.get();
+  }
+
+  Stream<List<WordRow>> watchWordsPaginated({
+    String? userId,
+    required int limit,
+    required int offset,
+    String? searchQuery,
+    bool? isKnown,
+  }) {
+    final resolvedUserId = _normalizeUserId(userId);
+    final query = select(words)
+      ..where((t) {
+        var cond = t.userId.equals(resolvedUserId);
+        if (searchQuery != null && searchQuery.isNotEmpty) {
+          cond = cond & t.wordText.like('%$searchQuery%');
+        }
+        if (isKnown != null) {
+          cond = cond & t.isKnown.equals(isKnown);
+        }
+        return cond;
+      })
+      ..orderBy([(t) => OrderingTerm.desc(t.lastUpdated)])
+      ..limit(limit, offset: offset);
     return query.watch();
   }
 

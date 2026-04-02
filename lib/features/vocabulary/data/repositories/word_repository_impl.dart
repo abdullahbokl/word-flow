@@ -95,6 +95,56 @@ class WordRepositoryImpl
       });
 
   @override
+  Stream<List<WordEntity>> watchWordsPaginated({
+    String? userId,
+    required int limit,
+    required int offset,
+    String? searchQuery,
+    bool? isKnown,
+  }) {
+    return localSource
+        .watchWordsPaginated(
+          userId: userId ?? guestUserId,
+          limit: limit,
+          offset: offset,
+          searchQuery: searchQuery,
+          isKnown: isKnown,
+        )
+        .map((rows) {
+          final entities = <WordEntity>[];
+          for (final row in rows) {
+            final mapped = WordMapper.fromRow(row);
+            mapped.match((failure) {
+              logger.warning(
+                'Skipping invalid word row in paginated stream: ${failure.message}',
+                category: LogCategory.database,
+              );
+            }, entities.add);
+          }
+          return entities;
+        });
+  }
+
+  @override
+  Future<Either<Failure, int>> countWords({
+    String? userId,
+    String? searchQuery,
+    bool? isKnown,
+  }) async {
+    try {
+      return Right(
+        await localSource.countWords(
+          userId: userId ?? guestUserId,
+          searchQuery: searchQuery,
+          isKnown: isKnown,
+        ),
+      );
+    } catch (e) {
+      return Left(DatabaseFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, int>> adoptGuestWords(String userId) =>
       handleAdoptGuestWords(userId);
 

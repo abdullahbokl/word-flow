@@ -1,12 +1,11 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
-import 'package:word_flow/core/usecases/usecase.dart';
 import 'package:word_flow/core/utils/uuid_generator.dart';
 import 'package:word_flow/features/vocabulary/domain/entities/word_entity.dart';
 import 'package:word_flow/features/vocabulary/domain/usecases/delete_word.dart';
 import 'package:word_flow/features/vocabulary/domain/usecases/update_word.dart';
-import 'package:word_flow/features/vocabulary/domain/usecases/watch_words.dart';
+import 'package:word_flow/features/vocabulary/domain/usecases/watch_words_paginated.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_state.dart';
 import 'package:word_flow/features/vocabulary/presentation/blocs/library_optimistic_updates.dart';
 import 'package:word_flow/core/errors/failures.dart';
@@ -14,31 +13,106 @@ import 'package:word_flow/core/database/constants.dart';
 
 @injectable
 class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
-  LibraryCubit(this._watchWords, this._updateWord, this._deleteWord)
+  LibraryCubit(this._watchWordsPaginated, this._updateWord, this._deleteWord)
     : super(const LibraryState.initial());
-  final WatchWords _watchWords;
+
+  final WatchWordsPaginated _watchWordsPaginated;
   final UpdateWord _updateWord;
   final DeleteWord _deleteWord;
+
+  static const int _pageSize = 50;
+  static const int _loadMoreSize = 30;
+
   StreamSubscription? _wordsSubscription;
   Set<String> _pendingWordIds = <String>{};
   final Map<String, Timer> _debounceTimers = {};
   static const _debounceMs = 2000;
 
+  String? _userId;
+  String? _searchQuery;
+  WordsFilter _filter = WordsFilter.all;
+  int _currentOffset = 0;
+  int _totalCount = 0;
+  final List<WordEntity> _accumulatedWords = [];
+
   void init(String? userId) {
+    _userId = userId;
+    _resetPagination();
     emit(const LibraryState.loading());
+    _loadPage(isLoadMore: false);
+  }
+
+  void _resetPagination() {
     _wordsSubscription?.cancel();
-    _wordsSubscription = _watchWords(UserIdParams(userId: userId)).listen((
-      result,
-    ) {
+    _wordsSubscription = null;
+    _currentOffset = 0;
+    _accumulatedWords.clear();
+    _searchQuery = null;
+    _filter = WordsFilter.all;
+    _totalCount = 0;
+  }
+
+  void _loadPage({required bool isLoadMore}) {
+    if (isLoadMore) {
+      state.maybeMap(
+        loaded: (s) => emit(s.copyWith(isLoadingMore: true)),
+        orElse: () {},
+      );
+    }
+
+    final bool? isKnown = switch (_filter) {
+      WordsFilter.all => null,
+      WordsFilter.known => true,
+      WordsFilter.unknown => false,
+    };
+
+    final params = WatchWordsPaginatedParams(
+      userId: _userId,
+      limit: isLoadMore ? _loadMoreSize : _pageSize,
+      offset: _currentOffset,
+      searchQuery: _searchQuery,
+      isKnown: isKnown,
+    );
+
+    _wordsSubscription?.cancel();
+    _wordsSubscription = _watchWordsPaginated(params).listen((result) {
       result.fold(
         (failure) => _emitLoadedError(failure.message, failure: failure),
-        (words) {
+        (pageWords) {
+          if (isLoadMore) {
+            _accumulatedWords.addAll(pageWords);
+          } else {
+            _accumulatedWords.clear();
+            _accumulatedWords.addAll(pageWords);
+          }
+
+          final hasMore =
+              pageWords.length >= (isLoadMore ? _loadMoreSize : _pageSize);
+
+          if (isLoadMore) {
+            _currentOffset += _loadMoreSize;
+          } else {
+            _currentOffset = pageWords.length;
+          }
+
           state.maybeMap(
-            loaded: (s) =>
-                emit(s.copyWith(words: words, pendingWordIds: _pendingWordIds)),
+            loaded: (s) => emit(
+              s.copyWith(
+                words: List.unmodifiable(_accumulatedWords),
+                hasMore: hasMore,
+                isLoadingMore: false,
+                totalCount: _totalCount,
+                pendingWordIds: _pendingWordIds,
+              ),
+            ),
             orElse: () => emit(
               LibraryState.loaded(
-                words: words,
+                words: List.unmodifiable(_accumulatedWords),
+                filter: _filter,
+                searchQuery: _searchQuery ?? '',
+                hasMore: hasMore,
+                isLoadingMore: false,
+                totalCount: _totalCount,
                 pendingWordIds: _pendingWordIds,
               ),
             ),
@@ -48,24 +122,33 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     });
   }
 
-  void setFilter(WordsFilter filter) {
+  void loadMore() {
     state.maybeMap(
-      loaded: (s) => emit(s.copyWith(filter: filter)),
+      loaded: (s) {
+        if (s.isLoadingMore || !s.hasMore) return;
+        _loadPage(isLoadMore: true);
+      },
       orElse: () {},
     );
+  }
+
+  void setFilter(WordsFilter filter) {
+    _filter = filter;
+    _currentOffset = 0;
+    _accumulatedWords.clear();
+    _loadPage(isLoadMore: false);
   }
 
   void setSearch(String query) {
-    state.maybeMap(
-      loaded: (s) => emit(s.copyWith(searchQuery: query)),
-      orElse: () {},
-    );
+    _searchQuery = query.isEmpty ? null : query;
+    _currentOffset = 0;
+    _accumulatedWords.clear();
+    _loadPage(isLoadMore: false);
   }
 
   Future<void> toggleKnown(WordEntity word) async {
-    // Debounce rapid toggles on the same word (2 second cooldown)
     if (_debounceTimers.containsKey(word.id)) {
-      return; // Ignore this call; debounce active
+      return;
     }
 
     final updatedWord = word.copyWith(
@@ -76,7 +159,6 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
     _markPending(word.id);
     _optimisticallyReplace(updatedWord);
 
-    // Start debounce timer
     _debounceTimers[word.id] = Timer(
       const Duration(milliseconds: _debounceMs),
       () => _debounceTimers.remove(word.id),
@@ -87,7 +169,6 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
       _unmarkPending(word.id);
       _optimisticallyReplace(prev);
       _emitLoadedError(f.message, failure: f);
-      // Clear debounce timer on error to allow retry
       _debounceTimers[word.id]?.cancel();
       _debounceTimers.remove(word.id);
     }, (_) => _unmarkPending(word.id));
@@ -201,7 +282,6 @@ class LibraryCubit extends Cubit<LibraryState> with LibraryOptimisticUpdates {
   @override
   Future<void> close() {
     _wordsSubscription?.cancel();
-    // Clean up all debounce timers
     for (final timer in _debounceTimers.values) {
       timer.cancel();
     }

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/core/logging/app_logger.dart';
@@ -45,7 +43,7 @@ void main() {
 
   test('tryRecordAttempt() returns false when at limit', () async {
     // Pre-populate storage with maxAttempts attempts
-    final key = 'test2';
+    const key = 'test2';
     final now = DateTime.now();
     storage.store[key] = List.generate(3, (i) => now.subtract(Duration(seconds: i)));
 
@@ -64,7 +62,7 @@ void main() {
   });
 
   test('concurrent tryRecordAttempt() calls do not exceed maxAttempts', () async {
-    final key = 'test3';
+    const key = 'test3';
     final limiter = RateLimiter(
       storage: storage,
       storageKey: key,

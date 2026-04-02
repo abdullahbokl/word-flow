@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:word_flow/features/vocabulary/data/sync/sync_orchestrator.dart';
@@ -55,7 +54,7 @@ void main() {
     // Allow event loop to process the listener
     await Future<void>.delayed(Duration.zero);
 
-    cubit.syncNow();
+    await cubit.syncNow();
 
     verify(() => mockOrchestrator.retrySync()).called(1);
   });

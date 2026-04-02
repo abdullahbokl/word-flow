@@ -5,7 +5,7 @@ import 'package:word_flow/core/widgets/word_card_base.dart';
 class LibraryAnimatedItem extends StatelessWidget {
   const LibraryAnimatedItem({
     super.key,
-    required this.animation,
+    this.animation,
     required this.word,
     required this.isPending,
     this.onEdit,
@@ -13,7 +13,7 @@ class LibraryAnimatedItem extends StatelessWidget {
     this.enabled = true,
   });
 
-  final Animation<double> animation;
+  final Animation<double>? animation;
   final WordEntity word;
   final bool isPending;
   final bool enabled;
@@ -22,9 +22,23 @@ class LibraryAnimatedItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Smoother curve for entry/exit
+    final child = Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: WordCardBase(
+        key: ValueKey('card_${word.id}'),
+        word: word,
+        mode: WordCardMode.library,
+        isPending: isPending,
+        enabled: enabled,
+        onEdit: onEdit,
+        onDelete: onDelete,
+      ),
+    );
+
+    if (animation == null) return child;
+
     final curvedAnimation = CurvedAnimation(
-      parent: animation,
+      parent: animation!,
       curve: Curves.easeOutCubic,
     );
 
@@ -32,24 +46,13 @@ class LibraryAnimatedItem extends StatelessWidget {
       opacity: curvedAnimation,
       child: SlideTransition(
         position: Tween<Offset>(
-          begin: const Offset(0.2, 0), // Pronounced slide from right
+          begin: const Offset(0.2, 0),
           end: Offset.zero,
         ).animate(curvedAnimation),
         child: SizeTransition(
           sizeFactor: curvedAnimation,
           axisAlignment: 0.0,
-          child: Padding(
-            padding: const EdgeInsets.only(bottom: 8),
-            child: WordCardBase(
-              key: ValueKey('card_${word.id}'),
-              word: word,
-              mode: WordCardMode.library,
-              isPending: isPending,
-              enabled: enabled,
-              onEdit: onEdit,
-              onDelete: onDelete,
-            ),
-          ),
+          child: child,
         ),
       ),
     );
