@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:word_flow/app/router/routes.dart';
+import 'package:go_router/go_router.dart';
 
 class ErrorPage extends StatelessWidget {
   const ErrorPage({super.key, this.error});
@@ -29,7 +29,7 @@ class ErrorPage extends StatelessWidget {
             ],
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => const WorkspaceRoute().go(context),
+              onPressed: () => context.go('/'),
               child: const Text('Go Home'),
             ),
           ],

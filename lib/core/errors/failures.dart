@@ -8,34 +8,10 @@ sealed class Failure extends Equatable {
   List<Object?> get props => [message];
 }
 
-class ServerFailure extends Failure {
-  const ServerFailure(super.message);
-}
-
 class DatabaseFailure extends Failure {
   const DatabaseFailure(super.message);
 }
 
-class AuthFailure extends Failure {
-  const AuthFailure(super.message);
-}
-
-class SyncFailure extends Failure {
-  const SyncFailure(super.message);
-}
-
 class ProcessingFailure extends Failure {
   const ProcessingFailure(super.message);
-}
-
-class ConnectionFailure extends Failure {
-  const ConnectionFailure(super.message);
-}
-
-class MigrationFailure extends Failure {
-  const MigrationFailure(super.message);
-}
-
-class SecurityFailure extends Failure {
-  const SecurityFailure(super.message);
 }

@@ -17,6 +17,7 @@ class AppTextField extends StatelessWidget {
     this.textCapitalization = TextCapitalization.none,
     this.onTapOutside,
     this.errorText,
+    this.maxLines = 1,
   });
   final TextEditingController? controller;
   final String? label;
@@ -32,11 +33,13 @@ class AppTextField extends StatelessWidget {
   final TextCapitalization textCapitalization;
   final void Function(PointerDownEvent)? onTapOutside;
   final String? errorText;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
     return TextFormField(
       controller: controller,
+      maxLines: maxLines,
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,

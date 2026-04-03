@@ -9,8 +9,6 @@
 ### **Prerequisites**
 - **Flutter:** 3.19.0 or later (install from [flutter.dev](https://flutter.dev/docs/get-started/install))
 - **Dart:** 3.10.0+ (included with Flutter)
-- **Supabase Account:** Free tier at [supabase.com](https://supabase.com)
-- **Sentry Account (Optional):** For error reporting at [sentry.io](https://sentry.io)
 
 ### **1. Clone the Repository**
 ```bash
@@ -18,38 +16,12 @@ git clone https://github.com/abdullahbokl/word-flow.git
 cd word-flow
 ```
 
-### **2. Configure Environment Variables**
-Create a local configuration file from the example:
-
-```bash
-cp dart_define.json.example dart_define.json
-```
-
-Edit `dart_define.json` with your credentials:
-```json
-{
-  "SUPABASE_URL": "https://your-project.supabase.co",
-  "SUPABASE_ANON_KEY": "your-anon-key-here",
-  "SENTRY_DSN": "https://your-sentry-dsn@sentry.io/project-id"
-}
-```
-
-**How to obtain credentials:**
-
-| Variable | Source | Required |
-|----------|--------|----------|
-| **SUPABASE_URL** | Supabase Project → Settings → API | ✅ Yes |
-| **SUPABASE_ANON_KEY** | Supabase Project → Settings → API → `anon` key | ✅ Yes |
-| **SENTRY_DSN** | Sentry Project → Settings → Client Keys (DSN) | ❌ Optional |
-
-**Security Note:** `dart_define.json` is in `.gitignore` and should **never** be committed. It's local-only.
-
-### **3. Install Dependencies**
+### **2. Install Dependencies**
 ```bash
 flutter pub get
 ```
 
-### **4. Generate Code (Build Runner)**
+### **3. Generate Code (Build Runner)**
 ```bash
 dart run build_runner build --delete-conflicting-outputs
 ```
@@ -59,7 +31,7 @@ Or use the Makefile:
 make gen
 ```
 
-### **5. Run the App**
+### **4. Run the App**
 Using Makefile (recommended):
 ```bash
 make run
@@ -67,10 +39,10 @@ make run
 
 Or manually:
 ```bash
-flutter run --dart-define-from-file=dart_define.json
+flutter run
 ```
 
-### **6. Run Tests**
+### **5. Run Tests**
 ```bash
 make test
 ```
@@ -79,7 +51,7 @@ make test
 - Location: `coverage/lcov.info`
 - View in browser: `genhtml coverage/lcov.info -o coverage/html && open coverage/html/index.html`
 
-### **7. Build for Release**
+### **6. Build for Release**
 
 **Android APK:**
 ```bash
@@ -96,8 +68,7 @@ make build-ios
 ### **Makefile Commands Reference**
 ```bash
 make help              # Show all available commands
-make setup             # Copy dart_define.json.example → dart_define.json
-make run               # Run app with environment config
+make run               # Run app
 make gen               # Generate data models/DI/Router
 make test              # Run tests with coverage
 make lint              # Run static analyzer
@@ -132,10 +103,7 @@ The application follows a **"Script-to-Lexicon"** workflow:
 * **Frontend:** Flutter (Dart).
 * **State Management:** BLoC / Cubit.
 * **Local Storage:** SQLite (used as the primary source of truth for offline-first).
-* **Backend:** Supabase (PostgreSQL + Auth).
-* **API Client:** Supabase Client for all remote operations (replaces Dio).
 * **Functional Programming:** fpdart (Sealed classes + `Either<Failure, Success>`).
-* **Error Reporting:** Sentry (integrated into Auth and Sync flows).
 * **Structured Logging:** Talker (replacing `debugPrint`).
 
 ---
@@ -147,15 +115,9 @@ The project strictly adheres to **Clean Architecture** principles to ensure scal
 * **Presentation Layer:** Contains UI Widgets and BLoC/Cubit logic.
 
 ### **Key Engineering Standards:**
-* **Offline-First:** The app performs all read/write operations on the local SQLite database first to ensure 0ms latency and offline availability.
-* **Background Sync:** Local data is synchronized with Supabase in the background when an internet connection is available.
+* **Offline-First:** The app performs all read/write operations on the local SQLite database to ensure 0ms latency and complete privacy.
 * **Atomic Design:** UI is built using small, reusable widgets. Helper methods that return widgets are strictly forbidden; specialized `Stateless` or `Stateful` widgets are used instead.
 * **Performance:** Heavy text processing is offloaded to **Background Isolates** to maintain 60 FPS. Exit animations for list items use `AnimatedList` for a smooth user experience.
 
----
-
-## **4. The "Guest-to-Auth" Workflow**
-* **Guest Mode:** New users can fully use the app. Data is stored locally with a `null` or `GUEST` user ID.
-* **Onboarding/Migration:** When a user creates an account, a migration service moves all local records to the Supabase cloud, linking them to the new User ID. This ensures users never lose their vocabulary progress.
 
 <- Chore: optimize library state management and improve the consistency of optimistic CI test: do not merge - 2026-03-30T22:10:24Z -->

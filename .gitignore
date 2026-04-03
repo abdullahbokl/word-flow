@@ -93,3 +93,6 @@ implementation_plan.md
 *.injectable.dart
 lib/app/di.config.dart
 lib/app/router/routes.g.dart
+
+adb-mcp-server
+.gemini

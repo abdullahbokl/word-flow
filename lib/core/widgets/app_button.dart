@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:word_flow/core/widgets/app_loader.dart';
 
 enum AppButtonVariant { primary, secondary, outline }
 
@@ -21,7 +20,14 @@ class AppButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final content = isLoading
-        ? AppLoader(size: 20, color: _loadingColor(context))
+        ? SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: _loadingColor(context),
+            ),
+          )
         : Text(label);
 
     final button = switch (variant) {
