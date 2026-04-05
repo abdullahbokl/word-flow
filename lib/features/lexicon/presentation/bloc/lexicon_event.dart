@@ -17,11 +17,14 @@ final class LoadLexicon extends LexiconEvent {
 }
 
 final class LexiconUpdateReceived extends LexiconEvent {
-  const LexiconUpdateReceived(this.words);
+  const LexiconUpdateReceived(this.words, [this.filter, this.sort, this.query]);
   final List<WordEntity> words;
+  final WordFilter? filter;
+  final WordSort? sort;
+  final String? query;
 
   @override
-  List<Object?> get props => [words];
+  List<Object?> get props => [words, filter, sort, query];
 }
 
 final class LexiconStatsUpdateReceived extends LexiconEvent {

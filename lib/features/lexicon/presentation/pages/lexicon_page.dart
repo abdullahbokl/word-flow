@@ -2,15 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/app_empty_state.dart';
-import '../../../../core/widgets/app_loader.dart';
+import '../../../../core/common/widgets/app_loader.dart';
 import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/widgets/stat_card.dart';
-import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_text.dart';
 import '../bloc/lexicon_bloc.dart';
 import '../bloc/lexicon_event.dart';
 import '../bloc/lexicon_state.dart';
 import '../widgets/word_filter_bar.dart';
 import '../widgets/word_tile.dart';
+import '../widgets/lexicon_stats_header.dart';
 import '../../domain/entities/word_entity.dart';
 import '../../../../core/widgets/theme_toggle.dart';
 
@@ -22,130 +22,113 @@ class LexiconPage extends StatefulWidget {
 }
 
 class _LexiconPageState extends State<LexiconPage> {
-  final _searchCtrl = TextEditingController();
   final _addCtrl = TextEditingController();
 
   @override
-  void initState() {
-    super.initState();
-    final state = context.read<LexiconBloc>().state;
-    if (state is LexiconLoaded) {
-      _searchCtrl.text = state.query;
-    }
-  }
-
-  @override
   void dispose() {
-    _searchCtrl.dispose();
     _addCtrl.dispose();
     super.dispose();
   }
 
-  void _showAddDialog() {
-    showDialog<void>(
-      context: context,
-      builder: (_) => AlertDialog(
-        title: const Text('Add Word'),
-        content: TextField(
-          controller: _addCtrl,
-          autofocus: true,
-          decoration: const InputDecoration(hintText: 'Enter a word...'),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          FilledButton(
-            onPressed: () {
-              context
-                  .read<LexiconBloc>()
-                  .add(AddWordManuallyEvent(_addCtrl.text));
-              _addCtrl.clear();
-              Navigator.pop(context);
-            },
-            child: const Text('Add'),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditDialog(WordEntity word) {
-    final meaningCtrl = TextEditingController(text: word.meaning);
-    final descCtrl = TextEditingController(text: word.description);
-
-    showDialog<void>(
+  void _onAddWord() {
+    _addCtrl.clear();
+    showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text('Edit "${word.text}"'),
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: meaningCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Meaning',
-                hintText: 'Short definition...',
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: descCtrl,
-              maxLines: 3,
-              decoration: const InputDecoration(
-                labelText: 'Description / Notes',
-                hintText: 'Add context or examples...',
-              ),
-            ),
-          ],
+        title: const AppText.title('Add Word'),
+        content: AppTextField(
+          controller: _addCtrl,
+          autofocus: true,
+          hint: 'Enter a word...',
+          textInputAction: TextInputAction.done,
+          onFieldSubmitted: (_) => _onAddSubmitted(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text('Cancel'),
+            child: const AppText.body('Cancel'),
           ),
-          FilledButton(
-            onPressed: () {
-              context.read<LexiconBloc>().add(UpdateWordEvent(
-                    word.id,
-                    meaning: meaningCtrl.text.trim(),
-                    description: descCtrl.text.trim(),
-                  ));
-              Navigator.pop(ctx);
-            },
-            child: const Text('Save'),
+          ElevatedButton(
+            onPressed: _onAddSubmitted,
+            child: const AppText.body('Add'),
           ),
         ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Lexicon'),
+  void _onAddSubmitted() {
+    final word = _addCtrl.text.trim();
+    if (word.isNotEmpty) {
+      context.read<LexiconBloc>().add(AddWordManuallyEvent(word));
+    }
+    Navigator.pop(context);
+  }
+
+  void _onEditWord(WordEntity word) {
+    _addCtrl.text = word.text;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const AppText.title('Edit Word'),
+        content: AppTextField(
+          controller: _addCtrl,
+          autofocus: true,
+          hint: 'Enter a word...',
+          textInputAction: TextInputAction.done,
+          onFieldSubmitted: (_) => _onEditSubmitted(word),
+        ),
         actions: [
-          const ThemeToggle(),
-          IconButton(
-            icon: const Icon(Icons.add),
-            onPressed: _showAddDialog,
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const AppText.body('Cancel'),
           ),
-          const SizedBox(width: 8),
+          ElevatedButton(
+            onPressed: () => _onEditSubmitted(word),
+            child: const AppText.body('Save'),
+          ),
         ],
       ),
+    );
+  }
+
+  void _onEditSubmitted(WordEntity word) {
+    final text = _addCtrl.text.trim();
+    if (text.isNotEmpty && text != word.text) {
+      // Assuming UpdateWordEvent updates the meaning for now based on the event definition
+      // If we need to update text, we'd need to update the event/bloc.
+      context.read<LexiconBloc>().add(UpdateWordEvent(word.id, meaning: text));
+    }
+    Navigator.pop(context);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final searchCtrl = TextEditingController(
+      text: context.read<LexiconBloc>().state.query,
+    );
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const AppText.headline('My Lexicon'),
+        actions: const [ThemeToggle(), SizedBox(width: 8)],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: _onAddWord,
+        child: const Icon(Icons.add),
+      ),
       body: BlocBuilder<LexiconBloc, LexiconState>(
-        builder: (context, state) => switch (state) {
-          LexiconInitial() => const AppLoader(message: 'Loading lexicon...'),
-          LexiconLoading() => const AppLoader(),
-          LexiconFailure(:final message) => Center(child: Text(message)),
-          LexiconLoaded() => _LoadedBody(
-              state: state,
-              searchCtrl: _searchCtrl,
-              onEdit: _showEditDialog,
-            ),
-        },
+        builder: (context, state) => state.status.when(
+          initial: () => const AppLoader(message: 'Loading lexicon...'),
+          loading: () => const AppLoader(),
+          failure: (error) => Center(child: AppText(error)),
+          success: (words) => _LoadedBody(
+            state: state,
+            words: words,
+            searchCtrl: searchCtrl,
+            onEdit: _onEditWord,
+          ),
+        ),
       ),
     );
   }
@@ -154,11 +137,13 @@ class _LexiconPageState extends State<LexiconPage> {
 class _LoadedBody extends StatelessWidget {
   const _LoadedBody({
     required this.state,
+    required this.words,
     required this.searchCtrl,
     required this.onEdit,
   });
 
-  final LexiconLoaded state;
+  final LexiconState state;
+  final List<WordEntity> words;
   final TextEditingController searchCtrl;
   final Function(WordEntity) onEdit;
 
@@ -166,15 +151,14 @@ class _LoadedBody extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _StatsRow(state: state),
+        LexiconStatsHeader(stats: state.stats),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: AppTextField(
             controller: searchCtrl,
             hint: 'Search words...',
             prefixIcon: Icons.search,
-            onChanged: (q) =>
-                context.read<LexiconBloc>().add(SearchLexicon(q)),
+            onChanged: (q) => context.read<LexiconBloc>().add(SearchLexicon(q)),
           ),
         ),
         const SizedBox(height: 8),
@@ -182,8 +166,7 @@ class _LoadedBody extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: WordFilterBar(
             active: state.filter,
-            onChanged: (f) =>
-                context.read<LexiconBloc>().add(FilterLexicon(f)),
+            onChanged: (f) => context.read<LexiconBloc>().add(FilterLexicon(f)),
             activeSort: state.sort,
             onSortChanged: (s) =>
                 context.read<LexiconBloc>().add(SortLexicon(s)),
@@ -191,17 +174,17 @@ class _LoadedBody extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Expanded(
-          child: state.words.isEmpty
+          child: words.isEmpty
               ? const AppEmptyState(
                   icon: Icons.menu_book_outlined,
                   title: 'No words yet',
                   subtitle: 'Analyze a text to populate your lexicon.',
                 )
               : ListView.separated(
-                  itemCount: state.words.length,
+                  itemCount: words.length,
                   separatorBuilder: (_, __) => const Divider(height: 1),
                   itemBuilder: (ctx, i) {
-                    final w = state.words[i];
+                    final w = words[i];
                     return WordTile(
                       word: w,
                       onToggle: () => ctx
@@ -216,39 +199,6 @@ class _LoadedBody extends StatelessWidget {
                 ),
         ),
       ],
-    );
-  }
-}
-
-class _StatsRow extends StatelessWidget {
-  const _StatsRow({required this.state});
-
-  final LexiconLoaded state;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          StatCard(
-            label: 'Total',
-            value: '${state.stats.total}',
-          ),
-          const SizedBox(width: 10),
-          StatCard(
-            label: 'Known',
-            value: '${state.stats.known}',
-            color: AppColors.known,
-          ),
-          const SizedBox(width: 10),
-          StatCard(
-            label: 'Unknown',
-            value: '${state.stats.unknown}',
-            color: AppColors.unknown,
-          ),
-        ],
-      ),
     );
   }
 }

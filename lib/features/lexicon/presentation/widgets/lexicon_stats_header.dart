@@ -1,0 +1,46 @@
+import 'package:flutter/material.dart';
+import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/stat_card.dart';
+import '../../domain/entities/lexicon_stats.dart';
+
+class LexiconStatsHeader extends StatelessWidget {
+  const LexiconStatsHeader({
+    required this.stats,
+    super.key,
+  });
+
+  final LexiconStats stats;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16),
+      child: Row(
+        children: [
+          Expanded(
+            child: StatCard(
+              label: 'Total',
+              value: '${stats.total}',
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: StatCard(
+              label: 'Known',
+              value: '${stats.known}',
+              color: AppColors.known,
+            ),
+          ),
+          const SizedBox(width: 10),
+          Expanded(
+            child: StatCard(
+              label: 'Unknown',
+              value: '${stats.unknown}',
+              color: AppColors.unknown,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}

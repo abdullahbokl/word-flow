@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/entities/lexicon_stats.dart';
+import '../../../../core/common/state/bloc_status.dart';
 import '../../domain/entities/word_filter.dart';
 import '../../domain/entities/word_sort.dart';
 import '../../domain/usecases/add_word_manually.dart';
@@ -27,18 +27,19 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
         _addWordManually = addWordManually,
         _updateWord = updateWord,
         _watchStats = watchStats,
-        super(const LexiconInitial()) {
+        super(const LexiconState()) {
     on<LoadLexicon>(_onLoad);
     on<LexiconUpdateReceived>(_onWordsUpdate);
     on<LexiconStatsUpdateReceived>(_onStatsUpdate);
     on<LexiconErrorReceived>(_onErrorReceived);
-    on<ToggleWordStatusEvent>(_onToggle);
-    on<DeleteWordEvent>(_onDelete);
-    on<SearchLexicon>(_onSearch);
-    on<FilterLexicon>(_onFilter);
-    on<SortLexicon>(_onSort);
-    on<UpdateWordEvent>(_onUpdateWord);
-    on<AddWordManuallyEvent>(_onAdd);
+    on<ToggleWordStatusEvent>((e, _) => _toggleWordStatus(e.wordId).run());
+    on<DeleteWordEvent>((e, _) => _deleteWord(e.wordId).run());
+    on<AddWordManuallyEvent>((e, _) => _addWordManually(e.word).run());
+    on<SearchLexicon>((e, _) => _onWatch(query: e.query));
+    on<FilterLexicon>((e, _) => _onWatch(filter: e.filter));
+    on<SortLexicon>((e, _) => _onWatch(sort: e.sort));
+    on<UpdateWordEvent>((e, _) => _updateWord(e.wordId,
+        meaning: e.meaning, description: e.description).run());
   }
 
   final WatchWords _watchWords;
@@ -48,124 +49,49 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
   final AddWordManually _addWordManually;
   final UpdateWord _updateWord;
 
-  StreamSubscription? _wordsSubscription;
-  StreamSubscription? _statsSubscription;
+  StreamSubscription? _wordsSub;
+  StreamSubscription? _statsSub;
 
-  WordFilter _activeFilter = WordFilter.all;
-  WordSort _activeSort = WordSort.frequencyDesc;
-  String _activeQuery = '';
-  LexiconStats _currentStats = const LexiconStats.empty();
-
-  Future<void> _onLoad(LoadLexicon e, Emitter<LexiconState> emit) async {
-    emit(const LexiconLoading());
-    _startWatching();
+  void _onLoad(LoadLexicon e, Emitter<LexiconState> emit) {
+    emit(state.copyWith(status: const BlocStatus.loading()));
+    _onWatch();
+    _statsSub ??= _watchStats().listen((res) => res.fold(
+        (_) {}, (s) => add(LexiconStatsUpdateReceived(s))));
   }
 
-  void _startWatching() {
-    _wordsSubscription?.cancel();
-    _statsSubscription?.cancel();
-
-    _wordsSubscription = _watchWords(
-      filter: _activeFilter,
-      sort: _activeSort,
-      query: _activeQuery,
-    ).listen((result) {
-      result.fold(
-        (f) => add(LexiconErrorReceived(f.message)),
-        (words) => add(LexiconUpdateReceived(words)),
-      );
-    });
-
-    _statsSubscription = _watchStats().listen((result) {
-      result.fold(
-        (_) {}, // Ignore stats errors for now
-        (stats) => add(LexiconStatsUpdateReceived(stats)),
-      );
-    });
+  void _onWatch({WordFilter? filter, WordSort? sort, String? query}) {
+    _wordsSub?.cancel();
+    _wordsSub = _watchWords(
+      filter: filter ?? state.filter,
+      sort: sort ?? state.sort,
+      query: query ?? state.query,
+    ).listen((res) => res.fold(
+          (f) => add(LexiconErrorReceived(f.message)),
+          (w) => add(LexiconUpdateReceived(w, filter, sort, query)),
+        ));
   }
 
   void _onWordsUpdate(LexiconUpdateReceived e, Emitter<LexiconState> emit) {
-    emit(LexiconLoaded(
-      words: e.words,
-      filter: _activeFilter,
-      sort: _activeSort,
-      query: _activeQuery,
-      stats: _currentStats,
+    emit(state.copyWith(
+      status: BlocStatus.success(data: e.words),
+      filter: e.filter,
+      sort: e.sort,
+      query: e.query,
     ));
   }
 
   void _onStatsUpdate(LexiconStatsUpdateReceived e, Emitter<LexiconState> emit) {
-    _currentStats = e.stats;
-    if (state is LexiconLoaded) {
-      emit((state as LexiconLoaded).copyWith(stats: e.stats));
-    }
+    emit(state.copyWith(stats: e.stats));
   }
 
   void _onErrorReceived(LexiconErrorReceived e, Emitter<LexiconState> emit) {
-    emit(LexiconFailure(e.message));
-  }
-
-  Future<void> _onToggle(
-    ToggleWordStatusEvent e,
-    Emitter<LexiconState> emit,
-  ) async {
-    // Optimistic UI could be added here, but with local DB it's fast enough
-    await _toggleWordStatus(e.wordId).run();
-  }
-
-  Future<void> _onDelete(
-    DeleteWordEvent e,
-    Emitter<LexiconState> emit,
-  ) async {
-    await _deleteWord(e.wordId).run();
-  }
-
-  Future<void> _onSearch(
-    SearchLexicon e,
-    Emitter<LexiconState> emit,
-  ) async {
-    _activeQuery = e.query;
-    _startWatching();
-  }
-
-  Future<void> _onFilter(
-    FilterLexicon e,
-    Emitter<LexiconState> emit,
-  ) async {
-    _activeFilter = e.filter;
-    _startWatching();
-  }
-
-  Future<void> _onAdd(
-    AddWordManuallyEvent e,
-    Emitter<LexiconState> emit,
-  ) async {
-    await _addWordManually(e.word).run();
-  }
-
-  void _onSort(
-    SortLexicon e,
-    Emitter<LexiconState> emit,
-  ) {
-    _activeSort = e.sort;
-    _startWatching();
-  }
-
-  Future<void> _onUpdateWord(
-    UpdateWordEvent e,
-    Emitter<LexiconState> emit,
-  ) async {
-    await _updateWord(
-      e.wordId,
-      meaning: e.meaning,
-      description: e.description,
-    ).run();
+    emit(state.copyWith(status: BlocStatus.failure(error: e.message)));
   }
 
   @override
   Future<void> close() {
-    _wordsSubscription?.cancel();
-    _statsSubscription?.cancel();
+    _wordsSub?.cancel();
+    _statsSub?.cancel();
     return super.close();
   }
 }

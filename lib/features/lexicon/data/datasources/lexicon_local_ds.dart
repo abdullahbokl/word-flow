@@ -203,24 +203,25 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
 
   @override
   Future<LexiconStats> getStats() async {
-    final all = await _db.select(_db.words).get();
-    final known = all.where((w) => w.isKnown).length;
-    return LexiconStats(
-      total: all.length,
-      known: known,
-      unknown: all.length - known,
-    );
+    final res = await _db
+        .customSelect(
+            'SELECT COUNT(*) as total, SUM(CASE WHEN is_known = 1 THEN 1 ELSE 0 END) as known FROM words')
+        .getSingle();
+    final total = res.read<int>('total');
+    final known = res.read<int?>('known') ?? 0;
+    return LexiconStats(total: total, known: known, unknown: total - known);
   }
 
   @override
   Stream<LexiconStats> watchStats() {
-    return _db.select(_db.words).watch().map((all) {
-      final known = all.where((w) => w.isKnown).length;
-      return LexiconStats(
-        total: all.length,
-        known: known,
-        unknown: all.length - known,
-      );
+    return _db
+        .customSelect(
+            'SELECT COUNT(*) as total, SUM(CASE WHEN is_known = 1 THEN 1 ELSE 0 END) as known FROM words')
+        .watchSingle()
+        .map((res) {
+      final total = res.read<int>('total');
+      final known = res.read<int?>('known') ?? 0;
+      return LexiconStats(total: total, known: known, unknown: total - known);
     });
   }
 }
