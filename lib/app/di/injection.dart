@@ -82,5 +82,5 @@ Future<void> initDI() async {
         watchHistory: sl(),
         deleteHistoryItem: sl(),
       ));
-  sl.registerFactory(() => HistoryDetailBloc(sl()));
+  sl.registerFactory(() => HistoryDetailBloc(sl(), sl()));
 }

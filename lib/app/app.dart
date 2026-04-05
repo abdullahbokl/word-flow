@@ -8,8 +8,9 @@ import '../features/history/presentation/bloc/history_event.dart';
 import '../features/lexicon/presentation/bloc/lexicon_bloc.dart';
 import '../features/lexicon/presentation/bloc/lexicon_event.dart';
 import '../features/text_analyzer/presentation/bloc/analyzer_bloc.dart';
+import '../core/navigation/app_navigator.dart';
+import 'app_shell.dart';
 import 'di/injection.dart';
-import 'router.dart';
 
 class LexiTrackApp extends StatelessWidget {
   const LexiTrackApp({super.key});
@@ -29,13 +30,14 @@ class LexiTrackApp extends StatelessWidget {
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {
-          return MaterialApp.router(
-            title: 'LexiTrack',
+          return MaterialApp(
+            title: 'WordFlow',
             debugShowCheckedModeBanner: false,
             theme: AppTheme.light,
             darkTheme: AppTheme.dark,
             themeMode: themeMode,
-            routerConfig: appRouter,
+            navigatorKey: AppNavigator.key,
+            home: const AppShell(),
           );
         },
       ),
