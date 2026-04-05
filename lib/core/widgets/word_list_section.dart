@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../../features/history/domain/entities/history_detail.dart';
+import '../../../../core/common/models/word_with_local_freq.dart';
 import '../theme/app_colors.dart';
 
 class WordListSection extends StatefulWidget {

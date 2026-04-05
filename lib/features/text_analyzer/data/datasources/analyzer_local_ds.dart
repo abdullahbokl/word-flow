@@ -2,7 +2,7 @@ import 'package:drift/drift.dart';
 
 import '../../../../core/database/app_database.dart';
 import '../../../../core/utils/text_processor.dart';
-import '../../../history/domain/entities/history_detail.dart';
+import '../../../../core/common/models/word_with_local_freq.dart';
 import '../../../lexicon/domain/entities/word_entity.dart';
 import '../../domain/entities/analysis_result.dart';
 

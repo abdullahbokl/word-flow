@@ -3,8 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_loader.dart';
+import '../../../../core/common/widgets/app_loader.dart';
 import '../../../../core/widgets/app_text_field.dart';
+import '../../../../core/widgets/app_text.dart';
 import '../../../../core/widgets/theme_toggle.dart';
 import '../../../lexicon/presentation/bloc/lexicon_bloc.dart';
 import '../../../lexicon/presentation/bloc/lexicon_event.dart';
@@ -49,40 +50,45 @@ class _AnalyzerPageState extends State<AnalyzerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Text Analyzer'),
+        title: const AppText.headline('Text Analyzer'),
         actions: const [ThemeToggle(), SizedBox(width: 8)],
       ),
       body: BlocConsumer<AnalyzerBloc, AnalyzerState>(
         listener: (context, state) {
-          if (state is AnalyzerFailure) {
+          if (state.status.isFailed) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(state.message)),
+              SnackBar(content: AppText(state.status.error ?? 'Error')),
             );
           }
         },
-        builder: (context, state) => switch (state) {
-          AnalyzerInitial() || AnalyzerFailure() => _InputBody(
-              titleCtrl: _titleCtrl,
-              contentCtrl: _contentCtrl,
-              onAnalyze: _onAnalyze,
-            ),
-          AnalyzerLoading() => const AppLoader(message: 'Processing text...'),
-          AnalyzerSuccess(:final result) => AnalysisSummary(
-              result: result,
-              onReset: () {
-                _titleCtrl.clear();
-                _contentCtrl.clear();
-                context.read<AnalyzerBloc>().add(const ResetAnalysis());
-              },
-              onToggleStatus: (w) {
-                final lexiconBloc = context.read<LexiconBloc>();
-                final analyzerBloc = context.read<AnalyzerBloc>();
+        builder: (context, state) => state.status.when(
+          initial: () => _InputBody(
+            titleCtrl: _titleCtrl,
+            contentCtrl: _contentCtrl,
+            onAnalyze: _onAnalyze,
+          ),
+          failure: (_) => _InputBody(
+            titleCtrl: _titleCtrl,
+            contentCtrl: _contentCtrl,
+            onAnalyze: _onAnalyze,
+          ),
+          loading: () => const AppLoader(message: 'Processing text...'),
+          success: (result) => AnalysisSummary(
+            result: result,
+            onReset: () {
+              _titleCtrl.clear();
+              _contentCtrl.clear();
+              context.read<AnalyzerBloc>().add(const ResetAnalysis());
+            },
+            onToggleStatus: (w) {
+              final lexiconBloc = context.read<LexiconBloc>();
+              final analyzerBloc = context.read<AnalyzerBloc>();
 
-                lexiconBloc.add(ToggleWordStatusEvent(w.word.id));
-                analyzerBloc.add(ToggleWordStatusInResult(wordId: w.word.id));
-              },
-            ),
-        },
+              lexiconBloc.add(ToggleWordStatusEvent(w.word.id));
+              analyzerBloc.add(ToggleWordStatusInResult(wordId: w.word.id));
+            },
+          ),
+        ),
       ),
     );
   }
@@ -106,10 +112,7 @@ class _InputBody extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text(
-            'New Analysis',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-          ),
+          const AppText.headline('New Analysis'),
           const SizedBox(height: 16),
           AppTextField(
             controller: titleCtrl,

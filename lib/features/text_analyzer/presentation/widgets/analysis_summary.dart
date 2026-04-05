@@ -2,8 +2,9 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/stat_card.dart';
+import '../../../../core/widgets/app_text.dart';
 import '../../../../core/widgets/word_list_section.dart';
-import '../../../history/domain/entities/history_detail.dart';
+import '../../../../core/common/models/word_with_local_freq.dart';
 import '../../domain/entities/analysis_result.dart';
 
 class AnalysisSummary extends StatelessWidget {
@@ -28,46 +29,49 @@ class AnalysisSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Analysis Results',
-            style: theme.textTheme.headlineMedium,
-          ),
+          const AppText.headline('Analysis Results'),
           const SizedBox(height: 8),
-          Text(
+          AppText.body(
             result.title,
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
-            ),
+            color: theme.colorScheme.onSurfaceVariant,
           ),
           const SizedBox(height: 24),
           _ComprehensionCard(percentage: comp),
           const SizedBox(height: 16),
           Row(
             children: [
-              StatCard(
-                label: 'Total Words',
-                value: '${result.totalWords}',
+              Expanded(
+                child: StatCard(
+                  label: 'Total Words',
+                  value: '${result.totalWords}',
+                ),
               ),
               const SizedBox(width: 8),
-              StatCard(
-                label: 'Unique',
-                value: '${result.uniqueWords}',
+              Expanded(
+                child: StatCard(
+                  label: 'Unique',
+                  value: '${result.uniqueWords}',
+                ),
               ),
             ],
           ),
           const SizedBox(height: 8),
           Row(
             children: [
-              StatCard(
-                label: 'Unknown',
-                value: '${result.unknownWords}',
-                color: theme.colorScheme.error,
+              Expanded(
+                child: StatCard(
+                  label: 'Unknown',
+                  value: '${result.unknownWords}',
+                  color: theme.colorScheme.error,
+                ),
               ),
               const SizedBox(width: 8),
-              StatCard(
-                label: 'Known Words',
-                value: '${result.knownWords}',
-                color: theme.colorScheme.primary,
+              Expanded(
+                child: StatCard(
+                  label: 'Known Words',
+                  value: '${result.knownWords}',
+                  color: theme.colorScheme.primary,
+                ),
               ),
             ],
           ),
@@ -117,9 +121,9 @@ class _ComprehensionCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              AppText.title(
                 'Comprehension Score',
-                style: theme.textTheme.titleMedium?.copyWith(color: color),
+                color: color,
               ),
               Text(
                 '${percentage.toStringAsFixed(1)}%',
