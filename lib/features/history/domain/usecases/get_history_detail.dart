@@ -8,6 +8,6 @@ class GetHistoryDetail {
 
   final HistoryRepository _repository;
 
-  TaskEither<Failure, HistoryDetail> call(int id) =>
+  Future<Either<Failure, HistoryDetail>> call(int id) =>
       _repository.getHistoryDetail(id);
 }

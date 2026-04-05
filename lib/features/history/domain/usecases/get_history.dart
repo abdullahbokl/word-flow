@@ -1,5 +1,4 @@
 import 'package:fpdart/fpdart.dart';
-
 import '../../../../core/error/failures.dart';
 import '../entities/history_item.dart';
 import '../repositories/history_repository.dart';
@@ -9,5 +8,6 @@ class GetHistory {
 
   final HistoryRepository _repository;
 
-  TaskEither<Failure, List<HistoryItem>> call() => _repository.getHistory();
+  Future<Either<Failure, List<HistoryItem>>> call() =>
+      _repository.getHistory();
 }

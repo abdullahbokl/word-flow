@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:go_router/go_router.dart';
+import '../../../../core/navigation/app_navigator.dart';
 
 import '../../../../core/widgets/app_empty_state.dart';
-import '../../../../core/widgets/app_loader.dart';
+import '../../../../core/common/widgets/app_loader.dart';
 import '../bloc/history_bloc.dart';
 import '../bloc/history_event.dart';
 import '../bloc/history_state.dart';
@@ -21,11 +21,11 @@ class HistoryPage extends StatelessWidget {
         actions: const [ThemeToggle(), SizedBox(width: 8)],
       ),
       body: BlocBuilder<HistoryBloc, HistoryState>(
-        builder: (context, state) => switch (state) {
-          HistoryInitial() => const AppLoader(message: 'Loading history...'),
-          HistoryLoading() => const AppLoader(),
-          HistoryFailure(:final message) => Center(child: Text(message)),
-          HistoryLoaded(:final items) => items.isEmpty
+        builder: (context, state) => state.status.when(
+          initial: () => const AppLoader(message: 'Loading history...'),
+          loading: () => const AppLoader(),
+          failure: (error) => Center(child: Text(error)),
+          success: (items) => items.isEmpty
               ? const AppEmptyState(
                   icon: Icons.history,
                   title: 'No analysis history',
@@ -39,12 +39,12 @@ class HistoryPage extends StatelessWidget {
                     final item = items[i];
                     return HistoryCard(
                       item: item,
-                      onTap: () => context.go('/history/${item.id}'),
-                      onDelete: () => _showDeleteDialog(context, item.id),
+                      onTap: () => AppNavigator.toHistoryDetail(item.id),
+                      onDelete: () => _showDeleteDialog(ctx, item.id),
                     );
                   },
                 ),
-        },
+        ),
       ),
     );
   }

@@ -3,8 +3,8 @@ import 'package:fpdart/fpdart.dart';
 import 'package:rxdart/rxdart.dart';
 
 import '../../../../core/database/app_database.dart';
-
 import '../../../../core/error/failures.dart';
+import '../../../../core/common/models/word_with_local_freq.dart';
 import '../../domain/entities/history_detail.dart';
 import '../../domain/entities/history_item.dart';
 import '../../domain/repositories/history_repository.dart';
@@ -18,14 +18,13 @@ class HistoryRepositoryImpl implements HistoryRepository {
   final HistoryLocalDataSource _local;
 
   @override
-  TaskEither<Failure, List<HistoryItem>> getHistory() {
-    return TaskEither.tryCatch(
-      () async {
-        final rows = await _local.getHistory();
-        return rows.map((r) => r.toEntity()).toList();
-      },
-      (error, stack) => DatabaseFailure('$error', stack),
-    );
+  Future<Either<Failure, List<HistoryItem>>> getHistory() async {
+    try {
+      final rows = await _local.getHistory();
+      return Right(rows.map((r) => r.toEntity()).toList());
+    } catch (e, stack) {
+      return Left(DatabaseFailure('$e', stack));
+    }
   }
 
   @override
@@ -36,37 +35,37 @@ class HistoryRepositoryImpl implements HistoryRepository {
   }
 
   @override
-  TaskEither<Failure, Unit> deleteHistoryItem(int id, {bool deleteUniqueWords = false}) {
-    return TaskEither.tryCatch(
-      () async {
-        await _local.deleteHistoryItem(id, deleteUniqueWords: deleteUniqueWords);
-        return unit;
-      },
-      (error, stack) => DatabaseFailure('$error', stack),
-    );
+  Future<Either<Failure, void>> deleteHistoryItem(int id,
+      {bool deleteUniqueWords = false}) async {
+    try {
+      await _local.deleteHistoryItem(id, deleteUniqueWords: deleteUniqueWords);
+      return const Right(null);
+    } catch (e, stack) {
+      return Left(DatabaseFailure('$e', stack));
+    }
   }
-  @override
-  TaskEither<Failure, HistoryDetail> getHistoryDetail(int id) {
-    return TaskEither.tryCatch(
-      () async {
-        final row = await _local.getHistoryItem(id);
-        if (row == null) throw Exception('Analysis not found');
 
-        final results = await _local.getAnalysisWords(id);
-        return HistoryDetail(
-          item: row.toEntity(),
-          words: results.map((r) {
-            final wordRow = r.readTable(_local.db.words);
-            final entryRow = r.readTable(_local.db.textWordEntries);
-            return WordWithLocalFreq(
-              word: wordRow.toEntity(),
-              localFrequency: entryRow.localFrequency,
-            );
-          }).toList(),
-        );
-      },
-      (error, stack) => DatabaseFailure('$error', stack),
-    );
+  @override
+  Future<Either<Failure, HistoryDetail>> getHistoryDetail(int id) async {
+    try {
+      final row = await _local.getHistoryItem(id);
+      if (row == null) throw Exception('Analysis not found');
+
+      final results = await _local.getAnalysisWords(id);
+      return Right(HistoryDetail(
+        item: row.toEntity(),
+        words: results.map((r) {
+          final wordRow = r.readTable(_local.db.words);
+          final entryRow = r.readTable(_local.db.textWordEntries);
+          return WordWithLocalFreq(
+            word: wordRow.toEntity(),
+            localFrequency: entryRow.localFrequency,
+          );
+        }).toList(),
+      ));
+    } catch (e, stack) {
+      return Left(DatabaseFailure('$e', stack));
+    }
   }
 
   @override

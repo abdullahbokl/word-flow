@@ -4,11 +4,10 @@ import '../entities/history_detail.dart';
 import '../repositories/history_repository.dart';
 
 class WatchHistoryDetail {
-  WatchHistoryDetail(this.repository);
+  const WatchHistoryDetail(this._repository);
 
-  final HistoryRepository repository;
+  final HistoryRepository _repository;
 
-  Stream<Either<Failure, HistoryDetail>> call(int id) {
-    return repository.watchHistoryDetail(id);
-  }
+  Stream<Either<Failure, HistoryDetail>> call(int id) =>
+      _repository.watchHistoryDetail(id);
 }

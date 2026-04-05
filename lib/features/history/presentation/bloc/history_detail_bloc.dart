@@ -1,42 +1,48 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import '../../../lexicon/domain/usecases/toggle_word_status.dart';
 import '../../domain/usecases/watch_history_detail.dart';
+import '../../../../core/common/state/bloc_status.dart';
 import 'history_detail_event.dart';
 import 'history_detail_state.dart';
 
 class HistoryDetailBloc extends Bloc<HistoryDetailEvent, HistoryDetailState> {
-  HistoryDetailBloc(this._watchHistoryDetail) : super(HistoryDetailInitial()) {
+  HistoryDetailBloc(this._watchDetail, this._toggleWord)
+      : super(const HistoryDetailState()) {
     on<LoadHistoryDetail>(_onLoad);
     on<HistoryDetailUpdated>(_onUpdated);
+    on<ToggleWordStatusInHistory>(_onToggle);
   }
 
-  final WatchHistoryDetail _watchHistoryDetail;
-  StreamSubscription? _subscription;
+  final WatchHistoryDetail _watchDetail;
+  final ToggleWordStatus _toggleWord;
+  StreamSubscription? _sub;
 
-  Future<void> _onLoad(
-    LoadHistoryDetail event,
+  void _onLoad(LoadHistoryDetail e, Emitter<HistoryDetailState> emit) {
+    emit(state.copyWith(status: const BlocStatus.loading()));
+    _sub?.cancel();
+    _sub = _watchDetail(e.id).listen((res) => add(HistoryDetailUpdated(res)));
+  }
+
+  void _onUpdated(HistoryDetailUpdated e, Emitter<HistoryDetailState> emit) {
+    e.result.fold(
+      (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),
+      (d) => emit(state.copyWith(status: BlocStatus.success(data: d))),
+    );
+  }
+
+  Future<void> _onToggle(
+    ToggleWordStatusInHistory e,
     Emitter<HistoryDetailState> emit,
   ) async {
-    emit(HistoryDetailLoading());
-    await _subscription?.cancel();
-    _subscription = _watchHistoryDetail(event.id).listen(
-      (result) => add(HistoryDetailUpdated(result)),
-    );
-  }
-
-  void _onUpdated(
-    HistoryDetailUpdated event,
-    Emitter<HistoryDetailState> emit,
-  ) {
-    event.result.fold(
-      (failure) => emit(HistoryDetailFailure(failure.message)),
-      (detail) => emit(HistoryDetailLoaded(detail)),
-    );
+    // Current status is success, we just trigger the update.
+    // Reactive stream will handle the UI update.
+    await _toggleWord(e.wordId).run();
   }
 
   @override
   Future<void> close() {
-    _subscription?.cancel();
+    _sub?.cancel();
     return super.close();
   }
 }

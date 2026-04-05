@@ -8,6 +8,6 @@ class DeleteHistoryItem {
 
   final HistoryRepository _repository;
 
-  TaskEither<Failure, Unit> call(int id, {bool deleteUniqueWords = false}) =>
+  Future<Either<Failure, void>> call(int id, {bool deleteUniqueWords = false}) =>
       _repository.deleteHistoryItem(id, deleteUniqueWords: deleteUniqueWords);
 }

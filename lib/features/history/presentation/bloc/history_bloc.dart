@@ -1,6 +1,5 @@
-import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
+import '../../../../core/common/state/bloc_status.dart';
 import '../../domain/usecases/delete_history_item.dart';
 import '../../domain/usecases/watch_history.dart';
 import 'history_event.dart';
@@ -12,47 +11,41 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     required DeleteHistoryItem deleteHistoryItem,
   })  : _watchHistory = watchHistory,
         _deleteHistoryItem = deleteHistoryItem,
-        super(const HistoryInitial()) {
-    on<LoadHistory>(_onLoad);
+        super(const HistoryState(status: BlocStatus.initial())) {
+    on<LoadHistory>(_onLoadHistory);
     on<HistoryUpdateReceived>(_onUpdateReceived);
-    on<HistoryErrorReceived>(_onErrorReceived);
-    on<DeleteHistoryItemEvent>(_onDelete);
+    on<DeleteHistoryItemEvent>(_onDeleteHistoryItem);
   }
 
   final WatchHistory _watchHistory;
   final DeleteHistoryItem _deleteHistoryItem;
-  StreamSubscription? _subscription;
 
-  Future<void> _onLoad(LoadHistory e, Emitter<HistoryState> emit) async {
-    emit(const HistoryLoading());
-    await _subscription?.cancel();
-    _subscription = _watchHistory().listen((result) {
-      result.fold(
-        (f) => add(HistoryErrorReceived(f.message)),
-        (items) => add(HistoryUpdateReceived(items)),
-      );
-    });
+  Future<void> _onLoadHistory(LoadHistory event, Emitter<HistoryState> emit) async {
+    emit(state.copyWith(status: const BlocStatus.loading()));
+    await emit.forEach(
+      _watchHistory(),
+      onData: (result) => result.fold(
+        (f) => state.copyWith(status: BlocStatus.failure(error: f.message)),
+        (items) => state.copyWith(status: BlocStatus.success(data: items)),
+      ),
+    );
   }
 
-  void _onUpdateReceived(HistoryUpdateReceived e, Emitter<HistoryState> emit) {
-    emit(HistoryLoaded(e.items));
+  void _onUpdateReceived(HistoryUpdateReceived event, Emitter<HistoryState> emit) {
+    emit(state.copyWith(status: BlocStatus.success(data: event.items)));
   }
 
-  void _onErrorReceived(HistoryErrorReceived e, Emitter<HistoryState> emit) {
-    emit(HistoryFailure(e.message));
-  }
-
-  Future<void> _onDelete(
-    DeleteHistoryItemEvent e,
+  Future<void> _onDeleteHistoryItem(
+    DeleteHistoryItemEvent event,
     Emitter<HistoryState> emit,
   ) async {
-    // Note: No need to call add(LoadHistory) because the stream will auto-update
-    await _deleteHistoryItem(e.id, deleteUniqueWords: e.deleteUniqueWords).run();
-  }
-
-  @override
-  Future<void> close() {
-    _subscription?.cancel();
-    return super.close();
+    final result = await _deleteHistoryItem(
+      event.id,
+      deleteUniqueWords: event.deleteUniqueWords,
+    );
+    result.fold(
+      (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),
+      (_) => null, // List will update via stream
+    );
   }
 }

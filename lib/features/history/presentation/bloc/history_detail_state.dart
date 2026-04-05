@@ -1,29 +1,23 @@
 import 'package:equatable/equatable.dart';
+
+import '../../../../core/common/state/bloc_status.dart';
 import '../../domain/entities/history_detail.dart';
 
-sealed class HistoryDetailState extends Equatable {
-  const HistoryDetailState();
+class HistoryDetailState extends Equatable {
+  const HistoryDetailState({
+    this.status = const BlocStatus.initial(),
+  });
+
+  final BlocStatus<HistoryDetail> status;
+
+  HistoryDetailState copyWith({
+    BlocStatus<HistoryDetail>? status,
+  }) {
+    return HistoryDetailState(
+      status: status ?? this.status,
+    );
+  }
 
   @override
-  List<Object?> get props => [];
-}
-
-final class HistoryDetailInitial extends HistoryDetailState {}
-
-final class HistoryDetailLoading extends HistoryDetailState {}
-
-final class HistoryDetailLoaded extends HistoryDetailState {
-  const HistoryDetailLoaded(this.detail);
-  final HistoryDetail detail;
-
-  @override
-  List<Object?> get props => [detail];
-}
-
-final class HistoryDetailFailure extends HistoryDetailState {
-  const HistoryDetailFailure(this.message);
-  final String message;
-
-  @override
-  List<Object?> get props => [message];
+  List<Object?> get props => [status];
 }

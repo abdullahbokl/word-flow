@@ -8,15 +8,30 @@ class HistoryItem extends Equatable {
     required this.uniqueWords,
     required this.createdAt,
     required this.contentSnippet,
+    this.knownWords = 0,
+    this.unknownWords = 0,
   });
 
   final int id;
   final String title;
   final int totalWords;
   final int uniqueWords;
+  final int knownWords;
+  final int unknownWords;
   final DateTime createdAt;
   final String contentSnippet;
 
+  double get comprehension =>
+      totalWords == 0 ? 100 : (knownWords / totalWords) * 100;
+
   @override
-  List<Object?> get props => [id, title, totalWords, uniqueWords];
+  List<Object?> get props => [
+        id,
+        title,
+        totalWords,
+        uniqueWords,
+        knownWords,
+        unknownWords,
+        createdAt,
+      ];
 }

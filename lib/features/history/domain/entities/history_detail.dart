@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import '../../../lexicon/domain/entities/word_entity.dart';
+import '../../../../core/common/models/word_with_local_freq.dart';
 import './history_item.dart';
 
 class HistoryDetail extends Equatable {
@@ -13,17 +13,4 @@ class HistoryDetail extends Equatable {
 
   @override
   List<Object?> get props => [item, words];
-}
-
-class WordWithLocalFreq extends Equatable {
-  const WordWithLocalFreq({
-    required this.word,
-    required this.localFrequency,
-  });
-
-  final WordEntity word;
-  final int localFrequency;
-
-  @override
-  List<Object?> get props => [word, localFrequency];
 }
