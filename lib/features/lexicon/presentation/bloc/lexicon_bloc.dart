@@ -7,6 +7,7 @@ import '../../domain/entities/word_sort.dart';
 import '../../domain/usecases/add_word_manually.dart';
 import '../../domain/usecases/delete_word.dart';
 import '../../domain/usecases/toggle_word_status.dart';
+import '../../domain/usecases/update_word.dart';
 import '../../domain/usecases/watch_lexicon_stats.dart';
 import '../../domain/usecases/watch_words.dart';
 import 'lexicon_event.dart';
@@ -18,11 +19,13 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
     required ToggleWordStatus toggleWordStatus,
     required DeleteWord deleteWord,
     required AddWordManually addWordManually,
+    required UpdateWord updateWord,
     required WatchLexiconStats watchStats,
   })  : _watchWords = watchWords,
         _toggleWordStatus = toggleWordStatus,
         _deleteWord = deleteWord,
         _addWordManually = addWordManually,
+        _updateWord = updateWord,
         _watchStats = watchStats,
         super(const LexiconInitial()) {
     on<LoadLexicon>(_onLoad);
@@ -34,6 +37,7 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
     on<SearchLexicon>(_onSearch);
     on<FilterLexicon>(_onFilter);
     on<SortLexicon>(_onSort);
+    on<UpdateWordEvent>(_onUpdateWord);
     on<AddWordManuallyEvent>(_onAdd);
   }
 
@@ -42,6 +46,7 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
   final ToggleWordStatus _toggleWordStatus;
   final DeleteWord _deleteWord;
   final AddWordManually _addWordManually;
+  final UpdateWord _updateWord;
 
   StreamSubscription? _wordsSubscription;
   StreamSubscription? _statsSubscription;
@@ -144,6 +149,17 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
   ) {
     _activeSort = e.sort;
     _startWatching();
+  }
+
+  Future<void> _onUpdateWord(
+    UpdateWordEvent e,
+    Emitter<LexiconState> emit,
+  ) async {
+    await _updateWord(
+      e.wordId,
+      meaning: e.meaning,
+      description: e.description,
+    ).run();
   }
 
   @override

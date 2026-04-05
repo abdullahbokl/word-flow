@@ -20,6 +20,7 @@ import '../../features/lexicon/domain/usecases/delete_word.dart';
 import '../../features/lexicon/domain/usecases/get_lexicon_stats.dart';
 import '../../features/lexicon/domain/usecases/get_words.dart';
 import '../../features/lexicon/domain/usecases/toggle_word_status.dart';
+import '../../features/lexicon/domain/usecases/update_word.dart';
 import '../../features/lexicon/domain/usecases/watch_lexicon_stats.dart';
 import '../../features/lexicon/domain/usecases/watch_words.dart';
 import '../../features/lexicon/presentation/bloc/lexicon_bloc.dart';
@@ -46,6 +47,7 @@ Future<void> initDI() async {
   sl.registerLazySingleton(() => ToggleWordStatus(sl()));
   sl.registerLazySingleton(() => DeleteWord(sl()));
   sl.registerLazySingleton(() => AddWordManually(sl()));
+  sl.registerLazySingleton(() => UpdateWord(sl()));
   sl.registerLazySingleton(() => GetLexiconStats(sl()));
   sl.registerLazySingleton(() => WatchWords(sl()));
   sl.registerLazySingleton(() => WatchLexiconStats(sl()));
@@ -54,6 +56,7 @@ Future<void> initDI() async {
         toggleWordStatus: sl(),
         deleteWord: sl(),
         addWordManually: sl(),
+        updateWord: sl(),
         watchStats: sl(),
       ));
 

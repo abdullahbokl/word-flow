@@ -11,6 +11,7 @@ import '../bloc/lexicon_event.dart';
 import '../bloc/lexicon_state.dart';
 import '../widgets/word_filter_bar.dart';
 import '../widgets/word_tile.dart';
+import '../../domain/entities/word_entity.dart';
 import '../../../../core/widgets/theme_toggle.dart';
 
 class LexiconPage extends StatefulWidget {
@@ -23,6 +24,15 @@ class LexiconPage extends StatefulWidget {
 class _LexiconPageState extends State<LexiconPage> {
   final _searchCtrl = TextEditingController();
   final _addCtrl = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    final state = context.read<LexiconBloc>().state;
+    if (state is LexiconLoaded) {
+      _searchCtrl.text = state.query;
+    }
+  }
 
   @override
   void dispose() {
@@ -61,6 +71,56 @@ class _LexiconPageState extends State<LexiconPage> {
     );
   }
 
+  void _showEditDialog(WordEntity word) {
+    final meaningCtrl = TextEditingController(text: word.meaning);
+    final descCtrl = TextEditingController(text: word.description);
+
+    showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text('Edit "${word.text}"'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: meaningCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Meaning',
+                hintText: 'Short definition...',
+              ),
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descCtrl,
+              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Description / Notes',
+                hintText: 'Add context or examples...',
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              context.read<LexiconBloc>().add(UpdateWordEvent(
+                    word.id,
+                    meaning: meaningCtrl.text.trim(),
+                    description: descCtrl.text.trim(),
+                  ));
+              Navigator.pop(ctx);
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -83,6 +143,7 @@ class _LexiconPageState extends State<LexiconPage> {
           LexiconLoaded() => _LoadedBody(
               state: state,
               searchCtrl: _searchCtrl,
+              onEdit: _showEditDialog,
             ),
         },
       ),
@@ -91,10 +152,15 @@ class _LexiconPageState extends State<LexiconPage> {
 }
 
 class _LoadedBody extends StatelessWidget {
-  const _LoadedBody({required this.state, required this.searchCtrl});
+  const _LoadedBody({
+    required this.state,
+    required this.searchCtrl,
+    required this.onEdit,
+  });
 
   final LexiconLoaded state;
   final TextEditingController searchCtrl;
+  final Function(WordEntity) onEdit;
 
   @override
   Widget build(BuildContext context) {
@@ -144,6 +210,7 @@ class _LoadedBody extends StatelessWidget {
                       onDelete: () => ctx
                           .read<LexiconBloc>()
                           .add(DeleteWordEvent(w.id)),
+                      onEdit: () => onEdit(w),
                     );
                   },
                 ),

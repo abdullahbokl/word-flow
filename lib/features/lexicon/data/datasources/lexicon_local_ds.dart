@@ -18,6 +18,11 @@ abstract interface class LexiconLocalDataSource {
     String query = '',
   });
   Future<WordRow> toggleStatus(int wordId);
+  Future<WordRow> updateWord(
+    int id, {
+    String? meaning,
+    String? description,
+  });
   Future<void> deleteWord(int wordId);
   Future<WordRow> addWord(String text);
   Future<LexiconStats> getStats();
@@ -123,11 +128,49 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
   }
 
   @override
+  Future<WordRow> updateWord(
+    int id, {
+    String? meaning,
+    String? description,
+  }) async {
+    final now = DateTime.now();
+    await (_db.update(_db.words)..where((w) => w.id.equals(id))).write(
+      WordsCompanion(
+        meaning: Value(meaning),
+        description: Value(description),
+        updatedAt: Value(now),
+      ),
+    );
+
+    final word = await (_db.select(_db.words)
+          ..where((w) => w.id.equals(id)))
+        .getSingle();
+
+    return word;
+  }
+
+  @override
   Future<void> deleteWord(int wordId) async {
-    await (_db.delete(_db.textWordEntries)
-          ..where((e) => e.wordId.equals(wordId)))
-        .go();
-    await (_db.delete(_db.words)..where((w) => w.id.equals(wordId))).go();
+    final word = await (_db.select(_db.words)..where((w) => w.id.equals(wordId)))
+        .getSingleOrNull();
+
+    if (word == null) return;
+
+    if (word.frequency > 1) {
+      // Decrement frequency instead of deleting
+      await (_db.update(_db.words)..where((w) => w.id.equals(wordId))).write(
+        WordsCompanion(
+          frequency: Value(word.frequency - 1),
+          updatedAt: Value(DateTime.now()),
+        ),
+      );
+    } else {
+      // Only delete if frequency reaches 1 or 0
+      await (_db.delete(_db.textWordEntries)
+            ..where((e) => e.wordId.equals(wordId)))
+          .go();
+      await (_db.delete(_db.words)..where((w) => w.id.equals(wordId))).go();
+    }
   }
 
   @override

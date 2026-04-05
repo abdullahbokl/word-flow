@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 
 import '../features/history/presentation/pages/history_detail_page.dart';
@@ -53,41 +54,35 @@ class _AppShell extends StatefulWidget {
 }
 
 class _AppShellState extends State<_AppShell> {
-  DateTime? _lastPressed;
 
   @override
   Widget build(BuildContext context) {
     final location = GoRouterState.of(context).uri.path;
-    final isHome = location == '/analyzer';
 
     return PopScope(
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
 
-        if (!isHome) {
+        // 1. If there's an internal navigator stack (e.g., detail page), handle normal pop
+        final shellNav = _shellNavigatorKey.currentState;
+        if (shellNav != null && shellNav.canPop()) {
+          shellNav.pop();
+          return;
+        }
+
+        // 2. We are on a secondary tab root, return to Analyzer (Home)
+        final currentLocation = GoRouterState.of(context).uri.path;
+        if (currentLocation != '/analyzer' && currentLocation != '/') {
           context.go('/analyzer');
           return;
         }
 
-        final now = DateTime.now();
-        final isDoubleBack = _lastPressed != null &&
-            now.difference(_lastPressed!) < const Duration(seconds: 2);
-
-        if (isDoubleBack) {
-          // Allow closing the app
-          Navigator.of(context).pop();
-          return;
+        // 3. We are already on home root, show exit confirmation
+        final shouldExit = await _showExitDialog(context);
+        if (shouldExit == true) {
+          await SystemNavigator.pop();
         }
-
-        _lastPressed = now;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Press back again to exit'),
-            duration: Duration(seconds: 2),
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
       },
       child: Scaffold(
         body: widget.child,
@@ -125,6 +120,26 @@ class _AppShellState extends State<_AppShell> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Future<bool?> _showExitDialog(BuildContext context) {
+    return showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Exit lexitrack?'),
+        content: const Text('Are you sure you want to close the app?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Stay'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: const Text('Exit'),
+          ),
+        ],
       ),
     );
   }

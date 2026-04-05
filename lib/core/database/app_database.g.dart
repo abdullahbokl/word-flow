@@ -54,9 +54,29 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
   late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
       'updated_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _meaningMeta =
+      const VerificationMeta('meaning');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, word, frequency, isKnown, createdAt, updatedAt];
+  late final GeneratedColumn<String> meaning = GeneratedColumn<String>(
+      'meaning', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _descriptionMeta =
+      const VerificationMeta('description');
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+      'description', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        word,
+        frequency,
+        isKnown,
+        createdAt,
+        updatedAt,
+        meaning,
+        description
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -96,6 +116,16 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
     } else if (isInserting) {
       context.missing(_updatedAtMeta);
     }
+    if (data.containsKey('meaning')) {
+      context.handle(_meaningMeta,
+          meaning.isAcceptableOrUnknown(data['meaning']!, _meaningMeta));
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+          _descriptionMeta,
+          description.isAcceptableOrUnknown(
+              data['description']!, _descriptionMeta));
+    }
     return context;
   }
 
@@ -117,6 +147,10 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
       updatedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}updated_at'])!,
+      meaning: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}meaning']),
+      description: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}description']),
     );
   }
 
@@ -133,13 +167,17 @@ class WordRow extends DataClass implements Insertable<WordRow> {
   final bool isKnown;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? meaning;
+  final String? description;
   const WordRow(
       {required this.id,
       required this.word,
       required this.frequency,
       required this.isKnown,
       required this.createdAt,
-      required this.updatedAt});
+      required this.updatedAt,
+      this.meaning,
+      this.description});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -149,6 +187,12 @@ class WordRow extends DataClass implements Insertable<WordRow> {
     map['is_known'] = Variable<bool>(isKnown);
     map['created_at'] = Variable<DateTime>(createdAt);
     map['updated_at'] = Variable<DateTime>(updatedAt);
+    if (!nullToAbsent || meaning != null) {
+      map['meaning'] = Variable<String>(meaning);
+    }
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
     return map;
   }
 
@@ -160,6 +204,12 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       isKnown: Value(isKnown),
       createdAt: Value(createdAt),
       updatedAt: Value(updatedAt),
+      meaning: meaning == null && nullToAbsent
+          ? const Value.absent()
+          : Value(meaning),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
     );
   }
 
@@ -173,6 +223,8 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       isKnown: serializer.fromJson<bool>(json['isKnown']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      meaning: serializer.fromJson<String?>(json['meaning']),
+      description: serializer.fromJson<String?>(json['description']),
     );
   }
   @override
@@ -185,6 +237,8 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       'isKnown': serializer.toJson<bool>(isKnown),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'meaning': serializer.toJson<String?>(meaning),
+      'description': serializer.toJson<String?>(description),
     };
   }
 
@@ -194,7 +248,9 @@ class WordRow extends DataClass implements Insertable<WordRow> {
           int? frequency,
           bool? isKnown,
           DateTime? createdAt,
-          DateTime? updatedAt}) =>
+          DateTime? updatedAt,
+          Value<String?> meaning = const Value.absent(),
+          Value<String?> description = const Value.absent()}) =>
       WordRow(
         id: id ?? this.id,
         word: word ?? this.word,
@@ -202,6 +258,8 @@ class WordRow extends DataClass implements Insertable<WordRow> {
         isKnown: isKnown ?? this.isKnown,
         createdAt: createdAt ?? this.createdAt,
         updatedAt: updatedAt ?? this.updatedAt,
+        meaning: meaning.present ? meaning.value : this.meaning,
+        description: description.present ? description.value : this.description,
       );
   WordRow copyWithCompanion(WordsCompanion data) {
     return WordRow(
@@ -211,6 +269,9 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       isKnown: data.isKnown.present ? data.isKnown.value : this.isKnown,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
       updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      meaning: data.meaning.present ? data.meaning.value : this.meaning,
+      description:
+          data.description.present ? data.description.value : this.description,
     );
   }
 
@@ -222,14 +283,16 @@ class WordRow extends DataClass implements Insertable<WordRow> {
           ..write('frequency: $frequency, ')
           ..write('isKnown: $isKnown, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('meaning: $meaning, ')
+          ..write('description: $description')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, word, frequency, isKnown, createdAt, updatedAt);
+  int get hashCode => Object.hash(
+      id, word, frequency, isKnown, createdAt, updatedAt, meaning, description);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -239,7 +302,9 @@ class WordRow extends DataClass implements Insertable<WordRow> {
           other.frequency == this.frequency &&
           other.isKnown == this.isKnown &&
           other.createdAt == this.createdAt &&
-          other.updatedAt == this.updatedAt);
+          other.updatedAt == this.updatedAt &&
+          other.meaning == this.meaning &&
+          other.description == this.description);
 }
 
 class WordsCompanion extends UpdateCompanion<WordRow> {
@@ -249,6 +314,8 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
   final Value<bool> isKnown;
   final Value<DateTime> createdAt;
   final Value<DateTime> updatedAt;
+  final Value<String?> meaning;
+  final Value<String?> description;
   const WordsCompanion({
     this.id = const Value.absent(),
     this.word = const Value.absent(),
@@ -256,6 +323,8 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
     this.isKnown = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.updatedAt = const Value.absent(),
+    this.meaning = const Value.absent(),
+    this.description = const Value.absent(),
   });
   WordsCompanion.insert({
     this.id = const Value.absent(),
@@ -264,6 +333,8 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
     this.isKnown = const Value.absent(),
     required DateTime createdAt,
     required DateTime updatedAt,
+    this.meaning = const Value.absent(),
+    this.description = const Value.absent(),
   })  : word = Value(word),
         createdAt = Value(createdAt),
         updatedAt = Value(updatedAt);
@@ -274,6 +345,8 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
     Expression<bool>? isKnown,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? updatedAt,
+    Expression<String>? meaning,
+    Expression<String>? description,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -282,6 +355,8 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
       if (isKnown != null) 'is_known': isKnown,
       if (createdAt != null) 'created_at': createdAt,
       if (updatedAt != null) 'updated_at': updatedAt,
+      if (meaning != null) 'meaning': meaning,
+      if (description != null) 'description': description,
     });
   }
 
@@ -291,7 +366,9 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
       Value<int>? frequency,
       Value<bool>? isKnown,
       Value<DateTime>? createdAt,
-      Value<DateTime>? updatedAt}) {
+      Value<DateTime>? updatedAt,
+      Value<String?>? meaning,
+      Value<String?>? description}) {
     return WordsCompanion(
       id: id ?? this.id,
       word: word ?? this.word,
@@ -299,6 +376,8 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
       isKnown: isKnown ?? this.isKnown,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      meaning: meaning ?? this.meaning,
+      description: description ?? this.description,
     );
   }
 
@@ -323,6 +402,12 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
     if (updatedAt.present) {
       map['updated_at'] = Variable<DateTime>(updatedAt.value);
     }
+    if (meaning.present) {
+      map['meaning'] = Variable<String>(meaning.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
     return map;
   }
 
@@ -334,7 +419,9 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
           ..write('frequency: $frequency, ')
           ..write('isKnown: $isKnown, ')
           ..write('createdAt: $createdAt, ')
-          ..write('updatedAt: $updatedAt')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('meaning: $meaning, ')
+          ..write('description: $description')
           ..write(')'))
         .toString();
   }
@@ -942,6 +1029,8 @@ typedef $$WordsTableCreateCompanionBuilder = WordsCompanion Function({
   Value<bool> isKnown,
   required DateTime createdAt,
   required DateTime updatedAt,
+  Value<String?> meaning,
+  Value<String?> description,
 });
 typedef $$WordsTableUpdateCompanionBuilder = WordsCompanion Function({
   Value<int> id,
@@ -950,6 +1039,8 @@ typedef $$WordsTableUpdateCompanionBuilder = WordsCompanion Function({
   Value<bool> isKnown,
   Value<DateTime> createdAt,
   Value<DateTime> updatedAt,
+  Value<String?> meaning,
+  Value<String?> description,
 });
 
 class $$WordsTableFilterComposer extends Composer<_$AppDatabase, $WordsTable> {
@@ -977,6 +1068,12 @@ class $$WordsTableFilterComposer extends Composer<_$AppDatabase, $WordsTable> {
 
   ColumnFilters<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get meaning => $composableBuilder(
+      column: $table.meaning, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnFilters(column));
 }
 
 class $$WordsTableOrderingComposer
@@ -1005,6 +1102,12 @@ class $$WordsTableOrderingComposer
 
   ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
       column: $table.updatedAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get meaning => $composableBuilder(
+      column: $table.meaning, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => ColumnOrderings(column));
 }
 
 class $$WordsTableAnnotationComposer
@@ -1033,6 +1136,12 @@ class $$WordsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get updatedAt =>
       $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get meaning =>
+      $composableBuilder(column: $table.meaning, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+      column: $table.description, builder: (column) => column);
 }
 
 class $$WordsTableTableManager extends RootTableManager<
@@ -1064,6 +1173,8 @@ class $$WordsTableTableManager extends RootTableManager<
             Value<bool> isKnown = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
             Value<DateTime> updatedAt = const Value.absent(),
+            Value<String?> meaning = const Value.absent(),
+            Value<String?> description = const Value.absent(),
           }) =>
               WordsCompanion(
             id: id,
@@ -1072,6 +1183,8 @@ class $$WordsTableTableManager extends RootTableManager<
             isKnown: isKnown,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            meaning: meaning,
+            description: description,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -1080,6 +1193,8 @@ class $$WordsTableTableManager extends RootTableManager<
             Value<bool> isKnown = const Value.absent(),
             required DateTime createdAt,
             required DateTime updatedAt,
+            Value<String?> meaning = const Value.absent(),
+            Value<String?> description = const Value.absent(),
           }) =>
               WordsCompanion.insert(
             id: id,
@@ -1088,6 +1203,8 @@ class $$WordsTableTableManager extends RootTableManager<
             isKnown: isKnown,
             createdAt: createdAt,
             updatedAt: updatedAt,
+            meaning: meaning,
+            description: description,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

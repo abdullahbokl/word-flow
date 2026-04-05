@@ -40,27 +40,36 @@ class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
   @override
   Future<void> deleteHistoryItem(int id, {bool deleteUniqueWords = false}) async {
     await _db.transaction(() async {
-      if (deleteUniqueWords) {
-        // Find words used IN this text
-        final entries = await (_db.select(_db.textWordEntries)
-              ..where((e) => e.textId.equals(id)))
-            .get();
+      // 1. Get all words in this analysis and their local frequencies
+      final entries = await (_db.select(_db.textWordEntries)
+            ..where((e) => e.textId.equals(id)))
+          .get();
 
-        for (final entry in entries) {
-          // Check if used ELSEWHERE
-          final otherUsage = await (_db.select(_db.textWordEntries)
-                ..where((e) =>
-                    e.wordId.equals(entry.wordId) & e.textId.isNotValue(id)))
-              .get();
+      for (final entry in entries) {
+        // 2. Fetch the corresponding word
+        final word = await (_db.select(_db.words)
+              ..where((w) => w.id.equals(entry.wordId)))
+            .getSingleOrNull();
 
-          if (otherUsage.isEmpty) {
-            // Delete the word itself
-            await (_db.delete(_db.words)..where((w) => w.id.equals(entry.wordId)))
+        if (word != null) {
+          final newFrequency = word.frequency - entry.localFrequency;
+
+          if (deleteUniqueWords && newFrequency <= 0) {
+            // 3a. Remove the word entirely if "delete everything" is selected and freq hits 0
+            await (_db.delete(_db.words)..where((w) => w.id.equals(word.id)))
                 .go();
+          } else {
+            // 3b. Otherwise just decrement the frequency
+            await (_db.update(_db.words)..where((w) => w.id.equals(word.id)))
+                .write(WordsCompanion(
+              frequency: Value(newFrequency < 0 ? 0 : newFrequency),
+              updatedAt: Value(DateTime.now()),
+            ));
           }
         }
       }
 
+      // 4. Clean up junction entries and the analyzed text record
       await (_db.delete(_db.textWordEntries)..where((e) => e.textId.equals(id)))
           .go();
       await (_db.delete(_db.analyzedTexts)..where((t) => t.id.equals(id))).go();

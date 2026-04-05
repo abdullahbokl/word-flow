@@ -8,6 +8,8 @@ class Words extends Table {
   BoolColumn get isKnown => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
   DateTimeColumn get updatedAt => dateTime()();
+  TextColumn get meaning => text().nullable()();
+  TextColumn get description => text().nullable()();
 }
 
 @DataClassName('AnalyzedTextRow')

@@ -8,6 +8,8 @@ class WordEntity extends Equatable {
     required this.isKnown,
     required this.createdAt,
     required this.updatedAt,
+    this.meaning,
+    this.description,
   });
 
   final int id;
@@ -16,6 +18,8 @@ class WordEntity extends Equatable {
   final bool isKnown;
   final DateTime createdAt;
   final DateTime updatedAt;
+  final String? meaning;
+  final String? description;
 
   WordEntity copyWith({
     int? id,
@@ -24,6 +28,8 @@ class WordEntity extends Equatable {
     bool? isKnown,
     DateTime? createdAt,
     DateTime? updatedAt,
+    String? meaning,
+    String? description,
   }) {
     return WordEntity(
       id: id ?? this.id,
@@ -32,9 +38,12 @@ class WordEntity extends Equatable {
       isKnown: isKnown ?? this.isKnown,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
+      meaning: meaning ?? this.meaning,
+      description: description ?? this.description,
     );
   }
 
   @override
-  List<Object?> get props => [id, text, frequency, isKnown];
+  List<Object?> get props =>
+      [id, text, frequency, isKnown, meaning, description];
 }

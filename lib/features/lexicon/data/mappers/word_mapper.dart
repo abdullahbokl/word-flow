@@ -10,6 +10,8 @@ extension WordRowMapper on WordRow {
       isKnown: isKnown,
       createdAt: createdAt,
       updatedAt: updatedAt,
+      meaning: meaning,
+      description: description,
     );
   }
 }

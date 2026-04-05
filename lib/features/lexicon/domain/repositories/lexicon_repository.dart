@@ -20,6 +20,11 @@ abstract interface class LexiconRepository {
   });
 
   TaskEither<Failure, WordEntity> toggleStatus(int wordId);
+  TaskEither<Failure, WordEntity> updateWord(
+    int id, {
+    String? meaning,
+    String? description,
+  });
 
   TaskEither<Failure, Unit> deleteWord(int wordId);
 

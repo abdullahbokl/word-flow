@@ -10,14 +10,20 @@ class TextProcessor {
   static Map<String, int> _tokenizeAndCount(String rawText) {
     if (rawText.trim().isEmpty) return {};
 
-    final cleaned = rawText
+    // Remove URLs first to prevent counting domain parts as words
+    final withoutUrls = rawText.replaceAll(
+      RegExp(r'https?://[^\s/$.?#].[^\s]*'),
+      ' ',
+    );
+
+    final cleaned = withoutUrls
         .toLowerCase()
         .replaceAll(RegExp(r"[^a-z'\s]"), ' ');
 
     final tokens = cleaned
         .split(RegExp(r'\s+'))
         .map((t) => t.replaceAll(RegExp(r"^'+|'+$"), ''))
-        .where((t) => t.length > 1 && t.contains(RegExp(r'[a-z]')));
+        .where((t) => t.isNotEmpty && t.contains(RegExp(r'[a-z]')));
 
     final freq = <String, int>{};
     for (final token in tokens) {
