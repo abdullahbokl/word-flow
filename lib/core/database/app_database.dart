@@ -16,7 +16,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting(QueryExecutor e) : super(e);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -26,6 +26,12 @@ class AppDatabase extends _$AppDatabase {
         if (from < 2) {
           await m.addColumn(words, words.meaning);
           await m.addColumn(words, words.description);
+        }
+        if (from < 3) {
+          await m.addColumn(analyzedTexts, analyzedTexts.knownWords);
+          await m.addColumn(analyzedTexts, analyzedTexts.unknownWords);
+          // Drift automatically handles foreign keys in createAll()
+          // For a live app with data, we might need a more complex migration to add FKs to existing tables
         }
       },
       beforeOpen: (details) async {

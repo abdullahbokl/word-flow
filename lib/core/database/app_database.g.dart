@@ -471,9 +471,33 @@ class $AnalyzedTextsTable extends AnalyzedTexts
   late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
       'created_at', aliasedName, false,
       type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  static const VerificationMeta _knownWordsMeta =
+      const VerificationMeta('knownWords');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, title, content, totalWords, uniqueWords, createdAt];
+  late final GeneratedColumn<int> knownWords = GeneratedColumn<int>(
+      'known_words', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  static const VerificationMeta _unknownWordsMeta =
+      const VerificationMeta('unknownWords');
+  @override
+  late final GeneratedColumn<int> unknownWords = GeneratedColumn<int>(
+      'unknown_words', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(0));
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        title,
+        content,
+        totalWords,
+        uniqueWords,
+        createdAt,
+        knownWords,
+        unknownWords
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -521,6 +545,18 @@ class $AnalyzedTextsTable extends AnalyzedTexts
     } else if (isInserting) {
       context.missing(_createdAtMeta);
     }
+    if (data.containsKey('known_words')) {
+      context.handle(
+          _knownWordsMeta,
+          knownWords.isAcceptableOrUnknown(
+              data['known_words']!, _knownWordsMeta));
+    }
+    if (data.containsKey('unknown_words')) {
+      context.handle(
+          _unknownWordsMeta,
+          unknownWords.isAcceptableOrUnknown(
+              data['unknown_words']!, _unknownWordsMeta));
+    }
     return context;
   }
 
@@ -542,6 +578,10 @@ class $AnalyzedTextsTable extends AnalyzedTexts
           .read(DriftSqlType.int, data['${effectivePrefix}unique_words'])!,
       createdAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      knownWords: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}known_words'])!,
+      unknownWords: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}unknown_words'])!,
     );
   }
 
@@ -558,13 +598,17 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
   final int totalWords;
   final int uniqueWords;
   final DateTime createdAt;
+  final int knownWords;
+  final int unknownWords;
   const AnalyzedTextRow(
       {required this.id,
       required this.title,
       required this.content,
       required this.totalWords,
       required this.uniqueWords,
-      required this.createdAt});
+      required this.createdAt,
+      required this.knownWords,
+      required this.unknownWords});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -574,6 +618,8 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
     map['total_words'] = Variable<int>(totalWords);
     map['unique_words'] = Variable<int>(uniqueWords);
     map['created_at'] = Variable<DateTime>(createdAt);
+    map['known_words'] = Variable<int>(knownWords);
+    map['unknown_words'] = Variable<int>(unknownWords);
     return map;
   }
 
@@ -585,6 +631,8 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
       totalWords: Value(totalWords),
       uniqueWords: Value(uniqueWords),
       createdAt: Value(createdAt),
+      knownWords: Value(knownWords),
+      unknownWords: Value(unknownWords),
     );
   }
 
@@ -598,6 +646,8 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
       totalWords: serializer.fromJson<int>(json['totalWords']),
       uniqueWords: serializer.fromJson<int>(json['uniqueWords']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      knownWords: serializer.fromJson<int>(json['knownWords']),
+      unknownWords: serializer.fromJson<int>(json['unknownWords']),
     );
   }
   @override
@@ -610,6 +660,8 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
       'totalWords': serializer.toJson<int>(totalWords),
       'uniqueWords': serializer.toJson<int>(uniqueWords),
       'createdAt': serializer.toJson<DateTime>(createdAt),
+      'knownWords': serializer.toJson<int>(knownWords),
+      'unknownWords': serializer.toJson<int>(unknownWords),
     };
   }
 
@@ -619,7 +671,9 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
           String? content,
           int? totalWords,
           int? uniqueWords,
-          DateTime? createdAt}) =>
+          DateTime? createdAt,
+          int? knownWords,
+          int? unknownWords}) =>
       AnalyzedTextRow(
         id: id ?? this.id,
         title: title ?? this.title,
@@ -627,6 +681,8 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
         totalWords: totalWords ?? this.totalWords,
         uniqueWords: uniqueWords ?? this.uniqueWords,
         createdAt: createdAt ?? this.createdAt,
+        knownWords: knownWords ?? this.knownWords,
+        unknownWords: unknownWords ?? this.unknownWords,
       );
   AnalyzedTextRow copyWithCompanion(AnalyzedTextsCompanion data) {
     return AnalyzedTextRow(
@@ -638,6 +694,11 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
       uniqueWords:
           data.uniqueWords.present ? data.uniqueWords.value : this.uniqueWords,
       createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      knownWords:
+          data.knownWords.present ? data.knownWords.value : this.knownWords,
+      unknownWords: data.unknownWords.present
+          ? data.unknownWords.value
+          : this.unknownWords,
     );
   }
 
@@ -649,14 +710,16 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
           ..write('content: $content, ')
           ..write('totalWords: $totalWords, ')
           ..write('uniqueWords: $uniqueWords, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('knownWords: $knownWords, ')
+          ..write('unknownWords: $unknownWords')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode =>
-      Object.hash(id, title, content, totalWords, uniqueWords, createdAt);
+  int get hashCode => Object.hash(id, title, content, totalWords, uniqueWords,
+      createdAt, knownWords, unknownWords);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -666,7 +729,9 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
           other.content == this.content &&
           other.totalWords == this.totalWords &&
           other.uniqueWords == this.uniqueWords &&
-          other.createdAt == this.createdAt);
+          other.createdAt == this.createdAt &&
+          other.knownWords == this.knownWords &&
+          other.unknownWords == this.unknownWords);
 }
 
 class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
@@ -676,6 +741,8 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
   final Value<int> totalWords;
   final Value<int> uniqueWords;
   final Value<DateTime> createdAt;
+  final Value<int> knownWords;
+  final Value<int> unknownWords;
   const AnalyzedTextsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -683,6 +750,8 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
     this.totalWords = const Value.absent(),
     this.uniqueWords = const Value.absent(),
     this.createdAt = const Value.absent(),
+    this.knownWords = const Value.absent(),
+    this.unknownWords = const Value.absent(),
   });
   AnalyzedTextsCompanion.insert({
     this.id = const Value.absent(),
@@ -691,6 +760,8 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
     required int totalWords,
     required int uniqueWords,
     required DateTime createdAt,
+    this.knownWords = const Value.absent(),
+    this.unknownWords = const Value.absent(),
   })  : title = Value(title),
         content = Value(content),
         totalWords = Value(totalWords),
@@ -703,6 +774,8 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
     Expression<int>? totalWords,
     Expression<int>? uniqueWords,
     Expression<DateTime>? createdAt,
+    Expression<int>? knownWords,
+    Expression<int>? unknownWords,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -711,6 +784,8 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
       if (totalWords != null) 'total_words': totalWords,
       if (uniqueWords != null) 'unique_words': uniqueWords,
       if (createdAt != null) 'created_at': createdAt,
+      if (knownWords != null) 'known_words': knownWords,
+      if (unknownWords != null) 'unknown_words': unknownWords,
     });
   }
 
@@ -720,7 +795,9 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
       Value<String>? content,
       Value<int>? totalWords,
       Value<int>? uniqueWords,
-      Value<DateTime>? createdAt}) {
+      Value<DateTime>? createdAt,
+      Value<int>? knownWords,
+      Value<int>? unknownWords}) {
     return AnalyzedTextsCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
@@ -728,6 +805,8 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
       totalWords: totalWords ?? this.totalWords,
       uniqueWords: uniqueWords ?? this.uniqueWords,
       createdAt: createdAt ?? this.createdAt,
+      knownWords: knownWords ?? this.knownWords,
+      unknownWords: unknownWords ?? this.unknownWords,
     );
   }
 
@@ -752,6 +831,12 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
     if (createdAt.present) {
       map['created_at'] = Variable<DateTime>(createdAt.value);
     }
+    if (knownWords.present) {
+      map['known_words'] = Variable<int>(knownWords.value);
+    }
+    if (unknownWords.present) {
+      map['unknown_words'] = Variable<int>(unknownWords.value);
+    }
     return map;
   }
 
@@ -763,7 +848,9 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
           ..write('content: $content, ')
           ..write('totalWords: $totalWords, ')
           ..write('uniqueWords: $uniqueWords, ')
-          ..write('createdAt: $createdAt')
+          ..write('createdAt: $createdAt, ')
+          ..write('knownWords: $knownWords, ')
+          ..write('unknownWords: $unknownWords')
           ..write(')'))
         .toString();
   }
@@ -781,13 +868,16 @@ class $TextWordEntriesTable extends TextWordEntries
       'text_id', aliasedName, false,
       type: DriftSqlType.int,
       requiredDuringInsert: true,
-      defaultConstraints:
-          GeneratedColumn.constraintIsAlways('REFERENCES analyzed_texts (id)'));
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES analyzed_texts (id) ON DELETE CASCADE'));
   static const VerificationMeta _wordIdMeta = const VerificationMeta('wordId');
   @override
   late final GeneratedColumn<int> wordId = GeneratedColumn<int>(
       'word_id', aliasedName, false,
-      type: DriftSqlType.int, requiredDuringInsert: true);
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES words (id) ON DELETE CASCADE'));
   static const VerificationMeta _localFrequencyMeta =
       const VerificationMeta('localFrequency');
   @override
@@ -1020,6 +1110,25 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
       [words, analyzedTexts, textWordEntries];
+  @override
+  StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
+        [
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('analyzed_texts',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('text_word_entries', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('words',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('text_word_entries', kind: UpdateKind.delete),
+            ],
+          ),
+        ],
+      );
 }
 
 typedef $$WordsTableCreateCompanionBuilder = WordsCompanion Function({
@@ -1042,6 +1151,28 @@ typedef $$WordsTableUpdateCompanionBuilder = WordsCompanion Function({
   Value<String?> meaning,
   Value<String?> description,
 });
+
+final class $$WordsTableReferences
+    extends BaseReferences<_$AppDatabase, $WordsTable, WordRow> {
+  $$WordsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$TextWordEntriesTable, List<TextWordEntryRow>>
+      _textWordEntriesRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.textWordEntries,
+              aliasName:
+                  $_aliasNameGenerator(db.words.id, db.textWordEntries.wordId));
+
+  $$TextWordEntriesTableProcessedTableManager get textWordEntriesRefs {
+    final manager =
+        $$TextWordEntriesTableTableManager($_db, $_db.textWordEntries)
+            .filter((f) => f.wordId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache =
+        $_typedResult.readTableOrNull(_textWordEntriesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
 
 class $$WordsTableFilterComposer extends Composer<_$AppDatabase, $WordsTable> {
   $$WordsTableFilterComposer({
@@ -1074,6 +1205,27 @@ class $$WordsTableFilterComposer extends Composer<_$AppDatabase, $WordsTable> {
 
   ColumnFilters<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => ColumnFilters(column));
+
+  Expression<bool> textWordEntriesRefs(
+      Expression<bool> Function($$TextWordEntriesTableFilterComposer f) f) {
+    final $$TextWordEntriesTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.textWordEntries,
+        getReferencedColumn: (t) => t.wordId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TextWordEntriesTableFilterComposer(
+              $db: $db,
+              $table: $db.textWordEntries,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$WordsTableOrderingComposer
@@ -1142,6 +1294,27 @@ class $$WordsTableAnnotationComposer
 
   GeneratedColumn<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => column);
+
+  Expression<T> textWordEntriesRefs<T extends Object>(
+      Expression<T> Function($$TextWordEntriesTableAnnotationComposer a) f) {
+    final $$TextWordEntriesTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.textWordEntries,
+        getReferencedColumn: (t) => t.wordId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$TextWordEntriesTableAnnotationComposer(
+              $db: $db,
+              $table: $db.textWordEntries,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$WordsTableTableManager extends RootTableManager<
@@ -1153,9 +1326,9 @@ class $$WordsTableTableManager extends RootTableManager<
     $$WordsTableAnnotationComposer,
     $$WordsTableCreateCompanionBuilder,
     $$WordsTableUpdateCompanionBuilder,
-    (WordRow, BaseReferences<_$AppDatabase, $WordsTable, WordRow>),
+    (WordRow, $$WordsTableReferences),
     WordRow,
-    PrefetchHooks Function()> {
+    PrefetchHooks Function({bool textWordEntriesRefs})> {
   $$WordsTableTableManager(_$AppDatabase db, $WordsTable table)
       : super(TableManagerState(
           db: db,
@@ -1207,9 +1380,35 @@ class $$WordsTableTableManager extends RootTableManager<
             description: description,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) =>
+                  (e.readTable(table), $$WordsTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({textWordEntriesRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (textWordEntriesRefs) db.textWordEntries
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (textWordEntriesRefs)
+                    await $_getPrefetchedData<WordRow, $WordsTable,
+                            TextWordEntryRow>(
+                        currentTable: table,
+                        referencedTable: $$WordsTableReferences
+                            ._textWordEntriesRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$WordsTableReferences(db, table, p0)
+                                .textWordEntriesRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.wordId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
         ));
 }
 
@@ -1222,9 +1421,9 @@ typedef $$WordsTableProcessedTableManager = ProcessedTableManager<
     $$WordsTableAnnotationComposer,
     $$WordsTableCreateCompanionBuilder,
     $$WordsTableUpdateCompanionBuilder,
-    (WordRow, BaseReferences<_$AppDatabase, $WordsTable, WordRow>),
+    (WordRow, $$WordsTableReferences),
     WordRow,
-    PrefetchHooks Function()>;
+    PrefetchHooks Function({bool textWordEntriesRefs})>;
 typedef $$AnalyzedTextsTableCreateCompanionBuilder = AnalyzedTextsCompanion
     Function({
   Value<int> id,
@@ -1233,6 +1432,8 @@ typedef $$AnalyzedTextsTableCreateCompanionBuilder = AnalyzedTextsCompanion
   required int totalWords,
   required int uniqueWords,
   required DateTime createdAt,
+  Value<int> knownWords,
+  Value<int> unknownWords,
 });
 typedef $$AnalyzedTextsTableUpdateCompanionBuilder = AnalyzedTextsCompanion
     Function({
@@ -1242,6 +1443,8 @@ typedef $$AnalyzedTextsTableUpdateCompanionBuilder = AnalyzedTextsCompanion
   Value<int> totalWords,
   Value<int> uniqueWords,
   Value<DateTime> createdAt,
+  Value<int> knownWords,
+  Value<int> unknownWords,
 });
 
 final class $$AnalyzedTextsTableReferences extends BaseReferences<_$AppDatabase,
@@ -1294,6 +1497,12 @@ class $$AnalyzedTextsTableFilterComposer
   ColumnFilters<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnFilters(column));
 
+  ColumnFilters<int> get knownWords => $composableBuilder(
+      column: $table.knownWords, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<int> get unknownWords => $composableBuilder(
+      column: $table.unknownWords, builder: (column) => ColumnFilters(column));
+
   Expression<bool> textWordEntriesRefs(
       Expression<bool> Function($$TextWordEntriesTableFilterComposer f) f) {
     final $$TextWordEntriesTableFilterComposer composer = $composerBuilder(
@@ -1342,6 +1551,13 @@ class $$AnalyzedTextsTableOrderingComposer
 
   ColumnOrderings<DateTime> get createdAt => $composableBuilder(
       column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get knownWords => $composableBuilder(
+      column: $table.knownWords, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<int> get unknownWords => $composableBuilder(
+      column: $table.unknownWords,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$AnalyzedTextsTableAnnotationComposer
@@ -1370,6 +1586,12 @@ class $$AnalyzedTextsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get createdAt =>
       $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<int> get knownWords => $composableBuilder(
+      column: $table.knownWords, builder: (column) => column);
+
+  GeneratedColumn<int> get unknownWords => $composableBuilder(
+      column: $table.unknownWords, builder: (column) => column);
 
   Expression<T> textWordEntriesRefs<T extends Object>(
       Expression<T> Function($$TextWordEntriesTableAnnotationComposer a) f) {
@@ -1422,6 +1644,8 @@ class $$AnalyzedTextsTableTableManager extends RootTableManager<
             Value<int> totalWords = const Value.absent(),
             Value<int> uniqueWords = const Value.absent(),
             Value<DateTime> createdAt = const Value.absent(),
+            Value<int> knownWords = const Value.absent(),
+            Value<int> unknownWords = const Value.absent(),
           }) =>
               AnalyzedTextsCompanion(
             id: id,
@@ -1430,6 +1654,8 @@ class $$AnalyzedTextsTableTableManager extends RootTableManager<
             totalWords: totalWords,
             uniqueWords: uniqueWords,
             createdAt: createdAt,
+            knownWords: knownWords,
+            unknownWords: unknownWords,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -1438,6 +1664,8 @@ class $$AnalyzedTextsTableTableManager extends RootTableManager<
             required int totalWords,
             required int uniqueWords,
             required DateTime createdAt,
+            Value<int> knownWords = const Value.absent(),
+            Value<int> unknownWords = const Value.absent(),
           }) =>
               AnalyzedTextsCompanion.insert(
             id: id,
@@ -1446,6 +1674,8 @@ class $$AnalyzedTextsTableTableManager extends RootTableManager<
             totalWords: totalWords,
             uniqueWords: uniqueWords,
             createdAt: createdAt,
+            knownWords: knownWords,
+            unknownWords: unknownWords,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (
@@ -1528,6 +1758,20 @@ final class $$TextWordEntriesTableReferences extends BaseReferences<
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: [item]));
   }
+
+  static $WordsTable _wordIdTable(_$AppDatabase db) => db.words.createAlias(
+      $_aliasNameGenerator(db.textWordEntries.wordId, db.words.id));
+
+  $$WordsTableProcessedTableManager get wordId {
+    final $_column = $_itemColumn<int>('word_id')!;
+
+    final manager = $$WordsTableTableManager($_db, $_db.words)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_wordIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
 }
 
 class $$TextWordEntriesTableFilterComposer
@@ -1539,9 +1783,6 @@ class $$TextWordEntriesTableFilterComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnFilters<int> get wordId => $composableBuilder(
-      column: $table.wordId, builder: (column) => ColumnFilters(column));
-
   ColumnFilters<int> get localFrequency => $composableBuilder(
       column: $table.localFrequency,
       builder: (column) => ColumnFilters(column));
@@ -1565,6 +1806,26 @@ class $$TextWordEntriesTableFilterComposer
             ));
     return composer;
   }
+
+  $$WordsTableFilterComposer get wordId {
+    final $$WordsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.wordId,
+        referencedTable: $db.words,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WordsTableFilterComposer(
+              $db: $db,
+              $table: $db.words,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$TextWordEntriesTableOrderingComposer
@@ -1576,9 +1837,6 @@ class $$TextWordEntriesTableOrderingComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  ColumnOrderings<int> get wordId => $composableBuilder(
-      column: $table.wordId, builder: (column) => ColumnOrderings(column));
-
   ColumnOrderings<int> get localFrequency => $composableBuilder(
       column: $table.localFrequency,
       builder: (column) => ColumnOrderings(column));
@@ -1602,6 +1860,26 @@ class $$TextWordEntriesTableOrderingComposer
             ));
     return composer;
   }
+
+  $$WordsTableOrderingComposer get wordId {
+    final $$WordsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.wordId,
+        referencedTable: $db.words,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WordsTableOrderingComposer(
+              $db: $db,
+              $table: $db.words,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$TextWordEntriesTableAnnotationComposer
@@ -1613,9 +1891,6 @@ class $$TextWordEntriesTableAnnotationComposer
     super.$addJoinBuilderToRootComposer,
     super.$removeJoinBuilderFromRootComposer,
   });
-  GeneratedColumn<int> get wordId =>
-      $composableBuilder(column: $table.wordId, builder: (column) => column);
-
   GeneratedColumn<int> get localFrequency => $composableBuilder(
       column: $table.localFrequency, builder: (column) => column);
 
@@ -1638,6 +1913,26 @@ class $$TextWordEntriesTableAnnotationComposer
             ));
     return composer;
   }
+
+  $$WordsTableAnnotationComposer get wordId {
+    final $$WordsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.wordId,
+        referencedTable: $db.words,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WordsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.words,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
 }
 
 class $$TextWordEntriesTableTableManager extends RootTableManager<
@@ -1651,7 +1946,7 @@ class $$TextWordEntriesTableTableManager extends RootTableManager<
     $$TextWordEntriesTableUpdateCompanionBuilder,
     (TextWordEntryRow, $$TextWordEntriesTableReferences),
     TextWordEntryRow,
-    PrefetchHooks Function({bool textId})> {
+    PrefetchHooks Function({bool textId, bool wordId})> {
   $$TextWordEntriesTableTableManager(
       _$AppDatabase db, $TextWordEntriesTable table)
       : super(TableManagerState(
@@ -1693,7 +1988,7 @@ class $$TextWordEntriesTableTableManager extends RootTableManager<
                     $$TextWordEntriesTableReferences(db, table, e)
                   ))
               .toList(),
-          prefetchHooksCallback: ({textId = false}) {
+          prefetchHooksCallback: ({textId = false, wordId = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [],
@@ -1720,6 +2015,16 @@ class $$TextWordEntriesTableTableManager extends RootTableManager<
                         $$TextWordEntriesTableReferences._textIdTable(db).id,
                   ) as T;
                 }
+                if (wordId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.wordId,
+                    referencedTable:
+                        $$TextWordEntriesTableReferences._wordIdTable(db),
+                    referencedColumn:
+                        $$TextWordEntriesTableReferences._wordIdTable(db).id,
+                  ) as T;
+                }
 
                 return state;
               },
@@ -1742,7 +2047,7 @@ typedef $$TextWordEntriesTableProcessedTableManager = ProcessedTableManager<
     $$TextWordEntriesTableUpdateCompanionBuilder,
     (TextWordEntryRow, $$TextWordEntriesTableReferences),
     TextWordEntryRow,
-    PrefetchHooks Function({bool textId})>;
+    PrefetchHooks Function({bool textId, bool wordId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;

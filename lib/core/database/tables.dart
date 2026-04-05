@@ -20,12 +20,16 @@ class AnalyzedTexts extends Table {
   IntColumn get totalWords => integer()();
   IntColumn get uniqueWords => integer()();
   DateTimeColumn get createdAt => dateTime()();
+  IntColumn get knownWords => integer().withDefault(const Constant(0))();
+  IntColumn get unknownWords => integer().withDefault(const Constant(0))();
 }
 
 @DataClassName('TextWordEntryRow')
 class TextWordEntries extends Table {
-  IntColumn get textId => integer().references(AnalyzedTexts, #id)();
-  IntColumn get wordId => integer()();
+  IntColumn get textId =>
+      integer().references(AnalyzedTexts, #id, onDelete: KeyAction.cascade)();
+  IntColumn get wordId =>
+      integer().references(Words, #id, onDelete: KeyAction.cascade)();
   IntColumn get localFrequency => integer().withDefault(const Constant(1))();
 
   @override
