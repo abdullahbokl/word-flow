@@ -1,12 +1,12 @@
 import 'package:fpdart/fpdart.dart';
 
+import '../../../../core/data/mappers/word_row_mapper.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/lexicon_stats.dart';
 import '../../domain/entities/word_entity.dart';
 import '../../domain/entities/word_filter.dart';
 import '../../domain/entities/word_sort.dart';
 import '../../domain/repositories/lexicon_repository.dart';
-import '../../../../../core/common/mappers/word_row_mapper.dart';
 import '../datasources/lexicon_local_ds.dart';
 
 class LexiconRepositoryImpl implements LexiconRepository {

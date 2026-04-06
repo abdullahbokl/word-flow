@@ -3,7 +3,7 @@ import 'package:drift/drift.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/utils/text_processor.dart';
 import '../../../../core/common/models/word_with_local_freq.dart';
-import '../../../lexicon/domain/entities/word_entity.dart';
+import '../../../../core/domain/entities/word_entity.dart';
 import '../../domain/entities/analysis_result.dart';
 
 abstract interface class AnalyzerLocalDataSource {

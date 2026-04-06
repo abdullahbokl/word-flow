@@ -2,8 +2,8 @@ import 'package:drift/drift.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:rxdart/rxdart.dart';
 
-import '../../../../core/common/mappers/word_row_mapper.dart';
 import '../../../../core/common/models/word_with_local_freq.dart';
+import '../../../../core/data/mappers/word_row_mapper.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/error/failures.dart';
 import '../../domain/entities/history_detail.dart';

@@ -1,5 +1,5 @@
-import '../../../database/app_database.dart';
-import '../../../features/lexicon/domain/entities/word_entity.dart';
+import '../../database/app_database.dart';
+import '../../domain/entities/word_entity.dart';
 
 extension WordRowMapper on WordRow {
   WordEntity toEntity() {
