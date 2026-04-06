@@ -6,7 +6,7 @@ part 'app_database.g.dart';
 
 @DriftDatabase(tables: [Words, AppSettings])
 class WordFlowDatabase extends _$WordFlowDatabase {
-  WordFlowDatabase() : super(_openConnection());
+  WordFlowDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
   @override
   int get schemaVersion => 5;
