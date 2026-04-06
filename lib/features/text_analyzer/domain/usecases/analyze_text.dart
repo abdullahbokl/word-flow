@@ -1,10 +1,11 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/usecase/usecase.dart';
 import '../entities/analysis_result.dart';
 import '../repositories/analyzer_repository.dart';
 
-class AnalyzeText {
+class AnalyzeText extends AsyncUseCase<AnalysisResult, void> {
   const AnalyzeText(this._repository);
 
   final AnalyzerRepository _repository;

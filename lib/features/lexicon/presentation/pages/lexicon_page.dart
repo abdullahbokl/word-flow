@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/app_empty_state.dart';
-import '../../../../core/common/widgets/app_loader.dart';
+import '../../../../core/widgets/app_loader.dart';
+import '../../../../core/widgets/status_view.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_text.dart';
 import '../bloc/lexicon_bloc.dart';
@@ -35,22 +37,22 @@ class _LexiconPageState extends State<LexiconPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const AppText.title('Add Word'),
+        title: const AppText.title(AppStrings.addWord),
         content: AppTextField(
           controller: _addCtrl,
           autofocus: true,
-          hint: 'Enter a word...',
+          hint: AppStrings.enterWord,
           textInputAction: TextInputAction.done,
           onFieldSubmitted: (_) => _onAddSubmitted(),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const AppText.body('Cancel'),
+            child: const AppText.body(AppStrings.cancel),
           ),
           ElevatedButton(
             onPressed: _onAddSubmitted,
-            child: const AppText.body('Add'),
+            child: const AppText.body(AppStrings.add),
           ),
         ],
       ),
@@ -70,22 +72,22 @@ class _LexiconPageState extends State<LexiconPage> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const AppText.title('Edit Word'),
+        title: const AppText.title(AppStrings.editWord),
         content: AppTextField(
           controller: _addCtrl,
           autofocus: true,
-          hint: 'Enter a word...',
+          hint: AppStrings.enterWord,
           textInputAction: TextInputAction.done,
           onFieldSubmitted: (_) => _onEditSubmitted(word),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const AppText.body('Cancel'),
+            child: const AppText.body(AppStrings.cancel),
           ),
           ElevatedButton(
             onPressed: () => _onEditSubmitted(word),
-            child: const AppText.body('Save'),
+            child: const AppText.body(AppStrings.save),
           ),
         ],
       ),
@@ -110,7 +112,7 @@ class _LexiconPageState extends State<LexiconPage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const AppText.headline('My Lexicon'),
+        title: const AppText.headline(AppStrings.myLexicon),
         actions: const [ThemeToggle(), SizedBox(width: 8)],
       ),
       floatingActionButton: FloatingActionButton(
@@ -118,11 +120,10 @@ class _LexiconPageState extends State<LexiconPage> {
         child: const Icon(Icons.add),
       ),
       body: BlocBuilder<LexiconBloc, LexiconState>(
-        builder: (context, state) => state.status.when(
-          initial: () => const AppLoader(message: 'Loading lexicon...'),
-          loading: () => const AppLoader(),
-          failure: (error) => Center(child: AppText(error)),
-          success: (words) => _LoadedBody(
+        builder: (context, state) => StatusView<List<WordEntity>>(
+          status: state.status,
+          onInitial: () => const AppLoader(message: AppStrings.loadingLexicon),
+          onSuccess: (words) => _LoadedBody(
             state: state,
             words: words,
             searchCtrl: searchCtrl,
@@ -156,7 +157,7 @@ class _LoadedBody extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: AppTextField(
             controller: searchCtrl,
-            hint: 'Search words...',
+            hint: AppStrings.searchWords,
             prefixIcon: Icons.search,
             onChanged: (q) => context.read<LexiconBloc>().add(SearchLexicon(q)),
           ),

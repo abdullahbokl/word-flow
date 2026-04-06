@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/constants/app_strings.dart';
+import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/stat_card.dart';
 import '../../../../core/widgets/app_text.dart';
+import '../../../../core/widgets/stat_card.dart';
 import '../../../../core/widgets/word_list_section.dart';
-import '../../../../core/common/models/word_with_local_freq.dart';
 import '../../domain/entities/analysis_result.dart';
 
 class AnalysisSummary extends StatelessWidget {
@@ -29,7 +30,7 @@ class AnalysisSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppText.headline('Analysis Results'),
+          const AppText.headline(AppStrings.analysisResults),
           const SizedBox(height: 8),
           AppText.body(
             result.title,
@@ -104,10 +105,10 @@ class _ComprehensionCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final color = percentage > 90
-        ? Colors.green
+        ? AppColors.success
         : percentage > 70
-            ? Colors.orange
-            : Colors.red;
+            ? AppColors.warning
+            : AppColors.error;
 
     return Container(
       padding: const EdgeInsets.all(20),
@@ -147,3 +148,4 @@ class _ComprehensionCard extends StatelessWidget {
     );
   }
 }
+

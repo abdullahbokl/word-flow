@@ -1,10 +1,6 @@
 import 'package:equatable/equatable.dart';
-import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 import '../enums/state_status.dart';
-import '../widgets/app_error_widget.dart';
-import '../widgets/app_loader.dart';
 
 class BlocStatus<T> extends Equatable {
   final StateStatus status;
@@ -30,34 +26,6 @@ class BlocStatus<T> extends Equatable {
   bool get isSuccess => status == StateStatus.success;
   bool get isEmpty => status == StateStatus.empty;
   bool get isFailed => status == StateStatus.failure;
-
-  Widget when({
-    required Widget Function(T data) success,
-    Widget Function()? loading,
-    Widget Function(String error)? failure,
-    Widget Function()? empty,
-    Widget Function()? initial,
-    bool animate = true,
-  }) {
-    final widget = switch (status) {
-      StateStatus.initial => initial?.call() ?? const SizedBox.shrink(),
-      StateStatus.loading => loading?.call() ?? const AppLoader(),
-      StateStatus.success => success(data as T),
-      StateStatus.empty => empty?.call() ?? const SizedBox.shrink(),
-      StateStatus.failure =>
-        failure?.call(error ?? 'An error occurred') ??
-            AppErrorWidget(error: error ?? 'An error occurred'),
-    };
-
-    if (animate && !isInitial) {
-      return widget.animate().fadeIn(duration: 300.ms).moveY(
-            begin: 10,
-            end: 0,
-            curve: Curves.easeOutQuad,
-          );
-    }
-    return widget;
-  }
 
   @override
   List<Object?> get props => [status, error, data];

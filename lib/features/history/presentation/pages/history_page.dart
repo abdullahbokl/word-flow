@@ -3,12 +3,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/navigation/app_navigator.dart';
 
 import '../../../../core/widgets/app_empty_state.dart';
-import '../../../../core/common/widgets/app_loader.dart';
+import '../../../../core/widgets/app_loader.dart';
+import '../../../../core/widgets/status_view.dart';
 import '../bloc/history_bloc.dart';
 import '../bloc/history_event.dart';
 import '../bloc/history_state.dart';
 import '../widgets/history_card.dart';
 import '../../../../core/widgets/theme_toggle.dart';
+import '../../domain/entities/history_item.dart';
 
 class HistoryPage extends StatelessWidget {
   const HistoryPage({super.key});
@@ -21,11 +23,10 @@ class HistoryPage extends StatelessWidget {
         actions: const [ThemeToggle(), SizedBox(width: 8)],
       ),
       body: BlocBuilder<HistoryBloc, HistoryState>(
-        builder: (context, state) => state.status.when(
-          initial: () => const AppLoader(message: 'Loading history...'),
-          loading: () => const AppLoader(),
-          failure: (error) => Center(child: Text(error)),
-          success: (items) => items.isEmpty
+        builder: (context, state) => StatusView<List<HistoryItem>>(
+          status: state.status,
+          onInitial: () => const AppLoader(message: 'Loading history...'),
+          onSuccess: (items) => items.isEmpty
               ? const AppEmptyState(
                   icon: Icons.history,
                   title: 'No analysis history',

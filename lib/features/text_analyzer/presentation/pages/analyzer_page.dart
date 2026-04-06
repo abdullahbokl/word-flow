@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/app_button.dart';
-import '../../../../core/common/widgets/app_loader.dart';
+import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_text.dart';
+import '../../../../core/widgets/status_view.dart';
 import '../../../../core/widgets/theme_toggle.dart';
 import '../../../lexicon/presentation/bloc/lexicon_bloc.dart';
 import '../../../lexicon/presentation/bloc/lexicon_event.dart';
@@ -50,30 +52,31 @@ class _AnalyzerPageState extends State<AnalyzerPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const AppText.headline('Text Analyzer'),
+        title: const AppText.headline(AppStrings.textAnalyzer),
         actions: const [ThemeToggle(), SizedBox(width: 8)],
       ),
       body: BlocConsumer<AnalyzerBloc, AnalyzerState>(
         listener: (context, state) {
           if (state.status.isFailed) {
             ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: AppText(state.status.error ?? 'Error')),
+              SnackBar(content: AppText(state.status.error ?? AppStrings.error)),
             );
           }
         },
-        builder: (context, state) => state.status.when(
-          initial: () => _InputBody(
+        builder: (context, state) => StatusView<AnalysisResult>(
+          status: state.status,
+          onInitial: () => _InputBody(
             titleCtrl: _titleCtrl,
             contentCtrl: _contentCtrl,
             onAnalyze: _onAnalyze,
           ),
-          failure: (_) => _InputBody(
+          onFailure: (_) => _InputBody(
             titleCtrl: _titleCtrl,
             contentCtrl: _contentCtrl,
             onAnalyze: _onAnalyze,
           ),
-          loading: () => const AppLoader(message: 'Processing text...'),
-          success: (result) => AnalysisSummary(
+          onLoading: () => const AppLoader(message: 'Processing text...'),
+          onSuccess: (result) => AnalysisSummary(
             result: result,
             onReset: () {
               _titleCtrl.clear();

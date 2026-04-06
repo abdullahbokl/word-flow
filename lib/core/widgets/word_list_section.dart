@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../constants/app_strings.dart';
 import '../../../../core/common/models/word_with_local_freq.dart';
 import '../theme/app_colors.dart';
 
@@ -6,7 +7,7 @@ class WordListSection extends StatefulWidget {
   const WordListSection({
     super.key,
     required this.words,
-    this.title = 'Word Breakdown',
+    this.title = AppStrings.wordBreakdown,
     this.onToggleStatus,
   });
 
@@ -56,7 +57,7 @@ class _WordListSectionState extends State<WordListSection> {
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 24),
             child: Center(
-              child: Text('No words found for this filter.'),
+              child: Text(AppStrings.noWordsForFilter),
             ),
           )
         else
@@ -113,13 +114,13 @@ class _FilterToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return SegmentedButton<int>(
       segments: const [
-        ButtonSegment(value: 0, label: Text('All'), icon: Icon(Icons.list)),
+        ButtonSegment(value: 0, label: const Text(AppStrings.all), icon: const Icon(Icons.list)),
         ButtonSegment(
             value: 1,
-            label: Text('Known'),
-            icon: Icon(Icons.check_circle_outline)),
+            label: const Text(AppStrings.known),
+            icon: const Icon(Icons.check_circle_outline)),
         ButtonSegment(
-            value: 2, label: Text('Unknown'), icon: Icon(Icons.help_outline)),
+            value: 2, label: const Text(AppStrings.unknownLabel), icon: const Icon(Icons.help_outline)),
       ],
       selected: {selectedIndex},
       onSelectionChanged: (set) => onSelected(set.first),
@@ -169,7 +170,7 @@ class _StatusButton extends StatelessWidget {
             ),
             const SizedBox(width: 4),
             Text(
-              isKnown ? 'Known' : 'Unknown',
+              isKnown ? AppStrings.known : AppStrings.unknownLabel,
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,

@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../app/di/injection.dart';
 import '../../../../core/common/state/bloc_status.dart';
-import '../../../../core/common/widgets/app_loader.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/app_text.dart';
+import '../../../../core/widgets/status_view.dart';
 import '../../../../core/widgets/stat_card.dart';
 import '../../../../core/widgets/theme_toggle.dart';
 import '../../../../core/widgets/word_list_section.dart';
@@ -41,11 +42,12 @@ class _DetailView extends StatelessWidget {
         actions: const [ThemeToggle(), SizedBox(width: 8)],
       ),
       body: BlocBuilder<HistoryDetailBloc, HistoryDetailState>(
-        builder: (context, state) => state.status.when(
-          initial: () => const AppLoader(),
-          loading: () => const AppLoader(),
-          failure: (error) => Center(child: AppText.body(error)),
-          success: (detail) => CustomScrollView(
+        builder: (context, state) => StatusView<HistoryDetail>(
+          status: state.status,
+          onInitial: () => const AppLoader(),
+          onLoading: () => const AppLoader(),
+          onFailure: (error) => Center(child: AppText.body(error)),
+          onSuccess: (detail) => CustomScrollView(
             slivers: [
               SliverToBoxAdapter(
                 child: Padding(
@@ -126,7 +128,7 @@ class _StatsGrid extends StatelessWidget {
         StatCard(
           label: 'Known Words',
           value: '${detail.item.knownWords}',
-          color: Colors.green,
+          color: AppColors.success,
         ),
         StatCard(
           label: 'Unknown',

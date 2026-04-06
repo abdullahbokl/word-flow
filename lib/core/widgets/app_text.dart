@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+enum _TextStyle { headline, title, body, label, caption }
+
 class AppText extends StatelessWidget {
   const AppText(
     this.text, {
+    _TextStyle? textType,
     this.style,
     this.color,
     this.maxLines,
@@ -12,7 +15,8 @@ class AppText extends StatelessWidget {
     this.fontSize,
     this.fontStyle,
     super.key,
-  });
+  })  : _textType = textType ?? _TextStyle.body,
+        style = null;
 
   const AppText.headline(
     this.text, {
@@ -21,10 +25,11 @@ class AppText extends StatelessWidget {
     this.overflow,
     this.textAlign,
     this.fontWeight = FontWeight.bold,
-    this.fontSize = 24,
+    this.fontSize = 24.0,
     this.fontStyle,
     super.key,
-  }) : style = null;
+  })  : style = null,
+        _textType = _TextStyle.headline;
 
   const AppText.title(
     this.text, {
@@ -33,10 +38,11 @@ class AppText extends StatelessWidget {
     this.overflow,
     this.textAlign,
     this.fontWeight = FontWeight.w600,
-    this.fontSize = 18,
+    this.fontSize = 18.0,
     this.fontStyle,
     super.key,
-  }) : style = null;
+  })  : style = null,
+        _textType = _TextStyle.title;
 
   const AppText.body(
     this.text, {
@@ -45,10 +51,11 @@ class AppText extends StatelessWidget {
     this.overflow,
     this.textAlign,
     this.fontWeight = FontWeight.normal,
-    this.fontSize = 14,
+    this.fontSize = 14.0,
     this.fontStyle,
     super.key,
-  }) : style = null;
+  })  : style = null,
+        _textType = _TextStyle.body;
 
   const AppText.label(
     this.text, {
@@ -57,10 +64,11 @@ class AppText extends StatelessWidget {
     this.overflow,
     this.textAlign,
     this.fontWeight = FontWeight.w500,
-    this.fontSize = 13,
+    this.fontSize = 13.0,
     this.fontStyle,
     super.key,
-  }) : style = null;
+  })  : style = null,
+        _textType = _TextStyle.label;
 
   const AppText.caption(
     this.text, {
@@ -69,10 +77,11 @@ class AppText extends StatelessWidget {
     this.overflow,
     this.textAlign,
     this.fontWeight = FontWeight.normal,
-    this.fontSize = 11,
+    this.fontSize = 11.0,
     this.fontStyle,
     super.key,
-  }) : style = null;
+  })  : style = null,
+        _textType = _TextStyle.caption;
 
   final String text;
   final TextStyle? style;
@@ -83,25 +92,20 @@ class AppText extends StatelessWidget {
   final FontWeight? fontWeight;
   final double? fontSize;
   final FontStyle? fontStyle;
+  final _TextStyle _textType;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    TextStyle? baseStyle = style;
-    if (baseStyle == null) {
-      if (fontSize == 24) {
-        baseStyle = theme.textTheme.headlineMedium;
-      } else if (fontSize == 18) {
-        baseStyle = theme.textTheme.titleLarge;
-      } else if (fontSize == 11) {
-        baseStyle = theme.textTheme.bodySmall;
-      } else if (fontSize == 13) {
-        baseStyle = theme.textTheme.labelMedium;
-      } else {
-        baseStyle = theme.textTheme.bodyMedium;
-      }
-    }
+    final baseStyle = style ??
+        switch (_textType) {
+          _TextStyle.headline => theme.textTheme.headlineMedium,
+          _TextStyle.title => theme.textTheme.titleLarge,
+          _TextStyle.body => theme.textTheme.bodyMedium,
+          _TextStyle.label => theme.textTheme.labelMedium,
+          _TextStyle.caption => theme.textTheme.bodySmall,
+        };
 
     return Text(
       text,

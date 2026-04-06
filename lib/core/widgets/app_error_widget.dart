@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../constants/app_strings.dart';
+
 class AppErrorWidget extends StatelessWidget {
   const AppErrorWidget({
     required this.error,
@@ -19,7 +21,7 @@ class AppErrorWidget extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.error_outline, size: 48, color: Colors.red),
+            const Icon(Icons.error_outline, size: 48, color: Color(0xFFC62828)),
             const SizedBox(height: 16),
             Text(
               error,
@@ -31,7 +33,7 @@ class AppErrorWidget extends StatelessWidget {
               TextButton.icon(
                 onPressed: onRetry,
                 icon: const Icon(Icons.refresh),
-                label: const Text('Retry'),
+                label: const Text(AppStrings.retry),
               ),
             ],
           ],

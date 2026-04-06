@@ -6,8 +6,8 @@ import '../../domain/entities/word_entity.dart';
 import '../../domain/entities/word_filter.dart';
 import '../../domain/entities/word_sort.dart';
 import '../../domain/repositories/lexicon_repository.dart';
+import '../../../../../core/common/mappers/word_row_mapper.dart';
 import '../datasources/lexicon_local_ds.dart';
-import '../mappers/word_mapper.dart';
 
 class LexiconRepositoryImpl implements LexiconRepository {
   const LexiconRepositoryImpl(this._local);

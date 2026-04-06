@@ -7,12 +7,14 @@ abstract final class AppColors {
   static const primaryDark = Color(0xFF0D47A1);
   static const secondary = Color(0xFF00BFA5);
 
-  // Semantic
+// Semantic
   static const known = Color(0xFF2E7D32);
   static const knownSurface = Color(0xFFE8F5E9);
   static const unknown = Color(0xFFE65100);
   static const unknownSurface = Color(0xFFFFF3E0);
   static const error = Color(0xFFC62828);
+  static const success = Color(0xFF4CAF50);
+  static const warning = Color(0xFFFF9800);
 
   // Light palette
   static const lightBg = Color(0xFFF8F9FC);

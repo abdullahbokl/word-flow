@@ -1,10 +1,11 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/usecase/usecase.dart';
 import '../entities/word_entity.dart';
 import '../repositories/lexicon_repository.dart';
 
-class AddWordManually {
+class AddWordManually extends AsyncUseCase<WordEntity, String> {
   const AddWordManually(this._repository);
 
   final LexiconRepository _repository;

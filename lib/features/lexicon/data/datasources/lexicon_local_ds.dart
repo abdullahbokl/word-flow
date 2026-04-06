@@ -41,20 +41,38 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
     String query = '',
   }) {
     final q = _db.select(_db.words);
+    _applyFilterAndSort(q, filter, query);
+    _applySorting(q, sort);
+    return q.get();
+  }
 
+  @override
+  Stream<List<WordRow>> watchWords({
+    WordFilter filter = WordFilter.all,
+    WordSort sort = WordSort.frequencyDesc,
+    String query = '',
+  }) {
+    final q = _db.select(_db.words);
+    _applyFilterAndSort(q, filter, query);
+    _applySorting(q, sort);
+    return q.watch();
+  }
+
+  void _applyFilterAndSort(
+    Selectable<WordRow> q,
+    WordFilter filter,
+    String query,
+  ) {
+    // Filter by known/unknown status
     if (filter == WordFilter.known) {
       q.where((w) => w.isKnown.equals(true));
     } else if (filter == WordFilter.unknown) {
       q.where((w) => w.isKnown.equals(false));
     }
-
+    // Filter by search query
     if (query.isNotEmpty) {
       q.where((w) => w.word.like('%$query%'));
     }
-
-    _applySorting(q, sort);
-
-    return q.get();
   }
 
   void _applySorting(Selectable<WordRow> q, WordSort sort) {
@@ -82,29 +100,6 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
           (w) => OrderingTerm.asc(w.word),
         ]);
     }
-  }
-
-  @override
-  Stream<List<WordRow>> watchWords({
-    WordFilter filter = WordFilter.all,
-    WordSort sort = WordSort.frequencyDesc,
-    String query = '',
-  }) {
-    final q = _db.select(_db.words);
-
-    if (filter == WordFilter.known) {
-      q.where((w) => w.isKnown.equals(true));
-    } else if (filter == WordFilter.unknown) {
-      q.where((w) => w.isKnown.equals(false));
-    }
-
-    if (query.isNotEmpty) {
-      q.where((w) => w.word.like('%$query%'));
-    }
-
-    _applySorting(q, sort);
-
-    return q.watch();
   }
 
   @override

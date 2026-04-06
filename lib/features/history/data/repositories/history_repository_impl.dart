@@ -2,13 +2,13 @@ import 'package:drift/drift.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:rxdart/rxdart.dart';
 
+import '../../../../core/common/mappers/word_row_mapper.dart';
+import '../../../../core/common/models/word_with_local_freq.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/error/failures.dart';
-import '../../../../core/common/models/word_with_local_freq.dart';
 import '../../domain/entities/history_detail.dart';
 import '../../domain/entities/history_item.dart';
 import '../../domain/repositories/history_repository.dart';
-import '../../../lexicon/data/mappers/word_mapper.dart';
 import '../datasources/history_local_ds.dart';
 import '../mappers/history_mapper.dart';
 
