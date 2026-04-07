@@ -1,25 +1,23 @@
 import 'package:fpdart/fpdart.dart';
 
-import '../error/failures.dart';
-
 // ---------------------------------------------------------------------------
 // UseCase base types — categorization markers, each use case defines its own
 // [call] signature.
 // ---------------------------------------------------------------------------
 
 /// Async use-case returning [TaskEither]. Preferred pattern.
-abstract class AsyncUseCase<Type, Params> {
+abstract class AsyncUseCase<TReturn, Params> {
   const AsyncUseCase();
 }
 
 /// Stream-based use-case returning a live stream of [Either] results.
-abstract class StreamUseCase<Type, Params> {
+abstract class StreamUseCase<TReturn, Params> {
   const StreamUseCase();
 }
 
 /// Future-based use-case returning [Either]. Used when the repository already
 /// returns [Future<Either>] and no TaskEither composition is needed.
-abstract class FutureUseCase<Type, Params> {
+abstract class FutureUseCase<TReturn, Params> {
   const FutureUseCase();
 }
 

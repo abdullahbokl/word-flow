@@ -1,3 +1,4 @@
+import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_strings.dart';

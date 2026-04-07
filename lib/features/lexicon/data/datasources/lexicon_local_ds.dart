@@ -40,9 +40,7 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
     WordSort sort = WordSort.frequencyDesc,
     String query = '',
   }) {
-    final q = _db.select(_db.words);
-    _applyFilterAndSort(q, filter, query);
-    _applySorting(q, sort);
+    final q = _buildQuery(filter: filter, query: query, sort: sort);
     return q.get();
   }
 
@@ -52,52 +50,48 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
     WordSort sort = WordSort.frequencyDesc,
     String query = '',
   }) {
-    final q = _db.select(_db.words);
-    _applyFilterAndSort(q, filter, query);
-    _applySorting(q, sort);
+    final q = _buildQuery(filter: filter, query: query, sort: sort);
     return q.watch();
   }
 
-  void _applyFilterAndSort(
-    Selectable<WordRow> q,
-    WordFilter filter,
-    String query,
-  ) {
-    // Filter by known/unknown status
+  Selectable<WordRow> _buildQuery({
+    required WordFilter filter,
+    required String query,
+    required WordSort sort,
+  }) {
+    final q = _db.select(_db.words);
     if (filter == WordFilter.known) {
-      q.where((w) => w.isKnown.equals(true));
+      q.where((t) => t.isKnown.equals(true));
     } else if (filter == WordFilter.unknown) {
-      q.where((w) => w.isKnown.equals(false));
+      q.where((t) => t.isKnown.equals(false));
     }
-    // Filter by search query
     if (query.isNotEmpty) {
-      q.where((w) => w.word.like('%$query%'));
+      q.where((t) => t.word.like('%$query%'));
     }
+    _applySorting(q, sort);
+    return q;
   }
 
-  void _applySorting(Selectable<WordRow> q, WordSort sort) {
-    if (q is! SimpleSelectStatement) return;
-    final statement = q as SimpleSelectStatement<dynamic, WordRow>;
-
+  void _applySorting(SimpleSelectStatement<dynamic, WordRow> q, WordSort sort) {
     switch (sort) {
       case WordSort.frequencyDesc:
-        statement.orderBy([
-          (w) => OrderingTerm.desc(w.frequency),
-          (w) => OrderingTerm.asc(w.word),
+        q.orderBy([
+          (t) => OrderingTerm.desc(t.frequency),
+          (t) => OrderingTerm.asc(t.word),
         ]);
       case WordSort.frequencyAsc:
-        statement.orderBy([
-          (w) => OrderingTerm.asc(w.frequency),
-          (w) => OrderingTerm.asc(w.word),
+        q.orderBy([
+          (t) => OrderingTerm.asc(t.frequency),
+          (t) => OrderingTerm.asc(t.word),
         ]);
       case WordSort.recent:
-        statement.orderBy([
-          (w) => OrderingTerm.desc(w.updatedAt),
-          (w) => OrderingTerm.asc(w.word),
+        q.orderBy([
+          (t) => OrderingTerm.desc(t.updatedAt),
+          (t) => OrderingTerm.asc(t.word),
         ]);
       case WordSort.alphabetical:
-        statement.orderBy([
-          (w) => OrderingTerm.asc(w.word),
+        q.orderBy([
+          (t) => OrderingTerm.asc(t.word),
         ]);
     }
   }

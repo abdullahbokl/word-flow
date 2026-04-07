@@ -13,10 +13,10 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
-  AppDatabase.forTesting(QueryExecutor e) : super(e);
+  AppDatabase.forTesting({required QueryExecutor e}) : super(e);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -33,9 +33,23 @@ class AppDatabase extends _$AppDatabase {
           // Drift automatically handles foreign keys in createAll()
           // For a live app with data, we might need a more complex migration to add FKs to existing tables
         }
+        if (from < 4) {
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_words_is_known_frequency ON words (is_known, frequency)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_words_updated_at ON words (updated_at)',
+          );
+        }
       },
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON');
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_words_is_known_frequency ON words (is_known, frequency)',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_words_updated_at ON words (updated_at)',
+        );
       },
     );
   }

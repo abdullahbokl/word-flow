@@ -3,13 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
-import '../../lib/core/error/failures.dart';
-import '../../lib/features/text_analyzer/domain/entities/analysis_result.dart';
-import '../../lib/features/text_analyzer/domain/repositories/analyzer_repository.dart';
-import '../../lib/features/text_analyzer/domain/usecases/analyze_text.dart';
-import '../../lib/features/text_analyzer/presentation/bloc/analyzer_bloc.dart';
-import '../../lib/features/text_analyzer/presentation/bloc/analyzer_event.dart';
-import '../../lib/features/text_analyzer/presentation/bloc/analyzer_state.dart';
+import 'package:lexitrack/core/error/failures.dart';
+import 'package:lexitrack/core/common/state/bloc_status.dart';
+import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
+import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
+import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/bloc/analyzer_bloc.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/bloc/analyzer_event.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/bloc/analyzer_state.dart';
 
 class MockAnalyzerRepository extends Mock implements AnalyzerRepository {}
 
@@ -22,8 +23,21 @@ AnalysisResult _makeResult({int id = 1}) {
     knownWords: 3,
     unknownWords: 2,
     newWordsCount: 0,
-    words: [],
+    words: const [],
   );
+}
+
+class _AnalysisResult extends AnalysisResult {
+  const _AnalysisResult({required super.id})
+      : super(
+          title: 'Test',
+          totalWords: 10,
+          uniqueWords: 5,
+          knownWords: 3,
+          unknownWords: 2,
+          newWordsCount: 0,
+          words: const [],
+        );
 }
 
 void main() {
@@ -90,18 +104,4 @@ void main() {
       ],
     );
   });
-}
-
-class _AnalysisResult extends AnalysisResult {
-  const _AnalysisResult({required int id})
-      : super(
-          id: id,
-          title: 'Test',
-          totalWords: 10,
-          uniqueWords: 5,
-          knownWords: 3,
-          unknownWords: 2,
-          newWordsCount: 0,
-          words: [],
-        );
 }

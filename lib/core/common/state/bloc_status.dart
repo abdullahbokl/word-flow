@@ -3,10 +3,6 @@ import 'package:equatable/equatable.dart';
 import '../enums/state_status.dart';
 
 class BlocStatus<T> extends Equatable {
-  final StateStatus status;
-  final String? error;
-  final T? data;
-
   const BlocStatus._(this.status, {this.error, this.data});
 
   const BlocStatus.initial({T? data}) : this._(StateStatus.initial, data: data);
@@ -20,6 +16,10 @@ class BlocStatus<T> extends Equatable {
 
   const BlocStatus.failure({required String error, T? data})
       : this._(StateStatus.failure, error: error, data: data);
+
+  final StateStatus status;
+  final String? error;
+  final T? data;
 
   bool get isInitial => status == StateStatus.initial;
   bool get isLoading => status == StateStatus.loading;

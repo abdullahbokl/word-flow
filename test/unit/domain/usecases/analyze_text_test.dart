@@ -1,11 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
-
-import '../../../lib/core/error/failures.dart';
-import '../../../lib/features/text_analyzer/domain/entities/analysis_result.dart';
-import '../../../lib/features/text_analyzer/domain/repositories/analyzer_repository.dart';
-import '../../../lib/features/text_analyzer/domain/usecases/analyze_text.dart';
+import 'package:lexitrack/core/error/failures.dart';
+import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
+import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
+import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
 
 class MockAnalyzerRepository extends Mock implements AnalyzerRepository {}
 
@@ -19,43 +18,73 @@ void main() {
   });
 
   group('AnalyzeText', () {
-    test('returns validation failure when title is empty', () {
-      final result = usecase.call(title: '', content: 'some text');
+    test('returns validation failure when title is empty', () async {
+      final result = await usecase(title: '', content: 'some text').run();
 
       expect(result.isLeft(), true);
-      final failure = (result as Left).value;
-      expect(failure, isA<ValidationFailure>());
+      result.fold(
+        (l) => expect(l, isA<ValidationFailure>()),
+        (r) => fail('Expected left'),
+      );
     });
 
-    test('returns validation failure when content is empty', () {
-      final result = usecase.call(title: 'Test', content: '');
+    test('returns validation failure when content is empty', () async {
+      final result = await usecase(title: 'Test', content: '').run();
 
       expect(result.isLeft(), true);
-      final failure = (result as Left).value;
-      expect(failure, isA<ValidationFailure>());
+      result.fold(
+        (l) => expect(l, isA<ValidationFailure>()),
+        (r) => fail('Expected left'),
+      );
     });
 
-    test('returns valid content', () {
+    test('returns valid content when input is valid', () async {
       when(() => repository.analyze(
             title: any(named: 'title'),
             content: any(named: 'content'),
           )).thenAnswer(
         (_) => TaskEither.right(
           AnalysisResult(
+            id: 1,
             title: 'Test',
             totalWords: 10,
             uniqueWords: 5,
             knownWords: 3,
             unknownWords: 2,
-            comprehension: 80.0,
-            words: [],
+            newWordsCount: 2,
+            words: const [],
           ),
         ),
       );
 
-      final result = usecase.call(title: 'Test', content: 'Hello world');
+      final result = await usecase(title: 'Test', content: 'Hello world').run();
 
       expect(result.isRight(), true);
+    });
+
+    test('calls repository.analyze with correct parameters', () async {
+      when(() => repository.analyze(
+            title: any(named: 'title'),
+            content: any(named: 'content'),
+          )).thenAnswer(
+        (_) => TaskEither.right(
+          AnalysisResult(
+            id: 1,
+            title: 'Test',
+            totalWords: 10,
+            uniqueWords: 5,
+            knownWords: 3,
+            unknownWords: 2,
+            newWordsCount: 2,
+            words: const [],
+          ),
+        ),
+      );
+
+      await usecase(title: 'My Title', content: 'Hello world').run();
+
+      verify(() => repository.analyze(title: 'My Title', content: 'Hello world'))
+          .called(1);
     });
   });
 }

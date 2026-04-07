@@ -9,10 +9,11 @@ void main() {
   group('StatusView', () {
     testWidgets('shows loading widget by default', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: StatusView<String>(
               status: BlocStatus<String>.loading(),
+              animate: false,
             ),
           ),
         ),
@@ -29,6 +30,7 @@ void main() {
             body: StatusView<String>(
               status: const BlocStatus<String>.success(data: 'Hello'),
               onSuccess: (data) => Text(data),
+              animate: false,
             ),
           ),
         ),
@@ -40,10 +42,11 @@ void main() {
     testWidgets('shows error widget by default when status is failure',
         (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: StatusView<String>(
               status: BlocStatus<String>.failure(error: 'Oops'),
+              animate: false,
             ),
           ),
         ),
@@ -54,11 +57,12 @@ void main() {
 
     testWidgets('shows custom empty callback', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: StatusView<String>(
               status: BlocStatus<String>.empty(),
-              onEmpty: Text('No data'),
+              onEmpty: () => Text('No data'),
+              animate: false,
             ),
           ),
         ),
@@ -69,11 +73,12 @@ void main() {
 
     testWidgets('shows initial callback when provided', (tester) async {
       await tester.pumpWidget(
-        const MaterialApp(
+        MaterialApp(
           home: Scaffold(
             body: StatusView<String>(
               status: BlocStatus<String>.initial(),
-              onInitial: Text('Initializing...'),
+              onInitial: () => Text('Initializing...'),
+              animate: false,
             ),
           ),
         ),
