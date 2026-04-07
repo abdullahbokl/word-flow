@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-enum _TextStyle { headline, title, body, label, caption }
+enum AppTextType { headline, title, body, label, caption }
 
 class AppText extends StatelessWidget {
   const AppText(
     this.text, {
-    _TextStyle? textType,
+    AppTextType? textType,
     this.style,
     this.color,
     this.maxLines,
@@ -15,8 +15,7 @@ class AppText extends StatelessWidget {
     this.fontSize,
     this.fontStyle,
     super.key,
-  })  : _textType = textType ?? _TextStyle.body,
-        style = null;
+  }) : _textType = textType ?? AppTextType.body;
 
   const AppText.headline(
     this.text, {
@@ -29,7 +28,7 @@ class AppText extends StatelessWidget {
     this.fontStyle,
     super.key,
   })  : style = null,
-        _textType = _TextStyle.headline;
+        _textType = AppTextType.headline;
 
   const AppText.title(
     this.text, {
@@ -42,7 +41,7 @@ class AppText extends StatelessWidget {
     this.fontStyle,
     super.key,
   })  : style = null,
-        _textType = _TextStyle.title;
+        _textType = AppTextType.title;
 
   const AppText.body(
     this.text, {
@@ -55,7 +54,7 @@ class AppText extends StatelessWidget {
     this.fontStyle,
     super.key,
   })  : style = null,
-        _textType = _TextStyle.body;
+        _textType = AppTextType.body;
 
   const AppText.label(
     this.text, {
@@ -68,7 +67,7 @@ class AppText extends StatelessWidget {
     this.fontStyle,
     super.key,
   })  : style = null,
-        _textType = _TextStyle.label;
+        _textType = AppTextType.label;
 
   const AppText.caption(
     this.text, {
@@ -81,7 +80,7 @@ class AppText extends StatelessWidget {
     this.fontStyle,
     super.key,
   })  : style = null,
-        _textType = _TextStyle.caption;
+        _textType = AppTextType.caption;
 
   final String text;
   final TextStyle? style;
@@ -92,7 +91,7 @@ class AppText extends StatelessWidget {
   final FontWeight? fontWeight;
   final double? fontSize;
   final FontStyle? fontStyle;
-  final _TextStyle _textType;
+  final AppTextType _textType;
 
   @override
   Widget build(BuildContext context) {
@@ -100,11 +99,11 @@ class AppText extends StatelessWidget {
 
     final baseStyle = style ??
         switch (_textType) {
-          _TextStyle.headline => theme.textTheme.headlineMedium,
-          _TextStyle.title => theme.textTheme.titleLarge,
-          _TextStyle.body => theme.textTheme.bodyMedium,
-          _TextStyle.label => theme.textTheme.labelMedium,
-          _TextStyle.caption => theme.textTheme.bodySmall,
+          AppTextType.headline => theme.textTheme.headlineMedium,
+          AppTextType.title => theme.textTheme.titleLarge,
+          AppTextType.body => theme.textTheme.bodyMedium,
+          AppTextType.label => theme.textTheme.labelMedium,
+          AppTextType.caption => theme.textTheme.bodySmall,
         };
 
     return Text(

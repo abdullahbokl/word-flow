@@ -8,12 +8,13 @@ import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_text.dart';
 import '../../../../core/widgets/status_view.dart';
-import '../../../../core/widgets/theme_toggle.dart';
+import '../../../../core/widgets/page_header.dart';
 import '../../../lexicon/presentation/bloc/lexicon_bloc.dart';
 import '../../../lexicon/presentation/bloc/lexicon_event.dart';
 import '../bloc/analyzer_bloc.dart';
 import '../bloc/analyzer_event.dart';
 import '../bloc/analyzer_state.dart';
+import '../../domain/entities/analysis_result.dart';
 import '../widgets/analysis_summary.dart';
 
 class AnalyzerPage extends StatefulWidget {
@@ -23,9 +24,12 @@ class AnalyzerPage extends StatefulWidget {
   State<AnalyzerPage> createState() => _AnalyzerPageState();
 }
 
-class _AnalyzerPageState extends State<AnalyzerPage> {
+class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClientMixin {
   final _titleCtrl = TextEditingController();
   final _contentCtrl = TextEditingController();
+
+  @override
+  bool get wantKeepAlive => true;
 
   @override
   void dispose() {
@@ -50,46 +54,45 @@ class _AnalyzerPageState extends State<AnalyzerPage> {
 
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const AppText.headline(AppStrings.textAnalyzer),
-        actions: const [ThemeToggle(), SizedBox(width: 8)],
-      ),
-      body: BlocConsumer<AnalyzerBloc, AnalyzerState>(
-        listener: (context, state) {
-          if (state.status.isFailed) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: AppText(state.status.error ?? AppStrings.error)),
-            );
-          }
-        },
-        builder: (context, state) => StatusView<AnalysisResult>(
-          status: state.status,
-          onInitial: () => _InputBody(
-            titleCtrl: _titleCtrl,
-            contentCtrl: _contentCtrl,
-            onAnalyze: _onAnalyze,
-          ),
-          onFailure: (_) => _InputBody(
-            titleCtrl: _titleCtrl,
-            contentCtrl: _contentCtrl,
-            onAnalyze: _onAnalyze,
-          ),
-          onLoading: () => const AppLoader(message: 'Processing text...'),
-          onSuccess: (result) => AnalysisSummary(
-            result: result,
-            onReset: () {
-              _titleCtrl.clear();
-              _contentCtrl.clear();
-              context.read<AnalyzerBloc>().add(const ResetAnalysis());
-            },
-            onToggleStatus: (w) {
-              final lexiconBloc = context.read<LexiconBloc>();
-              final analyzerBloc = context.read<AnalyzerBloc>();
-
-              lexiconBloc.add(ToggleWordStatusEvent(w.word.id));
-              analyzerBloc.add(ToggleWordStatusInResult(wordId: w.word.id));
-            },
+      body: SafeArea(
+        child: BlocConsumer<AnalyzerBloc, AnalyzerState>(
+          listener: (context, state) {
+            if (state.status.isFailed) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: AppText(state.status.error ?? AppStrings.error)),
+              );
+            }
+          },
+          builder: (context, state) => StatusView<AnalysisResult>(
+            status: state.status,
+            onInitial: () => _InputBody(
+              titleCtrl: _titleCtrl,
+              contentCtrl: _contentCtrl,
+              onAnalyze: _onAnalyze,
+            ),
+            onFailure: (_) => _InputBody(
+              titleCtrl: _titleCtrl,
+              contentCtrl: _contentCtrl,
+              onAnalyze: _onAnalyze,
+            ),
+            onLoading: () => const AppLoader(message: 'Processing text...'),
+            onSuccess: (result) => AnalysisSummary(
+              result: result,
+              onReset: () {
+                _titleCtrl.clear();
+                _contentCtrl.clear();
+                context.read<AnalyzerBloc>().add(const ResetAnalysis());
+              },
+              onToggleStatus: (w) {
+                final lexiconBloc = context.read<LexiconBloc>();
+                final analyzerBloc = context.read<AnalyzerBloc>();
+  
+                lexiconBloc.add(ToggleWordStatusEvent(w.word.id));
+                analyzerBloc.add(ToggleWordStatusInResult(wordId: w.word.id));
+              },
+            ),
           ),
         ),
       ),
@@ -111,12 +114,17 @@ class _InputBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const AppText.headline('New Analysis'),
-          const SizedBox(height: 16),
+          const PageHeader(title: AppStrings.textAnalyzer),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const AppText.title('New Analysis'),
+                const SizedBox(height: 16),
           AppTextField(
             controller: titleCtrl,
             label: 'Title (Optional)',
@@ -130,10 +138,13 @@ class _InputBody extends StatelessWidget {
             maxLines: 15,
           ),
           const SizedBox(height: 24),
-          AppButton(
-            label: 'Analyze Text',
-            onPressed: onAnalyze,
-            icon: Icons.analytics_outlined,
+                AppButton(
+                  label: 'Analyze Text',
+                  onPressed: onAnalyze,
+                  icon: Icons.analytics_outlined,
+                ),
+              ],
+            ),
           ),
         ],
       ),

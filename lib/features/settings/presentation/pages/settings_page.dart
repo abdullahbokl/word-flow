@@ -1,0 +1,144 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../../../../core/theme/theme_cubit.dart';
+import '../../../../core/widgets/page_header.dart';
+import '../../../../core/widgets/app_text.dart';
+
+class SettingsPage extends StatelessWidget {
+  const SettingsPage({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const PageHeader(title: 'Settings'),
+              const SizedBox(height: 32),
+              
+              _Section(
+                title: 'Appearance',
+                children: [
+                  _ThemeSelector(),
+                ],
+              ),
+              
+              const SizedBox(height: 32),
+              _Section(
+                title: 'About',
+                children: [
+                  ListTile(
+                    leading: const Icon(Icons.info_outline),
+                    title: const AppText.body('Version'),
+                    trailing: const AppText.body('1.0.0', color: Colors.grey),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _Section extends StatelessWidget {
+  const _Section({required this.title, required this.children});
+
+  final String title;
+  final List<Widget> children;
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        AppText.label(
+          title.toUpperCase(),
+          color: Theme.of(context).colorScheme.primary,
+          fontWeight: FontWeight.bold,
+        ),
+        const SizedBox(height: 8),
+        Card(
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+            side: BorderSide(
+              color: Theme.of(context).dividerColor.withAlpha(50),
+            ),
+          ),
+          child: Column(
+            children: children,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _ThemeSelector extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<ThemeCubit, ThemeMode>(
+      builder: (context, mode) {
+        return Column(
+          children: [
+            _ThemeOption(
+              title: 'System Default',
+              isSelected: mode == ThemeMode.system,
+              icon: Icons.brightness_auto,
+              onTap: () => context.read<ThemeCubit>().setSystem(),
+            ),
+            const Divider(height: 1),
+            _ThemeOption(
+              title: 'Light Mode',
+              isSelected: mode == ThemeMode.light,
+              icon: Icons.light_mode,
+              onTap: () => context.read<ThemeCubit>().setLight(),
+            ),
+            const Divider(height: 1),
+            _ThemeOption(
+              title: 'Dark Mode',
+              isSelected: mode == ThemeMode.dark,
+              icon: Icons.dark_mode,
+              onTap: () => context.read<ThemeCubit>().setDark(),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+class _ThemeOption extends StatelessWidget {
+  const _ThemeOption({
+    required this.title,
+    required this.isSelected,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final String title;
+  final bool isSelected;
+  final IconData icon;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return ListTile(
+      leading: Icon(icon, color: isSelected ? theme.colorScheme.primary : null),
+      title: AppText.body(
+        title,
+        fontWeight: isSelected ? FontWeight.bold : null,
+      ),
+      trailing: isSelected 
+          ? Icon(Icons.check_circle, color: theme.colorScheme.primary) 
+          : null,
+      onTap: onTap,
+    );
+  }
+}

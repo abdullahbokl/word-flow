@@ -4,6 +4,8 @@ import '../features/text_analyzer/presentation/pages/analyzer_page.dart';
 import '../features/lexicon/presentation/pages/lexicon_page.dart';
 import '../features/history/presentation/pages/history_page.dart';
 
+import '../features/settings/presentation/pages/settings_page.dart';
+
 class AppShell extends StatefulWidget {
   const AppShell({super.key});
 
@@ -13,14 +15,38 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _currentIndex = 0;
+  late final PageController _pageController;
 
   final List<Widget> _pages = const [
     AnalyzerPage(),
     LexiconPage(),
     HistoryPage(),
+    SettingsPage(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: _currentIndex);
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
   void _onTapped(int index) {
+    if (index == _currentIndex) return;
+    _pageController.animateToPage(
+      index,
+      duration: const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  void _onPageChanged(int index) {
+    if (index == _currentIndex) return;
     setState(() {
       _currentIndex = index;
     });
@@ -34,9 +60,7 @@ class _AppShellState extends State<AppShell> {
         if (didPop) return;
 
         if (_currentIndex != 0) {
-          setState(() {
-            _currentIndex = 0;
-          });
+          _onTapped(0);
           return;
         }
 
@@ -48,28 +72,30 @@ class _AppShellState extends State<AppShell> {
         }
       },
       child: Scaffold(
-        body: IndexedStack(
-          index: _currentIndex,
+        body: PageView(
+          controller: _pageController,
+          onPageChanged: _onPageChanged,
           children: _pages,
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          currentIndex: _currentIndex,
-          onTap: _onTapped,
-          items: const [
-            BottomNavigationBarItem(
+        bottomNavigationBar: NavigationBar(
+          selectedIndex: _currentIndex,
+          onDestinationSelected: _onTapped,
+          destinations: const [
+            NavigationDestination(
               icon: Icon(Icons.analytics_outlined),
-              activeIcon: Icon(Icons.analytics),
               label: 'Analyzer',
             ),
-            BottomNavigationBarItem(
+            NavigationDestination(
               icon: Icon(Icons.menu_book_outlined),
-              activeIcon: Icon(Icons.menu_book),
               label: 'Lexicon',
             ),
-            BottomNavigationBarItem(
+            NavigationDestination(
               icon: Icon(Icons.history_outlined),
-              activeIcon: Icon(Icons.history),
               label: 'History',
+            ),
+            NavigationDestination(
+              icon: Icon(Icons.settings_outlined),
+              label: 'Settings',
             ),
           ],
         ),

@@ -114,13 +114,13 @@ class _FilterToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return SegmentedButton<int>(
       segments: const [
-        ButtonSegment(value: 0, label: const Text(AppStrings.all), icon: const Icon(Icons.list)),
+        ButtonSegment(value: 0, label: Text(AppStrings.all), icon: Icon(Icons.list)),
         ButtonSegment(
             value: 1,
-            label: const Text(AppStrings.known),
-            icon: const Icon(Icons.check_circle_outline)),
+            label: Text(AppStrings.known),
+            icon: Icon(Icons.check_circle_outline)),
         ButtonSegment(
-            value: 2, label: const Text(AppStrings.unknownLabel), icon: const Icon(Icons.help_outline)),
+            value: 2, label: Text(AppStrings.unknownLabel), icon: Icon(Icons.help_outline)),
       ],
       selected: {selectedIndex},
       onSelectionChanged: (set) => onSelected(set.first),

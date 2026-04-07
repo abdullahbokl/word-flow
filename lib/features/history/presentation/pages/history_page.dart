@@ -4,47 +4,51 @@ import '../../../../core/navigation/app_navigator.dart';
 
 import '../../../../core/widgets/app_empty_state.dart';
 import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/status_view.dart';
+import '../../../../core/widgets/sliver_status_view.dart';
+import '../../../../core/widgets/page_header.dart';
 import '../bloc/history_bloc.dart';
 import '../bloc/history_event.dart';
 import '../bloc/history_state.dart';
 import '../widgets/history_card.dart';
-import '../../../../core/widgets/theme_toggle.dart';
 import '../../domain/entities/history_item.dart';
 
-class HistoryPage extends StatelessWidget {
+class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});
 
   @override
+  State<HistoryPage> createState() => _HistoryPageState();
+}
+
+class _HistoryPageState extends State<HistoryPage> with AutomaticKeepAliveClientMixin {
+  @override
+  bool get wantKeepAlive => true;
+
+  @override
   Widget build(BuildContext context) {
+    super.build(context);
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('History'),
-        actions: const [ThemeToggle(), SizedBox(width: 8)],
-      ),
-      body: BlocBuilder<HistoryBloc, HistoryState>(
-        builder: (context, state) => StatusView<List<HistoryItem>>(
-          status: state.status,
-          onInitial: () => const AppLoader(message: 'Loading history...'),
-          onSuccess: (items) => items.isEmpty
-              ? const AppEmptyState(
-                  icon: Icons.history,
-                  title: 'No analysis history',
-                  subtitle: 'Analyzed texts will appear here.',
-                )
-              : ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: items.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (ctx, i) {
-                    final item = items[i];
-                    return HistoryCard(
-                      item: item,
-                      onTap: () => AppNavigator.toHistoryDetail(item.id),
-                      onDelete: () => _showDeleteDialog(ctx, item.id),
-                    );
-                  },
+      body: SafeArea(
+        child: BlocBuilder<HistoryBloc, HistoryState>(
+          builder: (context, state) {
+            return CustomScrollView(
+              key: const PageStorageKey<String>('history_scroll_view'),
+              slivers: [
+                const SliverToBoxAdapter(
+                  child: PageHeader(title: 'Analysis History'),
                 ),
+                SliverStatusView<List<HistoryItem>>(
+                  status: state.status,
+                  onInitial: () => const SliverFillRemaining(
+                    child: AppLoader(message: 'Loading history...'),
+                  ),
+                  onSuccess: (items) => _HistorySliverList(
+                    items: items,
+                    onDelete: (id) => _showDeleteDialog(context, id),
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -94,6 +98,59 @@ class HistoryPage extends StatelessWidget {
             child: const Text('Delete Everything'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _HistorySliverList extends StatelessWidget {
+  const _HistorySliverList({
+    required this.items,
+    required this.onDelete,
+  });
+
+  final List<HistoryItem> items;
+  final Function(int) onDelete;
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return const SliverFillRemaining(
+        hasScrollBody: false,
+        child: AppEmptyState(
+          icon: Icons.history,
+          title: 'No analysis history',
+          subtitle: 'Analyzed texts will appear here.',
+        ),
+      );
+    }
+
+    return SliverPadding(
+      padding: const EdgeInsets.all(16),
+      sliver: SliverPrototypeExtentList(
+        prototypeItem: HistoryCard(
+          item: HistoryItem(
+            id: -1,
+            title: 'Prototype',
+            totalWords: 0,
+            uniqueWords: 0,
+            createdAt: DateTime.now(),
+            contentSnippet: 'Snippet',
+          ),
+          onTap: () {},
+          onDelete: () {},
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (ctx, i) {
+            final item = items[i];
+            return HistoryCard(
+              item: item,
+              onTap: () => AppNavigator.toHistoryDetail(item.id),
+              onDelete: () => onDelete(item.id),
+            );
+          },
+          childCount: items.length,
+        ),
       ),
     );
   }
