@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'app_text.dart';
+import '../constants/app_dimensions.dart';
 
 class PageHeader extends StatelessWidget {
   const PageHeader({
     required this.title,
-    this.padding = const EdgeInsets.fromLTRB(24, 32, 24, 16),
+    this.padding = const EdgeInsets.fromLTRB(
+        AppDimensions.pagePadding, 32, AppDimensions.pagePadding, 16),
     super.key,
   });
 

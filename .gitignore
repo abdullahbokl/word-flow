@@ -58,3 +58,5 @@ word_flow.db*
 
 # IDE / Build Artifacts
 lexitrack.iml
+
+.github/

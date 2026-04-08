@@ -6,12 +6,12 @@ import '../../../../core/widgets/app_text.dart';
 import '../../../../core/widgets/status_view.dart';
 import '../../../../core/widgets/theme_toggle.dart';
 import '../../../../core/widgets/word_list_section.dart';
+import '../../../../core/constants/app_dimensions.dart';
 import '../../domain/entities/history_detail.dart';
 import '../blocs/history_detail/history_detail_bloc.dart';
 import '../blocs/history_detail/history_detail_event.dart';
 import '../blocs/history_detail/history_detail_state.dart';
 import '../widgets/history_detail_stats_grid.dart';
-import '../../../../core/theme/app_dimensions.dart';
 
 class HistoryDetailPage extends StatelessWidget {
   const HistoryDetailPage({super.key, required this.id});

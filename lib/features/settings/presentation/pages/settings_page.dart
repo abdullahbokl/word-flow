@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/theme/theme_cubit.dart';
 import '../../../../core/widgets/page_header.dart';
 import '../../../../core/widgets/app_text.dart';
@@ -10,34 +11,36 @@ class SettingsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return const Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const PageHeader(title: 'Settings'),
-              const SizedBox(height: 32),
-              
-              _Section(
-                title: 'Appearance',
-                children: [
-                  _ThemeSelector(),
-                ],
-              ),
-              
-              const SizedBox(height: 32),
-              _Section(
-                title: 'About',
-                children: [
-                  ListTile(
-                    leading: const Icon(Icons.info_outline),
-                    title: const AppText.body('Version'),
-                    trailing: const AppText.body('1.0.0', color: Colors.grey),
-                  ),
-                ],
-              ),
-            ],
+          child: Padding(
+            padding:
+                EdgeInsets.symmetric(horizontal: AppDimensions.pagePadding),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                PageHeader(title: 'Settings'),
+                SizedBox(height: 32),
+                _Section(
+                  title: 'Appearance',
+                  children: [
+                    _ThemeSelector(),
+                  ],
+                ),
+                SizedBox(height: 32),
+                _Section(
+                  title: 'About',
+                  children: [
+                    ListTile(
+                      leading: Icon(Icons.info_outline),
+                      title: AppText.body('Version'),
+                      trailing: AppText.body('1.0.0', color: Colors.grey),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -80,6 +83,8 @@ class _Section extends StatelessWidget {
 }
 
 class _ThemeSelector extends StatelessWidget {
+  const _ThemeSelector();
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeCubit, ThemeMode>(
@@ -135,8 +140,8 @@ class _ThemeOption extends StatelessWidget {
         title,
         fontWeight: isSelected ? FontWeight.bold : null,
       ),
-      trailing: isSelected 
-          ? Icon(Icons.check_circle, color: theme.colorScheme.primary) 
+      trailing: isSelected
+          ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
           : null,
       onTap: onTap,
     );

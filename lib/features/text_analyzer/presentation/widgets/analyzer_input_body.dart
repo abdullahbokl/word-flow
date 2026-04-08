@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/constants/app_dimensions.dart';
 import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_text.dart';
 import '../../../../core/widgets/app_text_field.dart';
@@ -26,7 +27,8 @@ class AnalyzerInputBody extends StatelessWidget {
         children: [
           const PageHeader(title: AppStrings.textAnalyzer),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.pagePadding),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
