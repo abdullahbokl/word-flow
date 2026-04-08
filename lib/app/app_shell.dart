@@ -54,50 +54,53 @@ class _AppShellState extends State<AppShell> {
 
   @override
   Widget build(BuildContext context) {
-    return PopScope(
-      canPop: false,
-      onPopInvokedWithResult: (didPop, result) async {
-        if (didPop) return;
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: PopScope(
+        canPop: false,
+        onPopInvokedWithResult: (didPop, result) async {
+          if (didPop) return;
 
-        if (_currentIndex != 0) {
-          _onTapped(0);
-          return;
-        }
-
-        final exit = await showExitDialog(context);
-        if (exit == true) {
-          if (context.mounted) {
-            Navigator.of(context).pop();
+          if (_currentIndex != 0) {
+            _onTapped(0);
+            return;
           }
-        }
-      },
-      child: Scaffold(
-        body: PageView(
-          controller: _pageController,
-          onPageChanged: _onPageChanged,
-          children: _pages,
-        ),
-        bottomNavigationBar: NavigationBar(
-          selectedIndex: _currentIndex,
-          onDestinationSelected: _onTapped,
-          destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.analytics_outlined),
-              label: 'Analyzer',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.menu_book_outlined),
-              label: 'Lexicon',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.history_outlined),
-              label: 'History',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.settings_outlined),
-              label: 'Settings',
-            ),
-          ],
+
+          final exit = await showExitDialog(context);
+          if (exit == true) {
+            if (context.mounted) {
+              Navigator.of(context).pop();
+            }
+          }
+        },
+        child: Scaffold(
+          body: PageView(
+            controller: _pageController,
+            onPageChanged: _onPageChanged,
+            children: _pages,
+          ),
+          bottomNavigationBar: NavigationBar(
+            selectedIndex: _currentIndex,
+            onDestinationSelected: _onTapped,
+            destinations: const [
+              NavigationDestination(
+                icon: Icon(Icons.analytics_outlined),
+                label: 'Analyzer',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.menu_book_outlined),
+                label: 'Lexicon',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.history_outlined),
+                label: 'History',
+              ),
+              NavigationDestination(
+                icon: Icon(Icons.settings_outlined),
+                label: 'Settings',
+              ),
+            ],
+          ),
         ),
       ),
     );

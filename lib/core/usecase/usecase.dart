@@ -1,24 +1,27 @@
 import 'package:fpdart/fpdart.dart';
+import '../error/failures.dart';
 
-// ---------------------------------------------------------------------------
-// UseCase base types — categorization markers, each use case defines its own
-// [call] signature.
-// ---------------------------------------------------------------------------
+/// Standard abstract UseCase class.
+abstract class UseCase<Type, Params> {
+  Future<Either<Failure, Type>> call(Params params);
+}
 
-/// Async use-case returning [TaskEither]. Preferred pattern.
+/// Async use-case base using [TaskEither].
 abstract class AsyncUseCase<TReturn, Params> {
   const AsyncUseCase();
+  TaskEither<Failure, TReturn> call(Params params);
 }
 
-/// Stream-based use-case returning a live stream of [Either] results.
+/// Stream-based use-case base.
 abstract class StreamUseCase<TReturn, Params> {
   const StreamUseCase();
+  Stream<Either<Failure, TReturn>> call(Params params);
 }
 
-/// Future-based use-case returning [Either]. Used when the repository already
-/// returns [Future<Either>] and no TaskEither composition is needed.
+/// Future-based use-case base.
 abstract class FutureUseCase<TReturn, Params> {
   const FutureUseCase();
+  Future<Either<Failure, TReturn>> call(Params params);
 }
 
 // ---------------------------------------------------------------------------
@@ -28,16 +31,4 @@ abstract class FutureUseCase<TReturn, Params> {
 /// Marker for use-cases that take no parameters.
 class NoParams {
   const NoParams();
-}
-
-/// Parameter object for word queries (filter + sort + search).
-class WordQueryParams {
-  const WordQueryParams({
-    required this.filter,
-    required this.sort,
-    required this.query,
-  });
-  final String filter;
-  final String sort;
-  final String query;
 }

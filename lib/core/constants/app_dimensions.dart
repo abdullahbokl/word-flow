@@ -1,36 +1,15 @@
-abstract final class AppDimensions {
-  // Padding
-  static const double padding = 16;
-  static const double paddingLarge = 24;
-  static const double paddingXLarge = 32;
-  static const double paddingSmall = 8;
+class AppSpacing {
+  static const double xs = 4.0;
+  static const double s = 8.0;
+  static const double m = 16.0;
+  static const double l = 24.0;
+  static const double xl = 32.0;
+  static const double xxl = 48.0;
+}
 
-  // Radius
-  static const double radius = 12;
-  static const double radiusSmall = 8;
-  static const double radiusLarge = 16;
-  static const double radiusXSmall = 6;
-  static const double radiusXXSmall = 4;
-
-  // Font sizes
-  static const double fontSizeTiny = 11;
-  static const double fontSizeSmall = 12;
-  static const double fontSizeCaption = 13;
-  static const double fontSizeBody = 14;
-  static const double fontSizeSubtitle = 18;
-  static const double fontSizeTitle = 24;
-
-  // Icon sizes
-  static const double iconSizeSmall = 14;
-  static const double iconSize = 24;
-  static const double iconSizeStatus = 48;
-
-  // Spacing
-  static const double spacing = 8;
-  static const double spacingLarge = 12;
-  static const double spacingXLarge = 16;
-  static const double spacingXXLarge = 32;
-
-  // Divider
-  static const double dividerHeight = 1;
+class AppRadius {
+  static const double s = 8.0;
+  static const double m = 12.0;
+  static const double l = 16.0;
+  static const double xl = 24.0;
 }

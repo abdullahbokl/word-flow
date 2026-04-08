@@ -1,6 +1,4 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
-import 'package:lexitrack/features/lexicon/domain/entities/word_entity.dart';
 import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
 import 'package:lexitrack/features/lexicon/domain/repositories/lexicon_repository.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/add_word_manually.dart';

@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../../core/common/state/bloc_status.dart';
-import '../../domain/entities/lexicon_stats.dart';
-import '../../domain/entities/word_entity.dart';
-import '../../domain/entities/word_filter.dart';
-import '../../domain/entities/word_sort.dart';
+import '../../../../../core/common/state/bloc_status.dart';
+import '../../../domain/entities/lexicon_stats.dart';
+import '../../../domain/entities/word_entity.dart';
+import '../../../domain/entities/word_filter.dart';
+import '../../../domain/entities/word_sort.dart';
 
 class LexiconState extends Equatable {
   const LexiconState({
@@ -13,6 +13,8 @@ class LexiconState extends Equatable {
     this.sort = WordSort.frequencyDesc,
     this.query = '',
     this.stats = const LexiconStats.empty(),
+    this.page = 0,
+    this.hasReachedMax = false,
   });
 
   final BlocStatus<List<WordEntity>> status;
@@ -20,6 +22,8 @@ class LexiconState extends Equatable {
   final WordSort sort;
   final String query;
   final LexiconStats stats;
+  final int page;
+  final bool hasReachedMax;
 
   LexiconState copyWith({
     BlocStatus<List<WordEntity>>? status,
@@ -27,6 +31,8 @@ class LexiconState extends Equatable {
     WordSort? sort,
     String? query,
     LexiconStats? stats,
+    int? page,
+    bool? hasReachedMax,
   }) {
     return LexiconState(
       status: status ?? this.status,
@@ -34,9 +40,19 @@ class LexiconState extends Equatable {
       sort: sort ?? this.sort,
       query: query ?? this.query,
       stats: stats ?? this.stats,
+      page: page ?? this.page,
+      hasReachedMax: hasReachedMax ?? this.hasReachedMax,
     );
   }
 
   @override
-  List<Object?> get props => [status, filter, sort, query, stats];
+  List<Object?> get props => [
+        status,
+        filter,
+        sort,
+        query,
+        stats,
+        page,
+        hasReachedMax,
+      ];
 }

@@ -4,6 +4,7 @@ import '../../../../core/error/failures.dart';
 import '../../domain/entities/analysis_result.dart';
 import '../../domain/repositories/analyzer_repository.dart';
 import '../datasources/analyzer_local_ds.dart';
+import '../mappers/analysis_mapper.dart';
 
 class AnalyzerRepositoryImpl implements AnalyzerRepository {
   const AnalyzerRepositoryImpl(this._local);
@@ -16,7 +17,10 @@ class AnalyzerRepositoryImpl implements AnalyzerRepository {
     required String content,
   }) {
     return TaskEither.tryCatch(
-      () => _local.analyze(title: title, content: content),
+      () async {
+        final model = await _local.analyze(title: title, content: content);
+        return model.toEntity();
+      },
       (error, stack) => DatabaseFailure('$error', stack),
     );
   }

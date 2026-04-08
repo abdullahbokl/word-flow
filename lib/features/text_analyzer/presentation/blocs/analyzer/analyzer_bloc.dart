@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/common/models/word_with_local_freq.dart';
-import '../../../../core/common/state/bloc_status.dart';
-import '../../domain/usecases/analyze_text.dart';
+import '../../../../../core/common/models/word_with_local_freq.dart';
+import '../../../../../core/common/state/bloc_status.dart';
+import '../../../domain/usecases/analyze_text.dart';
 import 'analyzer_event.dart';
 import 'analyzer_state.dart';
 
@@ -19,8 +19,9 @@ class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
 
   Future<void> _onStart(StartAnalysis e, Emitter<AnalyzerState> emit) async {
     emit(state.copyWith(status: const BlocStatus.loading()));
-    final result =
-        await _analyzeText(title: e.title.trim(), content: e.content).run();
+    final result = await _analyzeText(
+      AnalyzeTextParams(title: e.title.trim(), content: e.content),
+    ).run();
     result.fold(
       (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),
       (res) => emit(state.copyWith(status: BlocStatus.success(data: res))),

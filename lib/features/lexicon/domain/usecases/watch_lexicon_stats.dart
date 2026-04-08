@@ -9,5 +9,6 @@ class WatchLexiconStats extends StreamUseCase<LexiconStats, NoParams> {
   const WatchLexiconStats(this._repository);
   final LexiconRepository _repository;
 
-  Stream<Either<Failure, LexiconStats>> call() => _repository.watchStats();
+  @override
+  Stream<Either<Failure, LexiconStats>> call(NoParams params) => _repository.watchStats();
 }

@@ -3,19 +3,17 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/constants/app_strings.dart';
-import '../../../../core/widgets/app_button.dart';
 import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/app_text_field.dart';
 import '../../../../core/widgets/app_text.dart';
 import '../../../../core/widgets/status_view.dart';
-import '../../../../core/widgets/page_header.dart';
-import '../../../lexicon/presentation/bloc/lexicon_bloc.dart';
-import '../../../lexicon/presentation/bloc/lexicon_event.dart';
-import '../bloc/analyzer_bloc.dart';
-import '../bloc/analyzer_event.dart';
-import '../bloc/analyzer_state.dart';
+import '../../../lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
+import '../../../lexicon/presentation/blocs/lexicon/lexicon_event.dart';
+import '../blocs/analyzer/analyzer_bloc.dart';
+import '../blocs/analyzer/analyzer_event.dart';
+import '../blocs/analyzer/analyzer_state.dart';
 import '../../domain/entities/analysis_result.dart';
 import '../widgets/analysis_summary.dart';
+import '../widgets/analyzer_input_body.dart';
 
 class AnalyzerPage extends StatefulWidget {
   const AnalyzerPage({super.key});
@@ -67,12 +65,12 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
           },
           builder: (context, state) => StatusView<AnalysisResult>(
             status: state.status,
-            onInitial: () => _InputBody(
+            onInitial: () => AnalyzerInputBody(
               titleCtrl: _titleCtrl,
               contentCtrl: _contentCtrl,
               onAnalyze: _onAnalyze,
             ),
-            onFailure: (_) => _InputBody(
+            onFailure: (_) => AnalyzerInputBody(
               titleCtrl: _titleCtrl,
               contentCtrl: _contentCtrl,
               onAnalyze: _onAnalyze,
@@ -86,67 +84,12 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
                 context.read<AnalyzerBloc>().add(const ResetAnalysis());
               },
               onToggleStatus: (w) {
-                final lexiconBloc = context.read<LexiconBloc>();
-                final analyzerBloc = context.read<AnalyzerBloc>();
-  
-                lexiconBloc.add(ToggleWordStatusEvent(w.word.id));
-                analyzerBloc.add(ToggleWordStatusInResult(wordId: w.word.id));
+                context.read<LexiconBloc>().add(ToggleWordStatusEvent(w.word.id));
+                context.read<AnalyzerBloc>().add(ToggleWordStatusInResult(wordId: w.word.id));
               },
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _InputBody extends StatelessWidget {
-  const _InputBody({
-    required this.titleCtrl,
-    required this.contentCtrl,
-    required this.onAnalyze,
-  });
-
-  final TextEditingController titleCtrl;
-  final TextEditingController contentCtrl;
-  final VoidCallback onAnalyze;
-
-  @override
-  Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          const PageHeader(title: AppStrings.textAnalyzer),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const AppText.title('New Analysis'),
-                const SizedBox(height: 16),
-          AppTextField(
-            controller: titleCtrl,
-            label: 'Title (Optional)',
-            hint: 'e.g., Short Story, News Article',
-          ),
-          const SizedBox(height: 16),
-          AppTextField(
-            controller: contentCtrl,
-            label: 'Text to Analyze',
-            hint: 'Paste English text here...',
-            maxLines: 15,
-          ),
-          const SizedBox(height: 24),
-                AppButton(
-                  label: 'Analyze Text',
-                  onPressed: onAnalyze,
-                  icon: Icons.analytics_outlined,
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }

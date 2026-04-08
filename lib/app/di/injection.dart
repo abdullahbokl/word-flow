@@ -10,9 +10,10 @@ import '../../features/history/domain/usecases/get_history.dart';
 import '../../features/history/domain/usecases/get_history_detail.dart';
 import '../../features/history/domain/usecases/watch_history.dart';
 import '../../features/history/domain/usecases/watch_history_detail.dart';
-import '../../features/history/presentation/bloc/history_bloc.dart';
-import '../../features/history/presentation/bloc/history_detail_bloc.dart';
+import '../../features/history/presentation/blocs/history/history_bloc.dart';
+import '../../features/history/presentation/blocs/history_detail/history_detail_bloc.dart';
 import '../../features/lexicon/data/datasources/lexicon_local_ds.dart';
+import '../../features/lexicon/data/datasources/lexicon_local_ds_impl.dart';
 import '../../features/lexicon/data/repositories/lexicon_repository_impl.dart';
 import '../../features/lexicon/domain/repositories/lexicon_repository.dart';
 import '../../features/lexicon/domain/usecases/add_word_manually.dart';
@@ -23,12 +24,13 @@ import '../../features/lexicon/domain/usecases/toggle_word_status.dart';
 import '../../features/lexicon/domain/usecases/update_word.dart';
 import '../../features/lexicon/domain/usecases/watch_lexicon_stats.dart';
 import '../../features/lexicon/domain/usecases/watch_words.dart';
-import '../../features/lexicon/presentation/bloc/lexicon_bloc.dart';
+import '../../features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
 import '../../features/text_analyzer/data/datasources/analyzer_local_ds.dart';
+import '../../features/text_analyzer/data/datasources/analyzer_local_ds_impl.dart';
 import '../../features/text_analyzer/data/repositories/analyzer_repository_impl.dart';
 import '../../features/text_analyzer/domain/repositories/analyzer_repository.dart';
 import '../../features/text_analyzer/domain/usecases/analyze_text.dart';
-import '../../features/text_analyzer/presentation/bloc/analyzer_bloc.dart';
+import '../../features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
 
 final sl = GetIt.instance;
 
@@ -52,7 +54,7 @@ Future<void> initDI() async {
   sl.registerLazySingleton(() => WatchWords(sl()));
   sl.registerLazySingleton(() => WatchLexiconStats(sl()));
   sl.registerFactory(() => LexiconBloc(
-        watchWords: sl(),
+        getWords: sl(),
         toggleWordStatus: sl(),
         deleteWord: sl(),
         addWordManually: sl(),

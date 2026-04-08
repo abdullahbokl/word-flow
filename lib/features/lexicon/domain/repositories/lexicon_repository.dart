@@ -11,6 +11,8 @@ abstract interface class LexiconRepository {
     WordFilter filter = WordFilter.all,
     WordSort sort = WordSort.frequencyDesc,
     String query = '',
+    int? limit,
+    int? offset,
   });
 
   Stream<Either<Failure, List<WordEntity>>> watchWords({

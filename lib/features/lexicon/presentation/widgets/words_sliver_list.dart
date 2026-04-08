@@ -1,0 +1,92 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sliver_tools/sliver_tools.dart';
+
+import '../../../../core/constants/app_strings.dart';
+import '../../../../core/widgets/app_empty_state.dart';
+import '../../../../core/widgets/app_loader.dart';
+import '../../domain/entities/word_entity.dart';
+import '../blocs/lexicon/lexicon_bloc.dart';
+import '../blocs/lexicon/lexicon_event.dart';
+import 'word_tile.dart';
+
+class WordsSliverList extends StatelessWidget {
+  const WordsSliverList({
+    required this.words,
+    required this.hasReachedMax,
+    required this.onEdit,
+    super.key,
+  });
+
+  final List<WordEntity> words;
+  final bool hasReachedMax;
+  final Function(WordEntity) onEdit;
+
+  @override
+  Widget build(BuildContext context) {
+    if (words.isEmpty) {
+      return const SliverFillRemaining(
+        hasScrollBody: false,
+        child: AppEmptyState(
+          icon: Icons.menu_book_outlined,
+          title: AppStrings.noWordsYet,
+          subtitle: AppStrings.noWordsSubtitle,
+        ),
+      );
+    }
+
+    return MultiSliver(
+      children: [
+        SliverPrototypeExtentList(
+          prototypeItem: WordTile(
+            word: WordEntity(
+              id: -1,
+              text: 'Prototype',
+              frequency: 0,
+              isKnown: false,
+              meaning: 'A prototype for height calculation',
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+            onToggle: () {},
+            onDelete: () {},
+            onEdit: () {},
+          ),
+          delegate: SliverChildBuilderDelegate(
+            (ctx, i) {
+              final w = words[i];
+              return WordTile(
+                key: ValueKey(w.id),
+                word: w,
+                onToggle: () => ctx.read<LexiconBloc>().add(ToggleWordStatusEvent(w.id)),
+                onDelete: () {
+                  final wordText = w.text;
+                  ctx.read<LexiconBloc>().add(DeleteWordEvent(w.id));
+                  ScaffoldMessenger.of(ctx).showSnackBar(
+                    SnackBar(
+                      content: Text(AppStrings.wordDeleted(wordText)),
+                      duration: const Duration(seconds: 3),
+                      action: SnackBarAction(
+                        label: AppStrings.undo,
+                        onPressed: () => ctx.read<LexiconBloc>().add(AddWordManuallyEvent(wordText)),
+                      ),
+                    ),
+                  );
+                },
+                onEdit: () => onEdit(w),
+              );
+            },
+            childCount: words.length,
+          ),
+        ),
+        if (!hasReachedMax)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: AppLoader(),
+            ),
+          ),
+      ],
+    );
+  }
+}

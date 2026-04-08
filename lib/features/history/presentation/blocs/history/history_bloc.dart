@@ -1,7 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../../core/common/state/bloc_status.dart';
-import '../../domain/usecases/delete_history_item.dart';
-import '../../domain/usecases/watch_history.dart';
+import '../../../../../core/common/state/bloc_status.dart';
+import '../../../domain/usecases/delete_history_item.dart';
+import '../../../domain/usecases/watch_history.dart';
+import '../../../../../core/usecase/usecase.dart';
 import 'history_event.dart';
 import 'history_state.dart';
 
@@ -23,7 +24,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   Future<void> _onLoadHistory(LoadHistory event, Emitter<HistoryState> emit) async {
     emit(state.copyWith(status: const BlocStatus.loading()));
     await emit.forEach(
-      _watchHistory(),
+      _watchHistory(const NoParams()),
       onData: (result) => result.fold(
         (f) => state.copyWith(status: BlocStatus.failure(error: f.message)),
         (items) => state.copyWith(status: BlocStatus.success(data: items)),
@@ -40,8 +41,10 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     Emitter<HistoryState> emit,
   ) async {
     final result = await _deleteHistoryItem(
-      event.id,
-      deleteUniqueWords: event.deleteUniqueWords,
+      DeleteHistoryItemParams(
+        id: event.id,
+        deleteUniqueWords: event.deleteUniqueWords,
+      ),
     );
     result.fold(
       (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),

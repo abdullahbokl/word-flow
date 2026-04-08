@@ -1,8 +1,9 @@
 import 'dart:async';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../../lexicon/domain/usecases/toggle_word_status.dart';
-import '../../domain/usecases/watch_history_detail.dart';
-import '../../../../core/common/state/bloc_status.dart';
+import '../../../../lexicon/domain/usecases/toggle_word_status.dart';
+import '../../../domain/usecases/watch_history_detail.dart';
+import '../../../../../core/common/state/bloc_status.dart';
+import '../../../domain/entities/history_detail.dart';
 import 'history_detail_event.dart';
 import 'history_detail_state.dart';
 
@@ -27,7 +28,7 @@ class HistoryDetailBloc extends Bloc<HistoryDetailEvent, HistoryDetailState> {
   void _onUpdated(HistoryDetailUpdated e, Emitter<HistoryDetailState> emit) {
     e.result.fold(
       (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),
-      (d) => emit(state.copyWith(status: BlocStatus.success(data: d))),
+      (d) => emit(state.copyWith(status: BlocStatus<HistoryDetail>.success(data: d))),
     );
   }
 

@@ -8,9 +8,9 @@ import 'package:lexitrack/core/common/state/bloc_status.dart';
 import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
 import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
 import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
-import 'package:lexitrack/features/text_analyzer/presentation/bloc/analyzer_bloc.dart';
-import 'package:lexitrack/features/text_analyzer/presentation/bloc/analyzer_event.dart';
-import 'package:lexitrack/features/text_analyzer/presentation/bloc/analyzer_state.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
 
 class MockAnalyzerRepository extends Mock implements AnalyzerRepository {}
 

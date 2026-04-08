@@ -19,7 +19,7 @@ void main() {
 
   group('AnalyzeText', () {
     test('returns validation failure when title is empty', () async {
-      final result = await usecase(title: '', content: 'some text').run();
+      final result = await usecase(const AnalyzeTextParams(title: '', content: 'some text')).run();
 
       expect(result.isLeft(), true);
       result.fold(
@@ -29,7 +29,7 @@ void main() {
     });
 
     test('returns validation failure when content is empty', () async {
-      final result = await usecase(title: 'Test', content: '').run();
+      final result = await usecase(const AnalyzeTextParams(title: 'Test', content: '')).run();
 
       expect(result.isLeft(), true);
       result.fold(
@@ -57,7 +57,7 @@ void main() {
         ),
       );
 
-      final result = await usecase(title: 'Test', content: 'Hello world').run();
+      final result = await usecase(const AnalyzeTextParams(title: 'Test', content: 'Hello world')).run();
 
       expect(result.isRight(), true);
     });
@@ -81,7 +81,7 @@ void main() {
         ),
       );
 
-      await usecase(title: 'My Title', content: 'Hello world').run();
+      await usecase(const AnalyzeTextParams(title: 'My Title', content: 'Hello world')).run();
 
       verify(() => repository.analyze(title: 'My Title', content: 'Hello world'))
           .called(1);

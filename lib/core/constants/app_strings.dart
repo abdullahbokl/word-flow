@@ -67,4 +67,6 @@ abstract final class AppStrings {
   static const retry = 'Retry';
   static const error = 'Error';
   static const loadingLexicon = 'Loading lexicon...';
+  static const undo = 'Undo';
+  static String wordDeleted(String word) => 'Deleted "$word"';
 }

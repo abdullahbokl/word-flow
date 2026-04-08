@@ -7,9 +7,9 @@ import 'package:lexitrack/features/history/domain/entities/history_item.dart';
 import 'package:lexitrack/features/history/domain/repositories/history_repository.dart';
 import 'package:lexitrack/features/history/domain/usecases/delete_history_item.dart';
 import 'package:lexitrack/features/history/domain/usecases/watch_history.dart';
-import 'package:lexitrack/features/history/presentation/bloc/history_bloc.dart';
-import 'package:lexitrack/features/history/presentation/bloc/history_event.dart';
-import 'package:lexitrack/features/history/presentation/bloc/history_state.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history/history_bloc.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history/history_event.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history/history_state.dart';
 
 class MockHistoryRepository extends Mock implements HistoryRepository {}
 

@@ -1,9 +1,9 @@
 import 'package:equatable/equatable.dart';
 
-import '../../domain/entities/lexicon_stats.dart';
-import '../../domain/entities/word_entity.dart';
-import '../../domain/entities/word_filter.dart';
-import '../../domain/entities/word_sort.dart';
+import '../../../domain/entities/lexicon_stats.dart';
+import '../../../domain/entities/word_entity.dart';
+import '../../../domain/entities/word_filter.dart';
+import '../../../domain/entities/word_sort.dart';
 
 sealed class LexiconEvent extends Equatable {
   const LexiconEvent();
@@ -99,4 +99,8 @@ final class SortLexicon extends LexiconEvent {
 
   @override
   List<Object?> get props => [sort];
+}
+
+final class LoadMoreLexicon extends LexiconEvent {
+  const LoadMoreLexicon();
 }

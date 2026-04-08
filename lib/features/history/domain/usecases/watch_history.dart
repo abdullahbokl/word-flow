@@ -9,5 +9,6 @@ class WatchHistory extends StreamUseCase<List<HistoryItem>, NoParams> {
   const WatchHistory(this._repository);
   final HistoryRepository _repository;
 
-  Stream<Either<Failure, List<HistoryItem>>> call() => _repository.watchHistory();
+  @override
+  Stream<Either<Failure, List<HistoryItem>>> call(NoParams params) => _repository.watchHistory();
 }
