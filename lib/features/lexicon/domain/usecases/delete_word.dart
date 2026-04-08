@@ -9,6 +9,7 @@ class DeleteWord extends AsyncUseCase<Unit, int> {
 
   final LexiconRepository _repository;
 
+  @override
   TaskEither<Failure, Unit> call(int wordId) {
     return _repository.deleteWord(wordId);
   }

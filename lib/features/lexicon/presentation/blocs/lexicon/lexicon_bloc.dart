@@ -8,9 +8,9 @@ import '../../../domain/usecases/toggle_word_status.dart';
 import '../../../domain/usecases/update_word.dart';
 import '../../../domain/usecases/watch_lexicon_stats.dart';
 import '../../../domain/usecases/get_words.dart';
-import '../../../domain/entities/word_entity.dart';
 import '../../../domain/entities/word_filter.dart';
 import '../../../domain/entities/word_sort.dart';
+import '../../../../../core/domain/entities/word_entity.dart';
 import '../../../../../core/usecase/usecase.dart';
 import 'lexicon_event.dart';
 import 'lexicon_state.dart';
@@ -38,11 +38,17 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
     on<LexiconErrorReceived>(_onErrorReceived);
     on<ToggleWordStatusEvent>(_onToggleStatus);
     on<DeleteWordEvent>(_onDelete);
-    on<AddWordManuallyEvent>((e, _) async => await _addWordManually(e.word).run());
-    on<SearchLexicon>((e, emit) async => await _onFetch(emit: emit, query: e.query));
-    on<FilterLexicon>((e, emit) async => await _onFetch(emit: emit, filter: e.filter));
-    on<SortLexicon>((e, emit) async => await _onFetch(emit: emit, sort: e.sort));
-    on<UpdateWordEvent>((e, _) async => await _updateWord(e.wordId, meaning: e.meaning, description: e.description).run());
+    on<AddWordManuallyEvent>(
+        (e, _) async => await _addWordManually(e.word).run());
+    on<SearchLexicon>(
+        (e, emit) async => await _onFetch(emit: emit, query: e.query));
+    on<FilterLexicon>(
+        (e, emit) async => await _onFetch(emit: emit, filter: e.filter));
+    on<SortLexicon>(
+        (e, emit) async => await _onFetch(emit: emit, sort: e.sort));
+    on<UpdateWordEvent>((e, _) async => await _updateWord(e.wordId,
+            meaning: e.meaning, description: e.description)
+        .run());
   }
 
   static const _pageSize = 50;

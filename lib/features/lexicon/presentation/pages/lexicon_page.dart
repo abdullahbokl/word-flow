@@ -3,10 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/domain/entities/word_entity.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/page_header.dart';
 import '../../../../core/widgets/sliver_status_view.dart';
-import '../../domain/entities/word_entity.dart';
 import '../blocs/lexicon/lexicon_bloc.dart';
 import '../blocs/lexicon/lexicon_event.dart';
 import '../blocs/lexicon/lexicon_state.dart';
@@ -22,7 +22,8 @@ class LexiconPage extends StatefulWidget {
   State<LexiconPage> createState() => _LexiconPageState();
 }
 
-class _LexiconPageState extends State<LexiconPage> with AutomaticKeepAliveClientMixin {
+class _LexiconPageState extends State<LexiconPage>
+    with AutomaticKeepAliveClientMixin {
   final _searchCtrl = TextEditingController();
   final _listScrollController = ScrollController();
   Timer? _searchDebounce;
@@ -38,7 +39,9 @@ class _LexiconPageState extends State<LexiconPage> with AutomaticKeepAliveClient
   }
 
   void _onListScroll() {
-    if (_listScrollController.hasClients && _listScrollController.offset >= (_listScrollController.position.maxScrollExtent * 0.9)) {
+    if (_listScrollController.hasClients &&
+        _listScrollController.offset >=
+            (_listScrollController.position.maxScrollExtent * 0.9)) {
       context.read<LexiconBloc>().add(const LoadMoreLexicon());
     }
   }
@@ -61,12 +64,18 @@ class _LexiconPageState extends State<LexiconPage> with AutomaticKeepAliveClient
   }
 
   Future<void> _showAdd() async {
-    final res = await showDialog<String>(context: context, builder: (_) => const AddWordDialog());
-    if (res != null && res.isNotEmpty) context.read<LexiconBloc>().add(AddWordManuallyEvent(res));
+    final res = await showDialog<String>(
+        context: context, builder: (_) => const AddWordDialog());
+    if (!mounted) return;
+    if (res != null && res.isNotEmpty) {
+      context.read<LexiconBloc>().add(AddWordManuallyEvent(res));
+    }
   }
 
   Future<void> _showEdit(WordEntity w) async {
-    final res = await showDialog<String>(context: context, builder: (_) => EditWordDialog(word: w));
+    final res = await showDialog<String>(
+        context: context, builder: (_) => EditWordDialog(word: w));
+    if (!mounted) return;
     if (res != null && res.isNotEmpty && res != w.text) {
       context.read<LexiconBloc>().add(UpdateWordEvent(w.id, meaning: res));
     }
@@ -76,13 +85,15 @@ class _LexiconPageState extends State<LexiconPage> with AutomaticKeepAliveClient
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      floatingActionButton: FloatingActionButton(onPressed: _showAdd, child: const Icon(Icons.add)),
+      floatingActionButton: FloatingActionButton(
+          onPressed: _showAdd, child: const Icon(Icons.add)),
       body: SafeArea(
         child: BlocBuilder<LexiconBloc, LexiconState>(
           builder: (ctx, state) => CustomScrollView(
             controller: _listScrollController,
             slivers: [
-              const SliverToBoxAdapter(child: PageHeader(title: AppStrings.myLexicon)),
+              const SliverToBoxAdapter(
+                  child: PageHeader(title: AppStrings.myLexicon)),
               SliverAppBar(
                 floating: true,
                 snap: true,
@@ -103,8 +114,12 @@ class _LexiconPageState extends State<LexiconPage> with AutomaticKeepAliveClient
               SliverStatusView<List<WordEntity>>(
                 status: state.status,
                 animate: false,
-                onInitial: () => const SliverFillRemaining(child: AppLoader(message: AppStrings.loadingLexicon)),
-                onSuccess: (words) => WordsSliverList(words: words, hasReachedMax: state.hasReachedMax, onEdit: _showEdit),
+                onInitial: () => const SliverFillRemaining(
+                    child: AppLoader(message: AppStrings.loadingLexicon)),
+                onSuccess: (words) => WordsSliverList(
+                    words: words,
+                    hasReachedMax: state.hasReachedMax,
+                    onEdit: _showEdit),
               ),
             ],
           ),

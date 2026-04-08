@@ -10,6 +10,7 @@ class WatchHistoryDetail extends StreamUseCase<HistoryDetail, int> {
 
   final HistoryRepository _repository;
 
+  @override
   Stream<Either<Failure, HistoryDetail>> call(int id) =>
       _repository.watchHistoryDetail(id);
 }

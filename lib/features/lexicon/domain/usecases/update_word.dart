@@ -1,8 +1,8 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/domain/entities/word_entity.dart';
 import '../../../../core/usecase/usecase.dart';
-import '../entities/word_entity.dart';
 import '../repositories/lexicon_repository.dart';
 
 class UpdateWord extends AsyncUseCase<WordEntity, int> {
@@ -10,11 +10,13 @@ class UpdateWord extends AsyncUseCase<WordEntity, int> {
 
   final LexiconRepository _repository;
 
+  @override
   TaskEither<Failure, WordEntity> call(
     int id, {
     String? meaning,
     String? description,
   }) {
-    return _repository.updateWord(id, meaning: meaning, description: description);
+    return _repository.updateWord(id,
+        meaning: meaning, description: description);
   }
 }

@@ -1,8 +1,8 @@
 import 'package:equatable/equatable.dart';
 
 import '../../../../../core/common/state/bloc_status.dart';
+import '../../../../../core/domain/entities/word_entity.dart';
 import '../../../domain/entities/lexicon_stats.dart';
-import '../../../domain/entities/word_entity.dart';
 import '../../../domain/entities/word_filter.dart';
 import '../../../domain/entities/word_sort.dart';
 

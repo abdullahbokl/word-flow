@@ -5,7 +5,7 @@ import 'package:sliver_tools/sliver_tools.dart';
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/app_empty_state.dart';
 import '../../../../core/widgets/app_loader.dart';
-import '../../domain/entities/word_entity.dart';
+import '../../../../core/domain/entities/word_entity.dart';
 import '../blocs/lexicon/lexicon_bloc.dart';
 import '../blocs/lexicon/lexicon_event.dart';
 import 'word_tile.dart';
@@ -58,7 +58,8 @@ class WordsSliverList extends StatelessWidget {
               return WordTile(
                 key: ValueKey(w.id),
                 word: w,
-                onToggle: () => ctx.read<LexiconBloc>().add(ToggleWordStatusEvent(w.id)),
+                onToggle: () =>
+                    ctx.read<LexiconBloc>().add(ToggleWordStatusEvent(w.id)),
                 onDelete: () {
                   final wordText = w.text;
                   ctx.read<LexiconBloc>().add(DeleteWordEvent(w.id));
@@ -68,7 +69,9 @@ class WordsSliverList extends StatelessWidget {
                       duration: const Duration(seconds: 3),
                       action: SnackBarAction(
                         label: AppStrings.undo,
-                        onPressed: () => ctx.read<LexiconBloc>().add(AddWordManuallyEvent(wordText)),
+                        onPressed: () => ctx
+                            .read<LexiconBloc>()
+                            .add(AddWordManuallyEvent(wordText)),
                       ),
                     ),
                   );

@@ -1,8 +1,8 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/domain/entities/word_entity.dart';
 import '../../../../core/usecase/usecase.dart';
-import '../entities/word_entity.dart';
 import '../repositories/lexicon_repository.dart';
 
 class AddWordManually extends AsyncUseCase<WordEntity, String> {
@@ -10,6 +10,7 @@ class AddWordManually extends AsyncUseCase<WordEntity, String> {
 
   final LexiconRepository _repository;
 
+  @override
   TaskEither<Failure, WordEntity> call(String text) {
     final normalized = text.trim().toLowerCase();
     if (normalized.isEmpty || normalized.length < 2) {

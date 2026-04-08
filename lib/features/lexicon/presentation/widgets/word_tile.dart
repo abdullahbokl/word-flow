@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../domain/entities/word_entity.dart';
+import '../../../../core/domain/entities/word_entity.dart';
 
 const _knownColor = Color(0xFF2E7D32);
 const _seenTextStyle = TextStyle(fontSize: 12);
@@ -23,7 +23,7 @@ class WordTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
-    
+
     return Dismissible(
       key: ValueKey(word.id),
       direction: DismissDirection.endToStart,
@@ -57,8 +57,9 @@ class WordTile extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                'Seen ${word.frequency}x', 
-                style: _seenTextStyle.copyWith(color: colorScheme.onSurfaceVariant),
+                'Seen ${word.frequency}x',
+                style: _seenTextStyle.copyWith(
+                    color: colorScheme.onSurfaceVariant),
               ),
               if (word.meaning != null && word.meaning!.isNotEmpty)
                 Text(

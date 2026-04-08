@@ -10,6 +10,7 @@ class GetHistoryDetail extends FutureUseCase<HistoryDetail, int> {
 
   final HistoryRepository _repository;
 
+  @override
   Future<Either<Failure, HistoryDetail>> call(int id) =>
       _repository.getHistoryDetail(id);
 }

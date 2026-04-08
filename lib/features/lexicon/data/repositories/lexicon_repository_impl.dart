@@ -4,8 +4,8 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/database/app_database.dart';
 import '../../../../core/data/mappers/word_row_mapper.dart';
 import '../../../../core/error/failures.dart';
+import '../../../../core/domain/entities/word_entity.dart';
 import '../../domain/entities/lexicon_stats.dart';
-import '../../domain/entities/word_entity.dart';
 import '../../domain/entities/word_filter.dart';
 import '../../domain/entities/word_sort.dart';
 import '../../domain/repositories/lexicon_repository.dart';
@@ -25,7 +25,12 @@ class LexiconRepositoryImpl implements LexiconRepository {
   }) =>
       TaskEither.tryCatch(
         () async {
-          final rows = await _local.getWords(filter: filter, sort: sort, query: query, limit: limit, offset: offset);
+          final rows = await _local.getWords(
+              filter: filter,
+              sort: sort,
+              query: query,
+              limit: limit,
+              offset: offset);
           return await compute((List<WordRow> r) => r.toEntities(), rows);
         },
         (error, stack) => DatabaseFailure('$error', stack),
@@ -37,17 +42,24 @@ class LexiconRepositoryImpl implements LexiconRepository {
     WordSort sort = WordSort.frequencyDesc,
     String query = '',
   }) =>
-      _local.watchWords(filter: filter, sort: sort, query: query).map((rows) => Right(rows.toEntities()));
+      _local
+          .watchWords(filter: filter, sort: sort, query: query)
+          .map((rows) => Right(rows.toEntities()));
 
   @override
-  TaskEither<Failure, WordEntity> toggleStatus(int wordId) => TaskEither.tryCatch(
+  TaskEither<Failure, WordEntity> toggleStatus(int wordId) =>
+      TaskEither.tryCatch(
         () async => (await _local.toggleStatus(wordId)).toEntity(),
         (error, stack) => DatabaseFailure('$error', stack),
       );
 
   @override
-  TaskEither<Failure, WordEntity> updateWord(int id, {String? meaning, String? description}) => TaskEither.tryCatch(
-        () async => (await _local.updateWord(id, meaning: meaning, description: description)).toEntity(),
+  TaskEither<Failure, WordEntity> updateWord(int id,
+          {String? meaning, String? description}) =>
+      TaskEither.tryCatch(
+        () async => (await _local.updateWord(id,
+                meaning: meaning, description: description))
+            .toEntity(),
         (error, stack) => DatabaseFailure('$error', stack),
       );
 
@@ -67,8 +79,10 @@ class LexiconRepositoryImpl implements LexiconRepository {
       );
 
   @override
-  TaskEither<Failure, LexiconStats> getStats() => TaskEither.tryCatch(() => _local.getStats(), (e, s) => DatabaseFailure('$e', s));
+  TaskEither<Failure, LexiconStats> getStats() => TaskEither.tryCatch(
+      () => _local.getStats(), (e, s) => DatabaseFailure('$e', s));
 
   @override
-  Stream<Either<Failure, LexiconStats>> watchStats() => _local.watchStats().map((stats) => Right(stats));
+  Stream<Either<Failure, LexiconStats>> watchStats() =>
+      _local.watchStats().map((stats) => Right(stats));
 }

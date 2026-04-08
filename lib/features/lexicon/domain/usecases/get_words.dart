@@ -1,8 +1,8 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/error/failures.dart';
+import '../../../../core/domain/entities/word_entity.dart';
 import '../../../../core/usecase/usecase.dart';
-import '../entities/word_entity.dart';
 import '../entities/word_filter.dart';
 import '../entities/word_sort.dart';
 import '../repositories/lexicon_repository.dart';
