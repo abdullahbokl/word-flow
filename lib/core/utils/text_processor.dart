@@ -35,4 +35,61 @@ class TextProcessor {
   static int totalTokenCount(Map<String, int> freq) {
     return freq.values.fold(0, (sum, v) => sum + v);
   }
+
+  static Future<Map<String, Object?>> summarizeAnalysis({
+    required int id,
+    required String title,
+    required int totalWords,
+    required int uniqueWords,
+    required int newWordsCount,
+    required List<Map<String, Object?>> words,
+  }) {
+    return Isolate.run(
+      () => _summarizeAnalysis(
+        id: id,
+        title: title,
+        totalWords: totalWords,
+        uniqueWords: uniqueWords,
+        newWordsCount: newWordsCount,
+        words: words,
+      ),
+    );
+  }
+
+  static Map<String, Object?> _summarizeAnalysis({
+    required int id,
+    required String title,
+    required int totalWords,
+    required int uniqueWords,
+    required int newWordsCount,
+    required List<Map<String, Object?>> words,
+  }) {
+    var knownWords = 0;
+    final sortedWords = List<Map<String, Object?>>.from(words);
+
+    for (final word in sortedWords) {
+      final localFrequency = word['localFrequency'] as int;
+      final isKnown = word['isKnown'] as bool;
+      if (isKnown) {
+        knownWords += localFrequency;
+      }
+    }
+
+    sortedWords.sort(
+      (left, right) => (right['localFrequency'] as int).compareTo(
+        left['localFrequency'] as int,
+      ),
+    );
+
+    return {
+      'id': id,
+      'title': title,
+      'totalWords': totalWords,
+      'uniqueWords': uniqueWords,
+      'unknownWords': totalWords - knownWords,
+      'knownWords': knownWords,
+      'newWordsCount': newWordsCount,
+      'words': sortedWords,
+    };
+  }
 }

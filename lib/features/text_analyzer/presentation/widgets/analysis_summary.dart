@@ -1,5 +1,6 @@
-import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
 import 'package:flutter/material.dart';
+
+import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
 
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/app_button.dart';
@@ -25,33 +26,63 @@ class AnalysisSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const AppText.headline(AppStrings.analysisResults),
-          const SizedBox(height: 8),
-          AppText.body(result.title, color: theme.colorScheme.onSurfaceVariant),
-          const SizedBox(height: 24),
-          ComprehensionCard(percentage: result.comprehension),
-          const SizedBox(height: 16),
-          _StatGrid(result: result),
-          const SizedBox(height: 32),
-          WordListSection(words: result.words, onToggleStatus: onToggleStatus),
-          const SizedBox(height: 32),
-          SizedBox(
-            width: double.infinity,
-            child: AppButton(label: 'Analyze Another Text', onPressed: onReset, icon: Icons.refresh),
+    return CustomScrollView(
+      slivers: [
+        const SliverPadding(
+          padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+          sliver: SliverToBoxAdapter(
+            child: AppText.headline(AppStrings.analysisResults),
           ),
-        ],
-      ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+          sliver: SliverToBoxAdapter(
+            child: AppText.body(
+              result.title,
+              color: theme.colorScheme.onSurfaceVariant,
+            ),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 0),
+          sliver: SliverToBoxAdapter(
+            child: ComprehensionCard(percentage: result.comprehension),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+          sliver: SliverToBoxAdapter(
+            child: _StatGrid(result: result),
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 32, 16, 0),
+          sliver: WordListSection(
+            words: result.words,
+            onToggleStatus: onToggleStatus,
+          ),
+        ),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
+          sliver: SliverToBoxAdapter(
+            child: SizedBox(
+              width: double.infinity,
+              child: AppButton(
+                label: 'Analyze Another Text',
+                onPressed: onReset,
+                icon: Icons.refresh,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
 
 class _StatGrid extends StatelessWidget {
   const _StatGrid({required this.result});
+
   final AnalysisResult result;
 
   @override
@@ -61,17 +92,39 @@ class _StatGrid extends StatelessWidget {
       children: [
         Row(
           children: [
-            Expanded(child: StatCard(label: 'Total Words', value: '${result.totalWords}')),
+            Expanded(
+              child: StatCard(
+                label: 'Total Words',
+                value: '${result.totalWords}',
+              ),
+            ),
             const SizedBox(width: 8),
-            Expanded(child: StatCard(label: 'Unique', value: '${result.uniqueWords}')),
+            Expanded(
+              child: StatCard(
+                label: 'Unique',
+                value: '${result.uniqueWords}',
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 8),
         Row(
           children: [
-            Expanded(child: StatCard(label: 'Unknown', value: '${result.unknownWords}', color: theme.colorScheme.error)),
+            Expanded(
+              child: StatCard(
+                label: 'Unknown',
+                value: '${result.unknownWords}',
+                color: theme.colorScheme.error,
+              ),
+            ),
             const SizedBox(width: 8),
-            Expanded(child: StatCard(label: 'Known Words', value: '${result.knownWords}', color: theme.colorScheme.primary)),
+            Expanded(
+              child: StatCard(
+                label: 'Known Words',
+                value: '${result.knownWords}',
+                color: theme.colorScheme.primary,
+              ),
+            ),
           ],
         ),
       ],

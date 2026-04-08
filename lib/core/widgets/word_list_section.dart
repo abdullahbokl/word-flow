@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+
+import '../common/models/word_with_local_freq.dart';
 import '../constants/app_strings.dart';
-import '../../../../core/common/models/word_with_local_freq.dart';
 import '../theme/app_colors.dart';
 
 class WordListSection extends StatefulWidget {
@@ -20,7 +21,7 @@ class WordListSection extends StatefulWidget {
 }
 
 class _WordListSectionState extends State<WordListSection> {
-  int _filterIndex = 0; // 0: All, 1: Known, 2: Unknown
+  int _filterIndex = 0;
 
   List<WordWithLocalFreq> get _filteredWords {
     if (_filterIndex == 0) return widget.words;
@@ -35,66 +36,77 @@ class _WordListSectionState extends State<WordListSection> {
     final theme = Theme.of(context);
     final filtered = _filteredWords;
 
-    return Column(
-      spacing: 12,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.title,
-          style: theme.textTheme.titleMedium?.copyWith(
-            fontWeight: FontWeight.bold,
-          ),
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-        ),
-        Center(
-          child: _FilterToggle(
-            selectedIndex: _filterIndex,
-            onSelected: (index) => setState(() => _filterIndex = index),
+    return SliverMainAxisGroup(
+      slivers: [
+        SliverToBoxAdapter(
+          child: Text(
+            widget.title,
+            style: theme.textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
         ),
+        const SliverToBoxAdapter(child: SizedBox(height: 12)),
+        SliverToBoxAdapter(
+          child: Center(
+            child: _FilterToggle(
+              selectedIndex: _filterIndex,
+              onSelected: (index) => setState(() => _filterIndex = index),
+            ),
+          ),
+        ),
+        const SliverToBoxAdapter(child: SizedBox(height: 12)),
         if (filtered.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 24),
-            child: Center(
-              child: Text(AppStrings.noWordsForFilter),
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 24),
+              child: Center(
+                child: Text(AppStrings.noWordsForFilter),
+              ),
             ),
           )
         else
-          ListView.separated(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: filtered.length,
-            separatorBuilder: (_, __) => Divider(
-              color: theme.dividerColor.withValues(alpha: 0.1),
-            ),
-            itemBuilder: (ctx, i) {
-              final w = filtered[i];
-              return ListTile(
-                contentPadding: EdgeInsets.zero,
-                title: Text(
-                  w.word.text,
-                  style: const TextStyle(fontWeight: FontWeight.w600),
-                ),
-                trailing: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '${w.localFrequency}x',
-                      style: TextStyle(
-                        color: theme.colorScheme.primary,
-                        fontWeight: FontWeight.bold,
+          SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (ctx, index) {
+                if (index.isOdd) {
+                  return Divider(
+                    color: theme.dividerColor.withValues(alpha: 0.1),
+                    height: 1,
+                  );
+                }
+
+                final wordIndex = index ~/ 2;
+                final w = filtered[wordIndex];
+                return ListTile(
+                  contentPadding: EdgeInsets.zero,
+                  title: Text(
+                    w.word.text,
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                  trailing: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        '${w.localFrequency}x',
+                        style: TextStyle(
+                          color: theme.colorScheme.primary,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 12),
-                    _StatusButton(
-                      isKnown: w.word.isKnown,
-                      onToggle: () => widget.onToggleStatus?.call(w),
-                    ),
-                  ],
-                ),
-              );
-            },
+                      const SizedBox(width: 12),
+                      _StatusButton(
+                        isKnown: w.word.isKnown,
+                        onToggle: () => widget.onToggleStatus?.call(w),
+                      ),
+                    ],
+                  ),
+                );
+              },
+              childCount: filtered.length * 2 - 1,
+            ),
           ),
       ],
     );
@@ -116,11 +128,15 @@ class _FilterToggle extends StatelessWidget {
       segments: const [
         ButtonSegment(value: 0, label: Text(AppStrings.all), icon: Icon(Icons.list)),
         ButtonSegment(
-            value: 1,
-            label: Text(AppStrings.known),
-            icon: Icon(Icons.check_circle_outline)),
+          value: 1,
+          label: Text(AppStrings.known),
+          icon: Icon(Icons.check_circle_outline),
+        ),
         ButtonSegment(
-            value: 2, label: Text(AppStrings.unknownLabel), icon: Icon(Icons.help_outline)),
+          value: 2,
+          label: Text(AppStrings.unknownLabel),
+          icon: Icon(Icons.help_outline),
+        ),
       ],
       selected: {selectedIndex},
       onSelectionChanged: (set) => onSelected(set.first),
@@ -155,8 +171,8 @@ class _StatusButton extends StatelessWidget {
               : AppColors.error.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
-            color: isKnown 
-                ? AppColors.secondary.withValues(alpha: 0.2) 
+            color: isKnown
+                ? AppColors.secondary.withValues(alpha: 0.2)
                 : AppColors.error.withValues(alpha: 0.2),
           ),
         ),

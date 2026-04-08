@@ -61,6 +61,46 @@ void main() {
     });
   });
 
+  group('TextProcessor.summarizeAnalysis', () {
+    test('computes counts and sorts by local frequency', () async {
+      final result = await TextProcessor.summarizeAnalysis(
+        id: 42,
+        title: 'Sample',
+        totalWords: 10,
+        uniqueWords: 2,
+        newWordsCount: 1,
+        words: [
+          {
+            'id': 1,
+            'text': 'alpha',
+            'frequency': 3,
+            'isKnown': false,
+            'createdAtMs': DateTime(2025).millisecondsSinceEpoch,
+            'updatedAtMs': DateTime(2025).millisecondsSinceEpoch,
+            'meaning': null,
+            'description': null,
+            'localFrequency': 2,
+          },
+          {
+            'id': 2,
+            'text': 'beta',
+            'frequency': 5,
+            'isKnown': true,
+            'createdAtMs': DateTime(2025).millisecondsSinceEpoch,
+            'updatedAtMs': DateTime(2025).millisecondsSinceEpoch,
+            'meaning': null,
+            'description': null,
+            'localFrequency': 8,
+          },
+        ],
+      );
+
+      expect(result['knownWords'], 8);
+      expect(result['unknownWords'], 2);
+      expect((result['words'] as List).first['text'], 'beta');
+    });
+  });
+
   group('TextProcessor.totalTokenCount', () {
     test('returns 0 for empty map', () {
       expect(TextProcessor.totalTokenCount({}), 0);

@@ -13,6 +13,20 @@ class WordWithLocalFreqModel extends Equatable {
     required this.localFrequency,
   });
 
+  factory WordWithLocalFreqModel.fromMap(Map<String, Object?> map) {
+    return WordWithLocalFreqModel(
+      id: map['id'] as int,
+      text: map['text'] as String,
+      frequency: map['frequency'] as int,
+      isKnown: map['isKnown'] as bool,
+      createdAt: DateTime.fromMillisecondsSinceEpoch(map['createdAtMs'] as int),
+      updatedAt: DateTime.fromMillisecondsSinceEpoch(map['updatedAtMs'] as int),
+      meaning: map['meaning'] as String?,
+      description: map['description'] as String?,
+      localFrequency: map['localFrequency'] as int,
+    );
+  }
+
   final int id;
   final String text;
   final int frequency;
@@ -48,6 +62,22 @@ class AnalysisResultModel extends Equatable {
     required this.newWordsCount,
     required this.words,
   });
+
+  factory AnalysisResultModel.fromMap(Map<String, Object?> map) {
+    return AnalysisResultModel(
+      id: map['id'] as int,
+      title: map['title'] as String,
+      totalWords: map['totalWords'] as int,
+      uniqueWords: map['uniqueWords'] as int,
+      unknownWords: map['unknownWords'] as int,
+      knownWords: map['knownWords'] as int,
+      newWordsCount: map['newWordsCount'] as int,
+      words: (map['words'] as List<Object?>)
+          .cast<Map<String, Object?>>()
+          .map(WordWithLocalFreqModel.fromMap)
+          .toList(),
+    );
+  }
 
   final int id;
   final String title;

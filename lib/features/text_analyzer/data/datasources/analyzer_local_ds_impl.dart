@@ -20,19 +20,14 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
     final uniqueTokens = freq.keys.toList();
 
     return _db.transaction(() async {
-      // 1. Get existing words info
       final existingRows = await (_db.select(_db.words)
             ..where((w) => w.word.isIn(uniqueTokens)))
           .get();
 
       final existingMap = {for (final r in existingRows) r.word: r};
-
-      // 2. Insert new words
-      final newTokens =
-          uniqueTokens.where((t) => !existingMap.containsKey(t)).toList();
+      final newTokens = uniqueTokens.where((t) => !existingMap.containsKey(t)).toList();
       final now = DateTime.now();
 
-      // 2. Insert new words in batch
       if (newTokens.isNotEmpty) {
         await _db.batch((b) {
           for (final t in newTokens) {
@@ -50,13 +45,24 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
         });
       }
 
-      // 3. Update frequencies and get final word IDs
       final allWordRows = await (_db.select(_db.words)
             ..where((w) => w.word.isIn(uniqueTokens)))
           .get();
 
       final wordIdMap = {for (final r in allWordRows) r.word: r.id};
-      final knownMap = {for (final r in allWordRows) r.id: r.isKnown};
+      final wordSnapshots = allWordRows.map((row) {
+        return {
+          'id': row.id,
+          'text': row.word,
+          'frequency': row.frequency,
+          'isKnown': row.isKnown,
+          'createdAtMs': row.createdAt.millisecondsSinceEpoch,
+          'updatedAtMs': row.updatedAt.millisecondsSinceEpoch,
+          'meaning': row.meaning,
+          'description': row.description,
+          'localFrequency': freq[row.word] ?? 0,
+        };
+      }).toList(growable: false);
 
       await _db.batch((b) {
         for (final row in allWordRows) {
@@ -72,7 +78,6 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
         }
       });
 
-      // 4. Create AnalyzedText record
       final analyzedTextId = await _db.into(_db.analyzedTexts).insert(
             AnalyzedTextsCompanion.insert(
               title: title,
@@ -83,7 +88,6 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
             ),
           );
 
-      // 5. Create TextWordEntries records in batch
       await _db.batch((b) {
         for (final entry in freq.entries) {
           final wordId = wordIdMap[entry.key]!;
@@ -98,44 +102,16 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
         }
       });
 
-      // 6. Calculate summary
-      var totalKnownTokens = 0;
-      for (final entry in freq.entries) {
-        final wordId = wordIdMap[entry.key]!;
-        final isKnown = knownMap[wordId] ?? false;
-        if (isKnown) {
-          totalKnownTokens += entry.value;
-        }
-      }
-
-      final unknownTokens = totalWords - totalKnownTokens;
-
-      // 7. Map to models
-      final wordsWithLocalFreq = allWordRows.map((row) {
-        return WordWithLocalFreqModel(
-          id: row.id,
-          text: row.word,
-          frequency: row.frequency,
-          isKnown: row.isKnown,
-          createdAt: row.createdAt,
-          updatedAt: row.updatedAt,
-          meaning: row.meaning,
-          description: row.description,
-          localFrequency: freq[row.word] ?? 0,
-        );
-      }).toList()
-        ..sort((a, b) => b.localFrequency.compareTo(a.localFrequency));
-
-      return AnalysisResultModel(
+      final analysisMap = await TextProcessor.summarizeAnalysis(
         id: analyzedTextId,
         title: title,
         totalWords: totalWords,
         uniqueWords: uniqueTokens.length,
-        unknownWords: unknownTokens,
-        knownWords: totalKnownTokens,
         newWordsCount: newTokens.length,
-        words: wordsWithLocalFreq,
+        words: wordSnapshots,
       );
+
+      return AnalysisResultModel.fromMap(analysisMap);
     });
   }
 }

@@ -65,6 +65,7 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
           },
           builder: (context, state) => StatusView<AnalysisResult>(
             status: state.status,
+            animate: false,
             onInitial: () => AnalyzerInputBody(
               titleCtrl: _titleCtrl,
               contentCtrl: _contentCtrl,

@@ -33,30 +33,22 @@ class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
     if (!state.status.isSuccess) return;
     final res = state.status.data!;
 
-    final updatedWords = res.words.map((w) {
-      if (w.word.id == e.wordId) {
-        return WordWithLocalFreq(
-          word: w.word.copyWith(isKnown: !w.word.isKnown),
-          localFrequency: w.localFrequency,
-        );
-      }
-      return w;
-    }).toList();
+    final index = res.words.indexWhere((w) => w.word.id == e.wordId);
+    if (index == -1) return;
 
-    int newKnownWords = 0;
-    int newUnknownTokens = 0;
-    for (final w in updatedWords) {
-      if (w.word.isKnown) {
-        newKnownWords += w.localFrequency;
-      } else {
-        newUnknownTokens += w.localFrequency;
-      }
-    }
+    final currentWord = res.words[index];
+    final isKnownNow = !currentWord.word.isKnown;
+    final delta = currentWord.localFrequency;
+    final updatedWords = List<WordWithLocalFreq>.from(res.words);
+    updatedWords[index] = WordWithLocalFreq(
+      word: currentWord.word.copyWith(isKnown: isKnownNow),
+      localFrequency: currentWord.localFrequency,
+    );
 
     final updatedResult = res.copyWith(
       words: updatedWords,
-      knownWords: newKnownWords,
-      unknownWords: newUnknownTokens,
+      knownWords: res.knownWords + (isKnownNow ? delta : -delta),
+      unknownWords: res.unknownWords + (isKnownNow ? -delta : delta),
     );
 
     emit(state.copyWith(status: BlocStatus.success(data: updatedResult)));

@@ -3,8 +3,10 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:lexitrack/core/error/failures.dart';
+import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
 import 'package:lexitrack/core/common/state/bloc_status.dart';
+import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:lexitrack/core/error/failures.dart';
 import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
 import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
 import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
@@ -14,16 +16,38 @@ import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/ana
 
 class MockAnalyzerRepository extends Mock implements AnalyzerRepository {}
 
+WordWithLocalFreq _makeWord({
+  required int id,
+  required String text,
+  required bool isKnown,
+  required int localFrequency,
+}) {
+  return WordWithLocalFreq(
+    word: WordEntity(
+      id: id,
+      text: text,
+      frequency: localFrequency,
+      isKnown: isKnown,
+      createdAt: DateTime(2025),
+      updatedAt: DateTime(2025),
+    ),
+    localFrequency: localFrequency,
+  );
+}
+
 AnalysisResult _makeResult({int id = 1}) {
   return AnalysisResult(
     id: id,
     title: 'Test',
     totalWords: 10,
-    uniqueWords: 5,
-    knownWords: 3,
-    unknownWords: 2,
+    uniqueWords: 2,
+    knownWords: 6,
+    unknownWords: 4,
     newWordsCount: 0,
-    words: const [],
+    words: [
+      _makeWord(id: 1, text: 'alpha', isKnown: false, localFrequency: 4),
+      _makeWord(id: 2, text: 'beta', isKnown: true, localFrequency: 6),
+    ],
   );
 }
 
@@ -95,12 +119,28 @@ void main() {
     blocTest<AnalyzerBloc, AnalyzerState>(
       'emits reset state on ResetAnalysis',
       build: () => bloc,
-      seed: () => AnalyzerState(
-        status: const BlocStatus.success(data: _AnalysisResult(id: 1)),
+      seed: () => const AnalyzerState(
+        status: BlocStatus.success(data: _AnalysisResult(id: 1)),
       ),
       act: (b) => b.add(const ResetAnalysis()),
       expect: () => [
         isA<AnalyzerState>().having((s) => s.status.isInitial, 'isInitial', true),
+      ],
+    );
+
+    blocTest<AnalyzerBloc, AnalyzerState>(
+      'toggles a single word without rescanning the whole result',
+      build: () => bloc,
+      seed: () => AnalyzerState(
+        status: BlocStatus.success(data: _makeResult()),
+      ),
+      act: (b) => b.add(const ToggleWordStatusInResult(wordId: 1)),
+      expect: () => [
+        isA<AnalyzerState>()
+            .having((s) => s.status.isSuccess, 'isSuccess', true)
+            .having((s) => s.status.data!.knownWords, 'knownWords', 10)
+            .having((s) => s.status.data!.unknownWords, 'unknownWords', 0)
+            .having((s) => s.status.data!.words.first.word.isKnown, 'first word isKnown', true),
       ],
     );
   });
