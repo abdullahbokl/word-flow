@@ -9,7 +9,7 @@ void main() {
   group('StatusView', () {
     testWidgets('shows loading widget by default', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: StatusView<String>(
               status: BlocStatus<String>.loading(),
@@ -42,7 +42,7 @@ void main() {
     testWidgets('shows error widget by default when status is failure',
         (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: StatusView<String>(
               status: BlocStatus<String>.failure(error: 'Oops'),
@@ -60,8 +60,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: StatusView<String>(
-              status: BlocStatus<String>.empty(),
-              onEmpty: () => Text('No data'),
+              status: const BlocStatus<String>.empty(),
+              onEmpty: () => const Text('No data'),
               animate: false,
             ),
           ),
@@ -76,8 +76,8 @@ void main() {
         MaterialApp(
           home: Scaffold(
             body: StatusView<String>(
-              status: BlocStatus<String>.initial(),
-              onInitial: () => Text('Initializing...'),
+              status: const BlocStatus<String>.initial(),
+              onInitial: () => const Text('Initializing...'),
               animate: false,
             ),
           ),

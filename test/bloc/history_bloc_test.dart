@@ -57,7 +57,8 @@ void main() {
       },
       act: (bloc) => bloc.add(const LoadHistory()),
       expect: () => [
-        isA<HistoryState>().having((s) => s.status.isLoading, 'isLoading', true),
+        isA<HistoryState>()
+            .having((s) => s.status.isLoading, 'isLoading', true),
         isA<HistoryState>().having(
           (s) => s.status.isSuccess,
           'isSuccess',
@@ -70,7 +71,7 @@ void main() {
       'emits [loading, failure] when LoadHistory fails',
       build: () {
         when(() => repository.watchHistory()).thenAnswer(
-          (_) => Stream.value(Left<Failure, List<HistoryItem>>(
+          (_) => Stream.value(const Left<Failure, List<HistoryItem>>(
             DatabaseFailure('Database error'),
           )),
         );
@@ -78,7 +79,8 @@ void main() {
       },
       act: (bloc) => bloc.add(const LoadHistory()),
       expect: () => [
-        isA<HistoryState>().having((s) => s.status.isLoading, 'isLoading', true),
+        isA<HistoryState>()
+            .having((s) => s.status.isLoading, 'isLoading', true),
         isA<HistoryState>().having((s) => s.status.isFailed, 'isFailed', true),
       ],
     );

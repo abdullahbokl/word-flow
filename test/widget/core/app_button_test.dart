@@ -22,8 +22,7 @@ void main() {
       expect(pressed, true);
     });
 
-    testWidgets('shows loading indicator when isLoading=true',
-        (tester) async {
+    testWidgets('shows loading indicator when isLoading=true', (tester) async {
       await tester.pumpWidget(
         MaterialApp(
           home: Scaffold(
@@ -41,7 +40,7 @@ void main() {
 
     testWidgets('disabled button has null onPressed', (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: AppButton(
               label: 'Disabled',
