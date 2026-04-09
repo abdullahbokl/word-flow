@@ -37,21 +37,7 @@ class WordsSliverList extends StatelessWidget {
 
     return MultiSliver(
       children: [
-        SliverPrototypeExtentList(
-          prototypeItem: WordTile(
-            word: WordEntity(
-              id: -1,
-              text: 'Prototype',
-              frequency: 0,
-              isKnown: false,
-              meaning: 'A prototype for height calculation',
-              createdAt: DateTime.now(),
-              updatedAt: DateTime.now(),
-            ),
-            onToggle: () {},
-            onDelete: () {},
-            onEdit: () {},
-          ),
+        SliverList(
           delegate: SliverChildBuilderDelegate(
             (ctx, i) {
               final w = words[i];

@@ -12,6 +12,10 @@ extension WordRowMapper on WordRow {
       updatedAt: updatedAt,
       meaning: meaning,
       description: description,
+      definitions: definitions,
+      examples: examples,
+      translations: translations,
+      synonyms: synonyms,
     );
   }
 }

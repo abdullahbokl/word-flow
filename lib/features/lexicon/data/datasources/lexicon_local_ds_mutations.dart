@@ -27,14 +27,24 @@ Future<WordRow> toggleWordStatus(AppDatabase db, int wordId) async {
 Future<WordRow> updateWordRow(
   AppDatabase db,
   int id, {
+  String? text,
   String? meaning,
   String? description,
+  List<String>? definitions,
+  List<String>? examples,
+  List<String>? translations,
+  List<String>? synonyms,
 }) async {
   final now = DateTime.now();
   await (db.update(db.words)..where((row) => row.id.equals(id))).write(
     WordsCompanion(
+      word: text != null ? Value(text) : const Value.absent(),
       meaning: Value(meaning),
       description: Value(description),
+      definitions: Value(definitions),
+      examples: Value(examples),
+      translations: Value(translations),
+      synonyms: Value(synonyms),
       updatedAt: Value(now),
     ),
   );

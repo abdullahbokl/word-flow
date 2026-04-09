@@ -55,10 +55,22 @@ class LexiconRepositoryImpl implements LexiconRepository {
 
   @override
   TaskEither<Failure, WordEntity> updateWord(int id,
-          {String? meaning, String? description}) =>
+          {String? text,
+          String? meaning,
+          String? description,
+          List<String>? definitions,
+          List<String>? examples,
+          List<String>? translations,
+          List<String>? synonyms}) =>
       TaskEither.tryCatch(
         () async => (await _local.updateWord(id,
-                meaning: meaning, description: description))
+                text: text,
+                meaning: meaning,
+                description: description,
+                definitions: definitions,
+                examples: examples,
+                translations: translations,
+                synonyms: synonyms))
             .toEntity(),
         (error, stack) => DatabaseFailure('$error', stack),
       );

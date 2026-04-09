@@ -103,7 +103,40 @@ extension LexiconBlocHandlers on LexiconBloc {
     await _deleteWord(e.wordId).run();
   }
 
-  void _onStatsUpdate(LexiconStatsUpdateReceived e, Emitter<LexiconState> emit) => emit(state.copyWith(stats: e.stats));
+  Future<void> _onUpdate(UpdateWordEvent e, Emitter<LexiconState> emit) async {
+    final status = state.status;
+    if (!status.isSuccess) return;
+
+    final currentWords = status.data as List<WordEntity>;
+    final index = currentWords.indexWhere((w) => w.id == e.wordId);
+    if (index == -1) return;
+
+    final res = await _updateWord(
+      e.wordId,
+      text: e.text,
+      meaning: e.meaning,
+      definitions: e.definitions,
+      examples: e.examples,
+      translations: e.translations,
+      synonyms: e.synonyms,
+    ).run();
+
+    res.fold(
+      (f) => add(LexiconErrorReceived(f.message)),
+      (updatedWord) {
+        final latestWords =
+            List<WordEntity>.from(state.status.data as List<WordEntity>);
+        final latestIndex = latestWords.indexWhere((w) => w.id == updatedWord.id);
+        if (latestIndex != -1) {
+          latestWords[latestIndex] = updatedWord;
+          emit(state.copyWith(status: BlocStatus.success(data: latestWords)));
+        }
+      },
+    );
+  }
+
+  void _onStatsUpdate(LexiconStatsUpdateReceived e, Emitter<LexiconState> emit) =>
+      emit(state.copyWith(stats: e.stats));
 
   void _onErrorReceived(LexiconErrorReceived e, Emitter<LexiconState> emit) => emit(state.copyWith(status: BlocStatus.failure(error: e.message)));
 }

@@ -6,6 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
 
 import 'tables.dart';
+import 'converters/string_list_converter.dart';
 
 part 'app_database.g.dart';
 
@@ -16,7 +17,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting({required QueryExecutor e}) : super(e);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -30,8 +31,6 @@ class AppDatabase extends _$AppDatabase {
         if (from < 3) {
           await m.addColumn(analyzedTexts, analyzedTexts.knownWords);
           await m.addColumn(analyzedTexts, analyzedTexts.unknownWords);
-          // Drift automatically handles foreign keys in createAll()
-          // For a live app with data, we might need a more complex migration to add FKs to existing tables
         }
         if (from < 4) {
           await customStatement(
@@ -40,6 +39,12 @@ class AppDatabase extends _$AppDatabase {
           await customStatement(
             'CREATE INDEX IF NOT EXISTS idx_words_updated_at ON words (updated_at)',
           );
+        }
+        if (from < 5) {
+          await m.addColumn(words, words.definitions);
+          await m.addColumn(words, words.examples);
+          await m.addColumn(words, words.translations);
+          await m.addColumn(words, words.synonyms);
         }
       },
       beforeOpen: (details) async {

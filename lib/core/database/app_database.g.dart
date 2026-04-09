@@ -67,6 +67,26 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
       'description', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
   @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+      definitions = GeneratedColumn<String>('definitions', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>($WordsTable.$converterdefinitionsn);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> examples =
+      GeneratedColumn<String>('examples', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>($WordsTable.$converterexamplesn);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+      translations = GeneratedColumn<String>('translations', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>($WordsTable.$convertertranslationsn);
+  @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String> synonyms =
+      GeneratedColumn<String>('synonyms', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>($WordsTable.$convertersynonymsn);
+  @override
   List<GeneratedColumn> get $columns => [
         id,
         word,
@@ -75,7 +95,11 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
         createdAt,
         updatedAt,
         meaning,
-        description
+        description,
+        definitions,
+        examples,
+        translations,
+        synonyms
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -151,6 +175,18 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
           .read(DriftSqlType.string, data['${effectivePrefix}meaning']),
       description: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}description']),
+      definitions: $WordsTable.$converterdefinitionsn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}definitions'])),
+      examples: $WordsTable.$converterexamplesn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}examples'])),
+      translations: $WordsTable.$convertertranslationsn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}translations'])),
+      synonyms: $WordsTable.$convertersynonymsn.fromSql(attachedDatabase
+          .typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}synonyms'])),
     );
   }
 
@@ -158,6 +194,23 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
   $WordsTable createAlias(String alias) {
     return $WordsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<String>, String> $converterdefinitions =
+      const StringListConverter();
+  static TypeConverter<List<String>?, String?> $converterdefinitionsn =
+      NullAwareTypeConverter.wrap($converterdefinitions);
+  static TypeConverter<List<String>, String> $converterexamples =
+      const StringListConverter();
+  static TypeConverter<List<String>?, String?> $converterexamplesn =
+      NullAwareTypeConverter.wrap($converterexamples);
+  static TypeConverter<List<String>, String> $convertertranslations =
+      const StringListConverter();
+  static TypeConverter<List<String>?, String?> $convertertranslationsn =
+      NullAwareTypeConverter.wrap($convertertranslations);
+  static TypeConverter<List<String>, String> $convertersynonyms =
+      const StringListConverter();
+  static TypeConverter<List<String>?, String?> $convertersynonymsn =
+      NullAwareTypeConverter.wrap($convertersynonyms);
 }
 
 class WordRow extends DataClass implements Insertable<WordRow> {
@@ -169,6 +222,10 @@ class WordRow extends DataClass implements Insertable<WordRow> {
   final DateTime updatedAt;
   final String? meaning;
   final String? description;
+  final List<String>? definitions;
+  final List<String>? examples;
+  final List<String>? translations;
+  final List<String>? synonyms;
   const WordRow(
       {required this.id,
       required this.word,
@@ -177,7 +234,11 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       required this.createdAt,
       required this.updatedAt,
       this.meaning,
-      this.description});
+      this.description,
+      this.definitions,
+      this.examples,
+      this.translations,
+      this.synonyms});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -192,6 +253,22 @@ class WordRow extends DataClass implements Insertable<WordRow> {
     }
     if (!nullToAbsent || description != null) {
       map['description'] = Variable<String>(description);
+    }
+    if (!nullToAbsent || definitions != null) {
+      map['definitions'] = Variable<String>(
+          $WordsTable.$converterdefinitionsn.toSql(definitions));
+    }
+    if (!nullToAbsent || examples != null) {
+      map['examples'] =
+          Variable<String>($WordsTable.$converterexamplesn.toSql(examples));
+    }
+    if (!nullToAbsent || translations != null) {
+      map['translations'] = Variable<String>(
+          $WordsTable.$convertertranslationsn.toSql(translations));
+    }
+    if (!nullToAbsent || synonyms != null) {
+      map['synonyms'] =
+          Variable<String>($WordsTable.$convertersynonymsn.toSql(synonyms));
     }
     return map;
   }
@@ -210,6 +287,18 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       description: description == null && nullToAbsent
           ? const Value.absent()
           : Value(description),
+      definitions: definitions == null && nullToAbsent
+          ? const Value.absent()
+          : Value(definitions),
+      examples: examples == null && nullToAbsent
+          ? const Value.absent()
+          : Value(examples),
+      translations: translations == null && nullToAbsent
+          ? const Value.absent()
+          : Value(translations),
+      synonyms: synonyms == null && nullToAbsent
+          ? const Value.absent()
+          : Value(synonyms),
     );
   }
 
@@ -225,6 +314,10 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
       meaning: serializer.fromJson<String?>(json['meaning']),
       description: serializer.fromJson<String?>(json['description']),
+      definitions: serializer.fromJson<List<String>?>(json['definitions']),
+      examples: serializer.fromJson<List<String>?>(json['examples']),
+      translations: serializer.fromJson<List<String>?>(json['translations']),
+      synonyms: serializer.fromJson<List<String>?>(json['synonyms']),
     );
   }
   @override
@@ -239,6 +332,10 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       'updatedAt': serializer.toJson<DateTime>(updatedAt),
       'meaning': serializer.toJson<String?>(meaning),
       'description': serializer.toJson<String?>(description),
+      'definitions': serializer.toJson<List<String>?>(definitions),
+      'examples': serializer.toJson<List<String>?>(examples),
+      'translations': serializer.toJson<List<String>?>(translations),
+      'synonyms': serializer.toJson<List<String>?>(synonyms),
     };
   }
 
@@ -250,7 +347,11 @@ class WordRow extends DataClass implements Insertable<WordRow> {
           DateTime? createdAt,
           DateTime? updatedAt,
           Value<String?> meaning = const Value.absent(),
-          Value<String?> description = const Value.absent()}) =>
+          Value<String?> description = const Value.absent(),
+          Value<List<String>?> definitions = const Value.absent(),
+          Value<List<String>?> examples = const Value.absent(),
+          Value<List<String>?> translations = const Value.absent(),
+          Value<List<String>?> synonyms = const Value.absent()}) =>
       WordRow(
         id: id ?? this.id,
         word: word ?? this.word,
@@ -260,6 +361,11 @@ class WordRow extends DataClass implements Insertable<WordRow> {
         updatedAt: updatedAt ?? this.updatedAt,
         meaning: meaning.present ? meaning.value : this.meaning,
         description: description.present ? description.value : this.description,
+        definitions: definitions.present ? definitions.value : this.definitions,
+        examples: examples.present ? examples.value : this.examples,
+        translations:
+            translations.present ? translations.value : this.translations,
+        synonyms: synonyms.present ? synonyms.value : this.synonyms,
       );
   WordRow copyWithCompanion(WordsCompanion data) {
     return WordRow(
@@ -272,6 +378,13 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       meaning: data.meaning.present ? data.meaning.value : this.meaning,
       description:
           data.description.present ? data.description.value : this.description,
+      definitions:
+          data.definitions.present ? data.definitions.value : this.definitions,
+      examples: data.examples.present ? data.examples.value : this.examples,
+      translations: data.translations.present
+          ? data.translations.value
+          : this.translations,
+      synonyms: data.synonyms.present ? data.synonyms.value : this.synonyms,
     );
   }
 
@@ -285,14 +398,29 @@ class WordRow extends DataClass implements Insertable<WordRow> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('meaning: $meaning, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('definitions: $definitions, ')
+          ..write('examples: $examples, ')
+          ..write('translations: $translations, ')
+          ..write('synonyms: $synonyms')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(
-      id, word, frequency, isKnown, createdAt, updatedAt, meaning, description);
+      id,
+      word,
+      frequency,
+      isKnown,
+      createdAt,
+      updatedAt,
+      meaning,
+      description,
+      definitions,
+      examples,
+      translations,
+      synonyms);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -304,7 +432,11 @@ class WordRow extends DataClass implements Insertable<WordRow> {
           other.createdAt == this.createdAt &&
           other.updatedAt == this.updatedAt &&
           other.meaning == this.meaning &&
-          other.description == this.description);
+          other.description == this.description &&
+          other.definitions == this.definitions &&
+          other.examples == this.examples &&
+          other.translations == this.translations &&
+          other.synonyms == this.synonyms);
 }
 
 class WordsCompanion extends UpdateCompanion<WordRow> {
@@ -316,6 +448,10 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
   final Value<DateTime> updatedAt;
   final Value<String?> meaning;
   final Value<String?> description;
+  final Value<List<String>?> definitions;
+  final Value<List<String>?> examples;
+  final Value<List<String>?> translations;
+  final Value<List<String>?> synonyms;
   const WordsCompanion({
     this.id = const Value.absent(),
     this.word = const Value.absent(),
@@ -325,6 +461,10 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
     this.updatedAt = const Value.absent(),
     this.meaning = const Value.absent(),
     this.description = const Value.absent(),
+    this.definitions = const Value.absent(),
+    this.examples = const Value.absent(),
+    this.translations = const Value.absent(),
+    this.synonyms = const Value.absent(),
   });
   WordsCompanion.insert({
     this.id = const Value.absent(),
@@ -335,6 +475,10 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
     required DateTime updatedAt,
     this.meaning = const Value.absent(),
     this.description = const Value.absent(),
+    this.definitions = const Value.absent(),
+    this.examples = const Value.absent(),
+    this.translations = const Value.absent(),
+    this.synonyms = const Value.absent(),
   })  : word = Value(word),
         createdAt = Value(createdAt),
         updatedAt = Value(updatedAt);
@@ -347,6 +491,10 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
     Expression<DateTime>? updatedAt,
     Expression<String>? meaning,
     Expression<String>? description,
+    Expression<String>? definitions,
+    Expression<String>? examples,
+    Expression<String>? translations,
+    Expression<String>? synonyms,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -357,6 +505,10 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
       if (updatedAt != null) 'updated_at': updatedAt,
       if (meaning != null) 'meaning': meaning,
       if (description != null) 'description': description,
+      if (definitions != null) 'definitions': definitions,
+      if (examples != null) 'examples': examples,
+      if (translations != null) 'translations': translations,
+      if (synonyms != null) 'synonyms': synonyms,
     });
   }
 
@@ -368,7 +520,11 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
       Value<DateTime>? createdAt,
       Value<DateTime>? updatedAt,
       Value<String?>? meaning,
-      Value<String?>? description}) {
+      Value<String?>? description,
+      Value<List<String>?>? definitions,
+      Value<List<String>?>? examples,
+      Value<List<String>?>? translations,
+      Value<List<String>?>? synonyms}) {
     return WordsCompanion(
       id: id ?? this.id,
       word: word ?? this.word,
@@ -378,6 +534,10 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
       updatedAt: updatedAt ?? this.updatedAt,
       meaning: meaning ?? this.meaning,
       description: description ?? this.description,
+      definitions: definitions ?? this.definitions,
+      examples: examples ?? this.examples,
+      translations: translations ?? this.translations,
+      synonyms: synonyms ?? this.synonyms,
     );
   }
 
@@ -408,6 +568,22 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
     if (description.present) {
       map['description'] = Variable<String>(description.value);
     }
+    if (definitions.present) {
+      map['definitions'] = Variable<String>(
+          $WordsTable.$converterdefinitionsn.toSql(definitions.value));
+    }
+    if (examples.present) {
+      map['examples'] = Variable<String>(
+          $WordsTable.$converterexamplesn.toSql(examples.value));
+    }
+    if (translations.present) {
+      map['translations'] = Variable<String>(
+          $WordsTable.$convertertranslationsn.toSql(translations.value));
+    }
+    if (synonyms.present) {
+      map['synonyms'] = Variable<String>(
+          $WordsTable.$convertersynonymsn.toSql(synonyms.value));
+    }
     return map;
   }
 
@@ -421,7 +597,11 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
           ..write('createdAt: $createdAt, ')
           ..write('updatedAt: $updatedAt, ')
           ..write('meaning: $meaning, ')
-          ..write('description: $description')
+          ..write('description: $description, ')
+          ..write('definitions: $definitions, ')
+          ..write('examples: $examples, ')
+          ..write('translations: $translations, ')
+          ..write('synonyms: $synonyms')
           ..write(')'))
         .toString();
   }
@@ -1140,6 +1320,10 @@ typedef $$WordsTableCreateCompanionBuilder = WordsCompanion Function({
   required DateTime updatedAt,
   Value<String?> meaning,
   Value<String?> description,
+  Value<List<String>?> definitions,
+  Value<List<String>?> examples,
+  Value<List<String>?> translations,
+  Value<List<String>?> synonyms,
 });
 typedef $$WordsTableUpdateCompanionBuilder = WordsCompanion Function({
   Value<int> id,
@@ -1150,6 +1334,10 @@ typedef $$WordsTableUpdateCompanionBuilder = WordsCompanion Function({
   Value<DateTime> updatedAt,
   Value<String?> meaning,
   Value<String?> description,
+  Value<List<String>?> definitions,
+  Value<List<String>?> examples,
+  Value<List<String>?> translations,
+  Value<List<String>?> synonyms,
 });
 
 final class $$WordsTableReferences
@@ -1206,6 +1394,26 @@ class $$WordsTableFilterComposer extends Composer<_$AppDatabase, $WordsTable> {
   ColumnFilters<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => ColumnFilters(column));
 
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+      get definitions => $composableBuilder(
+          column: $table.definitions,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+      get examples => $composableBuilder(
+          column: $table.examples,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+      get translations => $composableBuilder(
+          column: $table.translations,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+      get synonyms => $composableBuilder(
+          column: $table.synonyms,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
   Expression<bool> textWordEntriesRefs(
       Expression<bool> Function($$TextWordEntriesTableFilterComposer f) f) {
     final $$TextWordEntriesTableFilterComposer composer = $composerBuilder(
@@ -1260,6 +1468,19 @@ class $$WordsTableOrderingComposer
 
   ColumnOrderings<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get definitions => $composableBuilder(
+      column: $table.definitions, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get examples => $composableBuilder(
+      column: $table.examples, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get translations => $composableBuilder(
+      column: $table.translations,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get synonyms => $composableBuilder(
+      column: $table.synonyms, builder: (column) => ColumnOrderings(column));
 }
 
 class $$WordsTableAnnotationComposer
@@ -1294,6 +1515,20 @@ class $$WordsTableAnnotationComposer
 
   GeneratedColumn<String> get description => $composableBuilder(
       column: $table.description, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get definitions =>
+      $composableBuilder(
+          column: $table.definitions, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get examples =>
+      $composableBuilder(column: $table.examples, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get translations =>
+      $composableBuilder(
+          column: $table.translations, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get synonyms =>
+      $composableBuilder(column: $table.synonyms, builder: (column) => column);
 
   Expression<T> textWordEntriesRefs<T extends Object>(
       Expression<T> Function($$TextWordEntriesTableAnnotationComposer a) f) {
@@ -1348,6 +1583,10 @@ class $$WordsTableTableManager extends RootTableManager<
             Value<DateTime> updatedAt = const Value.absent(),
             Value<String?> meaning = const Value.absent(),
             Value<String?> description = const Value.absent(),
+            Value<List<String>?> definitions = const Value.absent(),
+            Value<List<String>?> examples = const Value.absent(),
+            Value<List<String>?> translations = const Value.absent(),
+            Value<List<String>?> synonyms = const Value.absent(),
           }) =>
               WordsCompanion(
             id: id,
@@ -1358,6 +1597,10 @@ class $$WordsTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             meaning: meaning,
             description: description,
+            definitions: definitions,
+            examples: examples,
+            translations: translations,
+            synonyms: synonyms,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -1368,6 +1611,10 @@ class $$WordsTableTableManager extends RootTableManager<
             required DateTime updatedAt,
             Value<String?> meaning = const Value.absent(),
             Value<String?> description = const Value.absent(),
+            Value<List<String>?> definitions = const Value.absent(),
+            Value<List<String>?> examples = const Value.absent(),
+            Value<List<String>?> translations = const Value.absent(),
+            Value<List<String>?> synonyms = const Value.absent(),
           }) =>
               WordsCompanion.insert(
             id: id,
@@ -1378,6 +1625,10 @@ class $$WordsTableTableManager extends RootTableManager<
             updatedAt: updatedAt,
             meaning: meaning,
             description: description,
+            definitions: definitions,
+            examples: examples,
+            translations: translations,
+            synonyms: synonyms,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) =>

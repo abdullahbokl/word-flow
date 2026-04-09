@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'converters/string_list_converter.dart';
 
 @DataClassName('WordRow')
 class Words extends Table {
@@ -10,6 +11,14 @@ class Words extends Table {
   DateTimeColumn get updatedAt => dateTime()();
   TextColumn get meaning => text().nullable()();
   TextColumn get description => text().nullable()();
+  TextColumn get definitions =>
+      text().map(const StringListConverter()).nullable()();
+  TextColumn get examples =>
+      text().map(const StringListConverter()).nullable()();
+  TextColumn get translations =>
+      text().map(const StringListConverter()).nullable()();
+  TextColumn get synonyms =>
+      text().map(const StringListConverter()).nullable()();
 }
 
 @DataClassName('AnalyzedTextRow')

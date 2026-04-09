@@ -48,10 +48,25 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
   @override
   Future<WordRow> updateWord(
     int id, {
+    String? text,
     String? meaning,
     String? description,
+    List<String>? definitions,
+    List<String>? examples,
+    List<String>? translations,
+    List<String>? synonyms,
   }) async {
-    return updateWordRow(_db, id, meaning: meaning, description: description);
+    return updateWordRow(
+      _db,
+      id,
+      text: text,
+      meaning: meaning,
+      description: description,
+      definitions: definitions,
+      examples: examples,
+      translations: translations,
+      synonyms: synonyms,
+    );
   }
 
   @override

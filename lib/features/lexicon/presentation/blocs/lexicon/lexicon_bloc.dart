@@ -46,9 +46,7 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
         (e, emit) async => await _onFetch(emit: emit, filter: e.filter));
     on<SortLexicon>(
         (e, emit) async => await _onFetch(emit: emit, sort: e.sort));
-    on<UpdateWordEvent>((e, _) async => await _updateWord(e.wordId,
-            meaning: e.meaning, description: e.description)
-        .run());
+    on<UpdateWordEvent>(_onUpdate);
   }
 
   static const _pageSize = 50;

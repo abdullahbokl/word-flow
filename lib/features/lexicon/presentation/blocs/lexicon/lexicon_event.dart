@@ -84,13 +84,36 @@ final class AddWordManuallyEvent extends LexiconEvent {
 }
 
 final class UpdateWordEvent extends LexiconEvent {
-  const UpdateWordEvent(this.wordId, {this.meaning, this.description});
+  const UpdateWordEvent(
+    this.wordId, {
+    this.text,
+    this.meaning,
+    this.description,
+    this.definitions,
+    this.examples,
+    this.translations,
+    this.synonyms,
+  });
   final int wordId;
+  final String? text;
   final String? meaning;
   final String? description;
+  final List<String>? definitions;
+  final List<String>? examples;
+  final List<String>? translations;
+  final List<String>? synonyms;
 
   @override
-  List<Object?> get props => [wordId, meaning, description];
+  List<Object?> get props => [
+        wordId,
+        text,
+        meaning,
+        description,
+        definitions,
+        examples,
+        translations,
+        synonyms
+      ];
 }
 
 final class SortLexicon extends LexiconEvent {

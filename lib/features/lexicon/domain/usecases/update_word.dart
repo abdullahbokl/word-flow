@@ -13,10 +13,23 @@ class UpdateWord extends AsyncUseCase<WordEntity, int> {
   @override
   TaskEither<Failure, WordEntity> call(
     int id, {
+    String? text,
     String? meaning,
     String? description,
+    List<String>? definitions,
+    List<String>? examples,
+    List<String>? translations,
+    List<String>? synonyms,
   }) {
-    return _repository.updateWord(id,
-        meaning: meaning, description: description);
+    return _repository.updateWord(
+      id,
+      text: text,
+      meaning: meaning,
+      description: description,
+      definitions: definitions,
+      examples: examples,
+      translations: translations,
+      synonyms: synonyms,
+    );
   }
 }

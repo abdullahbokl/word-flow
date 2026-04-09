@@ -73,11 +73,19 @@ class _LexiconPageState extends State<LexiconPage>
   }
 
   Future<void> _showEdit(WordEntity w) async {
-    final res = await showDialog<String>(
+    final res = await showDialog<Map<String, dynamic>>(
         context: context, builder: (_) => EditWordDialog(word: w));
     if (!mounted) return;
-    if (res != null && res.isNotEmpty && res != w.text) {
-      context.read<LexiconBloc>().add(UpdateWordEvent(w.id, meaning: res));
+    if (res != null) {
+      context.read<LexiconBloc>().add(UpdateWordEvent(
+            w.id,
+            text: res['text'] as String?,
+            meaning: res['meaning'] as String?,
+            definitions: res['definitions'] as List<String>?,
+            examples: res['examples'] as List<String>?,
+            translations: res['translations'] as List<String>?,
+            synonyms: res['synonyms'] as List<String>?,
+          ));
     }
   }
 

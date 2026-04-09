@@ -13,6 +13,10 @@ erDiagram
         datetime updatedAt
         string meaning OPTIONAL
         string description OPTIONAL
+        string definitions OPTIONAL
+        string examples OPTIONAL
+        string translations OPTIONAL
+        string synonyms OPTIONAL
     }
 
     AnalyzedTexts {
@@ -21,6 +25,8 @@ erDiagram
         string content
         int totalWords
         int uniqueWords
+        int knownWords
+        int unknownWords
         datetime createdAt
     }
 
@@ -37,11 +43,12 @@ erDiagram
 ### **Table Definitions**
 
 1.  **Words**: Stores unique vocabulary items across all texts.
-    *   `meaning` and `description` are new optional fields for user notes.
+    *   `meaning`, `definitions`, `examples`, `translations`, and `synonyms` are optional fields for user study and notes.
     *   `frequency` tracks how many times the word has appeared across all analyzed texts.
     *   `isKnown` marks if the user has mastered the word.
 
 2.  **AnalyzedTexts**: Stores the source text that was processed.
+    *   `knownWords` and `unknownWords` track the user's progress at the time of analysis.
     *   Acts as a history record for previous searches and readings.
 
 3.  **TextWordEntries**: A junction table linking Words to the AnalyzedTexts they belong to.
