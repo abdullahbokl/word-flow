@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:lexitrack/core/domain/entities/word_entity.dart';
 import 'package:lexitrack/core/error/failures.dart';
+import 'package:lexitrack/features/lexicon/domain/commands/word_commands.dart';
 import 'package:lexitrack/features/lexicon/domain/repositories/lexicon_repository.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/add_word_manually.dart';
 import 'package:mocktail/mocktail.dart';
@@ -12,6 +13,10 @@ void main() {
   late AddWordManually usecase;
   late MockLexiconRepository repository;
 
+  setUpAll(() {
+    registerFallbackValue(const AddWordCommand(text: ''));
+  });
+
   setUp(() {
     repository = MockLexiconRepository();
     usecase = AddWordManually(repository);
@@ -19,7 +24,7 @@ void main() {
 
   group('AddWordManually', () {
     test('returns validation failure when text is empty', () async {
-      final result = await usecase('').run();
+      final result = await usecase(const AddWordCommand(text: '')).run();
       expect(result.isLeft(), true);
       result.fold(
         (l) => expect(l, isA<ValidationFailure>()),
@@ -28,7 +33,7 @@ void main() {
     });
 
     test('returns validation failure when text is less than 2 chars', () async {
-      final result = await usecase('a').run();
+      final result = await usecase(const AddWordCommand(text: 'a')).run();
       expect(result.isLeft(), true);
     });
 
@@ -48,10 +53,10 @@ void main() {
         (_) => TaskEither.right(word),
       );
 
-      final result = await usecase('hello').run();
+      final result = await usecase(const AddWordCommand(text: 'hello')).run();
 
       expect(result.isRight(), true);
-      verify(() => repository.addWord('hello')).called(1);
+      verify(() => repository.addWord(const AddWordCommand(text: 'hello'))).called(1);
     });
 
     test('normalizes text to lowercase', () async {
@@ -70,9 +75,9 @@ void main() {
         (_) => TaskEither.right(word),
       );
 
-      await usecase('HELLO').run();
+      await usecase(const AddWordCommand(text: 'HELLO')).run();
 
-      verify(() => repository.addWord('hello')).called(1);
+      verify(() => repository.addWord(const AddWordCommand(text: 'hello'))).called(1);
     });
   });
 }

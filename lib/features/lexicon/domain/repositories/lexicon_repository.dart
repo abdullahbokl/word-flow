@@ -2,6 +2,7 @@ import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/domain/entities/word_entity.dart';
 import '../../../../core/error/failures.dart';
+import '../commands/word_commands.dart';
 import '../entities/lexicon_stats.dart';
 import '../entities/word_filter.dart';
 import '../entities/word_sort.dart';
@@ -22,20 +23,11 @@ abstract interface class LexiconRepository {
   });
 
   TaskEither<Failure, WordEntity> toggleStatus(int wordId);
-  TaskEither<Failure, WordEntity> updateWord(
-    int id, {
-    String? text,
-    String? meaning,
-    String? description,
-    List<String>? definitions,
-    List<String>? examples,
-    List<String>? translations,
-    List<String>? synonyms,
-  });
+  TaskEither<Failure, WordEntity> updateWord(UpdateWordCommand command);
 
   TaskEither<Failure, Unit> deleteWord(int wordId);
 
-  TaskEither<Failure, WordEntity> addWord(String text);
+  TaskEither<Failure, WordEntity> addWord(AddWordCommand command);
 
   TaskEither<Failure, LexiconStats> getStats();
 

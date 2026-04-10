@@ -4,6 +4,7 @@ import 'package:fpdart/fpdart.dart';
 import '../../../../core/data/mappers/word_row_mapper.dart';
 import '../../../../core/domain/entities/word_entity.dart';
 import '../../../../core/error/failures.dart';
+import '../../domain/commands/word_commands.dart';
 import '../../domain/entities/lexicon_stats.dart';
 import '../../domain/entities/word_filter.dart';
 import '../../domain/entities/word_sort.dart';
@@ -53,23 +54,19 @@ class LexiconRepositoryImpl implements LexiconRepository {
       );
 
   @override
-  TaskEither<Failure, WordEntity> updateWord(int id,
-          {String? text,
-          String? meaning,
-          String? description,
-          List<String>? definitions,
-          List<String>? examples,
-          List<String>? translations,
-          List<String>? synonyms}) =>
+  TaskEither<Failure, WordEntity> updateWord(UpdateWordCommand command) =>
       TaskEither.tryCatch(
-        () async => (await _local.updateWord(id,
-                text: text,
-                meaning: meaning,
-                description: description,
-                definitions: definitions,
-                examples: examples,
-                translations: translations,
-                synonyms: synonyms))
+        () async => (await _local.updateWord(
+          command.id,
+          text: command.text,
+          meaning: command.meaning,
+          description: command.description,
+          definitions: command.definitions,
+          examples: command.examples,
+          translations: command.translations,
+          synonyms: command.synonyms,
+          isKnown: command.isKnown,
+        ))
             .toEntity(),
         (error, stack) => DatabaseFailure('$error', stack),
       );
@@ -84,8 +81,9 @@ class LexiconRepositoryImpl implements LexiconRepository {
       );
 
   @override
-  TaskEither<Failure, WordEntity> addWord(String text) => TaskEither.tryCatch(
-        () async => (await _local.addWord(text)).toEntity(),
+  TaskEither<Failure, WordEntity> addWord(AddWordCommand command) =>
+      TaskEither.tryCatch(
+        () async => (await _local.addWord(command.text)).toEntity(),
         (error, stack) => DatabaseFailure('$error', stack),
       );
 

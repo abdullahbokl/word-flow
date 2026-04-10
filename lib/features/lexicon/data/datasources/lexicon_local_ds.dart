@@ -26,6 +26,7 @@ abstract interface class LexiconLocalDataSource {
     List<String>? examples,
     List<String>? translations,
     List<String>? synonyms,
+    bool? isKnown,
   });
   Future<void> deleteWord(int wordId);
   Future<WordRow> addWord(String text);

@@ -111,15 +111,15 @@ extension LexiconBlocHandlers on LexiconBloc {
     final index = currentWords.indexWhere((w) => w.id == e.wordId);
     if (index == -1) return;
 
-    final res = await _updateWord(
-      e.wordId,
+    final res = await _updateWord(UpdateWordCommand(
+      id: e.wordId,
       text: e.text,
       meaning: e.meaning,
       definitions: e.definitions,
       examples: e.examples,
       translations: e.translations,
       synonyms: e.synonyms,
-    ).run();
+    )).run();
 
     res.fold(
       (f) => add(LexiconEvent.errorReceived(f.message)),

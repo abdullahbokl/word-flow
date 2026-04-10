@@ -16,8 +16,8 @@
 ## Detailed Technical Roadmap
 
 ### Phase 1: Architecture & Foundation (Current Focus)
-- [ ] **Repository Abstractions**: Decouple domain layer from data sources.
-- [ ] **CQRS Implementation**: Separate read and write models for word operations.
+- [x] **Repository Abstractions**: Decoupled domain layer from data sources across all features (History, Lexicon, Analyzer).
+- [x] **CQRS Implementation**: Separate read and write models for word operations and implement structured Command objects for modifications.
 - [ ] **Static Analysis**: Implement strict `analysis_options.yaml` (80% Done).
 - [ ] **Testing**: Target 80%+ coverage; implement Golden Tests and Integration Tests (Patrol).
 

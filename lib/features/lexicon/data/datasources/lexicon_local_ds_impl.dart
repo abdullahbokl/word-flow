@@ -55,6 +55,7 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
     List<String>? examples,
     List<String>? translations,
     List<String>? synonyms,
+    bool? isKnown,
   }) async {
     return updateWordRow(
       _db,
@@ -66,6 +67,7 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
       examples: examples,
       translations: translations,
       synonyms: synonyms,
+      isKnown: isKnown,
     );
   }
 

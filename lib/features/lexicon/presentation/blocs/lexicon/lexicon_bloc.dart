@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../core/common/state/bloc_status.dart';
 import '../../../../../core/domain/entities/word_entity.dart';
 import '../../../../../core/usecase/usecase.dart';
+import '../../../domain/commands/word_commands.dart';
 import '../../../domain/entities/word_filter.dart';
 import '../../../domain/entities/word_sort.dart';
 import '../../../domain/usecases/add_word_manually.dart';
@@ -43,7 +44,7 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
     on<ToggleWordStatusEvent>(_onToggleStatus);
     on<DeleteWordEvent>(_onDelete);
     on<AddWordManuallyEvent>(
-        (e, _) async => await _addWordManually(e.word).run());
+        (e, _) async => await _addWordManually(AddWordCommand(text: e.word)).run());
     on<SearchLexicon>(
         (e, emit) async => await _onFetch(emit: emit, query: e.query));
     on<FilterLexicon>(
