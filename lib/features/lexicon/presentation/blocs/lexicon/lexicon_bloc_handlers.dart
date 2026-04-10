@@ -5,7 +5,7 @@ extension LexiconBlocHandlers on LexiconBloc {
     emit(state.copyWith(status: const BlocStatus.loading()));
     await _onFetch(emit: emit, force: true);
     _statsSub ??= _watchStats(const NoParams()).listen(
-        (res) => res.fold((_) {}, (s) => add(LexiconStatsUpdateReceived(s))));
+        (res) => res.fold((_) {}, (s) => add(LexiconEvent.statsUpdateReceived(s))));
   }
 
   Future<void> _onFetch({
@@ -122,7 +122,7 @@ extension LexiconBlocHandlers on LexiconBloc {
     ).run();
 
     res.fold(
-      (f) => add(LexiconErrorReceived(f.message)),
+      (f) => add(LexiconEvent.errorReceived(f.message)),
       (updatedWord) {
         final latestWords =
             List<WordEntity>.from(state.status.data as List<WordEntity>);

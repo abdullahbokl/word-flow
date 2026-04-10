@@ -3,8 +3,12 @@ import '../../../../../core/common/state/bloc_status.dart';
 import '../../../domain/usecases/delete_history_item.dart';
 import '../../../domain/usecases/watch_history.dart';
 import '../../../../../core/usecase/usecase.dart';
+import '../../../domain/entities/history_item.dart';
 import 'history_event.dart';
 import 'history_state.dart';
+
+export 'history_event.dart';
+export 'history_state.dart';
 
 class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   HistoryBloc({
@@ -12,23 +16,49 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     required DeleteHistoryItem deleteHistoryItem,
   })  : _watchHistory = watchHistory,
         _deleteHistoryItem = deleteHistoryItem,
-        super(const HistoryState(status: BlocStatus.initial())) {
+        super(const HistoryState()) {
     on<LoadHistory>(_onLoadHistory);
+    on<LoadMoreHistory>(_onLoadMore);
     on<HistoryUpdateReceived>(_onUpdateReceived);
     on<DeleteHistoryItemEvent>(_onDeleteHistoryItem);
   }
 
+  static const _pageSize = 20;
   final WatchHistory _watchHistory;
   final DeleteHistoryItem _deleteHistoryItem;
 
   Future<void> _onLoadHistory(LoadHistory event, Emitter<HistoryState> emit) async {
     emit(state.copyWith(status: const BlocStatus.loading()));
-    await emit.forEach(
-      _watchHistory(const NoParams()),
-      onData: (result) => result.fold(
-        (f) => state.copyWith(status: BlocStatus.failure(error: f.message)),
-        (items) => state.copyWith(status: BlocStatus.success(data: items)),
+    await _onFetch(emit: emit, force: true);
+  }
+
+  Future<void> _onLoadMore(LoadMoreHistory event, Emitter<HistoryState> emit) async {
+    if (state.hasReachedMax || !state.status.isSuccess) return;
+    await _onFetch(emit: emit);
+  }
+
+  Future<void> _onFetch({
+    required Emitter<HistoryState> emit,
+    bool force = false,
+  }) async {
+    final nextPage = force ? 0 : state.page + 1;
+    final res = await _watchHistory(
+      HistoryPaginationParams(
+        limit: _pageSize,
+        offset: nextPage * _pageSize,
       ),
+    ).first;
+
+    res.fold(
+      (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),
+      (items) {
+        final List<HistoryItem> currentItems = force ? [] : (state.status.data ?? []);
+        emit(state.copyWith(
+          status: BlocStatus.success(data: [...currentItems, ...items]),
+          page: nextPage,
+          hasReachedMax: items.length < _pageSize,
+        ));
+      },
     );
   }
 
@@ -48,7 +78,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     );
     result.fold(
       (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),
-      (_) => null, // List will update via stream
+      (_) => add(const LoadHistory()), // Reload to maintain pagination integrity
     );
   }
 }

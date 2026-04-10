@@ -1,23 +1,14 @@
-import 'package:equatable/equatable.dart';
-
+import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../../core/common/state/bloc_status.dart';
 import '../../../domain/entities/history_item.dart';
 
-class HistoryState extends Equatable {
-  const HistoryState({
-    this.status = const BlocStatus.initial(),
-  });
+part 'history_state.freezed.dart';
 
-  final BlocStatus<List<HistoryItem>> status;
-
-  HistoryState copyWith({
-    BlocStatus<List<HistoryItem>>? status,
-  }) {
-    return HistoryState(
-      status: status ?? this.status,
-    );
-  }
-
-  @override
-  List<Object?> get props => [status];
+@freezed
+abstract class HistoryState with _$HistoryState {
+  const factory HistoryState({
+    @Default(BlocStatus.initial()) BlocStatus<List<HistoryItem>> status,
+    @Default(0) int page,
+    @Default(false) bool hasReachedMax,
+  }) = _HistoryState;
 }

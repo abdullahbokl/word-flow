@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
-
 import '../../../../core/navigation/app_navigator.dart';
 import '../../../../core/widgets/app_empty_state.dart';
+import '../../../../core/widgets/app_loader.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 import '../../domain/entities/history_item.dart';
 import '../widgets/history_card.dart';
 
@@ -9,10 +10,12 @@ class HistorySliverList extends StatelessWidget {
   const HistorySliverList({
     required this.items,
     required this.onDelete,
+    this.hasReachedMax = false,
     super.key,
   });
 
   final List<HistoryItem> items;
+  final bool hasReachedMax;
   final Function(int) onDelete;
 
   @override
@@ -28,33 +31,35 @@ class HistorySliverList extends StatelessWidget {
       );
     }
 
-    return SliverPadding(
-      padding: const EdgeInsets.all(16),
-      sliver: SliverPrototypeExtentList(
-        prototypeItem: HistoryCard(
-          item: HistoryItem(
-            id: -1,
-            title: 'Prototype',
-            totalWords: 0,
-            uniqueWords: 0,
-            createdAt: DateTime.now(),
-            contentSnippet: 'Snippet',
+    return MultiSliver(
+      children: [
+        SliverPadding(
+          padding: const EdgeInsets.all(16),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (ctx, i) {
+                final item = items[i];
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: HistoryCard(
+                    item: item,
+                    onTap: () => AppNavigator.toHistoryDetail(item.id),
+                    onDelete: () => onDelete(item.id),
+                  ),
+                );
+              },
+              childCount: items.length,
+            ),
           ),
-          onTap: () {},
-          onDelete: () {},
         ),
-        delegate: SliverChildBuilderDelegate(
-          (ctx, i) {
-            final item = items[i];
-            return HistoryCard(
-              item: item,
-              onTap: () => AppNavigator.toHistoryDetail(item.id),
-              onDelete: () => onDelete(item.id),
-            );
-          },
-          childCount: items.length,
-        ),
-      ),
+        if (!hasReachedMax)
+          const SliverToBoxAdapter(
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 32),
+              child: AppLoader(),
+            ),
+          ),
+      ],
     );
   }
 }

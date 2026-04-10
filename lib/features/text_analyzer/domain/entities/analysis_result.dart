@@ -1,61 +1,23 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../core/common/models/word_with_local_freq.dart';
 
-class AnalysisResult extends Equatable {
-  const AnalysisResult({
-    required this.id,
-    required this.title,
-    required this.totalWords,
-    required this.uniqueWords,
-    required this.unknownWords,
-    required this.knownWords,
-    required this.newWordsCount,
-    required this.words,
-  });
+part 'analysis_result.freezed.dart';
 
-  final int id;
-  final String title;
-  final int totalWords;
-  final int uniqueWords;
-  final int unknownWords;
-  final int knownWords;
-  final int newWordsCount;
-  final List<WordWithLocalFreq> words;
+@freezed
+abstract class AnalysisResult with _$AnalysisResult {
+  const factory AnalysisResult({
+    required int id,
+    required String title,
+    required int totalWords,
+    required int uniqueWords,
+    required int unknownWords,
+    required int knownWords,
+    required int newWordsCount,
+    required List<WordWithLocalFreq> words,
+  }) = _AnalysisResult;
+
+  const AnalysisResult._();
 
   double get comprehension =>
       totalWords == 0 ? 100 : (knownWords / totalWords) * 100;
-
-  AnalysisResult copyWith({
-    int? id,
-    String? title,
-    int? totalWords,
-    int? uniqueWords,
-    int? unknownWords,
-    int? knownWords,
-    int? newWordsCount,
-    List<WordWithLocalFreq>? words,
-  }) {
-    return AnalysisResult(
-      id: id ?? this.id,
-      title: title ?? this.title,
-      totalWords: totalWords ?? this.totalWords,
-      uniqueWords: uniqueWords ?? this.uniqueWords,
-      unknownWords: unknownWords ?? this.unknownWords,
-      knownWords: knownWords ?? this.knownWords,
-      newWordsCount: newWordsCount ?? this.newWordsCount,
-      words: words ?? this.words,
-    );
-  }
-
-  @override
-  List<Object?> get props => [
-        id,
-        title,
-        totalWords,
-        uniqueWords,
-        unknownWords,
-        knownWords,
-        newWordsCount,
-        words,
-      ];
 }

@@ -27,7 +27,7 @@ void main() {
 
   group('LexiconStats', () {
     test('empty stats has correct values', () {
-      const stats = LexiconStats.empty();
+      final stats = LexiconStats.empty();
       expect(stats.total, 0);
       expect(stats.known, 0);
       expect(stats.unknown, 0);

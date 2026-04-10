@@ -18,9 +18,9 @@ class HistoryRepositoryImpl implements HistoryRepository {
   final HistoryLocalDataSource _local;
 
   @override
-  Future<Either<Failure, List<HistoryItem>>> getHistory() async {
+  Future<Either<Failure, List<HistoryItem>>> getHistory({int? limit, int? offset}) async {
     try {
-      final rows = await _local.getHistory();
+      final rows = await _local.getHistory(limit: limit, offset: offset);
       return Right(rows.map((r) => r.toEntity()).toList());
     } catch (e, stack) {
       return Left(DatabaseFailure('$e', stack));
@@ -28,8 +28,8 @@ class HistoryRepositoryImpl implements HistoryRepository {
   }
 
   @override
-  Stream<Either<Failure, List<HistoryItem>>> watchHistory() {
-    return _local.watchHistory().map(
+  Stream<Either<Failure, List<HistoryItem>>> watchHistory({int? limit, int? offset}) {
+    return _local.watchHistory(limit: limit, offset: offset).map(
       (rows) => Right(rows.map((r) => r.toEntity()).toList()),
     );
   }

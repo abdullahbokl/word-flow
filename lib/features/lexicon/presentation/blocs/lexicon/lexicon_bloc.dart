@@ -15,6 +15,9 @@ import '../../../../../core/usecase/usecase.dart';
 import 'lexicon_event.dart';
 import 'lexicon_state.dart';
 
+export 'lexicon_event.dart';
+export 'lexicon_state.dart';
+
 part 'lexicon_bloc_handlers.dart';
 
 class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {

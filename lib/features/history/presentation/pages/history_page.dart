@@ -18,8 +18,30 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> with AutomaticKeepAliveClientMixin {
+  final _scrollController = ScrollController();
+
   @override
   bool get wantKeepAlive => true;
+
+  @override
+  void initState() {
+    super.initState();
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    if (_scrollController.hasClients &&
+        _scrollController.offset >=
+            (_scrollController.position.maxScrollExtent * 0.9)) {
+      context.read<HistoryBloc>().add(const LoadMoreHistory());
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -28,6 +50,7 @@ class _HistoryPageState extends State<HistoryPage> with AutomaticKeepAliveClient
       body: SafeArea(
         child: BlocBuilder<HistoryBloc, HistoryState>(
           builder: (context, state) => CustomScrollView(
+            controller: _scrollController,
             key: const PageStorageKey<String>('history_scroll_view'),
             slivers: [
               const SliverToBoxAdapter(child: PageHeader(title: 'Analysis History')),
@@ -36,6 +59,7 @@ class _HistoryPageState extends State<HistoryPage> with AutomaticKeepAliveClient
                 onInitial: () => const SliverFillRemaining(child: AppLoader(message: 'Loading history...')),
                 onSuccess: (items) => HistorySliverList(
                   items: items,
+                  hasReachedMax: state.hasReachedMax,
                   onDelete: (id) => showDialog(context: context, builder: (_) => DeleteHistoryDialog(id: id)),
                 ),
               ),

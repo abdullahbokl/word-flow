@@ -1,18 +1,16 @@
-import 'package:equatable/equatable.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
 
-class LexiconStats extends Equatable {
-  const LexiconStats({
-    required this.total,
-    required this.known,
-    required this.unknown,
-  });
+part 'lexicon_stats.freezed.dart';
 
-  const LexiconStats.empty() : total = 0, known = 0, unknown = 0;
+@freezed
+abstract class LexiconStats with _$LexiconStats {
+  const factory LexiconStats({
+    required int total,
+    required int known,
+    required int unknown,
+  }) = _LexiconStats;
 
-  final int total;
-  final int known;
-  final int unknown;
+  const LexiconStats._();
 
-  @override
-  List<Object?> get props => [total, known, unknown];
+  factory LexiconStats.empty() => const LexiconStats(total: 0, known: 0, unknown: 0);
 }

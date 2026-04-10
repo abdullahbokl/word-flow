@@ -51,19 +51,6 @@ AnalysisResult _makeResult({int id = 1}) {
   );
 }
 
-class _AnalysisResult extends AnalysisResult {
-  const _AnalysisResult({required super.id})
-      : super(
-          title: 'Test',
-          totalWords: 10,
-          uniqueWords: 5,
-          knownWords: 3,
-          unknownWords: 2,
-          newWordsCount: 0,
-          words: const [],
-        );
-}
-
 void main() {
   setUpAll(() {
     registerFallbackValue(_makeResult());
@@ -119,8 +106,8 @@ void main() {
     blocTest<AnalyzerBloc, AnalyzerState>(
       'emits reset state on ResetAnalysis',
       build: () => bloc,
-      seed: () => const AnalyzerState(
-        status: BlocStatus.success(data: _AnalysisResult(id: 1)),
+      seed: () => AnalyzerState(
+        status: BlocStatus.success(data: _makeResult(id: 1)),
       ),
       act: (b) => b.add(const ResetAnalysis()),
       expect: () => [
@@ -138,8 +125,8 @@ void main() {
       expect: () => [
         isA<AnalyzerState>()
             .having((s) => s.status.isSuccess, 'isSuccess', true)
-            .having((s) => s.status.data!.knownWords, 'knownWords', 10)
-            .having((s) => s.status.data!.unknownWords, 'unknownWords', 0)
+            .having((s) => s.status.data!.knownWords, 'knownWords', 7) // 6 + 1
+            .having((s) => s.status.data!.unknownWords, 'unknownWords', 3) // 4 - 1
             .having((s) => s.status.data!.words.first.word.isKnown, 'first word isKnown', true),
       ],
     );

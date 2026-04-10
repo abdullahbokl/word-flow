@@ -41,7 +41,7 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
 
   Future<void> _onPickFile() async {
     try {
-      final result = await FilePicker.platform.pickFiles(
+      final result = await FilePicker.pickFiles(
         type: FileType.custom,
         allowedExtensions: ['txt'],
       );
