@@ -12,12 +12,14 @@ class AnalyzerInputBody extends StatelessWidget {
     required this.titleCtrl,
     required this.contentCtrl,
     required this.onAnalyze,
+    required this.onPickFile,
     super.key,
   });
 
   final TextEditingController titleCtrl;
   final TextEditingController contentCtrl;
   final VoidCallback onAnalyze;
+  final VoidCallback onPickFile;
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +50,16 @@ class AnalyzerInputBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 24),
                 AppButton(
-                  label: 'Analyze Text',
+                  label: AppStrings.analyzeText,
                   onPressed: onAnalyze,
                   icon: Icons.analytics_outlined,
+                ),
+                const SizedBox(height: 12),
+                AppButton(
+                  label: AppStrings.uploadTxtFile,
+                  onPressed: onPickFile,
+                  icon: Icons.upload_file_outlined,
+                  variant: AppButtonVariant.outlined,
                 ),
               ],
             ),

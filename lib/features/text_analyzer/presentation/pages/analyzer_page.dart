@@ -1,6 +1,9 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:path/path.dart' as p;
 
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/app_loader.dart';
@@ -34,6 +37,32 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
     _titleCtrl.dispose();
     _contentCtrl.dispose();
     super.dispose();
+  }
+
+  Future<void> _onPickFile() async {
+    try {
+      final result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['txt'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        final content = await file.readAsString();
+        final fileName = result.files.single.name;
+        
+        setState(() {
+          _titleCtrl.text = p.basenameWithoutExtension(fileName);
+          _contentCtrl.text = content;
+        });
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text(AppStrings.fileError)),
+        );
+      }
+    }
   }
 
   void _onAnalyze() {
@@ -70,11 +99,13 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
               titleCtrl: _titleCtrl,
               contentCtrl: _contentCtrl,
               onAnalyze: _onAnalyze,
+              onPickFile: _onPickFile,
             ),
             onFailure: (_) => AnalyzerInputBody(
               titleCtrl: _titleCtrl,
               contentCtrl: _contentCtrl,
               onAnalyze: _onAnalyze,
+              onPickFile: _onPickFile,
             ),
             onLoading: () => const AppLoader(message: 'Processing text...'),
             onSuccess: (result) => AnalysisSummary(

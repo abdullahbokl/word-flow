@@ -50,6 +50,9 @@ abstract final class AppStrings {
   static const titleOptional = 'Title (Optional)';
   static const textToAnalyze = 'Text to Analyze';
   static const analyzeText = 'Analyze Text';
+  static const uploadTxtFile = 'Upload .txt File';
+  static const pickingFile = 'Picking file...';
+  static const fileError = 'Could not read file';
   static const processingText = 'Processing text...';
 
   // Analysis summary
