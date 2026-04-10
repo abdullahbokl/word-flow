@@ -1,43 +1,26 @@
-# Project Improvement Plan: Kind Comet (Technical) - UPDATED
-
-**Status: Phase 3 Completed (UI Modernization), Phase 1 In Progress (Architecture)**
-
----
-
-## Completed Tasks ✅
-- [x] **Design Token System**: Centralized colors, spacing, and typography in `AppColors`, `AppTypography`, and `AppTokens`.
-- [x] **Material 3 Migration**: Complete overhaul of `AppTheme` with full M3 support.
-- [x] **Component Modernization**: Refactored `StatCard`, `AppEmptyState`, `WordTile`, and `LexiconToolbar` to use premium design tokens.
-- [x] **Bug Fixes**: Resolved critical `undefined_getter` errors and deprecated members (`withOpacity`, `surfaceVariant`, `FilePicker.platform`).
-- [x] **Linting Cleanup**: Fixed 30+ linting issues and optimized imports across major features.
-- [x] **Repository Abstractions**: Decoupled domain layer from data sources across all features.
-- [x] **CQRS Implementation**: Structured Command objects for word modifications.
-- [x] **Static Analysis**: Implemented strict `analysis_options.yaml` (100% Done).
+## Project Status Summary
+- **UI/UX**: 100% (M3, Tokens, Components)
+- **Architecture**: 85% (CQRS, LocalCache, Linting done; coverage pending)
+- **Performance**: 90% (Indices & Batch Analysis done; sync pending)
 
 ---
 
-## Detailed Technical Roadmap
+## Technical Roadmap
 
-### Phase 1: Architecture & Foundation (Current Focus)
-- [x] **Repository Abstractions**: Decoupled domain layer from data sources.
-- [x] **CQRS Implementation**: Separate read and write models for word operations.
-- [x] **Static Analysis**: High-quality code standards enforced.
-- [ ] **Testing**: Target 80%+ coverage; implement Golden Tests and Integration Tests (Patrol).
+### 1. Hardening (Current)
+- [x] **CQRS & Repository Abstraction**: Decoupled domain and data layers.
+- [x] **Stat Analysis**: Strict linting enforced across codebase.
+- [ ] **Test Coverage**: Reach 80%+ (currently ~40-50%).
 
-### Phase 2: Performance & Database
-- [x] **Batch Operations**: Implemented idempotent upsert strategy for efficient large text analysis (100% Done).
-- [x] **Query Optimization**: Implemented database indices for foreign keys and frequent queries (100% Done).
-- [ ] **Caching Strategy**: Implemented local caching for statistics (80% Done).
+### 2. Efficiency
+- [x] **DB Optimization**: V6 with indices and idempotent batch analysis.
+- [x] **Smart Caching**: LocalCache layer for instant statistics.
+- [ ] **Sync Engine**: Offline-first background sync logic.
 
-### Phase 3: UI Architecture (Material 3) ✅
-- [x] **Design Tokens**: Create a centralized design token system.
-- [x] **Component Library**: Build reusable Material 3 compliant widgets.
-- [x] **Theme System**: Full migration to Material 3 with support for dynamic color.
+### 3. Intelligence
+- [ ] **AI Word Engine**: Word recommendations and context analysis.
+- [ ] **Advanced History**: Trend analysis for vocabulary growth.
 
-### Phase 4: Advanced Logic
-- [ ] **AI Word Engine**: Technical implementation of recommendation logic and text analysis.
-- [ ] **Cloud Sync Engine**: Offline-first synchronization logic with conflict resolution.
-- [ ] **Background Processing**: Use `WorkManager` for heavy background tasks if needed.
 
 ---
 

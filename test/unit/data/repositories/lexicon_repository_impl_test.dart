@@ -76,7 +76,7 @@ void main() {
             synonyms: any(named: 'synonyms'),
           )).thenAnswer((_) async => tWordRow);
 
-      final command = UpdateWordCommand(id: 1, text: 'updated', isKnown: true);
+      const command = UpdateWordCommand(id: 1, text: 'updated', isKnown: true);
       final result = await repository.updateWord(command).run();
 
       expect(result.isRight(), true);

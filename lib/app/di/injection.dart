@@ -43,10 +43,8 @@ Future<void> initDI() async {
   sl
     ..registerSingleton<AppDatabase>(db)
     ..registerSingleton<LocalCache>(LocalCacheImpl(prefs))
-    ..registerFactory(ThemeCubit.new);
-
-  // Features - Lexicon
-  sl
+    ..registerFactory(ThemeCubit.new)
+    // Features - Lexicon
     ..registerLazySingleton<LexiconLocalDataSource>(
         () => LexiconLocalDataSourceImpl(sl(), sl()))
     ..registerLazySingleton<LexiconRepository>(

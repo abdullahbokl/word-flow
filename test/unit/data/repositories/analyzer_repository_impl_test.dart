@@ -1,9 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds.dart';
 import 'package:lexitrack/features/text_analyzer/data/models/analysis_result_model.dart';
 import 'package:lexitrack/features/text_analyzer/data/repositories/analyzer_repository_impl.dart';
-import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAnalyzerLocalDataSource extends Mock implements AnalyzerLocalDataSource {}
