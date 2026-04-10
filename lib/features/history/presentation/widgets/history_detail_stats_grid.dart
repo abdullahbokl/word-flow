@@ -9,13 +9,15 @@ class HistoryDetailStatsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GridView.count(
+    return GridView(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      crossAxisCount: 2,
-      childAspectRatio: 2.2,
-      mainAxisSpacing: 12,
-      crossAxisSpacing: 12,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        mainAxisExtent: 100,
+        mainAxisSpacing: 12,
+        crossAxisSpacing: 12,
+      ),
       children: [
         StatCard(
           label: 'Total Words',

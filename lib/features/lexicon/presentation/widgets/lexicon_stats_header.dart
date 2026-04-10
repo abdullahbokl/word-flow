@@ -14,7 +14,7 @@ class LexiconStatsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
       child: Row(
         children: [
           Expanded(

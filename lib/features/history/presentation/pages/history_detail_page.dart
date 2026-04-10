@@ -48,9 +48,9 @@ class _DetailView extends StatelessWidget {
           onFailure: (e) => Center(child: AppText.body(e)),
           onSuccess: (detail) => CustomScrollView(
             slivers: [
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppDimensions.pagePadding),
+              SliverPadding(
+                padding: const EdgeInsets.all(AppDimensions.pagePadding),
+                sliver: SliverToBoxAdapter(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
@@ -61,12 +61,15 @@ class _DetailView extends StatelessWidget {
                       const SizedBox(height: AppDimensions.space24),
                       HistoryDetailStatsGrid(detail: detail),
                       const SizedBox(height: AppDimensions.space32),
-                      WordListSection(
-                        words: detail.words,
-                        onToggleStatus: (w) => context.read<HistoryDetailBloc>().add(ToggleWordStatusInHistory(w.word.id)),
-                      ),
                     ],
                   ),
+                ),
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.symmetric(horizontal: AppDimensions.pagePadding),
+                sliver: WordListSection(
+                  words: detail.words,
+                  onToggleStatus: (w) => context.read<HistoryDetailBloc>().add(ToggleWordStatusInHistory(w.word.id)),
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: AppDimensions.space32)),

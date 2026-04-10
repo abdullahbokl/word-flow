@@ -105,7 +105,7 @@ class _LexiconPageState extends State<LexiconPage>
                 snap: true,
                 elevation: 1,
                 toolbarHeight: 0,
-                expandedHeight: 215,
+                expandedHeight: 235,
                 backgroundColor: Theme.of(context).scaffoldBackgroundColor,
                 flexibleSpace: FlexibleSpaceBar(
                   background: LexiconToolbar(
