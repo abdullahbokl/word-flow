@@ -16,7 +16,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting({required QueryExecutor e}) : super(e);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration {
@@ -53,14 +53,25 @@ class AppDatabase extends _$AppDatabase {
             'CREATE INDEX IF NOT EXISTS idx_text_word_entries_word_id ON text_word_entries (word_id)',
           );
         }
+        if (from < 7) {
+          // Optimized composite index for (Filter + Frequency Sort + Alphabetical fallback)
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_words_filter_sort_freq ON words (is_known, frequency DESC, word ASC)',
+          );
+          // Optimized composite index for (Filter + Recency Sort + Alphabetical fallback)
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_words_filter_sort_recent ON words (is_known, updated_at DESC, word ASC)',
+          );
+        }
       },
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON');
+        // Ensure critical performance indices exist
         await customStatement(
-          'CREATE INDEX IF NOT EXISTS idx_words_is_known_frequency ON words (is_known, frequency)',
+          'CREATE INDEX IF NOT EXISTS idx_words_filter_sort_freq ON words (is_known, frequency DESC, word ASC)',
         );
         await customStatement(
-          'CREATE INDEX IF NOT EXISTS idx_words_updated_at ON words (updated_at)',
+          'CREATE INDEX IF NOT EXISTS idx_words_filter_sort_recent ON words (is_known, updated_at DESC, word ASC)',
         );
         await customStatement(
           'CREATE INDEX IF NOT EXISTS idx_text_word_entries_text_id ON text_word_entries (text_id)',

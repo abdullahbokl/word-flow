@@ -15,8 +15,8 @@ class HistoryDetailStatsGrid extends StatelessWidget {
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
         mainAxisExtent: 100,
-        mainAxisSpacing: 12,
-        crossAxisSpacing: 12,
+        mainAxisSpacing: 16,
+        crossAxisSpacing: 16,
       ),
       children: [
         StatCard(

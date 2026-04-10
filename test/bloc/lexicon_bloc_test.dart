@@ -15,6 +15,9 @@ import 'package:lexitrack/features/lexicon/domain/usecases/get_words.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/toggle_word_status.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/update_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/data/datasources/lexicon_cache.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -24,6 +27,7 @@ class MockDeleteWord extends Mock implements DeleteWord {}
 class MockAddWordManually extends Mock implements AddWordManually {}
 class MockUpdateWord extends Mock implements UpdateWord {}
 class MockWatchLexiconStats extends Mock implements WatchLexiconStats {}
+class MockLexiconCache extends Mock implements LexiconCache {}
 
 void main() {
   late LexiconBloc bloc;
@@ -33,6 +37,7 @@ void main() {
   late MockAddWordManually mockAddWordManually;
   late MockUpdateWord mockUpdateWord;
   late MockWatchLexiconStats mockWatchStats;
+  late MockLexiconCache mockCache;
 
   final tWord = WordEntity(
     id: 1,
@@ -57,9 +62,14 @@ void main() {
     mockAddWordManually = MockAddWordManually();
     mockUpdateWord = MockUpdateWord();
     mockWatchStats = MockWatchLexiconStats();
+    mockCache = MockLexiconCache();
 
     // Default mock behavior
     when(() => mockWatchStats(any())).thenAnswer((_) => Stream.value(const Right(LexiconStats(total: 0, known: 0, unknown: 0))));
+    when(() => mockCache.getFilter()).thenReturn(WordFilter.all);
+    when(() => mockCache.getSort()).thenReturn(WordSort.frequencyDesc);
+    when(() => mockCache.saveFilter(any())).thenAnswer((_) async {});
+    when(() => mockCache.saveSort(any())).thenAnswer((_) async {});
 
     bloc = LexiconBloc(
       getWords: mockGetWords,
@@ -68,6 +78,7 @@ void main() {
       addWordManually: mockAddWordManually,
       updateWord: mockUpdateWord,
       watchStats: mockWatchStats,
+      cache: mockCache,
     );
   });
 

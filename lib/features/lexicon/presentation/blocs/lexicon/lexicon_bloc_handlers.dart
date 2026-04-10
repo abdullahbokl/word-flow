@@ -33,14 +33,18 @@ extension LexiconBlocHandlers on LexiconBloc {
 
     res.fold(
       (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),
-      (w) => emit(state.copyWith(
-        status: BlocStatus.success(data: w),
-        filter: nextFilter,
-        sort: nextSort,
-        query: nextQuery,
-        page: 0,
-        hasReachedMax: w.length < LexiconBloc._pageSize,
-      )),
+      (w) {
+        if (filter != null) unawaited(_cache.saveFilter(filter));
+        if (sort != null) unawaited(_cache.saveSort(sort));
+        emit(state.copyWith(
+          status: BlocStatus.success(data: w),
+          filter: nextFilter,
+          sort: nextSort,
+          query: nextQuery,
+          page: 0,
+          hasReachedMax: w.length < LexiconBloc._pageSize,
+        ));
+      },
     );
   }
 
@@ -85,6 +89,7 @@ extension LexiconBlocHandlers on LexiconBloc {
 
     final res = await _toggleWordStatus(e.wordId).run();
     res.fold((_) {}, (newWord) {
+      if (!state.status.isSuccess) return;
       final latestWords = List<WordEntity>.from(state.status.data as List<WordEntity>);
       final latestIndex = latestWords.indexWhere((w) => w.id == newWord.id);
       if (latestIndex != -1) {

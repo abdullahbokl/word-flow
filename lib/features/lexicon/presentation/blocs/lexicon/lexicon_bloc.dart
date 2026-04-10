@@ -14,6 +14,7 @@ import 'package:lexitrack/features/lexicon/domain/usecases/get_words.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/toggle_word_status.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/update_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/data/datasources/lexicon_cache.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_event.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_state.dart';
 
@@ -30,13 +31,18 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
     required AddWordManually addWordManually,
     required UpdateWord updateWord,
     required WatchLexiconStats watchStats,
+    required LexiconCache cache,
   })  : _getWords = getWords,
         _toggleWordStatus = toggleWordStatus,
         _deleteWord = deleteWord,
         _addWordManually = addWordManually,
         _updateWord = updateWord,
         _watchStats = watchStats,
-        super(const LexiconState()) {
+        _cache = cache,
+        super(LexiconState(
+          filter: cache.getFilter(),
+          sort: cache.getSort(),
+        )) {
     on<LoadLexicon>(_onLoad);
     on<LoadMoreLexicon>(_onLoadMore);
     on<LexiconStatsUpdateReceived>(_onStatsUpdate);
@@ -44,13 +50,13 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
     on<ToggleWordStatusEvent>(_onToggleStatus);
     on<DeleteWordEvent>(_onDelete);
     on<AddWordManuallyEvent>(
-        (e, _) async => await _addWordManually(AddWordCommand(text: e.word)).run());
+        (e, _) => _addWordManually(AddWordCommand(text: e.word)).run());
     on<SearchLexicon>(
-        (e, emit) async => await _onFetch(emit: emit, query: e.query));
+        (e, emit) => _onFetch(emit: emit, query: e.query));
     on<FilterLexicon>(
-        (e, emit) async => await _onFetch(emit: emit, filter: e.filter));
+        (e, emit) => _onFetch(emit: emit, filter: e.filter));
     on<SortLexicon>(
-        (e, emit) async => await _onFetch(emit: emit, sort: e.sort));
+        (e, emit) => _onFetch(emit: emit, sort: e.sort));
     on<UpdateWordEvent>(_onUpdate);
   }
 
@@ -61,6 +67,7 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
   final DeleteWord _deleteWord;
   final AddWordManually _addWordManually;
   final UpdateWord _updateWord;
+  final LexiconCache _cache;
   StreamSubscription? _statsSub;
 
   @override

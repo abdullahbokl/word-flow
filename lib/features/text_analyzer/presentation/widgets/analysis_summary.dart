@@ -96,7 +96,7 @@ class _StatGrid extends StatelessWidget {
                 value: '${result.totalWords}',
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 16),
             Expanded(
               child: StatCard(
                 label: 'Unique',
@@ -105,7 +105,7 @@ class _StatGrid extends StatelessWidget {
             ),
           ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 16),
         Row(
           children: [
             Expanded(
@@ -115,7 +115,7 @@ class _StatGrid extends StatelessWidget {
                 color: theme.colorScheme.error,
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 16),
             Expanded(
               child: StatCard(
                 label: 'Known Words',

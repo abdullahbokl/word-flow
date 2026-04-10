@@ -21,25 +21,35 @@ class WordFilterBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        ...WordFilter.values.map((f) {
-          final isActive = f == active;
-          return Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: ChoiceChip(
-              visualDensity: VisualDensity.compact,
-              label: Text(f.name[0].toUpperCase() + f.name.substring(1)),
-              selected: isActive,
-              onSelected: (_) => onChanged(f),
-              selectedColor: AppColors.primary.withValues(alpha: 0.15),
-              labelStyle: TextStyle(
-                color: isActive ? AppColors.primary : null,
-                fontWeight: isActive ? FontWeight.w600 : null,
-                fontSize: 13,
-              ),
+        Expanded(
+          child: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            child: Row(
+              children: [
+                ...WordFilter.values.map((f) {
+                  final isActive = f == active;
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: ChoiceChip(
+                      visualDensity: VisualDensity.compact,
+                      label: Text(f.name[0].toUpperCase() + f.name.substring(1)),
+                      selected: isActive,
+                      onSelected: (_) => onChanged(f),
+                      selectedColor: AppColors.primary.withValues(alpha: 0.15),
+                      labelStyle: TextStyle(
+                        color: isActive ? AppColors.primary : null,
+                        fontWeight: isActive ? FontWeight.w600 : null,
+                        fontSize: 13,
+                      ),
+                    ),
+                  );
+                }),
+              ],
             ),
-          );
-        }),
-        const Spacer(),
+          ),
+        ),
+        const SizedBox(width: 8),
         _SortMenu(
           current: activeSort,
           onChanged: onSortChanged,

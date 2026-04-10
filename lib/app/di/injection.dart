@@ -24,6 +24,7 @@ import 'package:lexitrack/features/lexicon/domain/usecases/toggle_word_status.da
 import 'package:lexitrack/features/lexicon/domain/usecases/update_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/watch_words.dart';
+import 'package:lexitrack/features/lexicon/data/datasources/lexicon_cache.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
 import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds.dart';
 import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds_impl.dart';
@@ -57,6 +58,7 @@ Future<void> initDI() async {
     ..registerLazySingleton(() => GetLexiconStats(sl()))
     ..registerLazySingleton(() => WatchWords(sl()))
     ..registerLazySingleton(() => WatchLexiconStats(sl()))
+    ..registerLazySingleton(() => LexiconCache(sl()))
     ..registerFactory(() => LexiconBloc(
           getWords: sl(),
           toggleWordStatus: sl(),
@@ -64,6 +66,7 @@ Future<void> initDI() async {
           addWordManually: sl(),
           updateWord: sl(),
           watchStats: sl(),
+          cache: sl(),
         ))
 
     // Features - Text Analyzer

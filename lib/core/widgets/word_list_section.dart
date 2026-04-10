@@ -68,44 +68,75 @@ class _WordListSectionState extends State<WordListSection> {
             ),
           )
         else
-          SliverList(
-            delegate: SliverChildBuilderDelegate(
-              (ctx, index) {
-                if (index.isOdd) {
-                  return Divider(
-                    color: theme.dividerColor.withValues(alpha: 0.1),
-                    height: 1,
-                  );
-                }
-
-                final wordIndex = index ~/ 2;
-                final w = filtered[wordIndex];
-                return ListTile(
-                  contentPadding: EdgeInsets.zero,
-                  title: Text(
-                    w.word.text,
-                    style: const TextStyle(fontWeight: FontWeight.w600),
-                  ),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        '${w.localFrequency}x',
-                        style: TextStyle(
-                          color: theme.colorScheme.primary,
-                          fontWeight: FontWeight.bold,
+          SliverPadding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            sliver: SliverList(
+              delegate: SliverChildBuilderDelegate(
+                (ctx, index) {
+                  final w = filtered[index];
+                  return Container(
+                    margin: const EdgeInsets.only(bottom: 12),
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: theme.colorScheme.surfaceContainerLowest,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(
+                        color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 8,
+                          offset: const Offset(0, 2),
                         ),
-                      ),
-                      const SizedBox(width: 12),
-                      WordListSectionStatusButton(
-                        isKnown: w.word.isKnown,
-                        onToggle: () => widget.onToggleStatus?.call(w),
-                      ),
-                    ],
-                  ),
-                );
-              },
-              childCount: filtered.length * 2 - 1,
+                      ],
+                    ),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                w.word.text,
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  fontWeight: FontWeight.w700,
+                                  color: theme.colorScheme.onSurface,
+                                ),
+                              ),
+                              if (w.word.meaning != null) ...[
+                                const SizedBox(height: 4),
+                                Text(
+                                  w.word.meaning!,
+                                  style: theme.textTheme.bodySmall?.copyWith(
+                                    color: theme.colorScheme.onSurfaceVariant,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ],
+                            ],
+                          ),
+                        ),
+                        Text(
+                          '${w.localFrequency}x',
+                          style: TextStyle(
+                            color: theme.colorScheme.primary,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        WordListSectionStatusButton(
+                          isKnown: w.word.isKnown,
+                          onToggle: () => widget.onToggleStatus?.call(w),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                childCount: filtered.length,
+              ),
             ),
           ),
       ],
