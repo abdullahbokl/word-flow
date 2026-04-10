@@ -2,13 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/sliver_status_view.dart';
 import '../../../../core/widgets/page_header.dart';
-import '../blocs/history/history_bloc.dart';
-import '../blocs/history/history_state.dart';
+import '../../../../core/widgets/sliver_status_view.dart';
 import '../../domain/entities/history_item.dart';
-import '../widgets/history_sliver_list.dart';
+import '../blocs/history/history_bloc.dart';
 import '../widgets/delete_history_dialog.dart';
+import '../widgets/history_sliver_list.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});

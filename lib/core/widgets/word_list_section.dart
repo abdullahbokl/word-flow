@@ -7,8 +7,7 @@ import 'word_list_section_status_button.dart';
 
 class WordListSection extends StatefulWidget {
   const WordListSection({
-    super.key,
-    required this.words,
+    required this.words, super.key,
     this.title = AppStrings.wordBreakdown,
     this.onToggleStatus,
   });

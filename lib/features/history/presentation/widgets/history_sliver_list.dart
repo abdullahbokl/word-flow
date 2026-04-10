@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:sliver_tools/sliver_tools.dart';
+
 import '../../../../core/navigation/app_navigator.dart';
 import '../../../../core/widgets/app_empty_state.dart';
 import '../../../../core/widgets/app_loader.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 import '../../domain/entities/history_item.dart';
 import '../widgets/history_card.dart';
 

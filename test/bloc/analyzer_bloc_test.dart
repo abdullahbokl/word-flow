@@ -1,8 +1,6 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mocktail/mocktail.dart';
-
 import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
 import 'package:lexitrack/core/common/state/bloc_status.dart';
 import 'package:lexitrack/core/domain/entities/word_entity.dart';
@@ -13,6 +11,7 @@ import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.da
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
+import 'package:mocktail/mocktail.dart';
 
 class MockAnalyzerRepository extends Mock implements AnalyzerRepository {}
 
@@ -125,8 +124,8 @@ void main() {
       expect: () => [
         isA<AnalyzerState>()
             .having((s) => s.status.isSuccess, 'isSuccess', true)
-            .having((s) => s.status.data!.knownWords, 'knownWords', 7) // 6 + 1
-            .having((s) => s.status.data!.unknownWords, 'unknownWords', 3) // 4 - 1
+            .having((s) => s.status.data!.knownWords, 'knownWords', 10) // 6 + 4
+            .having((s) => s.status.data!.unknownWords, 'unknownWords', 0) // 4 - 4
             .having((s) => s.status.data!.words.first.word.isKnown, 'first word isKnown', true),
       ],
     );

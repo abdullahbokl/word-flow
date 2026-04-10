@@ -1,7 +1,8 @@
 import 'package:fpdart/fpdart.dart';
+
 import '../../../../core/error/failures.dart';
-import '../entities/history_item.dart';
 import '../entities/history_detail.dart';
+import '../entities/history_item.dart';
 
 abstract class HistoryRepository {
   /// Fetches a list of history items, optionally paged.

@@ -24,7 +24,7 @@ abstract final class AppTokens {
   // Shadows
   static List<BoxShadow> get shadowLow => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.04),
+          color: Colors.black.withValues(alpha: 0.04),
           blurRadius: 8,
           offset: const Offset(0, 2),
         ),
@@ -32,7 +32,7 @@ abstract final class AppTokens {
 
   static List<BoxShadow> get shadowMedium => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.08),
+          color: Colors.black.withValues(alpha: 0.08),
           blurRadius: 16,
           offset: const Offset(0, 4),
         ),
@@ -40,7 +40,7 @@ abstract final class AppTokens {
 
   static List<BoxShadow> get shadowHigh => [
         BoxShadow(
-          color: Colors.black.withOpacity(0.12),
+          color: Colors.black.withValues(alpha: 0.12),
           blurRadius: 24,
           offset: const Offset(0, 8),
         ),

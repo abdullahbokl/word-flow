@@ -28,7 +28,7 @@ class SliverStatusView<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Widget widget = switch (status.status) {
+    final widget = switch (status.status) {
       StateStatus.initial => onInitial?.call() ??
           const SliverFillRemaining(child: SizedBox.shrink()),
       StateStatus.loading => onLoading?.call() ??

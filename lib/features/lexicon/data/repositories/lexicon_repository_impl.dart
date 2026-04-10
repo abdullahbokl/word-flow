@@ -1,10 +1,9 @@
 import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
 
-import '../../../../core/database/app_database.dart';
 import '../../../../core/data/mappers/word_row_mapper.dart';
-import '../../../../core/error/failures.dart';
 import '../../../../core/domain/entities/word_entity.dart';
+import '../../../../core/error/failures.dart';
 import '../../domain/entities/lexicon_stats.dart';
 import '../../domain/entities/word_filter.dart';
 import '../../domain/entities/word_sort.dart';
@@ -31,7 +30,7 @@ class LexiconRepositoryImpl implements LexiconRepository {
               query: query,
               limit: limit,
               offset: offset);
-          return await compute((List<WordRow> r) => r.toEntities(), rows);
+          return await compute((r) => r.toEntities(), rows);
         },
         (error, stack) => DatabaseFailure('$error', stack),
       );

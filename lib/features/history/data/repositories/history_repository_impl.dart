@@ -1,4 +1,3 @@
-import 'package:drift/drift.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:rxdart/rxdart.dart';
 
@@ -55,8 +54,8 @@ class HistoryRepositoryImpl implements HistoryRepository {
       return Right(HistoryDetail(
         item: row.toEntity(),
         words: results.map((r) {
-          final wordRow = r.readTable(_local.db.words);
-          final entryRow = r.readTable(_local.db.textWordEntries);
+          final wordRow = r.$1;
+          final entryRow = r.$2;
           return WordWithLocalFreq(
             word: wordRow.toEntity(),
             localFrequency: entryRow.localFrequency,
@@ -70,31 +69,32 @@ class HistoryRepositoryImpl implements HistoryRepository {
 
   @override
   Stream<Either<Failure, HistoryDetail>> watchHistoryDetail(int id) {
-    final itemStream = (_local.db.select(_local.db.analyzedTexts)
-          ..where((t) => t.id.equals(id)))
-        .watchSingleOrNull();
-
+    final itemStream = _local.watchHistoryItem(id);
     final wordsStream = _local.watchAnalysisWords(id);
 
-    return Rx.combineLatest2<AnalyzedTextRow?, List<TypedResult>,
-        Either<Failure, HistoryDetail>>(itemStream, wordsStream, (item, words) {
-      if (item == null) {
-        return Left(DatabaseFailure('Analysis not found', StackTrace.current));
-      }
+    return Rx.combineLatest2<AnalyzedTextRow?, List<(WordRow, TextWordEntryRow)>,
+        Either<Failure, HistoryDetail>>(
+      itemStream,
+      wordsStream,
+      (item, words) {
+        if (item == null) {
+          return Left(DatabaseFailure('Analysis not found', StackTrace.current));
+        }
 
-      final detail = HistoryDetail(
-        item: item.toEntity(),
-        words: words.map((r) {
-          final wordRow = r.readTable(_local.db.words);
-          final entryRow = r.readTable(_local.db.textWordEntries);
-          return WordWithLocalFreq(
-            word: wordRow.toEntity(),
-            localFrequency: entryRow.localFrequency,
-          );
-        }).toList(),
-      );
+        final detail = HistoryDetail(
+          item: item.toEntity(),
+          words: words.map((r) {
+            final wordRow = r.$1;
+            final entryRow = r.$2;
+            return WordWithLocalFreq(
+              word: wordRow.toEntity(),
+              localFrequency: entryRow.localFrequency,
+            );
+          }).toList(),
+        );
 
-      return Right(detail);
-    });
+        return Right(detail);
+      },
+    );
   }
 }

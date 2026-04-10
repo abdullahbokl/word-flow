@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lexitrack/core/common/state/bloc_status.dart';
 import 'package:lexitrack/core/common/enums/state_status.dart';
+import 'package:lexitrack/core/common/state/bloc_status.dart';
 
 void main() {
   group('BlocStatus', () {

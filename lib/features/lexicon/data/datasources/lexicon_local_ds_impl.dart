@@ -1,10 +1,10 @@
 import '../../../../core/database/app_database.dart';
-import 'lexicon_local_ds_mutations.dart';
-import 'lexicon_local_ds_query_helpers.dart';
 import '../../domain/entities/lexicon_stats.dart';
 import '../../domain/entities/word_filter.dart';
 import '../../domain/entities/word_sort.dart';
 import 'lexicon_local_ds.dart';
+import 'lexicon_local_ds_mutations.dart';
+import 'lexicon_local_ds_query_helpers.dart';
 
 class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
   const LexiconLocalDataSourceImpl(this._db);

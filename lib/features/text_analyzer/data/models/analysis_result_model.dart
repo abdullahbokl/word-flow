@@ -8,9 +8,8 @@ class WordWithLocalFreqModel extends Equatable {
     required this.isKnown,
     required this.createdAt,
     required this.updatedAt,
-    this.meaning,
+    required this.localFrequency, this.meaning,
     this.description,
-    required this.localFrequency,
   });
 
   factory WordWithLocalFreqModel.fromMap(Map<String, Object?> map) {

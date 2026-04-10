@@ -1,7 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../domain/entities/lexicon_stats.dart';
 import '../../../../../core/domain/entities/word_entity.dart';
+import '../../../domain/entities/lexicon_stats.dart';
 import '../../../domain/entities/word_filter.dart';
 import '../../../domain/entities/word_sort.dart';
 

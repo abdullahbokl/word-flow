@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'exit_dialog.dart';
-import '../features/text_analyzer/presentation/pages/analyzer_page.dart';
-import '../features/lexicon/presentation/pages/lexicon_page.dart';
-import '../features/history/presentation/pages/history_page.dart';
 
+import '../features/history/presentation/pages/history_page.dart';
+import '../features/lexicon/presentation/pages/lexicon_page.dart';
 import '../features/settings/presentation/pages/settings_page.dart';
+import '../features/text_analyzer/presentation/pages/analyzer_page.dart';
+import 'exit_dialog.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});

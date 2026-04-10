@@ -1,19 +1,20 @@
 import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:path/path.dart' as p;
 
 import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/app_text.dart';
 import '../../../../core/widgets/status_view.dart';
+import '../../../lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
 import '../../domain/entities/analysis_result.dart';
 import '../blocs/analyzer/analyzer_bloc.dart';
 import '../blocs/analyzer/analyzer_event.dart';
 import '../blocs/analyzer/analyzer_state.dart';
-import '../../../lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
 import '../widgets/analysis_summary.dart';
 import '../widgets/analyzer_input_body.dart';
 

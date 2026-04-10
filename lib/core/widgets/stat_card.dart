@@ -27,7 +27,7 @@ class StatCard extends StatelessWidget {
         color: colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(AppTokens.radius16),
         border: Border.all(
-          color: colorScheme.outline.withOpacity(0.08),
+          color: colorScheme.outline.withValues(alpha: 0.08),
         ),
         boxShadow: AppTokens.shadowLow,
       ),

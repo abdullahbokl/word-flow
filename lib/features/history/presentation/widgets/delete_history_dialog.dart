@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../blocs/history/history_bloc.dart';
-import '../blocs/history/history_event.dart';
 
 class DeleteHistoryDialog extends StatelessWidget {
   const DeleteHistoryDialog({required this.id, super.key});

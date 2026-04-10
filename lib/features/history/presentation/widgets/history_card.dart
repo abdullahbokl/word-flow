@@ -6,8 +6,7 @@ import '../../domain/entities/history_item.dart';
 
 class HistoryCard extends StatelessWidget {
   const HistoryCard({
-    super.key,
-    required this.item,
+    required this.item, super.key,
     this.onTap,
     this.onDelete,
   });

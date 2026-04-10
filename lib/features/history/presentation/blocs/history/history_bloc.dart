@@ -1,9 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
+
 import '../../../../../core/common/state/bloc_status.dart';
 import '../../../domain/usecases/delete_history_item.dart';
 import '../../../domain/usecases/watch_history.dart';
-import '../../../../../core/usecase/usecase.dart';
-import '../../../domain/entities/history_item.dart';
 import 'history_event.dart';
 import 'history_state.dart';
 
@@ -52,7 +51,7 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     res.fold(
       (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),
       (items) {
-        final List<HistoryItem> currentItems = force ? [] : (state.status.data ?? []);
+        final currentItems = force ? [] : (state.status.data ?? []);
         emit(state.copyWith(
           status: BlocStatus.success(data: [...currentItems, ...items]),
           page: nextPage,

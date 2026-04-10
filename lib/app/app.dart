@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../core/navigation/app_navigator.dart';
 import '../core/theme/app_theme.dart';
 import '../core/theme/theme_cubit.dart';
 import '../features/history/presentation/blocs/history/history_bloc.dart';
-import '../features/history/presentation/blocs/history/history_event.dart';
 import '../features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
-import '../features/lexicon/presentation/blocs/lexicon/lexicon_event.dart';
 import '../features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
-import '../core/navigation/app_navigator.dart';
 import 'app_shell.dart';
 import 'di/injection.dart';
 

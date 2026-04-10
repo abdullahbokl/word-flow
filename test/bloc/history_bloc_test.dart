@@ -1,15 +1,13 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:lexitrack/core/error/failures.dart';
 import 'package:lexitrack/features/history/domain/entities/history_item.dart';
 import 'package:lexitrack/features/history/domain/repositories/history_repository.dart';
 import 'package:lexitrack/features/history/domain/usecases/delete_history_item.dart';
 import 'package:lexitrack/features/history/domain/usecases/watch_history.dart';
 import 'package:lexitrack/features/history/presentation/blocs/history/history_bloc.dart';
-import 'package:lexitrack/features/history/presentation/blocs/history/history_event.dart';
-import 'package:lexitrack/features/history/presentation/blocs/history/history_state.dart';
+import 'package:mocktail/mocktail.dart';
 
 class MockHistoryRepository extends Mock implements HistoryRepository {}
 
@@ -50,7 +48,10 @@ void main() {
     blocTest<HistoryBloc, HistoryState>(
       'emits [loading, success] when LoadHistory succeeds',
       build: () {
-        when(() => repository.watchHistory()).thenAnswer(
+        when(() => repository.watchHistory(
+              limit: any(named: 'limit'),
+              offset: any(named: 'offset'),
+            )).thenAnswer(
           (_) => Stream.value(Right<Failure, List<HistoryItem>>(testItems)),
         );
         return bloc;
@@ -70,7 +71,10 @@ void main() {
     blocTest<HistoryBloc, HistoryState>(
       'emits [loading, failure] when LoadHistory fails',
       build: () {
-        when(() => repository.watchHistory()).thenAnswer(
+        when(() => repository.watchHistory(
+              limit: any(named: 'limit'),
+              offset: any(named: 'offset'),
+            )).thenAnswer(
           (_) => Stream.value(const Left<Failure, List<HistoryItem>>(
             DatabaseFailure('Database error'),
           )),
@@ -88,8 +92,14 @@ void main() {
     blocTest<HistoryBloc, HistoryState>(
       'calls deleteHistoryItem when DeleteHistoryItemEvent is added',
       build: () {
-        when(() => repository.deleteHistoryItem(1, deleteUniqueWords: false))
+        when(() => repository.deleteHistoryItem(1, deleteUniqueWords: any(named: 'deleteUniqueWords')))
             .thenAnswer((_) async => const Right<Failure, void>(null));
+        when(() => repository.watchHistory(
+              limit: any(named: 'limit'),
+              offset: any(named: 'offset'),
+            )).thenAnswer(
+          (_) => Stream.value(Right<Failure, List<HistoryItem>>(testItems)),
+        );
         return bloc;
       },
       act: (bloc) => bloc.add(const DeleteHistoryItemEvent(1)),

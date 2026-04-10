@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'app_text.dart';
+
 import '../constants/app_dimensions.dart';
+import 'app_text.dart';
 
 class PageHeader extends StatelessWidget {
   const PageHeader({

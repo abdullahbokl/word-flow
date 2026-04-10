@@ -3,9 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:sliver_tools/sliver_tools.dart';
 
 import '../../../../core/constants/app_strings.dart';
+import '../../../../core/domain/entities/word_entity.dart';
 import '../../../../core/widgets/app_empty_state.dart';
 import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/domain/entities/word_entity.dart';
 import '../blocs/lexicon/lexicon_bloc.dart';
 import 'word_tile.dart';
 

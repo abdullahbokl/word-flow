@@ -1,10 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:lexitrack/core/error/failures.dart';
 import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
 import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
 import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
+import 'package:mocktail/mocktail.dart';
 
 class MockAnalyzerRepository extends Mock implements AnalyzerRepository {}
 

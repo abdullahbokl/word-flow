@@ -3,21 +3,18 @@ import 'package:drift/drift.dart';
 import '../../../../core/database/app_database.dart';
 
 abstract interface class HistoryLocalDataSource {
-  AppDatabase get db;
   Future<List<AnalyzedTextRow>> getHistory({int? limit, int? offset});
   Stream<List<AnalyzedTextRow>> watchHistory({int? limit, int? offset});
   Future<void> deleteHistoryItem(int id, {bool deleteUniqueWords = false});
   Future<AnalyzedTextRow?> getHistoryItem(int id);
-  Future<List<TypedResult>> getAnalysisWords(int id);
-  Stream<List<TypedResult>> watchAnalysisWords(int id);
+  Stream<AnalyzedTextRow?> watchHistoryItem(int id);
+  Future<List<(WordRow, TextWordEntryRow)>> getAnalysisWords(int id);
+  Stream<List<(WordRow, TextWordEntryRow)>> watchAnalysisWords(int id);
 }
 
 class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
   const HistoryLocalDataSourceImpl(this._db);
   final AppDatabase _db;
-
-  @override
-  AppDatabase get db => _db;
 
   @override
   Future<List<AnalyzedTextRow>> getHistory({int? limit, int? offset}) {
@@ -92,18 +89,33 @@ class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
   }
 
   @override
-  Future<List<TypedResult>> getAnalysisWords(int id) {
-    return (_db.select(_db.textWordEntries).join([
-      innerJoin(_db.words, _db.words.id.equalsExp(_db.textWordEntries.wordId)),
-    ])..where(_db.textWordEntries.textId.equals(id)))
-        .get();
+  Stream<AnalyzedTextRow?> watchHistoryItem(int id) {
+    return (_db.select(_db.analyzedTexts)..where((t) => t.id.equals(id)))
+        .watchSingleOrNull();
   }
 
   @override
-  Stream<List<TypedResult>> watchAnalysisWords(int id) {
+  Future<List<(WordRow, TextWordEntryRow)>> getAnalysisWords(int id) async {
+    final results = await (_db.select(_db.textWordEntries).join([
+      innerJoin(_db.words, _db.words.id.equalsExp(_db.textWordEntries.wordId)),
+    ])..where(_db.textWordEntries.textId.equals(id)))
+        .get();
+
+    return results.map((r) => (
+          r.readTable(_db.words),
+          r.readTable(_db.textWordEntries),
+        )).toList();
+  }
+
+  @override
+  Stream<List<(WordRow, TextWordEntryRow)>> watchAnalysisWords(int id) {
     return (_db.select(_db.textWordEntries).join([
       innerJoin(_db.words, _db.words.id.equalsExp(_db.textWordEntries.wordId)),
     ])..where(_db.textWordEntries.textId.equals(id)))
-        .watch();
+        .watch()
+        .map((results) => results.map((r) => (
+              r.readTable(_db.words),
+              r.readTable(_db.textWordEntries),
+            )).toList());
   }
 }
