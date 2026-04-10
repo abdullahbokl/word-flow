@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../core/common/models/word_with_local_freq.dart';
-import '../../../../../core/common/state/bloc_status.dart';
-import '../../../domain/usecases/analyze_text.dart';
-import 'analyzer_event.dart';
-import 'analyzer_state.dart';
+import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
+import 'package:lexitrack/core/common/state/bloc_status.dart';
+import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
 
 class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
   AnalyzerBloc({required AnalyzeText analyzeText})

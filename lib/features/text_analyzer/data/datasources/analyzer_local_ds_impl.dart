@@ -1,9 +1,8 @@
 import 'package:drift/drift.dart';
-
-import '../../../../core/database/app_database.dart';
-import '../../../../core/utils/text_processor.dart';
-import '../models/analysis_result_model.dart';
-import 'analyzer_local_ds.dart';
+import 'package:lexitrack/core/database/app_database.dart';
+import 'package:lexitrack/core/utils/text_processor.dart';
+import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds.dart';
+import 'package:lexitrack/features/text_analyzer/data/models/analysis_result_model.dart';
 
 class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
   const AnalyzerLocalDataSourceImpl(this._db);
@@ -20,36 +19,36 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
     final uniqueTokens = freq.keys.toList();
 
     return _db.transaction(() async {
-      final existingRows = await (_db.select(_db.words)
-            ..where((w) => w.word.isIn(uniqueTokens)))
-          .get();
-
-      final existingMap = {for (final r in existingRows) r.word: r};
-      final newTokens = uniqueTokens.where((t) => !existingMap.containsKey(t)).toList();
       final now = DateTime.now();
 
-      if (newTokens.isNotEmpty) {
-        await _db.batch((b) {
-          for (final t in newTokens) {
-            b.insert(
-              _db.words,
-              WordsCompanion.insert(
-                word: t,
-                frequency: const Value(0),
-                isKnown: const Value(false),
-                createdAt: now,
-                updatedAt: now,
-              ),
-            );
-          }
-        });
-      }
+      // 1. Ensure all unique words exist in the database (Idempotent batch insert)
+      await _db.batch((b) {
+        for (final t in uniqueTokens) {
+          b.insert(
+            _db.words,
+            WordsCompanion.insert(
+              word: t,
+              frequency: const Value(0),
+              isKnown: const Value(false),
+              createdAt: now,
+              updatedAt: now,
+            ),
+            mode: InsertMode.insertOrIgnore,
+          );
+        }
+      });
 
+      // 2. Retrieve all words for the current analysis to get IDs and metadata
       final allWordRows = await (_db.select(_db.words)
             ..where((w) => w.word.isIn(uniqueTokens)))
           .get();
 
       final wordIdMap = {for (final r in allWordRows) r.word: r.id};
+      
+      // Calculate new words count for the summary (words created in this transaction or with 0 freq)
+      // Note: This is an approximation since words with 0 freq might have been added before but never seen.
+      final newWordsCount = allWordRows.where((r) => r.createdAt == now || r.frequency == 0).length;
+
       final wordSnapshots = allWordRows.map((row) {
         return {
           'id': row.id,
@@ -107,7 +106,7 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
         title: title,
         totalWords: totalWords,
         uniqueWords: uniqueTokens.length,
-        newWordsCount: newTokens.length,
+        newWordsCount: newWordsCount,
         words: wordSnapshots,
       );
 

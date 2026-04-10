@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../core/navigation/app_navigator.dart';
-import '../core/theme/app_theme.dart';
-import '../core/theme/theme_cubit.dart';
-import '../features/history/presentation/blocs/history/history_bloc.dart';
-import '../features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
-import '../features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
-import 'app_shell.dart';
-import 'di/injection.dart';
+import 'package:lexitrack/app/app_shell.dart';
+import 'package:lexitrack/app/di/injection.dart';
+import 'package:lexitrack/core/navigation/app_navigator.dart';
+import 'package:lexitrack/core/theme/app_theme.dart';
+import 'package:lexitrack/core/theme/theme_cubit.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history/history_bloc.dart';
+import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
 
 class LexiTrackApp extends StatelessWidget {
   const LexiTrackApp({super.key});

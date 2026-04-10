@@ -2,20 +2,20 @@ import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../core/common/state/bloc_status.dart';
-import '../../../../../core/domain/entities/word_entity.dart';
-import '../../../../../core/usecase/usecase.dart';
-import '../../../domain/commands/word_commands.dart';
-import '../../../domain/entities/word_filter.dart';
-import '../../../domain/entities/word_sort.dart';
-import '../../../domain/usecases/add_word_manually.dart';
-import '../../../domain/usecases/delete_word.dart';
-import '../../../domain/usecases/get_words.dart';
-import '../../../domain/usecases/toggle_word_status.dart';
-import '../../../domain/usecases/update_word.dart';
-import '../../../domain/usecases/watch_lexicon_stats.dart';
-import 'lexicon_event.dart';
-import 'lexicon_state.dart';
+import 'package:lexitrack/core/common/state/bloc_status.dart';
+import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:lexitrack/core/usecase/usecase.dart';
+import 'package:lexitrack/features/lexicon/domain/commands/word_commands.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/add_word_manually.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/delete_word.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/get_words.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/toggle_word_status.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/update_word.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_event.dart';
+import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_state.dart';
 
 export 'lexicon_event.dart';
 export 'lexicon_state.dart';

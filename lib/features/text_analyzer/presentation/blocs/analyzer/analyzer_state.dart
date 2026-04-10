@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import '../../../../../core/common/state/bloc_status.dart';
-import '../../../domain/entities/analysis_result.dart';
+import 'package:lexitrack/core/common/state/bloc_status.dart';
+import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
 
 class AnalyzerState extends Equatable {
   const AnalyzerState({

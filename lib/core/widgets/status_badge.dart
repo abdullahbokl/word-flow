@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../theme/app_colors.dart';
+import 'package:lexitrack/core/theme/app_colors.dart';
 
 class StatusBadge extends StatelessWidget {
   const StatusBadge({required this.isKnown, super.key});

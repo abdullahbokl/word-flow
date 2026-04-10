@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/constants/app_dimensions.dart';
-import '../../../../core/theme/theme_cubit.dart';
-import '../../../../core/widgets/app_text.dart';
-import '../../../../core/widgets/page_header.dart';
+import 'package:lexitrack/core/constants/app_dimensions.dart';
+import 'package:lexitrack/core/theme/theme_cubit.dart';
+import 'package:lexitrack/core/widgets/app_text.dart';
+import 'package:lexitrack/core/widgets/page_header.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});

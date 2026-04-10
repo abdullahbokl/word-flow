@@ -1,15 +1,14 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
+import 'package:lexitrack/core/data/mappers/word_row_mapper.dart';
+import 'package:lexitrack/core/database/app_database.dart';
+import 'package:lexitrack/core/error/failures.dart';
+import 'package:lexitrack/features/history/data/datasources/history_local_ds.dart';
+import 'package:lexitrack/features/history/data/mappers/history_mapper.dart';
+import 'package:lexitrack/features/history/domain/entities/history_detail.dart';
+import 'package:lexitrack/features/history/domain/entities/history_item.dart';
+import 'package:lexitrack/features/history/domain/repositories/history_repository.dart';
 import 'package:rxdart/rxdart.dart';
-
-import '../../../../core/common/models/word_with_local_freq.dart';
-import '../../../../core/data/mappers/word_row_mapper.dart';
-import '../../../../core/database/app_database.dart';
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/history_detail.dart';
-import '../../domain/entities/history_item.dart';
-import '../../domain/repositories/history_repository.dart';
-import '../datasources/history_local_ds.dart';
-import '../mappers/history_mapper.dart';
 
 class HistoryRepositoryImpl implements HistoryRepository {
   const HistoryRepositoryImpl(this._local);

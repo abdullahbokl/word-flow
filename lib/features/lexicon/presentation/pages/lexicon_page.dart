@@ -2,16 +2,16 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/domain/entities/word_entity.dart';
-import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/page_header.dart';
-import '../../../../core/widgets/sliver_status_view.dart';
-import '../blocs/lexicon/lexicon_bloc.dart';
-import '../widgets/add_word_dialog.dart';
-import '../widgets/edit_word_dialog.dart';
-import '../widgets/lexicon_toolbar.dart';
-import '../widgets/words_sliver_list.dart';
+import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:lexitrack/core/widgets/app_loader.dart';
+import 'package:lexitrack/core/widgets/page_header.dart';
+import 'package:lexitrack/core/widgets/sliver_status_view.dart';
+import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
+import 'package:lexitrack/features/lexicon/presentation/widgets/add_word_dialog.dart';
+import 'package:lexitrack/features/lexicon/presentation/widgets/edit_word_dialog.dart';
+import 'package:lexitrack/features/lexicon/presentation/widgets/lexicon_toolbar.dart';
+import 'package:lexitrack/features/lexicon/presentation/widgets/words_sliver_list.dart';
 
 class LexiconPage extends StatefulWidget {
   const LexiconPage({super.key});

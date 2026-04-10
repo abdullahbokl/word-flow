@@ -1,15 +1,14 @@
 import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
-
-import '../../../../core/data/mappers/word_row_mapper.dart';
-import '../../../../core/domain/entities/word_entity.dart';
-import '../../../../core/error/failures.dart';
-import '../../domain/commands/word_commands.dart';
-import '../../domain/entities/lexicon_stats.dart';
-import '../../domain/entities/word_filter.dart';
-import '../../domain/entities/word_sort.dart';
-import '../../domain/repositories/lexicon_repository.dart';
-import '../datasources/lexicon_local_ds.dart';
+import 'package:lexitrack/core/data/mappers/word_row_mapper.dart';
+import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:lexitrack/core/error/failures.dart';
+import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds.dart';
+import 'package:lexitrack/features/lexicon/domain/commands/word_commands.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
+import 'package:lexitrack/features/lexicon/domain/repositories/lexicon_repository.dart';
 
 class LexiconRepositoryImpl implements LexiconRepository {
   const LexiconRepositoryImpl(this._local);
@@ -89,9 +88,9 @@ class LexiconRepositoryImpl implements LexiconRepository {
 
   @override
   TaskEither<Failure, LexiconStats> getStats() => TaskEither.tryCatch(
-      () => _local.getStats(), (e, s) => DatabaseFailure('$e', s));
+      _local.getStats, (e, s) => DatabaseFailure('$e', s));
 
   @override
   Stream<Either<Failure, LexiconStats>> watchStats() =>
-      _local.watchStats().map((stats) => Right(stats));
+      _local.watchStats().map(Right.new);
 }

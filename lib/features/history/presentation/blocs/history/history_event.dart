@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import '../../../domain/entities/history_item.dart';
+import 'package:lexitrack/features/history/domain/entities/history_item.dart';
 
 part 'history_event.freezed.dart';
 

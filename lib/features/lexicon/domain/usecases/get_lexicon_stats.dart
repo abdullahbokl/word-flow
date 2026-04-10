@@ -1,9 +1,9 @@
 import 'package:fpdart/fpdart.dart';
 
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecase/usecase.dart';
-import '../entities/lexicon_stats.dart';
-import '../repositories/lexicon_repository.dart';
+import 'package:lexitrack/core/error/failures.dart';
+import 'package:lexitrack/core/usecase/usecase.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/domain/repositories/lexicon_repository.dart';
 
 class GetLexiconStats extends AsyncUseCase<LexiconStats, NoParams> {
   const GetLexiconStats(this._repository);

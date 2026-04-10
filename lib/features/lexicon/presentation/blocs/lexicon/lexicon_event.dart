@@ -1,9 +1,9 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../../../core/domain/entities/word_entity.dart';
-import '../../../domain/entities/lexicon_stats.dart';
-import '../../../domain/entities/word_filter.dart';
-import '../../../domain/entities/word_sort.dart';
+import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
 
 part 'lexicon_event.freezed.dart';
 

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/constants/app_dimensions.dart';
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_text.dart';
-import '../../../../core/widgets/app_text_field.dart';
-import '../../../../core/widgets/page_header.dart';
+import 'package:lexitrack/core/constants/app_dimensions.dart';
+import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:lexitrack/core/widgets/app_button.dart';
+import 'package:lexitrack/core/widgets/app_text.dart';
+import 'package:lexitrack/core/widgets/app_text_field.dart';
+import 'package:lexitrack/core/widgets/page_header.dart';
 
 class AnalyzerInputBody extends StatelessWidget {
   const AnalyzerInputBody({

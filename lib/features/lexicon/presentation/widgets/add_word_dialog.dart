@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/widgets/app_text.dart';
-import '../../../../core/widgets/app_text_field.dart';
+import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:lexitrack/core/widgets/app_text.dart';
+import 'package:lexitrack/core/widgets/app_text_field.dart';
 
 class AddWordDialog extends StatefulWidget {
   const AddWordDialog({super.key});

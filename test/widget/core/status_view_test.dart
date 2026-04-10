@@ -25,11 +25,11 @@ void main() {
     testWidgets('shows success callback when status is success',
         (tester) async {
       await tester.pumpWidget(
-        MaterialApp(
+        const MaterialApp(
           home: Scaffold(
             body: StatusView<String>(
-              status: const BlocStatus<String>.success(data: 'Hello'),
-              onSuccess: (data) => Text(data),
+              status: BlocStatus<String>.success(data: 'Hello'),
+              onSuccess: Text.new,
               animate: false,
             ),
           ),

@@ -1,10 +1,10 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../core/common/state/bloc_status.dart';
-import '../../../domain/usecases/delete_history_item.dart';
-import '../../../domain/usecases/watch_history.dart';
-import 'history_event.dart';
-import 'history_state.dart';
+import 'package:lexitrack/core/common/state/bloc_status.dart';
+import 'package:lexitrack/features/history/domain/usecases/delete_history_item.dart';
+import 'package:lexitrack/features/history/domain/usecases/watch_history.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history/history_event.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history/history_state.dart';
 
 export 'history_event.dart';
 export 'history_state.dart';

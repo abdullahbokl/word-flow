@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'converters/string_list_converter.dart';
+import 'package:lexitrack/core/database/converters/string_list_converter.dart';
 
 @DataClassName('WordRow')
 class Words extends Table {

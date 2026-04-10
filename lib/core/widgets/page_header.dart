@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../constants/app_dimensions.dart';
-import 'app_text.dart';
+import 'package:lexitrack/core/constants/app_dimensions.dart';
+import 'package:lexitrack/core/widgets/app_text.dart';
 
 class PageHeader extends StatelessWidget {
   const PageHeader({

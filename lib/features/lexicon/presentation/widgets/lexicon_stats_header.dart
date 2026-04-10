@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/stat_card.dart';
-import '../../domain/entities/lexicon_stats.dart';
+import 'package:lexitrack/core/theme/app_colors.dart';
+import 'package:lexitrack/core/widgets/stat_card.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
 
 class LexiconStatsHeader extends StatelessWidget {
   const LexiconStatsHeader({

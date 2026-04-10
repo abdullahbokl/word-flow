@@ -1,7 +1,7 @@
-import '../../../../core/common/models/word_with_local_freq.dart';
-import '../../../../core/domain/entities/word_entity.dart';
-import '../../domain/entities/analysis_result.dart';
-import '../models/analysis_result_model.dart';
+import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
+import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:lexitrack/features/text_analyzer/data/models/analysis_result_model.dart';
+import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
 
 extension AnalysisResultModelMapper on AnalysisResultModel {
   AnalysisResult toEntity() {

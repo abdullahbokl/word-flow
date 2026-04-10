@@ -29,7 +29,6 @@ abstract final class AppColors {
         onSurfaceVariant: const Color(0xFF44474E),
         outline: const Color(0xFF74777F),
         error: error,
-        brightness: Brightness.light,
       );
 
   // Dark Color Scheme

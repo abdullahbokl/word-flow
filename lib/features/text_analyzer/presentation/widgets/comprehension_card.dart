@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/app_text.dart';
+import 'package:lexitrack/core/theme/app_colors.dart';
+import 'package:lexitrack/core/widgets/app_text.dart';
 
 class ComprehensionCard extends StatelessWidget {
   const ComprehensionCard({required this.percentage, super.key});

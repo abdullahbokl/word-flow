@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import '../../../../core/theme/app_colors.dart';
-import '../../domain/entities/word_filter.dart';
-import '../../domain/entities/word_sort.dart';
+import 'package:lexitrack/core/theme/app_colors.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
 
 class WordFilterBar extends StatelessWidget {
   const WordFilterBar({

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../constants/app_strings.dart';
-import '../widgets/app_text.dart';
+import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:lexitrack/core/widgets/app_text.dart';
 
 class AppUIUtils {
   static void showSnackBar(

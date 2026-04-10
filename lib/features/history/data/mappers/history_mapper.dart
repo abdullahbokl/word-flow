@@ -1,5 +1,5 @@
-import '../../../../core/database/app_database.dart';
-import '../../domain/entities/history_item.dart';
+import 'package:lexitrack/core/database/app_database.dart';
+import 'package:lexitrack/features/history/domain/entities/history_item.dart';
 
 extension AnalyzedTextRowMapper on AnalyzedTextRow {
   HistoryItem toEntity() {

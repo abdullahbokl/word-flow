@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
 
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/widgets/app_button.dart';
-import '../../../../core/widgets/app_text.dart';
-import '../../../../core/widgets/stat_card.dart';
-import '../../../../core/widgets/word_list_section.dart';
-import '../../domain/entities/analysis_result.dart';
-import 'comprehension_card.dart';
+import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:lexitrack/core/widgets/app_button.dart';
+import 'package:lexitrack/core/widgets/app_text.dart';
+import 'package:lexitrack/core/widgets/stat_card.dart';
+import 'package:lexitrack/core/widgets/word_list_section.dart';
+import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/widgets/comprehension_card.dart';
 
 class AnalysisSummary extends StatelessWidget {
   const AnalysisSummary({

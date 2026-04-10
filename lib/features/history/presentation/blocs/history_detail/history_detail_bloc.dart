@@ -1,13 +1,12 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-
-import '../../../../../core/common/state/bloc_status.dart';
-import '../../../../lexicon/domain/usecases/toggle_word_status.dart';
-import '../../../domain/entities/history_detail.dart';
-import '../../../domain/usecases/watch_history_detail.dart';
-import 'history_detail_event.dart';
-import 'history_detail_state.dart';
+import 'package:lexitrack/core/common/state/bloc_status.dart';
+import 'package:lexitrack/features/history/domain/entities/history_detail.dart';
+import 'package:lexitrack/features/history/domain/usecases/watch_history_detail.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history_detail/history_detail_event.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history_detail/history_detail_state.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/toggle_word_status.dart';
 
 class HistoryDetailBloc extends Bloc<HistoryDetailEvent, HistoryDetailState> {
   HistoryDetailBloc(this._watchDetail, this._toggleWord)

@@ -46,8 +46,6 @@ void main() {
         isKnown: false,
         createdAt: now,
         updatedAt: now,
-        meaning: null,
-        description: null,
       );
       when(() => repository.addWord(any())).thenAnswer(
         (_) => TaskEither.right(word),
@@ -68,8 +66,6 @@ void main() {
         isKnown: false,
         createdAt: now,
         updatedAt: now,
-        meaning: null,
-        description: null,
       );
       when(() => repository.addWord(any())).thenAnswer(
         (_) => TaskEither.right(word),

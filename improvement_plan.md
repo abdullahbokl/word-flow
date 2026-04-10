@@ -10,22 +10,24 @@
 - [x] **Component Modernization**: Refactored `StatCard`, `AppEmptyState`, `WordTile`, and `LexiconToolbar` to use premium design tokens.
 - [x] **Bug Fixes**: Resolved critical `undefined_getter` errors and deprecated members (`withOpacity`, `surfaceVariant`, `FilePicker.platform`).
 - [x] **Linting Cleanup**: Fixed 30+ linting issues and optimized imports across major features.
+- [x] **Repository Abstractions**: Decoupled domain layer from data sources across all features.
+- [x] **CQRS Implementation**: Structured Command objects for word modifications.
+- [x] **Static Analysis**: Implemented strict `analysis_options.yaml` (100% Done).
 
 ---
 
 ## Detailed Technical Roadmap
 
 ### Phase 1: Architecture & Foundation (Current Focus)
-- [x] **Repository Abstractions**: Decoupled domain layer from data sources across all features (History, Lexicon, Analyzer).
-- [x] **CQRS Implementation**: Separate read and write models for word operations and implement structured Command objects for modifications.
-- [ ] **Static Analysis**: Implement strict `analysis_options.yaml` (80% Done).
+- [x] **Repository Abstractions**: Decoupled domain layer from data sources.
+- [x] **CQRS Implementation**: Separate read and write models for word operations.
+- [x] **Static Analysis**: High-quality code standards enforced.
 - [ ] **Testing**: Target 80%+ coverage; implement Golden Tests and Integration Tests (Patrol).
 
 ### Phase 2: Performance & Database
-- [x] **Lazy Loading**: Implement pagination with infinite scroll for word lists.
-- [ ] **Caching**: Introduce Hive/SharedPreferences caching for frequently accessed data.
-- [ ] **Query Optimization**: Optimize Drift database queries and add necessary indexes.
-- [ ] **Batch Operations**: Implement batching for bulk word updates/additions.
+- [x] **Batch Operations**: Implemented idempotent upsert strategy for efficient large text analysis (100% Done).
+- [x] **Query Optimization**: Implemented database indices for foreign keys and frequent queries (100% Done).
+- [ ] **Caching Strategy**: Implemented local caching for statistics (80% Done).
 
 ### Phase 3: UI Architecture (Material 3) ✅
 - [x] **Design Tokens**: Create a centralized design token system.
@@ -40,8 +42,7 @@
 ---
 
 ## Technical Success Metrics
-- **Test Coverage**: Current: ~10% | Target: 80%+
+- **Test Coverage**: Current: ~20% | Target: 80%+
 - **App Size**: <50MB
 - **Frame Rate**: Consistent 60fps (or 120fps) during scrolling
 - **Crash-free sessions**: 99.9%
-

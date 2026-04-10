@@ -2,11 +2,10 @@ import 'dart:io';
 
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
+import 'package:lexitrack/core/database/converters/string_list_converter.dart';
+import 'package:lexitrack/core/database/tables.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
-
-import 'converters/string_list_converter.dart';
-import 'tables.dart';
 
 part 'app_database.g.dart';
 
@@ -17,7 +16,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting({required QueryExecutor e}) : super(e);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -46,6 +45,14 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(words, words.translations);
           await m.addColumn(words, words.synonyms);
         }
+        if (from < 6) {
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_text_word_entries_text_id ON text_word_entries (text_id)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_text_word_entries_word_id ON text_word_entries (word_id)',
+          );
+        }
       },
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON');
@@ -54,6 +61,12 @@ class AppDatabase extends _$AppDatabase {
         );
         await customStatement(
           'CREATE INDEX IF NOT EXISTS idx_words_updated_at ON words (updated_at)',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_text_word_entries_text_id ON text_word_entries (text_id)',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_text_word_entries_word_id ON text_word_entries (word_id)',
         );
       },
     );

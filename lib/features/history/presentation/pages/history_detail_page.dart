@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../app/di/injection.dart';
-import '../../../../core/constants/app_dimensions.dart';
-import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/app_text.dart';
-import '../../../../core/widgets/status_view.dart';
-import '../../../../core/widgets/theme_toggle.dart';
-import '../../../../core/widgets/word_list_section.dart';
-import '../../domain/entities/history_detail.dart';
-import '../blocs/history_detail/history_detail_bloc.dart';
-import '../blocs/history_detail/history_detail_event.dart';
-import '../blocs/history_detail/history_detail_state.dart';
-import '../widgets/history_detail_stats_grid.dart';
+import 'package:lexitrack/app/di/injection.dart';
+import 'package:lexitrack/core/constants/app_dimensions.dart';
+import 'package:lexitrack/core/widgets/app_loader.dart';
+import 'package:lexitrack/core/widgets/app_text.dart';
+import 'package:lexitrack/core/widgets/status_view.dart';
+import 'package:lexitrack/core/widgets/theme_toggle.dart';
+import 'package:lexitrack/core/widgets/word_list_section.dart';
+import 'package:lexitrack/features/history/domain/entities/history_detail.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history_detail/history_detail_bloc.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history_detail/history_detail_event.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history_detail/history_detail_state.dart';
+import 'package:lexitrack/features/history/presentation/widgets/history_detail_stats_grid.dart';
 
 class HistoryDetailPage extends StatelessWidget {
   const HistoryDetailPage({required this.id, super.key});
@@ -54,7 +54,7 @@ class _DetailView extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      AppText.headline(detail.item.title, fontWeight: FontWeight.bold),
+                      AppText.headline(detail.item.title),
                       const SizedBox(height: AppDimensions.space8),
                       const AppText.label('Full text content excerpt:'),
                       _SnippetBox(snippet: detail.item.contentSnippet, isDark: isDark),

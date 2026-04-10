@@ -24,7 +24,7 @@ void main() {
         title: 'Test Analysis',
         totalWords: 100,
         uniqueWords: 50,
-        createdAt: DateTime(2024, 1, 1),
+        createdAt: DateTime(2024),
         contentSnippet: 'Test content...',
       ),
     ];
@@ -104,7 +104,7 @@ void main() {
       },
       act: (bloc) => bloc.add(const DeleteHistoryItemEvent(1)),
       verify: (_) {
-        verify(() => repository.deleteHistoryItem(1, deleteUniqueWords: false))
+        verify(() => repository.deleteHistoryItem(1))
             .called(1);
       },
     );

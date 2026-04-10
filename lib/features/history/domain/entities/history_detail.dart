@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
-import '../../../../core/common/models/word_with_local_freq.dart';
-import './history_item.dart';
+import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
+import 'package:lexitrack/features/history/domain/entities/history_item.dart';
 
 class HistoryDetail extends Equatable {
   const HistoryDetail({

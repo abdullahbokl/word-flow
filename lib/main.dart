@@ -3,8 +3,8 @@ library;
 
 import 'package:flutter/material.dart';
 
-import 'app/app.dart';
-import 'app/di/injection.dart';
+import 'package:lexitrack/app/app.dart';
+import 'package:lexitrack/app/di/injection.dart';
 
 /// Initializes the application services and runs the app.
 void main() async {

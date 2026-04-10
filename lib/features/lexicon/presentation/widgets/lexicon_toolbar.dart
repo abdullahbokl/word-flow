@@ -1,14 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/widgets/app_text_field.dart';
-import '../../domain/entities/lexicon_stats.dart';
-import '../../domain/entities/word_filter.dart';
-import '../../domain/entities/word_sort.dart';
-import '../blocs/lexicon/lexicon_bloc.dart';
-import 'lexicon_stats_header.dart';
-import 'word_filter_bar.dart';
+import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:lexitrack/core/widgets/app_text_field.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
+import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
+import 'package:lexitrack/features/lexicon/presentation/widgets/lexicon_stats_header.dart';
+import 'package:lexitrack/features/lexicon/presentation/widgets/word_filter_bar.dart';
 
 class LexiconToolbar extends StatelessWidget {
   const LexiconToolbar({

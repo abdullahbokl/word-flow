@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../../core/domain/entities/word_entity.dart';
+import 'package:lexitrack/core/domain/entities/word_entity.dart';
 
 const _knownColor = Color(0xFF2E7D32);
 
@@ -59,7 +59,6 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
           ],
           border: Border.all(
             color: colorScheme.outlineVariant.withValues(alpha: 0.5),
-            width: 1,
           ),
         ),
         child: InkWell(

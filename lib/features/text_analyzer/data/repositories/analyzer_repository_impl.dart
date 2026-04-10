@@ -1,10 +1,9 @@
 import 'package:fpdart/fpdart.dart';
-
-import '../../../../core/error/failures.dart';
-import '../../domain/entities/analysis_result.dart';
-import '../../domain/repositories/analyzer_repository.dart';
-import '../datasources/analyzer_local_ds.dart';
-import '../mappers/analysis_mapper.dart';
+import 'package:lexitrack/core/error/failures.dart';
+import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds.dart';
+import 'package:lexitrack/features/text_analyzer/data/mappers/analysis_mapper.dart';
+import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
+import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
 
 class AnalyzerRepositoryImpl implements AnalyzerRepository {
   const AnalyzerRepositoryImpl(this._local);

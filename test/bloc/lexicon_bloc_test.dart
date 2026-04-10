@@ -187,8 +187,6 @@ void main() {
         },
         seed: () => LexiconState(
           status: BlocStatus.success(data: [tWord]),
-          page: 0,
-          hasReachedMax: false,
         ),
         act: (bloc) => bloc.add(const LoadMoreLexicon()),
         expect: () => [

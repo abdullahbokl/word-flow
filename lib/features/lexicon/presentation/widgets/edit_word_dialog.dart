@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/domain/entities/word_entity.dart';
-import '../../../../core/widgets/app_text.dart';
-import '../../../../core/widgets/app_text_field.dart';
+import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:lexitrack/core/widgets/app_text.dart';
+import 'package:lexitrack/core/widgets/app_text_field.dart';
 
 class EditWordDialog extends StatefulWidget {
   const EditWordDialog({required this.word, super.key});
@@ -63,8 +63,7 @@ class _EditWordDialogState extends State<EditWordDialog> {
 
   void _removeItem(List<TextEditingController> ctrls, int index) {
     setState(() {
-      final c = ctrls.removeAt(index);
-      c.dispose();
+      ctrls.removeAt(index).dispose();
       if (ctrls.isEmpty) {
         ctrls.add(TextEditingController());
       }

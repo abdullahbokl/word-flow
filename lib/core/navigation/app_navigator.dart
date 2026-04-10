@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../../features/history/presentation/pages/history_detail_page.dart';
+import 'package:lexitrack/features/history/presentation/pages/history_detail_page.dart';
 
 class AppNavigator {
   static final key = GlobalKey<NavigatorState>();

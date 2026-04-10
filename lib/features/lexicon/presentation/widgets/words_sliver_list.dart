@@ -1,13 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:lexitrack/core/widgets/app_empty_state.dart';
+import 'package:lexitrack/core/widgets/app_loader.dart';
+import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
+import 'package:lexitrack/features/lexicon/presentation/widgets/word_tile.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/domain/entities/word_entity.dart';
-import '../../../../core/widgets/app_empty_state.dart';
-import '../../../../core/widgets/app_loader.dart';
-import '../blocs/lexicon/lexicon_bloc.dart';
-import 'word_tile.dart';
 
 class WordsSliverList extends StatelessWidget {
   const WordsSliverList({

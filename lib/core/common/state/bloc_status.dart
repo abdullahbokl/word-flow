@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-import '../enums/state_status.dart';
+import 'package:lexitrack/core/common/enums/state_status.dart';
 
 class BlocStatus<T> extends Equatable {
   const BlocStatus._(this.status, {this.error, this.data});

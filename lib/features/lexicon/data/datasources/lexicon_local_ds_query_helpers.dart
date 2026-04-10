@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart';
 
-import '../../../../core/database/app_database.dart';
-import '../../domain/entities/word_filter.dart';
-import '../../domain/entities/word_sort.dart';
+import 'package:lexitrack/core/database/app_database.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
 
 Selectable<WordRow> buildWordQuery(
   AppDatabase db, {

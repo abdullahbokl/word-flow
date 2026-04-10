@@ -1,9 +1,9 @@
 import 'package:fpdart/fpdart.dart';
 
-import '../../../../core/error/failures.dart';
-import '../../../../core/usecase/usecase.dart';
-import '../entities/analysis_result.dart';
-import '../repositories/analyzer_repository.dart';
+import 'package:lexitrack/core/error/failures.dart';
+import 'package:lexitrack/core/usecase/usecase.dart';
+import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
+import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
 
 class AnalyzeTextParams {
   const AnalyzeTextParams({required this.title, required this.content});

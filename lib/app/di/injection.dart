@@ -1,88 +1,94 @@
 import 'package:get_it/get_it.dart';
-
-import '../../core/database/app_database.dart';
-import '../../core/theme/theme_cubit.dart';
-import '../../features/history/data/datasources/history_local_ds.dart';
-import '../../features/history/data/repositories/history_repository_impl.dart';
-import '../../features/history/domain/repositories/history_repository.dart';
-import '../../features/history/domain/usecases/delete_history_item.dart';
-import '../../features/history/domain/usecases/get_history.dart';
-import '../../features/history/domain/usecases/get_history_detail.dart';
-import '../../features/history/domain/usecases/watch_history.dart';
-import '../../features/history/domain/usecases/watch_history_detail.dart';
-import '../../features/history/presentation/blocs/history/history_bloc.dart';
-import '../../features/history/presentation/blocs/history_detail/history_detail_bloc.dart';
-import '../../features/lexicon/data/datasources/lexicon_local_ds.dart';
-import '../../features/lexicon/data/datasources/lexicon_local_ds_impl.dart';
-import '../../features/lexicon/data/repositories/lexicon_repository_impl.dart';
-import '../../features/lexicon/domain/repositories/lexicon_repository.dart';
-import '../../features/lexicon/domain/usecases/add_word_manually.dart';
-import '../../features/lexicon/domain/usecases/delete_word.dart';
-import '../../features/lexicon/domain/usecases/get_lexicon_stats.dart';
-import '../../features/lexicon/domain/usecases/get_words.dart';
-import '../../features/lexicon/domain/usecases/toggle_word_status.dart';
-import '../../features/lexicon/domain/usecases/update_word.dart';
-import '../../features/lexicon/domain/usecases/watch_lexicon_stats.dart';
-import '../../features/lexicon/domain/usecases/watch_words.dart';
-import '../../features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
-import '../../features/text_analyzer/data/datasources/analyzer_local_ds.dart';
-import '../../features/text_analyzer/data/datasources/analyzer_local_ds_impl.dart';
-import '../../features/text_analyzer/data/repositories/analyzer_repository_impl.dart';
-import '../../features/text_analyzer/domain/repositories/analyzer_repository.dart';
-import '../../features/text_analyzer/domain/usecases/analyze_text.dart';
-import '../../features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
+import 'package:lexitrack/core/cache/local_cache.dart';
+import 'package:lexitrack/core/database/app_database.dart';
+import 'package:lexitrack/core/theme/theme_cubit.dart';
+import 'package:lexitrack/features/history/data/datasources/history_local_ds.dart';
+import 'package:lexitrack/features/history/data/repositories/history_repository_impl.dart';
+import 'package:lexitrack/features/history/domain/repositories/history_repository.dart';
+import 'package:lexitrack/features/history/domain/usecases/delete_history_item.dart';
+import 'package:lexitrack/features/history/domain/usecases/get_history.dart';
+import 'package:lexitrack/features/history/domain/usecases/get_history_detail.dart';
+import 'package:lexitrack/features/history/domain/usecases/watch_history.dart';
+import 'package:lexitrack/features/history/domain/usecases/watch_history_detail.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history/history_bloc.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history_detail/history_detail_bloc.dart';
+import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds.dart';
+import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds_impl.dart';
+import 'package:lexitrack/features/lexicon/data/repositories/lexicon_repository_impl.dart';
+import 'package:lexitrack/features/lexicon/domain/repositories/lexicon_repository.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/add_word_manually.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/delete_word.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/get_lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/get_words.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/toggle_word_status.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/update_word.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/watch_words.dart';
+import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
+import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds.dart';
+import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds_impl.dart';
+import 'package:lexitrack/features/text_analyzer/data/repositories/analyzer_repository_impl.dart';
+import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
+import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
 
 Future<void> initDI() async {
   // Core
   final db = AppDatabase();
-  sl.registerSingleton<AppDatabase>(db);
-  sl.registerFactory(() => ThemeCubit());
+  final prefs = await SharedPreferences.getInstance();
+  
+  sl
+    ..registerSingleton<AppDatabase>(db)
+    ..registerSingleton<LocalCache>(LocalCacheImpl(prefs))
+    ..registerFactory(ThemeCubit.new);
 
   // Features - Lexicon
-  sl.registerLazySingleton<LexiconLocalDataSource>(
-      () => LexiconLocalDataSourceImpl(sl()));
-  sl.registerLazySingleton<LexiconRepository>(
-      () => LexiconRepositoryImpl(sl()));
-  sl.registerLazySingleton(() => GetWords(sl()));
-  sl.registerLazySingleton(() => ToggleWordStatus(sl()));
-  sl.registerLazySingleton(() => DeleteWord(sl()));
-  sl.registerLazySingleton(() => AddWordManually(sl()));
-  sl.registerLazySingleton(() => UpdateWord(sl()));
-  sl.registerLazySingleton(() => GetLexiconStats(sl()));
-  sl.registerLazySingleton(() => WatchWords(sl()));
-  sl.registerLazySingleton(() => WatchLexiconStats(sl()));
-  sl.registerFactory(() => LexiconBloc(
-        getWords: sl(),
-        toggleWordStatus: sl(),
-        deleteWord: sl(),
-        addWordManually: sl(),
-        updateWord: sl(),
-        watchStats: sl(),
-      ));
+  sl
+    ..registerLazySingleton<LexiconLocalDataSource>(
+        () => LexiconLocalDataSourceImpl(sl(), sl()))
+    ..registerLazySingleton<LexiconRepository>(
+        () => LexiconRepositoryImpl(sl()))
+    ..registerLazySingleton(() => GetWords(sl()))
+    ..registerLazySingleton(() => ToggleWordStatus(sl()))
+    ..registerLazySingleton(() => DeleteWord(sl()))
+    ..registerLazySingleton(() => AddWordManually(sl()))
+    ..registerLazySingleton(() => UpdateWord(sl()))
+    ..registerLazySingleton(() => GetLexiconStats(sl()))
+    ..registerLazySingleton(() => WatchWords(sl()))
+    ..registerLazySingleton(() => WatchLexiconStats(sl()))
+    ..registerFactory(() => LexiconBloc(
+          getWords: sl(),
+          toggleWordStatus: sl(),
+          deleteWord: sl(),
+          addWordManually: sl(),
+          updateWord: sl(),
+          watchStats: sl(),
+        ))
 
-  // Features - Text Analyzer
-  sl.registerLazySingleton<AnalyzerLocalDataSource>(
-      () => AnalyzerLocalDataSourceImpl(sl()));
-  sl.registerLazySingleton<AnalyzerRepository>(
-      () => AnalyzerRepositoryImpl(sl()));
-  sl.registerLazySingleton(() => AnalyzeText(sl()));
-  sl.registerFactory(() => AnalyzerBloc(analyzeText: sl()));
+    // Features - Text Analyzer
+    ..registerLazySingleton<AnalyzerLocalDataSource>(
+        () => AnalyzerLocalDataSourceImpl(sl()))
+    ..registerLazySingleton<AnalyzerRepository>(
+        () => AnalyzerRepositoryImpl(sl()))
+    ..registerLazySingleton(() => AnalyzeText(sl()))
+    ..registerFactory(() => AnalyzerBloc(analyzeText: sl()))
 
-  // Features - History
-  sl.registerLazySingleton<HistoryLocalDataSource>(
-      () => HistoryLocalDataSourceImpl(sl()));
-  sl.registerLazySingleton<HistoryRepository>(
-      () => HistoryRepositoryImpl(sl()));
-  sl.registerLazySingleton(() => GetHistory(sl()));
-  sl.registerLazySingleton(() => WatchHistory(sl()));
-  sl.registerLazySingleton(() => DeleteHistoryItem(sl()));
-  sl.registerLazySingleton(() => GetHistoryDetail(sl()));
-  sl.registerLazySingleton(() => WatchHistoryDetail(sl()));
-  sl.registerFactory(() => HistoryBloc(
-        watchHistory: sl(),
-        deleteHistoryItem: sl(),
-      ));
-  sl.registerFactory(() => HistoryDetailBloc(sl(), sl()));
+    // Features - History
+    ..registerLazySingleton<HistoryLocalDataSource>(
+        () => HistoryLocalDataSourceImpl(sl()))
+    ..registerLazySingleton<HistoryRepository>(
+        () => HistoryRepositoryImpl(sl()))
+    ..registerLazySingleton(() => GetHistory(sl()))
+    ..registerLazySingleton(() => WatchHistory(sl()))
+    ..registerLazySingleton(() => DeleteHistoryItem(sl()))
+    ..registerLazySingleton(() => GetHistoryDetail(sl()))
+    ..registerLazySingleton(() => WatchHistoryDetail(sl()))
+    ..registerFactory(() => HistoryBloc(
+          watchHistory: sl(),
+          deleteHistoryItem: sl(),
+        ))
+    ..registerFactory(() => HistoryDetailBloc(sl(), sl()));
 }

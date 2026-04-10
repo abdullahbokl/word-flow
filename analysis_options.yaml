@@ -84,3 +84,17 @@ linter:
     use_function_type_syntax_for_parameters: true
     use_rethrow_when_possible: true
     package_api_docs: true
+    
+    # --- Strict Rules ---
+    always_use_package_imports: true
+    avoid_escaping_inner_quotes: true
+    avoid_redundant_argument_values: true
+    avoid_unused_constructor_parameters: true
+    cascade_invocations: true
+    join_return_with_assignment: true
+    prefer_interpolation_to_compose_strings: true
+    unnecessary_lambdas: true
+    use_super_parameters: true
+    parameter_assignments: true
+    prefer_final_in_for_each: true
+    noop_primitive_operations: true

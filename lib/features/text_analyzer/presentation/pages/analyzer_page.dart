@@ -4,19 +4,18 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:lexitrack/core/widgets/app_loader.dart';
+import 'package:lexitrack/core/widgets/app_text.dart';
+import 'package:lexitrack/core/widgets/status_view.dart';
+import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
+import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/widgets/analysis_summary.dart';
+import 'package:lexitrack/features/text_analyzer/presentation/widgets/analyzer_input_body.dart';
 import 'package:path/path.dart' as p;
-
-import '../../../../core/constants/app_strings.dart';
-import '../../../../core/widgets/app_loader.dart';
-import '../../../../core/widgets/app_text.dart';
-import '../../../../core/widgets/status_view.dart';
-import '../../../lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
-import '../../domain/entities/analysis_result.dart';
-import '../blocs/analyzer/analyzer_bloc.dart';
-import '../blocs/analyzer/analyzer_event.dart';
-import '../blocs/analyzer/analyzer_state.dart';
-import '../widgets/analysis_summary.dart';
-import '../widgets/analyzer_input_body.dart';
 
 class AnalyzerPage extends StatefulWidget {
   const AnalyzerPage({super.key});

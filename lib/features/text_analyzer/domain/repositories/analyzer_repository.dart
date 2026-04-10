@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
 
-import '../../../../core/error/failures.dart';
-import '../entities/analysis_result.dart';
+import 'package:lexitrack/core/error/failures.dart';
+import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
 
 abstract interface class AnalyzerRepository {
   TaskEither<Failure, AnalysisResult> analyze({

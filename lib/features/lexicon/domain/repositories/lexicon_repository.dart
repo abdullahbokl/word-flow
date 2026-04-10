@@ -1,11 +1,11 @@
 import 'package:fpdart/fpdart.dart';
 
-import '../../../../core/domain/entities/word_entity.dart';
-import '../../../../core/error/failures.dart';
-import '../commands/word_commands.dart';
-import '../entities/lexicon_stats.dart';
-import '../entities/word_filter.dart';
-import '../entities/word_sort.dart';
+import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:lexitrack/core/error/failures.dart';
+import 'package:lexitrack/features/lexicon/domain/commands/word_commands.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
 
 abstract interface class LexiconRepository {
   TaskEither<Failure, List<WordEntity>> getWords({

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../common/enums/state_status.dart';
-import '../common/state/bloc_status.dart';
-import 'app_error_widget.dart';
-import 'app_loader.dart';
+import 'package:lexitrack/core/common/enums/state_status.dart';
+import 'package:lexitrack/core/common/state/bloc_status.dart';
+import 'package:lexitrack/core/widgets/app_error_widget.dart';
+import 'package:lexitrack/core/widgets/app_loader.dart';
 
 /// A version of [StatusView] that always returns Slivers.
 /// Useful for [CustomScrollView] bodies.

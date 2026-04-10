@@ -1,4 +1,4 @@
-import '../models/analysis_result_model.dart';
+import 'package:lexitrack/features/text_analyzer/data/models/analysis_result_model.dart';
 
 abstract interface class AnalyzerLocalDataSource {
   Future<AnalysisResultModel> analyze({

@@ -1,15 +1,20 @@
-import '../../../../core/database/app_database.dart';
-import '../../domain/entities/lexicon_stats.dart';
-import '../../domain/entities/word_filter.dart';
-import '../../domain/entities/word_sort.dart';
-import 'lexicon_local_ds.dart';
-import 'lexicon_local_ds_mutations.dart';
-import 'lexicon_local_ds_query_helpers.dart';
+import 'package:lexitrack/core/cache/local_cache.dart';
+import 'package:lexitrack/core/database/app_database.dart';
+import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds.dart';
+import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds_mutations.dart';
+import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds_query_helpers.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
+import 'package:rxdart/rxdart.dart';
 
 class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
-  const LexiconLocalDataSourceImpl(this._db);
+  const LexiconLocalDataSourceImpl(this._db, this._cache);
 
   final AppDatabase _db;
+  final LocalCache _cache;
+  
+  static const _statsCacheKey = 'lexicon_stats_cache';
 
   @override
   Future<List<WordRow>> getWords({
@@ -83,11 +88,45 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
 
   @override
   Future<LexiconStats> getStats() async {
-    return getLexiconStats(_db);
+    final stats = await getLexiconStats(_db);
+    _saveStatsToCache(stats);
+    return stats;
   }
 
   @override
   Stream<LexiconStats> watchStats() {
-    return watchLexiconStats(_db);
+    final cached = _getCachedStats();
+    final dbStream = watchLexiconStats(_db).map((s) {
+      _saveStatsToCache(s);
+      return s;
+    });
+
+    if (cached != null) {
+      return Rx.concat([
+        Stream.value(cached),
+        dbStream,
+      ]).distinct();
+    }
+    return dbStream;
+  }
+
+  LexiconStats? _getCachedStats() {
+    final raw = _cache.getString(_statsCacheKey);
+    if (raw == null) return null;
+    try {
+      final parts = raw.split(':');
+      if (parts.length != 3) return null;
+      return LexiconStats(
+        total: int.parse(parts[0]),
+        known: int.parse(parts[1]),
+        unknown: int.parse(parts[2]),
+      );
+    } catch (_) {
+      return null;
+    }
+  }
+
+  void _saveStatsToCache(LexiconStats stats) {
+    _cache.setString(_statsCacheKey, '${stats.total}:${stats.known}:${stats.unknown}');
   }
 }

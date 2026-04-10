@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import '../common/models/word_with_local_freq.dart';
-import '../constants/app_strings.dart';
-import 'word_list_section_filter_toggle.dart';
-import 'word_list_section_status_button.dart';
+import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
+import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:lexitrack/core/widgets/word_list_section_filter_toggle.dart';
+import 'package:lexitrack/core/widgets/word_list_section_status_button.dart';
 
 class WordListSection extends StatefulWidget {
   const WordListSection({

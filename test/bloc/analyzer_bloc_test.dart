@@ -106,7 +106,7 @@ void main() {
       'emits reset state on ResetAnalysis',
       build: () => bloc,
       seed: () => AnalyzerState(
-        status: BlocStatus.success(data: _makeResult(id: 1)),
+        status: BlocStatus.success(data: _makeResult()),
       ),
       act: (b) => b.add(const ResetAnalysis()),
       expect: () => [

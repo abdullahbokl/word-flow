@@ -38,8 +38,6 @@ void main() {
         isKnown: false,
         createdAt: now,
         updatedAt: now,
-        meaning: null,
-        description: null,
       );
 
       final entity = row.toEntity();

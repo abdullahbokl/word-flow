@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_animate/flutter_animate.dart';
 
-import '../common/enums/state_status.dart';
-import '../common/state/bloc_status.dart';
-import 'app_error_widget.dart';
-import 'app_loader.dart';
+import 'package:lexitrack/core/common/enums/state_status.dart';
+import 'package:lexitrack/core/common/state/bloc_status.dart';
+import 'package:lexitrack/core/widgets/app_error_widget.dart';
+import 'package:lexitrack/core/widgets/app_loader.dart';
 
 class StatusView<T> extends StatelessWidget {
   const StatusView({
