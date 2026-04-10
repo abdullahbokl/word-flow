@@ -77,12 +77,18 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
         }
       });
 
+      // Calculate unique word stats for the DB item
+      final uniqueKnown = allWordRows.where((r) => r.isKnown).length;
+      final uniqueUnknown = uniqueTokens.length - uniqueKnown;
+
       final analyzedTextId = await _db.into(_db.analyzedTexts).insert(
             AnalyzedTextsCompanion.insert(
               title: title,
               content: content,
               totalWords: totalWords,
               uniqueWords: uniqueTokens.length,
+              knownWords: Value(uniqueKnown),
+              unknownWords: Value(uniqueUnknown),
               createdAt: now,
             ),
           );

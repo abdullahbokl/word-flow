@@ -64,14 +64,15 @@ class TextProcessor {
     required int newWordsCount,
     required List<Map<String, Object?>> words,
   }) {
-    var knownWords = 0;
+    var knownTokens = 0;
+    var knownUnique = 0;
     final sortedWords = List<Map<String, Object?>>.from(words);
 
     for (final word in sortedWords) {
-      final localFrequency = word['localFrequency'] as int;
       final isKnown = word['isKnown'] as bool;
       if (isKnown) {
-        knownWords += localFrequency;
+        knownTokens += word['localFrequency'] as int;
+        knownUnique++;
       }
     }
 
@@ -86,8 +87,8 @@ class TextProcessor {
       'title': title,
       'totalWords': totalWords,
       'uniqueWords': uniqueWords,
-      'unknownWords': totalWords - knownWords,
-      'knownWords': knownWords,
+      'unknownWords': uniqueWords - knownUnique, // Changed to unique
+      'knownWords': knownUnique, // Changed to unique
       'newWordsCount': newWordsCount,
       'words': sortedWords,
     };

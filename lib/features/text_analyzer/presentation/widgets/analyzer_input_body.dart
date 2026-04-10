@@ -56,11 +56,12 @@ class AnalyzerInputBody extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 AppButton(
-                  label: AppStrings.uploadTxtFile,
+                  label: 'Upload TXT File',
                   onPressed: onPickFile,
                   icon: Icons.upload_file_outlined,
                   variant: AppButtonVariant.outlined,
                 ),
+                const SizedBox(height: 24),
               ],
             ),
           ),

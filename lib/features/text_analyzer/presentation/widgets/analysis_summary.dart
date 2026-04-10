@@ -28,10 +28,21 @@ class AnalysisSummary extends StatelessWidget {
 
     return CustomScrollView(
       slivers: [
-        const SliverPadding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
+        SliverPadding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
           sliver: SliverToBoxAdapter(
-            child: AppText.headline(AppStrings.analysisResults),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: AppText.headline(AppStrings.analysisResults),
+                ),
+                IconButton(
+                  onPressed: onReset,
+                  icon: const Icon(Icons.refresh_rounded),
+                  tooltip: 'Analyze Another Text',
+                ),
+              ],
+            ),
           ),
         ),
         SliverPadding(
@@ -56,23 +67,10 @@ class AnalysisSummary extends StatelessWidget {
           ),
         ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 32, 16, 0),
+          padding: const EdgeInsets.fromLTRB(16, 32, 16, 32),
           sliver: WordListSection(
             words: result.words,
             onToggleStatus: onToggleStatus,
-          ),
-        ),
-        SliverPadding(
-          padding: const EdgeInsets.fromLTRB(16, 32, 16, 16),
-          sliver: SliverToBoxAdapter(
-            child: SizedBox(
-              width: double.infinity,
-              child: AppButton(
-                label: 'Analyze Another Text',
-                onPressed: onReset,
-                icon: Icons.refresh,
-              ),
-            ),
           ),
         ),
       ],

@@ -47,8 +47,8 @@ class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
 
     final updatedResult = res.copyWith(
       words: updatedWords,
-      knownWords: res.knownWords + (isKnownNow ? delta : -delta),
-      unknownWords: res.unknownWords + (isKnownNow ? -delta : delta),
+      knownWords: res.knownWords + (isKnownNow ? 1 : -1),
+      unknownWords: res.unknownWords + (isKnownNow ? -1 : 1),
     );
 
     emit(state.copyWith(status: BlocStatus.success(data: updatedResult)));

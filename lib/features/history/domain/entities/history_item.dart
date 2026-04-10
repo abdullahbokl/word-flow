@@ -22,7 +22,7 @@ class HistoryItem extends Equatable {
   final String contentSnippet;
 
   double get comprehension =>
-      totalWords == 0 ? 100 : (knownWords / totalWords) * 100;
+      uniqueWords == 0 ? 100 : (knownWords / uniqueWords) * 100;
 
   @override
   List<Object?> get props => [

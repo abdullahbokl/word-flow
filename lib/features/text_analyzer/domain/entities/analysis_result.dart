@@ -19,5 +19,5 @@ abstract class AnalysisResult with _$AnalysisResult {
   const AnalysisResult._();
 
   double get comprehension =>
-      totalWords == 0 ? 100 : (knownWords / totalWords) * 100;
+      uniqueWords == 0 ? 100 : (knownWords / uniqueWords) * 100;
 }
