@@ -7,6 +7,7 @@ import 'package:lexitrack/core/theme/app_theme.dart';
 import 'package:lexitrack/core/theme/theme_cubit.dart';
 import 'package:lexitrack/features/history/presentation/blocs/history/history_bloc.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
+import 'package:lexitrack/features/settings/presentation/blocs/backup/backup_bloc.dart';
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
 
 class LexiTrackApp extends StatelessWidget {
@@ -23,6 +24,9 @@ class LexiTrackApp extends StatelessWidget {
         BlocProvider(create: (_) => sl<AnalyzerBloc>()),
         BlocProvider(
           create: (_) => sl<HistoryBloc>()..add(const LoadHistory()),
+        ),
+        BlocProvider(
+          create: (_) => sl<BackupBloc>()..add(CheckBackupStatus()),
         ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(

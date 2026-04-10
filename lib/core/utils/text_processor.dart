@@ -64,14 +64,12 @@ class TextProcessor {
     required int newWordsCount,
     required List<Map<String, Object?>> words,
   }) {
-    var knownTokens = 0;
     var knownUnique = 0;
     final sortedWords = List<Map<String, Object?>>.from(words);
 
     for (final word in sortedWords) {
       final isKnown = word['isKnown'] as bool;
       if (isKnown) {
-        knownTokens += word['localFrequency'] as int;
         knownUnique++;
       }
     }

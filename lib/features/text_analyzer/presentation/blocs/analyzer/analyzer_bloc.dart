@@ -38,7 +38,6 @@ class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
 
     final currentWord = res.words[index];
     final isKnownNow = !currentWord.word.isKnown;
-    final delta = currentWord.localFrequency;
     final updatedWords = List<WordWithLocalFreq>.from(res.words);
     updatedWords[index] = WordWithLocalFreq(
       word: currentWord.word.copyWith(isKnown: isKnownNow),

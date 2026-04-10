@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
 
 import 'package:lexitrack/core/constants/app_strings.dart';
-import 'package:lexitrack/core/widgets/app_button.dart';
 import 'package:lexitrack/core/widgets/app_text.dart';
 import 'package:lexitrack/core/widgets/stat_card.dart';
 import 'package:lexitrack/core/widgets/word_list_section.dart';

@@ -1,10 +1,10 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:lexitrack/core/common/state/bloc_status.dart';
 import 'package:lexitrack/core/domain/entities/word_entity.dart';
 import 'package:lexitrack/core/usecase/usecase.dart';
+import 'package:lexitrack/features/lexicon/data/datasources/lexicon_cache.dart';
 import 'package:lexitrack/features/lexicon/domain/commands/word_commands.dart';
 import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
 import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
@@ -14,7 +14,6 @@ import 'package:lexitrack/features/lexicon/domain/usecases/get_words.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/toggle_word_status.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/update_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
-import 'package:lexitrack/features/lexicon/data/datasources/lexicon_cache.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_event.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_state.dart';
 

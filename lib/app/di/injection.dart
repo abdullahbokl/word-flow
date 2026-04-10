@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:lexitrack/core/backup/backup_repository.dart';
 import 'package:lexitrack/core/cache/local_cache.dart';
 import 'package:lexitrack/core/database/app_database.dart';
 import 'package:lexitrack/core/theme/theme_cubit.dart';
@@ -12,6 +13,7 @@ import 'package:lexitrack/features/history/domain/usecases/watch_history.dart';
 import 'package:lexitrack/features/history/domain/usecases/watch_history_detail.dart';
 import 'package:lexitrack/features/history/presentation/blocs/history/history_bloc.dart';
 import 'package:lexitrack/features/history/presentation/blocs/history_detail/history_detail_bloc.dart';
+import 'package:lexitrack/features/lexicon/data/datasources/lexicon_cache.dart';
 import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds.dart';
 import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds_impl.dart';
 import 'package:lexitrack/features/lexicon/data/repositories/lexicon_repository_impl.dart';
@@ -24,8 +26,8 @@ import 'package:lexitrack/features/lexicon/domain/usecases/toggle_word_status.da
 import 'package:lexitrack/features/lexicon/domain/usecases/update_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/watch_words.dart';
-import 'package:lexitrack/features/lexicon/data/datasources/lexicon_cache.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
+import 'package:lexitrack/features/settings/presentation/blocs/backup/backup_bloc.dart';
 import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds.dart';
 import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds_impl.dart';
 import 'package:lexitrack/features/text_analyzer/data/repositories/analyzer_repository_impl.dart';
@@ -91,5 +93,9 @@ Future<void> initDI() async {
           watchHistory: sl(),
           deleteHistoryItem: sl(),
         ))
-    ..registerFactory(() => HistoryDetailBloc(sl(), sl()));
+    ..registerFactory(() => HistoryDetailBloc(sl(), sl()))
+    
+    // Features - Settings / Backup
+    ..registerLazySingleton<BackupRepository>(BackupRepositoryImpl.new)
+    ..registerFactory(() => BackupBloc(sl()));
 }

@@ -30,7 +30,7 @@ class LexiconRepositoryImpl implements LexiconRepository {
               query: query,
               limit: limit,
               offset: offset);
-          return await compute((r) => r.toEntities(), rows);
+          return compute((r) => r.toEntities(), rows);
         },
         (error, stack) => DatabaseFailure('$error', stack),
       );

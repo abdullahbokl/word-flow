@@ -1,45 +1,61 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:lexitrack/core/constants/app_dimensions.dart';
 import 'package:lexitrack/core/theme/theme_cubit.dart';
 import 'package:lexitrack/core/widgets/app_text.dart';
 import 'package:lexitrack/core/widgets/page_header.dart';
+import 'package:lexitrack/features/settings/presentation/blocs/backup/backup_bloc.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
             padding:
-                EdgeInsets.symmetric(horizontal: AppDimensions.pagePadding),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                PageHeader(title: 'Settings'),
-                SizedBox(height: 32),
-                _Section(
-                  title: 'Appearance',
-                  children: [
-                    _ThemeSelector(),
-                  ],
-                ),
-                SizedBox(height: 32),
-                _Section(
-                  title: 'About',
-                  children: [
-                    ListTile(
-                      leading: Icon(Icons.info_outline),
-                      title: AppText.body('Version'),
-                      trailing: AppText.body('1.0.0', color: Colors.grey),
-                    ),
-                  ],
-                ),
-              ],
+                const EdgeInsets.symmetric(horizontal: AppDimensions.pagePadding),
+            child: BlocListener<BackupBloc, BackupState>(
+              listener: (context, state) {
+                if (state.message != null) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: AppText.body(state.message!)),
+                  );
+                }
+              },
+              child: const Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  PageHeader(title: 'Settings'),
+                  SizedBox(height: 32),
+                  _Section(
+                    title: 'Appearance',
+                    children: [
+                      _ThemeSelector(),
+                    ],
+                  ),
+                  SizedBox(height: 32),
+                  _Section(
+                    title: 'Data & Sync',
+                    children: [
+                      _BackupSettings(),
+                    ],
+                  ),
+                  SizedBox(height: 32),
+                  _Section(
+                    title: 'About',
+                    children: [
+                      ListTile(
+                        leading: Icon(Icons.info_outline),
+                        title: AppText.body('Version'),
+                        trailing: AppText.body('1.0.0', color: Colors.grey),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -144,6 +160,102 @@ class _ThemeOption extends StatelessWidget {
           ? Icon(Icons.check_circle, color: theme.colorScheme.primary)
           : null,
       onTap: onTap,
+    );
+  }
+}
+
+class _BackupSettings extends StatelessWidget {
+  const _BackupSettings();
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocBuilder<BackupBloc, BackupState>(
+      builder: (context, state) {
+        if (!state.isAuthenticated) {
+          return ListTile(
+            leading: const Icon(Icons.cloud_off),
+            title: const AppText.body('Backup to Google Drive'),
+            subtitle: const AppText.body(
+              'Sign in to enable cloud backup',
+              color: Colors.grey,
+              fontSize: 12,
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => context.read<BackupBloc>().add(PerformBackup()),
+          );
+        }
+
+        return Column(
+          children: [
+            ListTile(
+              leading: const Icon(Icons.cloud_done, color: Colors.green),
+              title: const AppText.body('Google Drive Connected'),
+              subtitle: AppText.body(
+                state.userEmail ?? 'Authenticated',
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+              trailing: TextButton(
+                onPressed: () => context.read<BackupBloc>().add(SignOutBackup()),
+                child: const AppText.body('Sign Out', color: Colors.red),
+              ),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.backup),
+              title: const AppText.body('Backup Now'),
+              subtitle: const AppText.body(
+                'Upload your local database to Drive',
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+              onTap: state.status == BackupStatus.loading
+                  ? null
+                  : () => context.read<BackupBloc>().add(PerformBackup()),
+            ),
+            const Divider(height: 1),
+            ListTile(
+              leading: const Icon(Icons.restore),
+              title: const AppText.body('Restore from Drive'),
+              subtitle: const AppText.body(
+                'Replace local data with cloud backup',
+                color: Colors.grey,
+                fontSize: 12,
+              ),
+              onTap: state.status == BackupStatus.loading
+                  ? null
+                  : () => _showRestoreDialog(context),
+            ),
+            if (state.status == BackupStatus.loading)
+              const LinearProgressIndicator(),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showRestoreDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const AppText.label('Restore Data?'),
+        content: const AppText.body(
+          'This will overwrite your current local data with the backup from Google Drive. This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const AppText.body('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<BackupBloc>().add(PerformRestore());
+            },
+            child: const AppText.body('Restore', color: Colors.red),
+          ),
+        ],
+      ),
     );
   }
 }

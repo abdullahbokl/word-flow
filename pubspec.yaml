@@ -8,7 +8,7 @@ environment:
   flutter: '>=3.16.0'
 
 dependencies:
-  drift: ^2.15.0
+  drift: ^2.20.0
   equatable: ^2.0.5
   file_picker: ^11.0.2
   flutter:
@@ -19,6 +19,10 @@ dependencies:
   freezed_annotation: ^3.1.0
   get_it: ^9.2.1
   google_fonts: ^8.0.2
+  google_sign_in: ^6.2.1
+  googleapis: ^13.0.0
+  googleapis_auth: ^1.6.0
+  http: ^1.2.1
   intl: ^0.20.2
   json_annotation: ^4.9.0
   path: ^1.9.0
@@ -26,7 +30,8 @@ dependencies:
   rxdart: ^0.28.0
   shared_preferences: ^2.5.5
   sliver_tools: ^0.2.12
-  sqlite3_flutter_libs: ^0.6.0+eol
+  sqlite3: ^2.5.0
+  sqlite3_flutter_libs: ^0.5.42
 
 dev_dependencies:
   bloc_test: ^10.0.0

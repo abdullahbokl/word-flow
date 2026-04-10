@@ -1,4 +1,4 @@
-package com.example.lexitrack
+package com.bocl.wordflow
 
 import io.flutter.embedding.android.FlutterActivity
 
