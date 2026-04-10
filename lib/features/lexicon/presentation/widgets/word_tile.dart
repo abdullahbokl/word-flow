@@ -52,13 +52,13 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
           borderRadius: BorderRadius.circular(20),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.04),
+              color: Colors.black.withValues(alpha: 0.04),
               blurRadius: 10,
               offset: const Offset(0, 4),
             ),
           ],
           border: Border.all(
-            color: colorScheme.outlineVariant.withOpacity(0.5),
+            color: colorScheme.outlineVariant.withValues(alpha: 0.5),
             width: 1,
           ),
         ),
@@ -123,7 +123,7 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
                           _isExpanded
                               ? Icons.expand_less_rounded
                               : Icons.expand_more_rounded,
-                          color: colorScheme.onSurfaceVariant.withOpacity(0.5),
+                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
                         ),
                       ],
                     ),
@@ -188,7 +188,7 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
                             margin: const EdgeInsets.only(top: 16),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: colorScheme.surfaceVariant.withOpacity(0.3),
+                              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
@@ -248,7 +248,7 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Row(
@@ -297,14 +297,14 @@ class _DetailRow extends StatelessWidget {
                 icon,
                 size: 14,
                 color:
-                    color ?? theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+                    color ?? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
               const SizedBox(width: 8),
               Text(
                 _getLabel(),
                 style: theme.textTheme.labelSmall?.copyWith(
-                  color: color?.withOpacity(0.8) ??
-                      theme.colorScheme.onSurfaceVariant.withOpacity(0.8),
+                  color: color?.withValues(alpha: 0.8) ??
+                      theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.8),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -316,7 +316,7 @@ class _DetailRow extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text("• ",
+                    Text('• ',
                         style: TextStyle(
                             color: color ?? theme.colorScheme.onSurfaceVariant)),
                     Expanded(
@@ -338,10 +338,10 @@ class _DetailRow extends StatelessWidget {
   }
 
   String _getLabel() {
-    if (icon == Icons.menu_book_rounded) return "Definitions";
-    if (icon == Icons.lightbulb_outline_rounded) return "Examples";
-    if (icon == Icons.translate_rounded) return "Translations";
-    if (icon == Icons.link_rounded) return "Similar Words";
-    return "";
+    if (icon == Icons.menu_book_rounded) return 'Definitions';
+    if (icon == Icons.lightbulb_outline_rounded) return 'Examples';
+    if (icon == Icons.translate_rounded) return 'Translations';
+    if (icon == Icons.link_rounded) return 'Similar Words';
+    return '';
   }
 }

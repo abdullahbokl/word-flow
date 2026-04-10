@@ -28,7 +28,7 @@ class LexiconStatsHeader extends StatelessWidget {
             child: StatCard(
               label: 'Known',
               value: '${stats.known}',
-              color: AppColors.known,
+              color: AppColors.statusKnown,
             ),
           ),
           const SizedBox(width: 10),
@@ -36,7 +36,7 @@ class LexiconStatsHeader extends StatelessWidget {
             child: StatCard(
               label: 'Unknown',
               value: '${stats.unknown}',
-              color: AppColors.unknown,
+              color: AppColors.statusUnknown,
             ),
           ),
         ],

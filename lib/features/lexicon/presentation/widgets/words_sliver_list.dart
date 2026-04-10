@@ -7,7 +7,6 @@ import '../../../../core/widgets/app_empty_state.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/domain/entities/word_entity.dart';
 import '../blocs/lexicon/lexicon_bloc.dart';
-import '../blocs/lexicon/lexicon_event.dart';
 import 'word_tile.dart';
 
 class WordsSliverList extends StatelessWidget {

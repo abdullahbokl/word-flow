@@ -7,7 +7,6 @@ import '../../domain/entities/lexicon_stats.dart';
 import '../../domain/entities/word_filter.dart';
 import '../../domain/entities/word_sort.dart';
 import '../blocs/lexicon/lexicon_bloc.dart';
-import '../blocs/lexicon/lexicon_event.dart';
 import 'lexicon_stats_header.dart';
 import 'word_filter_bar.dart';
 

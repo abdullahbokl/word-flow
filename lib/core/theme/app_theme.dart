@@ -1,104 +1,139 @@
 import 'package:flutter/material.dart';
-
 import 'app_colors.dart';
 import 'app_typography.dart';
+import 'design_tokens.dart';
 
 abstract final class AppTheme {
-  static ThemeData get light {
-    return _build(
-      brightness: Brightness.light,
-      bg: AppColors.lightBg,
-      surface: AppColors.lightSurface,
-      border: AppColors.lightBorder,
-      textPrimary: AppColors.lightTextPrimary,
-      textSecondary: AppColors.lightTextSecondary,
-    );
-  }
+  static ThemeData get light => _buildTheme(AppColors.lightScheme);
+  static ThemeData get dark => _buildTheme(AppColors.darkScheme);
 
-  static ThemeData get dark {
-    return _build(
-      brightness: Brightness.dark,
-      bg: AppColors.darkBg,
-      surface: AppColors.darkSurface,
-      border: AppColors.darkBorder,
-      textPrimary: AppColors.darkTextPrimary,
-      textSecondary: AppColors.darkTextSecondary,
-    );
-  }
-
-  static ThemeData _build({
-    required Brightness brightness,
-    required Color bg,
-    required Color surface,
-    required Color border,
-    required Color textPrimary,
-    required Color textSecondary,
-  }) {
-    final scheme = ColorScheme.fromSeed(
-      seedColor: AppColors.primary,
-      brightness: brightness,
-      surface: surface,
-      error: AppColors.error,
-    );
+  static ThemeData _buildTheme(ColorScheme colorScheme) {
+    final isDark = colorScheme.brightness == Brightness.dark;
 
     return ThemeData(
       useMaterial3: true,
-      brightness: brightness,
-      colorScheme: scheme,
-      scaffoldBackgroundColor: bg,
+      colorScheme: colorScheme,
       textTheme: AppTypography.textTheme.apply(
-        bodyColor: textPrimary,
-        displayColor: textPrimary,
+        bodyColor: colorScheme.onSurface,
+        displayColor: colorScheme.onSurface,
       ),
-      dividerColor: border,
+      scaffoldBackgroundColor: colorScheme.surface,
+      
+      // Card Theme - Glassmorphism ready or sleek flat
       cardTheme: CardThemeData(
         elevation: 0,
-        color: surface,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: border),
+          borderRadius: BorderRadius.circular(AppTokens.radius16),
+          side: BorderSide(
+            color: colorScheme.outline.withValues(alpha: isDark ? 0.2 : 0.08),
+          ),
         ),
+        color: colorScheme.surfaceContainerLowest,
+        margin: EdgeInsets.zero,
       ),
-      inputDecorationTheme: InputDecorationTheme(
-        filled: true,
-        fillColor: surface,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: border),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: border),
-        ),
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 16,
-          vertical: 14,
-        ),
+
+      // Divider Theme
+      dividerTheme: DividerThemeData(
+        thickness: 1,
+        color: colorScheme.outline.withValues(alpha: 0.08),
       ),
+
+      // AppBar Theme
       appBarTheme: AppBarTheme(
         elevation: 0,
-        scrolledUnderElevation: 1,
-        backgroundColor: bg,
-        foregroundColor: textPrimary,
+        scrolledUnderElevation: 0,
+        backgroundColor: colorScheme.surface,
+        foregroundColor: colorScheme.onSurface,
         centerTitle: false,
+        titleTextStyle: AppTypography.textTheme.titleLarge?.copyWith(
+          color: colorScheme.onSurface,
+          fontWeight: FontWeight.bold,
+        ),
       ),
-      bottomNavigationBarTheme: BottomNavigationBarThemeData(
-        backgroundColor: surface,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: textSecondary,
-        type: BottomNavigationBarType.fixed,
+
+      // Input Decoration Theme
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: colorScheme.surfaceContainerLowest,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTokens.radius12),
+          borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.12)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTokens.radius12),
+          borderSide: BorderSide(color: colorScheme.outline.withValues(alpha: 0.08)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTokens.radius12),
+          borderSide: BorderSide(color: colorScheme.primary, width: 2),
+        ),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: AppTokens.space16,
+          vertical: AppTokens.space16,
+        ),
+        hintStyle: TextStyle(color: colorScheme.onSurfaceVariant.withValues(alpha: 0.6)),
       ),
+
+      // Navigation Bar / Rail Theme
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: surface,
-        indicatorColor: AppColors.primary.withValues(alpha: 0.14),
+        backgroundColor: colorScheme.surface,
+        indicatorColor: colorScheme.primaryContainer,
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
-          return TextStyle(
-            fontSize: 12,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w500,
-            color: selected ? AppColors.primary : textSecondary,
+          return AppTypography.textTheme.labelMedium?.copyWith(
+            fontWeight: selected ? FontWeight.bold : FontWeight.w500,
+            color: selected ? colorScheme.primary : colorScheme.onSurfaceVariant,
           );
         }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          final selected = states.contains(WidgetState.selected);
+          return IconThemeData(
+            color: selected ? colorScheme.onPrimaryContainer : colorScheme.onSurfaceVariant,
+            size: 24,
+          );
+        }),
+      ),
+
+      // Button Themes
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          elevation: 0,
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTokens.space24,
+            vertical: AppTokens.space16,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTokens.radius12),
+          ),
+          textStyle: AppTypography.textTheme.labelLarge?.copyWith(
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ),
+      
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          elevation: 0,
+          backgroundColor: colorScheme.secondaryContainer,
+          foregroundColor: colorScheme.onSecondaryContainer,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTokens.space24,
+            vertical: AppTokens.space16,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTokens.radius12),
+          ),
+        ),
+      ),
+
+      textButtonTheme: TextButtonThemeData(
+        style: TextButton.styleFrom(
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTokens.radius8),
+          ),
+        ),
       ),
     );
   }

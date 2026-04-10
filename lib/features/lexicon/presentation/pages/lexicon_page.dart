@@ -8,8 +8,6 @@ import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/page_header.dart';
 import '../../../../core/widgets/sliver_status_view.dart';
 import '../blocs/lexicon/lexicon_bloc.dart';
-import '../blocs/lexicon/lexicon_event.dart';
-import '../blocs/lexicon/lexicon_state.dart';
 import '../widgets/add_word_dialog.dart';
 import '../widgets/edit_word_dialog.dart';
 import '../widgets/lexicon_toolbar.dart';

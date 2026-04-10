@@ -3,34 +3,46 @@ import 'package:google_fonts/google_fonts.dart';
 
 abstract final class AppTypography {
   static TextTheme get textTheme {
-    final base = GoogleFonts.interTextTheme();
-    return base.copyWith(
-      displayLarge: base.displayLarge?.copyWith(
-        fontSize: 32,
+    // We use Lexend for headlines for a modern, friendly look
+    // and Inter for body text for maximum legibility.
+    final displayBase = GoogleFonts.lexendTextTheme();
+    final bodyBase = GoogleFonts.interTextTheme();
+
+    return bodyBase.copyWith(
+      displayLarge: displayBase.displayLarge,
+      displayMedium: displayBase.displayMedium,
+      displaySmall: displayBase.displaySmall,
+      headlineLarge: displayBase.headlineLarge?.copyWith(
         fontWeight: FontWeight.w700,
         letterSpacing: -0.5,
       ),
-      headlineMedium: base.headlineMedium?.copyWith(
-        fontSize: 24,
+      headlineMedium: displayBase.headlineMedium?.copyWith(
         fontWeight: FontWeight.w700,
         letterSpacing: -0.3,
       ),
-      titleLarge: base.titleLarge?.copyWith(
-        fontSize: 20,
+      headlineSmall: displayBase.headlineSmall?.copyWith(
+        fontWeight: FontWeight.w700,
+      ),
+      titleLarge: displayBase.titleLarge?.copyWith(
         fontWeight: FontWeight.w600,
       ),
-      titleMedium: base.titleMedium?.copyWith(
-        fontSize: 16,
+      titleMedium: displayBase.titleMedium?.copyWith(
         fontWeight: FontWeight.w600,
       ),
-      bodyLarge: base.bodyLarge?.copyWith(fontSize: 16),
-      bodyMedium: base.bodyMedium?.copyWith(fontSize: 14),
-      labelLarge: base.labelLarge?.copyWith(
-        fontSize: 14,
+      titleSmall: displayBase.titleSmall?.copyWith(
         fontWeight: FontWeight.w600,
-        letterSpacing: 0.4,
       ),
-      bodySmall: GoogleFonts.jetBrainsMono(fontSize: 13),
+      bodyLarge: bodyBase.bodyLarge?.copyWith(
+        height: 1.5,
+      ),
+      bodyMedium: bodyBase.bodyMedium?.copyWith(
+        height: 1.4,
+      ),
+      bodySmall: bodyBase.bodySmall,
+      labelLarge: bodyBase.labelLarge?.copyWith(
+        fontWeight: FontWeight.w600,
+        letterSpacing: 0.1,
+      ),
     );
   }
 }

@@ -9,12 +9,11 @@ import '../../../../core/constants/app_strings.dart';
 import '../../../../core/widgets/app_loader.dart';
 import '../../../../core/widgets/app_text.dart';
 import '../../../../core/widgets/status_view.dart';
-import '../../../lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
-import '../../../lexicon/presentation/blocs/lexicon/lexicon_event.dart';
+import '../../domain/entities/analysis_result.dart';
 import '../blocs/analyzer/analyzer_bloc.dart';
 import '../blocs/analyzer/analyzer_event.dart';
 import '../blocs/analyzer/analyzer_state.dart';
-import '../../domain/entities/analysis_result.dart';
+import '../../../lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
 import '../widgets/analysis_summary.dart';
 import '../widgets/analyzer_input_body.dart';
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../theme/design_tokens.dart';
 
 class StatCard extends StatelessWidget {
   const StatCard({
@@ -15,27 +16,39 @@ class StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+      padding: const EdgeInsets.symmetric(
+        vertical: AppTokens.space16,
+        horizontal: AppTokens.space24,
+      ),
       decoration: BoxDecoration(
-        color: theme.cardTheme.color,
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: theme.dividerColor),
+        color: colorScheme.surfaceContainerLowest,
+        borderRadius: BorderRadius.circular(AppTokens.radius16),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.08),
+        ),
+        boxShadow: AppTokens.shadowLow,
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            label,
+            style: theme.textTheme.labelMedium?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+          const SizedBox(height: AppTokens.space4),
           Text(
             value,
             style: theme.textTheme.headlineMedium?.copyWith(
-              color: color ?? theme.colorScheme.primary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant,
+              color: color ?? colorScheme.primary,
+              fontWeight: FontWeight.bold,
+              letterSpacing: -0.5,
             ),
           ),
         ],

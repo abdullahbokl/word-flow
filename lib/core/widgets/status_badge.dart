@@ -12,10 +12,12 @@ class StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
       decoration: BoxDecoration(
-        color: isKnown ? AppColors.knownSurface : AppColors.unknownSurface,
+        color: isKnown
+            ? AppColors.statusKnown.withValues(alpha: 0.1)
+            : AppColors.statusUnknown.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: isKnown ? AppColors.known : AppColors.unknown,
+          color: isKnown ? AppColors.statusKnown : AppColors.statusUnknown,
           width: 0.5,
         ),
       ),
@@ -24,7 +26,7 @@ class StatusBadge extends StatelessWidget {
         style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w600,
-          color: isKnown ? AppColors.known : AppColors.unknown,
+          color: isKnown ? AppColors.statusKnown : AppColors.statusUnknown,
         ),
       ),
     );
