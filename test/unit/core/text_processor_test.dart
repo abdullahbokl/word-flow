@@ -93,6 +93,7 @@ void main() {
             'localFrequency': 8,
           },
         ],
+        excludedWordsFound: [],
       );
 
       expect(result['knownWords'], 8);

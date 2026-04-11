@@ -14,6 +14,7 @@ extension AnalysisResultModelMapper on AnalysisResultModel {
       knownWords: knownWords,
       newWordsCount: newWordsCount,
       words: words.map((w) => w.toEntity()).toList(),
+      excludedWordsFound: excludedWordsFound,
     );
   }
 }

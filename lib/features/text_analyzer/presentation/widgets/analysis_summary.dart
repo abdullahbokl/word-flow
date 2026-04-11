@@ -28,9 +28,11 @@ class AnalysisSummary extends StatelessWidget {
         _buildHeader(onReset),
         _buildTitle(result.title, theme),
         _buildComprehension(result.comprehension),
-        const SliverPadding(
-          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          sliver: SliverToBoxAdapter(child: ExcludedWordsShortcut()),
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          sliver: SliverToBoxAdapter(
+            child: ExcludedWordsShortcut(excludedWords: result.excludedWordsFound),
+          ),
         ),
         SliverPadding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),

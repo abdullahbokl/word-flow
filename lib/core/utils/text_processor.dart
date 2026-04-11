@@ -43,6 +43,7 @@ class TextProcessor {
     required int uniqueWords,
     required int newWordsCount,
     required List<Map<String, Object?>> words,
+    required List<String> excludedWordsFound,
   }) {
     return Isolate.run(
       () => _summarizeAnalysis(
@@ -52,6 +53,7 @@ class TextProcessor {
         uniqueWords: uniqueWords,
         newWordsCount: newWordsCount,
         words: words,
+        excludedWordsFound: excludedWordsFound,
       ),
     );
   }
@@ -63,6 +65,7 @@ class TextProcessor {
     required int uniqueWords,
     required int newWordsCount,
     required List<Map<String, Object?>> words,
+    required List<String> excludedWordsFound,
   }) {
     var knownUnique = 0;
     final sortedWords = List<Map<String, Object?>>.from(words);
@@ -89,6 +92,7 @@ class TextProcessor {
       'knownWords': knownUnique, // Changed to unique
       'newWordsCount': newWordsCount,
       'words': sortedWords,
+      'excludedWordsFound': excludedWordsFound,
     };
   }
 }

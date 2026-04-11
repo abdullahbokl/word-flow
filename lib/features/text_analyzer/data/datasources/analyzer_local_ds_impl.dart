@@ -16,10 +16,13 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
   }) async {
     final freq = await TextProcessor.process(content);
     
-    // Fetch excluded words and filter them out
     final excludedRows = await _db.select(_db.excludedWords).get();
     final excludedSet = excludedRows.map((r) => r.word.toLowerCase()).toSet();
     
+    final excludedWordsFound = freq.keys
+        .where((word) => excludedSet.contains(word.toLowerCase()))
+        .toList();
+        
     freq.removeWhere((word, _) => excludedSet.contains(word.toLowerCase()));
 
     final totalWords = TextProcessor.totalTokenCount(freq);
@@ -121,6 +124,7 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
         uniqueWords: uniqueTokens.length,
         newWordsCount: newWordsCount,
         words: wordSnapshots,
+        excludedWordsFound: excludedWordsFound,
       );
 
       return AnalysisResultModel.fromMap(analysisMap);

@@ -7,7 +7,12 @@ import 'package:lexitrack/features/excluded_words/presentation/pages/excluded_wo
 import 'package:lexitrack/features/excluded_words/presentation/widgets/excluded_word_list_view.dart';
 
 class ExcludedWordsShortcut extends StatelessWidget {
-  const ExcludedWordsShortcut({super.key});
+  const ExcludedWordsShortcut({
+    super.key,
+    this.excludedWords = const [],
+  });
+
+  final List<String> excludedWords;
 
   @override
   Widget build(BuildContext context) {
@@ -42,24 +47,26 @@ class ExcludedWordsShortcut extends StatelessWidget {
       ),
       builder: (_) => BlocProvider(
         create: (context) => sl<ExcludedWordsCubit>()..loadExcludedWords(),
-        child: const _ExcludedBottomSheetBody(),
+        child: _ExcludedBottomSheetBody(filter: excludedWords),
       ),
     );
   }
 }
 
 class _ExcludedBottomSheetBody extends StatelessWidget {
-  const _ExcludedBottomSheetBody();
+  const _ExcludedBottomSheetBody({this.filter});
+
+  final List<String>? filter;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(20),
-      child: const Column(
+      child: Column(
         children: [
-          AppText.label('Currently Excluded Words'),
-          SizedBox(height: 16),
-          Expanded(child: ExcludedWordListView()),
+          const AppText.label('Currently Excluded Words'),
+          const SizedBox(height: 16),
+          Expanded(child: ExcludedWordListView(filter: filter)),
         ],
       ),
     );

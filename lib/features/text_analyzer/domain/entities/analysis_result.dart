@@ -14,6 +14,7 @@ abstract class AnalysisResult with _$AnalysisResult {
     required int knownWords,
     required int newWordsCount,
     required List<WordWithLocalFreq> words,
+    @Default([]) List<String> excludedWordsFound,
   }) = _AnalysisResult;
 
   const AnalysisResult._();

@@ -9,7 +9,12 @@ import 'package:lexitrack/features/excluded_words/presentation/cubit/excluded_wo
 import 'excluded_word_form_dialog.dart';
 
 class ExcludedWordListView extends StatelessWidget {
-  const ExcludedWordListView({super.key});
+  const ExcludedWordListView({
+    super.key,
+    this.filter,
+  });
+
+  final List<String>? filter;
 
   @override
   Widget build(BuildContext context) {
@@ -23,7 +28,11 @@ class ExcludedWordListView extends StatelessWidget {
             onRetry: () => context.read<ExcludedWordsCubit>().loadExcludedWords(),
           ),
           loaded: (words) {
-            if (words.isEmpty) {
+            final displayWords = filter != null
+                ? words.where((w) => filter!.contains(w.word.toLowerCase())).toList()
+                : words;
+
+            if (displayWords.isEmpty) {
               return const AppEmptyState(
                 icon: Icons.block,
                 title: 'No excluded words',
@@ -31,10 +40,10 @@ class ExcludedWordListView extends StatelessWidget {
               );
             }
             return ListView.separated(
-              itemCount: words.length,
+              itemCount: displayWords.length,
               separatorBuilder: (_, __) => const Divider(height: 1),
               itemBuilder: (context, index) {
-                final word = words[index];
+                final word = displayWords[index];
                 return ListTile(
                   title: AppText.body(word.word),
                   trailing: Row(

@@ -60,6 +60,7 @@ class AnalysisResultModel extends Equatable {
     required this.knownWords,
     required this.newWordsCount,
     required this.words,
+    required this.excludedWordsFound,
   });
 
   factory AnalysisResultModel.fromMap(Map<String, Object?> map) {
@@ -75,6 +76,7 @@ class AnalysisResultModel extends Equatable {
           .cast<Map<String, Object?>>()
           .map(WordWithLocalFreqModel.fromMap)
           .toList(),
+      excludedWordsFound: (map['excludedWordsFound'] as List<Object?>?)?.cast<String>() ?? [],
     );
   }
 
@@ -86,6 +88,7 @@ class AnalysisResultModel extends Equatable {
   final int knownWords;
   final int newWordsCount;
   final List<WordWithLocalFreqModel> words;
+  final List<String> excludedWordsFound;
 
   @override
   List<Object?> get props => [
@@ -97,5 +100,6 @@ class AnalysisResultModel extends Equatable {
         knownWords,
         newWordsCount,
         words,
+        excludedWordsFound,
       ];
 }

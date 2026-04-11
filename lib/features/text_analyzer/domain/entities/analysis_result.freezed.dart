@@ -22,6 +22,7 @@ mixin _$AnalysisResult {
   int get knownWords;
   int get newWordsCount;
   List<WordWithLocalFreq> get words;
+  List<String> get excludedWordsFound;
 
   /// Create a copy of AnalysisResult
   /// with the given fields replaced by the non-null parameter values.
@@ -48,7 +49,9 @@ mixin _$AnalysisResult {
                 other.knownWords == knownWords) &&
             (identical(other.newWordsCount, newWordsCount) ||
                 other.newWordsCount == newWordsCount) &&
-            const DeepCollectionEquality().equals(other.words, words));
+            const DeepCollectionEquality().equals(other.words, words) &&
+            const DeepCollectionEquality()
+                .equals(other.excludedWordsFound, excludedWordsFound));
   }
 
   @override
@@ -61,11 +64,12 @@ mixin _$AnalysisResult {
       unknownWords,
       knownWords,
       newWordsCount,
-      const DeepCollectionEquality().hash(words));
+      const DeepCollectionEquality().hash(words),
+      const DeepCollectionEquality().hash(excludedWordsFound));
 
   @override
   String toString() {
-    return 'AnalysisResult(id: $id, title: $title, totalWords: $totalWords, uniqueWords: $uniqueWords, unknownWords: $unknownWords, knownWords: $knownWords, newWordsCount: $newWordsCount, words: $words)';
+    return 'AnalysisResult(id: $id, title: $title, totalWords: $totalWords, uniqueWords: $uniqueWords, unknownWords: $unknownWords, knownWords: $knownWords, newWordsCount: $newWordsCount, words: $words, excludedWordsFound: $excludedWordsFound)';
   }
 }
 
@@ -83,7 +87,8 @@ abstract mixin class $AnalysisResultCopyWith<$Res> {
       int unknownWords,
       int knownWords,
       int newWordsCount,
-      List<WordWithLocalFreq> words});
+      List<WordWithLocalFreq> words,
+      List<String> excludedWordsFound});
 }
 
 /// @nodoc
@@ -107,6 +112,7 @@ class _$AnalysisResultCopyWithImpl<$Res>
     Object? knownWords = null,
     Object? newWordsCount = null,
     Object? words = null,
+    Object? excludedWordsFound = null,
   }) {
     return _then(_self.copyWith(
       id: null == id
@@ -141,6 +147,10 @@ class _$AnalysisResultCopyWithImpl<$Res>
           ? _self.words
           : words // ignore: cast_nullable_to_non_nullable
               as List<WordWithLocalFreq>,
+      excludedWordsFound: null == excludedWordsFound
+          ? _self.excludedWordsFound
+          : excludedWordsFound // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ));
   }
 }
@@ -246,7 +256,8 @@ extension AnalysisResultPatterns on AnalysisResult {
             int unknownWords,
             int knownWords,
             int newWordsCount,
-            List<WordWithLocalFreq> words)?
+            List<WordWithLocalFreq> words,
+            List<String> excludedWordsFound)?
         $default, {
     required TResult orElse(),
   }) {
@@ -261,7 +272,8 @@ extension AnalysisResultPatterns on AnalysisResult {
             _that.unknownWords,
             _that.knownWords,
             _that.newWordsCount,
-            _that.words);
+            _that.words,
+            _that.excludedWordsFound);
       case _:
         return orElse();
     }
@@ -290,7 +302,8 @@ extension AnalysisResultPatterns on AnalysisResult {
             int unknownWords,
             int knownWords,
             int newWordsCount,
-            List<WordWithLocalFreq> words)
+            List<WordWithLocalFreq> words,
+            List<String> excludedWordsFound)
         $default,
   ) {
     final _that = this;
@@ -304,7 +317,8 @@ extension AnalysisResultPatterns on AnalysisResult {
             _that.unknownWords,
             _that.knownWords,
             _that.newWordsCount,
-            _that.words);
+            _that.words,
+            _that.excludedWordsFound);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -332,7 +346,8 @@ extension AnalysisResultPatterns on AnalysisResult {
             int unknownWords,
             int knownWords,
             int newWordsCount,
-            List<WordWithLocalFreq> words)?
+            List<WordWithLocalFreq> words,
+            List<String> excludedWordsFound)?
         $default,
   ) {
     final _that = this;
@@ -346,7 +361,8 @@ extension AnalysisResultPatterns on AnalysisResult {
             _that.unknownWords,
             _that.knownWords,
             _that.newWordsCount,
-            _that.words);
+            _that.words,
+            _that.excludedWordsFound);
       case _:
         return null;
     }
@@ -364,8 +380,10 @@ class _AnalysisResult extends AnalysisResult {
       required this.unknownWords,
       required this.knownWords,
       required this.newWordsCount,
-      required final List<WordWithLocalFreq> words})
+      required final List<WordWithLocalFreq> words,
+      final List<String> excludedWordsFound = const []})
       : _words = words,
+        _excludedWordsFound = excludedWordsFound,
         super._();
 
   @override
@@ -388,6 +406,16 @@ class _AnalysisResult extends AnalysisResult {
     if (_words is EqualUnmodifiableListView) return _words;
     // ignore: implicit_dynamic_type
     return EqualUnmodifiableListView(_words);
+  }
+
+  final List<String> _excludedWordsFound;
+  @override
+  @JsonKey()
+  List<String> get excludedWordsFound {
+    if (_excludedWordsFound is EqualUnmodifiableListView)
+      return _excludedWordsFound;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_excludedWordsFound);
   }
 
   /// Create a copy of AnalysisResult
@@ -415,7 +443,9 @@ class _AnalysisResult extends AnalysisResult {
                 other.knownWords == knownWords) &&
             (identical(other.newWordsCount, newWordsCount) ||
                 other.newWordsCount == newWordsCount) &&
-            const DeepCollectionEquality().equals(other._words, _words));
+            const DeepCollectionEquality().equals(other._words, _words) &&
+            const DeepCollectionEquality()
+                .equals(other._excludedWordsFound, _excludedWordsFound));
   }
 
   @override
@@ -428,11 +458,12 @@ class _AnalysisResult extends AnalysisResult {
       unknownWords,
       knownWords,
       newWordsCount,
-      const DeepCollectionEquality().hash(_words));
+      const DeepCollectionEquality().hash(_words),
+      const DeepCollectionEquality().hash(_excludedWordsFound));
 
   @override
   String toString() {
-    return 'AnalysisResult(id: $id, title: $title, totalWords: $totalWords, uniqueWords: $uniqueWords, unknownWords: $unknownWords, knownWords: $knownWords, newWordsCount: $newWordsCount, words: $words)';
+    return 'AnalysisResult(id: $id, title: $title, totalWords: $totalWords, uniqueWords: $uniqueWords, unknownWords: $unknownWords, knownWords: $knownWords, newWordsCount: $newWordsCount, words: $words, excludedWordsFound: $excludedWordsFound)';
   }
 }
 
@@ -452,7 +483,8 @@ abstract mixin class _$AnalysisResultCopyWith<$Res>
       int unknownWords,
       int knownWords,
       int newWordsCount,
-      List<WordWithLocalFreq> words});
+      List<WordWithLocalFreq> words,
+      List<String> excludedWordsFound});
 }
 
 /// @nodoc
@@ -476,6 +508,7 @@ class __$AnalysisResultCopyWithImpl<$Res>
     Object? knownWords = null,
     Object? newWordsCount = null,
     Object? words = null,
+    Object? excludedWordsFound = null,
   }) {
     return _then(_AnalysisResult(
       id: null == id
@@ -510,6 +543,10 @@ class __$AnalysisResultCopyWithImpl<$Res>
           ? _self._words
           : words // ignore: cast_nullable_to_non_nullable
               as List<WordWithLocalFreq>,
+      excludedWordsFound: null == excludedWordsFound
+          ? _self._excludedWordsFound
+          : excludedWordsFound // ignore: cast_nullable_to_non_nullable
+              as List<String>,
     ));
   }
 }

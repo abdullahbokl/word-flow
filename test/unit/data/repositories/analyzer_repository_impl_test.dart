@@ -24,6 +24,7 @@ void main() {
     knownWords: 3,
     newWordsCount: 2,
     words: [],
+    excludedWordsFound: [],
   );
 
   test('should call data source and return AnalysisResult', () async {
