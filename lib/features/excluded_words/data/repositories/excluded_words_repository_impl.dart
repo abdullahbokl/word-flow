@@ -4,6 +4,7 @@ import 'package:lexitrack/core/error/failures.dart';
 import 'package:lexitrack/features/excluded_words/data/datasources/excluded_words_local_data_source.dart';
 import 'package:lexitrack/features/excluded_words/data/mappers/excluded_word_mapper.dart';
 import 'package:lexitrack/features/excluded_words/domain/entities/excluded_word.dart';
+import 'package:lexitrack/core/constants/default_excluded_words.dart';
 import 'package:lexitrack/features/excluded_words/domain/repositories/excluded_words_repository.dart';
 
 class ExcludedWordsRepositoryImpl implements ExcludedWordsRepository {
@@ -65,16 +66,7 @@ class ExcludedWordsRepositoryImpl implements ExcludedWordsRepository {
   TaskEither<Failure, List<ExcludedWord>> initializeDefaultExcludedWords() {
     return TaskEither.tryCatch(
       () async {
-        final defaults = [
-          'a', 'an', 'the', 'and', 'or', 'but', 'if', 'because', 'as', 'until', 'while',
-          'of', 'at', 'by', 'for', 'with', 'about', 'against', 'between', 'into', 'through',
-          'during', 'before', 'after', 'above', 'below', 'to', 'from', 'up', 'down', 'in',
-          'out', 'on', 'off', 'over', 'under', 'again', 'further', 'then', 'once', 'here',
-          'there', 'when', 'where', 'why', 'how', 'all', 'any', 'both', 'each', 'few',
-          'more', 'most', 'other', 'some', 'such', 'no', 'nor', 'not', 'only', 'own',
-          'same', 'so', 'than', 'too', 'very', 's', 't', 'can', 'will', 'just', 'don',
-          'should', 'now'
-        ];
+        final defaults = DefaultExcludedWords.words;
         final rows = await localDataSource.addMultipleExcludedWords(defaults);
         return rows.map((r) => r.toEntity()).toList();
       },

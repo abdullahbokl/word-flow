@@ -1,4 +1,5 @@
 import 'package:drift/drift.dart';
+import 'package:lexitrack/core/constants/default_excluded_words.dart';
 import 'package:lexitrack/core/database/app_database.dart';
 import 'package:lexitrack/core/utils/text_processor.dart';
 import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds.dart';
@@ -16,14 +17,33 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
   }) async {
     final freq = await TextProcessor.process(content);
     
-    final excludedRows = await _db.select(_db.excludedWords).get();
-    final excludedSet = excludedRows.map((r) => r.word.toLowerCase()).toSet();
+    var excludedRows = await _db.select(_db.excludedWords).get();
+    
+    // Auto-initialize defaults if empty
+    if (excludedRows.isEmpty) {
+      final defaults = DefaultExcludedWords.words;
+      await _db.batch((batch) {
+        for (final word in defaults) {
+          batch.insert(
+            _db.excludedWords,
+            ExcludedWordsCompanion.insert(
+              word: word,
+              createdAt: DateTime.now(),
+            ),
+            mode: InsertMode.insertOrIgnore,
+          );
+        }
+      });
+      excludedRows = await _db.select(_db.excludedWords).get();
+    }
+
+    final excludedSet = excludedRows.map((r) => r.word.trim().toLowerCase()).toSet();
     
     final excludedWordsFound = freq.keys
-        .where((word) => excludedSet.contains(word.toLowerCase()))
+        .where((word) => excludedSet.contains(word.trim().toLowerCase()))
         .toList();
         
-    freq.removeWhere((word, _) => excludedSet.contains(word.toLowerCase()));
+    freq.removeWhere((word, _) => excludedSet.contains(word.trim().toLowerCase()));
 
     final totalWords = TextProcessor.totalTokenCount(freq);
     final uniqueTokens = freq.keys.toList();

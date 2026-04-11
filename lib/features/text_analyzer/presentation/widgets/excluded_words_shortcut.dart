@@ -21,8 +21,10 @@ class ExcludedWordsShortcut extends StatelessWidget {
         Expanded(
           child: _ShortcutButton(
             icon: Icons.visibility_outlined,
-            label: 'Show Excluded',
-            onTap: () => _showExcludedWordsBottomSheet(context),
+            label: 'Excluded (${excludedWords.length})',
+            onTap: excludedWords.isEmpty 
+                ? null 
+                : () => _showExcludedWordsBottomSheet(context),
           ),
         ),
         const SizedBox(width: 12),
@@ -82,25 +84,37 @@ class _ShortcutButton extends StatelessWidget {
 
   final IconData icon;
   final String label;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDisabled = onTap == null;
+    
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          border: Border.all(color: Theme.of(context).dividerColor.withAlpha(50)),
-          borderRadius: BorderRadius.circular(12),
-        ),
-        child: Column(
-          children: [
-            Icon(icon, size: 20),
-            const SizedBox(height: 4),
-            AppText.caption(label),
-          ],
+      child: Opacity(
+        opacity: isDisabled ? 0.5 : 1.0,
+        child: Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            border: Border.all(color: theme.dividerColor.withAlpha(50)),
+            borderRadius: BorderRadius.circular(12),
+            color: isDisabled ? theme.disabledColor.withAlpha(20) : null,
+          ),
+          child: Column(
+            children: [
+              Icon(icon, size: 20, color: isDisabled ? theme.disabledColor : null),
+              const SizedBox(height: 4),
+              AppText.caption(
+                label,
+                color: isDisabled ? theme.disabledColor : null,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lexitrack/core/constants/app_strings.dart';
 import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:lexitrack/core/utils/ui_utils.dart';
 import 'package:lexitrack/core/widgets/app_empty_state.dart';
 import 'package:lexitrack/core/widgets/app_loader.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
@@ -47,17 +48,13 @@ class WordsSliverList extends StatelessWidget {
                 onDelete: () {
                   final wordText = w.text;
                   ctx.read<LexiconBloc>().add(DeleteWordEvent(w.id));
-                  ScaffoldMessenger.of(ctx).showSnackBar(
-                    SnackBar(
-                      content: Text(AppStrings.wordDeleted(wordText)),
-                      duration: const Duration(seconds: 3),
-                      action: SnackBarAction(
-                        label: AppStrings.undo,
-                        onPressed: () => ctx
-                            .read<LexiconBloc>()
-                            .add(AddWordManuallyEvent(wordText)),
-                      ),
-                    ),
+                  AppUIUtils.showSnackBar(
+                    ctx,
+                    message: AppStrings.wordDeleted(wordText),
+                    actionLabel: AppStrings.undo,
+                    onAction: () => ctx
+                        .read<LexiconBloc>()
+                        .add(AddWordManuallyEvent(wordText)),
                   );
                 },
                 onEdit: () => onEdit(w),

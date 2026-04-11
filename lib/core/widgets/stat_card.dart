@@ -43,7 +43,7 @@ class StatCard extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(
                 vertical: AppTokens.space16,
-                horizontal: AppTokens.space24,
+                horizontal: AppTokens.space12,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -57,6 +57,8 @@ class StatCard extends StatelessWidget {
                       letterSpacing: 0.5,
                       fontSize: 11,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: AppTokens.space8),
                   Text(
@@ -66,6 +68,8 @@ class StatCard extends StatelessWidget {
                       fontWeight: FontWeight.w800,
                       letterSpacing: -1,
                     ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),

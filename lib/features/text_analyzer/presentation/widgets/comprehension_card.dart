@@ -29,9 +29,13 @@ class ComprehensionCard extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              AppText.title(
-                'Comprehension Score',
-                color: color,
+              Expanded(
+                child: AppText.title(
+                  'Comprehension Score',
+                  color: color,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
               ),
               Text(
                 '${percentage.toStringAsFixed(1)}%',

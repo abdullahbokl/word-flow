@@ -5,9 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:lexitrack/core/utils/ui_utils.dart';
 import 'package:lexitrack/core/widgets/app_loader.dart';
-import 'package:lexitrack/core/widgets/app_text.dart';
 import 'package:lexitrack/core/widgets/status_view.dart';
+import 'package:lexitrack/features/history/presentation/blocs/history/history_bloc.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
 import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
@@ -57,8 +58,9 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text(AppStrings.fileError)),
+        AppUIUtils.showSnackBar(
+          context,
+          message: AppStrings.fileError,
         );
       }
     }
@@ -86,9 +88,14 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
         child: BlocConsumer<AnalyzerBloc, AnalyzerState>(
           listener: (context, state) {
             if (state.status.isFailed) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: AppText(state.status.error ?? AppStrings.error)),
+              AppUIUtils.showSnackBar(
+                context,
+                message: state.status.error ?? AppStrings.error,
               );
+            }
+            if (state.status.isSuccess) {
+              context.read<LexiconBloc>().add(const LoadLexicon());
+              context.read<HistoryBloc>().add(const LoadHistory());
             }
           },
           builder: (context, state) => StatusView<AnalysisResult>(

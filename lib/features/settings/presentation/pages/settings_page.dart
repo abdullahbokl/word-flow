@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lexitrack/core/constants/app_dimensions.dart';
 import 'package:lexitrack/core/theme/theme_cubit.dart';
+import 'package:lexitrack/core/utils/ui_utils.dart';
 import 'package:lexitrack/core/widgets/app_text.dart';
 import 'package:lexitrack/core/widgets/page_header.dart';
 import 'package:lexitrack/features/excluded_words/presentation/pages/excluded_words_screen.dart';
@@ -21,8 +22,9 @@ class SettingsPage extends StatelessWidget {
             child: BlocListener<BackupBloc, BackupState>(
               listener: (context, state) {
                 if (state.message != null) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: AppText.body(state.message!)),
+                  AppUIUtils.showSnackBar(
+                    context,
+                    message: state.message!,
                   );
                 }
               },

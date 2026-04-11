@@ -48,8 +48,13 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
     on<LexiconErrorReceived>(_onErrorReceived);
     on<ToggleWordStatusEvent>(_onToggleStatus);
     on<DeleteWordEvent>(_onDelete);
-    on<AddWordManuallyEvent>(
-        (e, _) => _addWordManually(AddWordCommand(text: e.word)).run());
+    on<AddWordManuallyEvent>((e, emit) async {
+      final res = await _addWordManually(AddWordCommand(text: e.word)).run();
+      res.fold(
+        (f) => add(LexiconEvent.errorReceived(f.message)),
+        (_) => add(const LoadLexicon()),
+      );
+    });
     on<SearchLexicon>(
         (e, emit) => _onFetch(emit: emit, query: e.query));
     on<FilterLexicon>(
