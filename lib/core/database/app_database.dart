@@ -12,14 +12,14 @@ import 'package:sqlite3_flutter_libs/sqlite3_flutter_libs.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Words, AnalyzedTexts, TextWordEntries])
+@DriftDatabase(tables: [Words, AnalyzedTexts, TextWordEntries, ExcludedWords])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   AppDatabase.forTesting({required QueryExecutor e}) : super(e);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration {
@@ -65,6 +65,9 @@ class AppDatabase extends _$AppDatabase {
           await customStatement(
             'CREATE INDEX IF NOT EXISTS idx_words_filter_sort_recent ON words (is_known, updated_at DESC, word ASC)',
           );
+        }
+        if (from < 8) {
+          await m.createTable(excludedWords);
         }
       },
       beforeOpen: (details) async {

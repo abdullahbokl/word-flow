@@ -15,6 +15,13 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
     required String content,
   }) async {
     final freq = await TextProcessor.process(content);
+    
+    // Fetch excluded words and filter them out
+    final excludedRows = await _db.select(_db.excludedWords).get();
+    final excludedSet = excludedRows.map((r) => r.word.toLowerCase()).toSet();
+    
+    freq.removeWhere((word, _) => excludedSet.contains(word.toLowerCase()));
+
     final totalWords = TextProcessor.totalTokenCount(freq);
     final uniqueTokens = freq.keys.toList();
 

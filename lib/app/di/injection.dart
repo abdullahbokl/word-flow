@@ -34,6 +34,16 @@ import 'package:lexitrack/features/text_analyzer/data/repositories/analyzer_repo
 import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
 import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
+import 'package:lexitrack/features/excluded_words/data/datasources/excluded_words_local_data_source.dart';
+import 'package:lexitrack/features/excluded_words/data/datasources/excluded_words_local_data_source_impl.dart';
+import 'package:lexitrack/features/excluded_words/data/repositories/excluded_words_repository_impl.dart';
+import 'package:lexitrack/features/excluded_words/domain/repositories/excluded_words_repository.dart';
+import 'package:lexitrack/features/excluded_words/domain/usecases/add_excluded_word.dart';
+import 'package:lexitrack/features/excluded_words/domain/usecases/delete_excluded_word.dart';
+import 'package:lexitrack/features/excluded_words/domain/usecases/get_excluded_words.dart';
+import 'package:lexitrack/features/excluded_words/domain/usecases/initialize_default_excluded_words.dart';
+import 'package:lexitrack/features/excluded_words/domain/usecases/update_excluded_word.dart';
+import 'package:lexitrack/features/excluded_words/presentation/cubit/excluded_words_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
@@ -97,5 +107,23 @@ Future<void> initDI() async {
     
     // Features - Settings / Backup
     ..registerLazySingleton<BackupRepository>(BackupRepositoryImpl.new)
-    ..registerFactory(() => BackupBloc(sl()));
+    ..registerFactory(() => BackupBloc(sl()))
+
+    // Features - Excluded Words
+    ..registerLazySingleton<ExcludedWordsLocalDataSource>(
+        () => ExcludedWordsLocalDataSourceImpl(sl()))
+    ..registerLazySingleton<ExcludedWordsRepository>(
+        () => ExcludedWordsRepositoryImpl(localDataSource: sl()))
+    ..registerLazySingleton(() => GetExcludedWordsUseCase(sl()))
+    ..registerLazySingleton(() => AddExcludedWordUseCase(sl()))
+    ..registerLazySingleton(() => UpdateExcludedWordUseCase(sl()))
+    ..registerLazySingleton(() => DeleteExcludedWordUseCase(sl()))
+    ..registerLazySingleton(() => InitializeDefaultExcludedWordsUseCase(sl()))
+    ..registerFactory(() => ExcludedWordsCubit(
+          getExcludedWords: sl(),
+          addExcludedWord: sl(),
+          updateExcludedWord: sl(),
+          deleteExcludedWord: sl(),
+          initializeDefaults: sl(),
+        ));
 }

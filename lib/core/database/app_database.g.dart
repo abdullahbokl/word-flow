@@ -1277,6 +1277,224 @@ class TextWordEntriesCompanion extends UpdateCompanion<TextWordEntryRow> {
   }
 }
 
+class $ExcludedWordsTable extends ExcludedWords
+    with TableInfo<$ExcludedWordsTable, ExcludedWordRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ExcludedWordsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+      'id', aliasedName, false,
+      hasAutoIncrement: true,
+      type: DriftSqlType.int,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
+  static const VerificationMeta _wordMeta = const VerificationMeta('word');
+  @override
+  late final GeneratedColumn<String> word = GeneratedColumn<String>(
+      'word', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+  static const VerificationMeta _createdAtMeta =
+      const VerificationMeta('createdAt');
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+      'created_at', aliasedName, false,
+      type: DriftSqlType.dateTime, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [id, word, createdAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'excluded_words';
+  @override
+  VerificationContext validateIntegrity(Insertable<ExcludedWordRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('word')) {
+      context.handle(
+          _wordMeta, word.isAcceptableOrUnknown(data['word']!, _wordMeta));
+    } else if (isInserting) {
+      context.missing(_wordMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(_createdAtMeta,
+          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ExcludedWordRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ExcludedWordRow(
+      id: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
+      word: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}word'])!,
+      createdAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+    );
+  }
+
+  @override
+  $ExcludedWordsTable createAlias(String alias) {
+    return $ExcludedWordsTable(attachedDatabase, alias);
+  }
+}
+
+class ExcludedWordRow extends DataClass implements Insertable<ExcludedWordRow> {
+  final int id;
+  final String word;
+  final DateTime createdAt;
+  const ExcludedWordRow(
+      {required this.id, required this.word, required this.createdAt});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['word'] = Variable<String>(word);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    return map;
+  }
+
+  ExcludedWordsCompanion toCompanion(bool nullToAbsent) {
+    return ExcludedWordsCompanion(
+      id: Value(id),
+      word: Value(word),
+      createdAt: Value(createdAt),
+    );
+  }
+
+  factory ExcludedWordRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ExcludedWordRow(
+      id: serializer.fromJson<int>(json['id']),
+      word: serializer.fromJson<String>(json['word']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'word': serializer.toJson<String>(word),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+    };
+  }
+
+  ExcludedWordRow copyWith({int? id, String? word, DateTime? createdAt}) =>
+      ExcludedWordRow(
+        id: id ?? this.id,
+        word: word ?? this.word,
+        createdAt: createdAt ?? this.createdAt,
+      );
+  ExcludedWordRow copyWithCompanion(ExcludedWordsCompanion data) {
+    return ExcludedWordRow(
+      id: data.id.present ? data.id.value : this.id,
+      word: data.word.present ? data.word.value : this.word,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExcludedWordRow(')
+          ..write('id: $id, ')
+          ..write('word: $word, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(id, word, createdAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ExcludedWordRow &&
+          other.id == this.id &&
+          other.word == this.word &&
+          other.createdAt == this.createdAt);
+}
+
+class ExcludedWordsCompanion extends UpdateCompanion<ExcludedWordRow> {
+  final Value<int> id;
+  final Value<String> word;
+  final Value<DateTime> createdAt;
+  const ExcludedWordsCompanion({
+    this.id = const Value.absent(),
+    this.word = const Value.absent(),
+    this.createdAt = const Value.absent(),
+  });
+  ExcludedWordsCompanion.insert({
+    this.id = const Value.absent(),
+    required String word,
+    required DateTime createdAt,
+  })  : word = Value(word),
+        createdAt = Value(createdAt);
+  static Insertable<ExcludedWordRow> custom({
+    Expression<int>? id,
+    Expression<String>? word,
+    Expression<DateTime>? createdAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (word != null) 'word': word,
+      if (createdAt != null) 'created_at': createdAt,
+    });
+  }
+
+  ExcludedWordsCompanion copyWith(
+      {Value<int>? id, Value<String>? word, Value<DateTime>? createdAt}) {
+    return ExcludedWordsCompanion(
+      id: id ?? this.id,
+      word: word ?? this.word,
+      createdAt: createdAt ?? this.createdAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (word.present) {
+      map['word'] = Variable<String>(word.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ExcludedWordsCompanion(')
+          ..write('id: $id, ')
+          ..write('word: $word, ')
+          ..write('createdAt: $createdAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -1284,12 +1502,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AnalyzedTextsTable analyzedTexts = $AnalyzedTextsTable(this);
   late final $TextWordEntriesTable textWordEntries =
       $TextWordEntriesTable(this);
+  late final $ExcludedWordsTable excludedWords = $ExcludedWordsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [words, analyzedTexts, textWordEntries];
+      [words, analyzedTexts, textWordEntries, excludedWords];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
@@ -2299,6 +2518,143 @@ typedef $$TextWordEntriesTableProcessedTableManager = ProcessedTableManager<
     (TextWordEntryRow, $$TextWordEntriesTableReferences),
     TextWordEntryRow,
     PrefetchHooks Function({bool textId, bool wordId})>;
+typedef $$ExcludedWordsTableCreateCompanionBuilder = ExcludedWordsCompanion
+    Function({
+  Value<int> id,
+  required String word,
+  required DateTime createdAt,
+});
+typedef $$ExcludedWordsTableUpdateCompanionBuilder = ExcludedWordsCompanion
+    Function({
+  Value<int> id,
+  Value<String> word,
+  Value<DateTime> createdAt,
+});
+
+class $$ExcludedWordsTableFilterComposer
+    extends Composer<_$AppDatabase, $ExcludedWordsTable> {
+  $$ExcludedWordsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get word => $composableBuilder(
+      column: $table.word, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+}
+
+class $$ExcludedWordsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ExcludedWordsTable> {
+  $$ExcludedWordsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+      column: $table.id, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get word => $composableBuilder(
+      column: $table.word, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+}
+
+class $$ExcludedWordsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ExcludedWordsTable> {
+  $$ExcludedWordsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get word =>
+      $composableBuilder(column: $table.word, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+}
+
+class $$ExcludedWordsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $ExcludedWordsTable,
+    ExcludedWordRow,
+    $$ExcludedWordsTableFilterComposer,
+    $$ExcludedWordsTableOrderingComposer,
+    $$ExcludedWordsTableAnnotationComposer,
+    $$ExcludedWordsTableCreateCompanionBuilder,
+    $$ExcludedWordsTableUpdateCompanionBuilder,
+    (
+      ExcludedWordRow,
+      BaseReferences<_$AppDatabase, $ExcludedWordsTable, ExcludedWordRow>
+    ),
+    ExcludedWordRow,
+    PrefetchHooks Function()> {
+  $$ExcludedWordsTableTableManager(_$AppDatabase db, $ExcludedWordsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ExcludedWordsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ExcludedWordsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ExcludedWordsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            Value<String> word = const Value.absent(),
+            Value<DateTime> createdAt = const Value.absent(),
+          }) =>
+              ExcludedWordsCompanion(
+            id: id,
+            word: word,
+            createdAt: createdAt,
+          ),
+          createCompanionCallback: ({
+            Value<int> id = const Value.absent(),
+            required String word,
+            required DateTime createdAt,
+          }) =>
+              ExcludedWordsCompanion.insert(
+            id: id,
+            word: word,
+            createdAt: createdAt,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$ExcludedWordsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $ExcludedWordsTable,
+    ExcludedWordRow,
+    $$ExcludedWordsTableFilterComposer,
+    $$ExcludedWordsTableOrderingComposer,
+    $$ExcludedWordsTableAnnotationComposer,
+    $$ExcludedWordsTableCreateCompanionBuilder,
+    $$ExcludedWordsTableUpdateCompanionBuilder,
+    (
+      ExcludedWordRow,
+      BaseReferences<_$AppDatabase, $ExcludedWordsTable, ExcludedWordRow>
+    ),
+    ExcludedWordRow,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2309,4 +2665,6 @@ class $AppDatabaseManager {
       $$AnalyzedTextsTableTableManager(_db, _db.analyzedTexts);
   $$TextWordEntriesTableTableManager get textWordEntries =>
       $$TextWordEntriesTableTableManager(_db, _db.textWordEntries);
+  $$ExcludedWordsTableTableManager get excludedWords =>
+      $$ExcludedWordsTableTableManager(_db, _db.excludedWords);
 }

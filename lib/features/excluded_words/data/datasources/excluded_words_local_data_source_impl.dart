@@ -1,0 +1,54 @@
+import 'package:drift/drift.dart';
+import 'package:lexitrack/core/database/app_database.dart';
+import 'package:lexitrack/features/excluded_words/data/datasources/excluded_words_local_data_source.dart';
+
+class ExcludedWordsLocalDataSourceImpl implements ExcludedWordsLocalDataSource {
+  final AppDatabase _db;
+
+  ExcludedWordsLocalDataSourceImpl(this._db);
+
+  @override
+  Future<List<ExcludedWordRow>> getExcludedWords() async {
+    return _db.select(_db.excludedWords).get();
+  }
+
+  @override
+  Future<ExcludedWordRow> addExcludedWord(String word) async {
+    return _db.into(_db.excludedWords).insertReturning(
+          ExcludedWordsCompanion.insert(
+            word: word.toLowerCase().trim(),
+            createdAt: DateTime.now(),
+          ),
+        );
+  }
+
+  @override
+  Future<ExcludedWordRow> updateExcludedWord(ExcludedWordRow word) async {
+    await _db.update(_db.excludedWords).replace(word);
+    return word;
+  }
+
+  @override
+  Future<void> deleteExcludedWord(int id) async {
+    await (_db.delete(_db.excludedWords)..where((t) => t.id.equals(id))).go();
+  }
+
+  @override
+  Future<List<ExcludedWordRow>> addMultipleExcludedWords(List<String> words) async {
+    final now = DateTime.now();
+    final rows = <ExcludedWordRow>[];
+    await _db.batch((batch) {
+      for (final word in words) {
+        batch.insert(
+          _db.excludedWords,
+          ExcludedWordsCompanion.insert(
+            word: word.toLowerCase().trim(),
+            createdAt: now,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+      }
+    });
+    return getExcludedWords();
+  }
+}

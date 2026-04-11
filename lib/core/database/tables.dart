@@ -44,3 +44,10 @@ class TextWordEntries extends Table {
   @override
   Set<Column> get primaryKey => {textId, wordId};
 }
+
+@DataClassName('ExcludedWordRow')
+class ExcludedWords extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get word => text().unique()();
+  DateTimeColumn get createdAt => dateTime()();
+}

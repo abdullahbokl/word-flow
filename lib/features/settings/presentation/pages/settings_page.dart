@@ -4,6 +4,7 @@ import 'package:lexitrack/core/constants/app_dimensions.dart';
 import 'package:lexitrack/core/theme/theme_cubit.dart';
 import 'package:lexitrack/core/widgets/app_text.dart';
 import 'package:lexitrack/core/widgets/page_header.dart';
+import 'package:lexitrack/features/excluded_words/presentation/pages/excluded_words_screen.dart';
 import 'package:lexitrack/features/settings/presentation/blocs/backup/backup_bloc.dart';
 
 class SettingsPage extends StatelessWidget {
@@ -25,7 +26,7 @@ class SettingsPage extends StatelessWidget {
                   );
                 }
               },
-              child: const Column(
+              child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   PageHeader(title: 'Settings'),
@@ -37,6 +38,27 @@ class SettingsPage extends StatelessWidget {
                     ],
                   ),
                   SizedBox(height: 32),
+                  _Section(
+                    title: 'Analysis Settings',
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.block),
+                        title: const AppText.body('Excluded Words'),
+                        subtitle: const AppText.body(
+                          'Words that won\'t be counted in analysis',
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () => Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const ExcludedWordsScreen(),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
                   _Section(
                     title: 'Data & Sync',
                     children: [
