@@ -2,9 +2,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import 'package:lexitrack/core/constants/app_dimensions.dart';
 import 'package:lexitrack/core/constants/app_strings.dart';
 import 'package:lexitrack/core/domain/entities/word_entity.dart';
 import 'package:lexitrack/core/widgets/app_loader.dart';
+import 'package:lexitrack/core/widgets/app_text_field.dart';
 import 'package:lexitrack/core/widgets/page_header.dart';
 import 'package:lexitrack/core/widgets/sliver_status_view.dart';
 import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
@@ -13,7 +15,8 @@ import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
 import 'package:lexitrack/features/lexicon/presentation/widgets/add_word_dialog.dart';
 import 'package:lexitrack/features/lexicon/presentation/widgets/edit_word_dialog.dart';
-import 'package:lexitrack/features/lexicon/presentation/widgets/lexicon_toolbar.dart';
+import 'package:lexitrack/features/lexicon/presentation/widgets/lexicon_stats_header.dart';
+import 'package:lexitrack/features/lexicon/presentation/widgets/word_filter_bar.dart';
 import 'package:lexitrack/features/lexicon/presentation/widgets/words_sliver_list.dart';
 
 class LexiconPage extends StatefulWidget {
@@ -110,20 +113,42 @@ class _LexiconPageState extends State<LexiconPage>
               backgroundColor: Theme.of(context).scaffoldBackgroundColor,
               flexibleSpace: FlexibleSpaceBar(
                 background: RepaintBoundary(
-                  child: BlocSelector<LexiconBloc, LexiconState,
-                      ({LexiconStats stats, WordFilter filter, WordSort sort})>(
-                    selector: (state) => (
-                      stats: state.stats,
-                      filter: state.filter,
-                      sort: state.sort,
-                    ),
-                    builder: (ctx, toolbarState) => LexiconToolbar(
-                      stats: toolbarState.stats,
-                      searchCtrl: _searchCtrl,
-                      filter: toolbarState.filter,
-                      sort: toolbarState.sort,
-                      onSearchChanged: _onSearchChanged,
-                    ),
+                  child: Column(
+                    children: [
+                      BlocSelector<LexiconBloc, LexiconState, LexiconStats>(
+                        selector: (state) => state.stats,
+                        builder: (ctx, stats) =>
+                            LexiconStatsHeader(stats: stats),
+                      ),
+                      const SizedBox(height: 6),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppDimensions.pagePadding),
+                        child: AppTextField(
+                          controller: _searchCtrl,
+                          hint: AppStrings.searchWords,
+                          prefixIcon: Icons.search,
+                          onChanged: _onSearchChanged,
+                        ),
+                      ),
+                      const SizedBox(height: AppDimensions.space8),
+                      BlocSelector<LexiconBloc, LexiconState,
+                          ({WordFilter filter, WordSort sort})>(
+                        selector: (state) => (
+                          filter: state.filter,
+                          sort: state.sort,
+                        ),
+                        builder: (ctx, filterState) => WordFilterBar(
+                          active: filterState.filter,
+                          onChanged: (f) =>
+                              ctx.read<LexiconBloc>().add(FilterLexicon(f)),
+                          activeSort: filterState.sort,
+                          onSortChanged: (s) =>
+                              ctx.read<LexiconBloc>().add(SortLexicon(s)),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                    ],
                   ),
                 ),
               ),

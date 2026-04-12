@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lexitrack/core/common/state/bloc_status.dart';
 import 'package:lexitrack/core/domain/entities/word_entity.dart';
@@ -62,9 +63,12 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
         (_) => add(const LoadLexicon()),
       );
     });
-    on<SearchLexicon>((e, emit) => _onFetch(emit: emit, query: e.query));
-    on<FilterLexicon>((e, emit) => _onFetch(emit: emit, filter: e.filter));
-    on<SortLexicon>((e, emit) => _onFetch(emit: emit, sort: e.sort));
+    on<SearchLexicon>((e, emit) => _onFetch(emit: emit, query: e.query),
+        transformer: restartable());
+    on<FilterLexicon>((e, emit) => _onFetch(emit: emit, filter: e.filter),
+        transformer: restartable());
+    on<SortLexicon>((e, emit) => _onFetch(emit: emit, sort: e.sort),
+        transformer: restartable());
     on<UpdateWordEvent>(_onUpdate);
   }
 
@@ -81,8 +85,8 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
   StreamSubscription? _statsSub;
 
   @override
-  Future<void> close() {
-    _statsSub?.cancel();
+  Future<void> close() async {
+    await _statsSub?.cancel();
     return super.close();
   }
 }

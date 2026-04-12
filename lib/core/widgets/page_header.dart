@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:lexitrack/core/constants/app_dimensions.dart';
 import 'package:lexitrack/core/widgets/app_text.dart';
+import 'package:lexitrack/core/constants/app_dimensions.dart';
 
 class PageHeader extends StatelessWidget {
   const PageHeader({
     required this.title,
-    this.padding = const EdgeInsets.fromLTRB(0, 32, 0, 16),
+    this.padding = const EdgeInsets.symmetric(
+      horizontal: AppDimensions.pagePadding,
+      vertical: AppDimensions.space24,
+    ),
     this.showBackButton = false,
     super.key,
   });

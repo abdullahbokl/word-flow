@@ -15,12 +15,12 @@ class ExcludedWordsLocalDataSourceImpl implements ExcludedWordsLocalDataSource {
   @override
   Future<ExcludedWordRow> addExcludedWord(String word) async {
     final normalizedWord = word.toLowerCase().trim();
-    
+
     // Check if word already exists to avoid UNIQUE constraint failure
     final existing = await (_db.select(_db.excludedWords)
           ..where((t) => t.word.equals(normalizedWord)))
         .getSingleOrNull();
-        
+
     if (existing != null) {
       return existing;
     }
@@ -45,9 +45,9 @@ class ExcludedWordsLocalDataSourceImpl implements ExcludedWordsLocalDataSource {
   }
 
   @override
-  Future<List<ExcludedWordRow>> addMultipleExcludedWords(List<String> words) async {
+  Future<List<ExcludedWordRow>> addMultipleExcludedWords(
+      List<String> words) async {
     final now = DateTime.now();
-    final rows = <ExcludedWordRow>[];
     await _db.batch((batch) {
       for (final word in words) {
         batch.insert(

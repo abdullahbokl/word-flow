@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:lexitrack/core/theme/app_colors.dart';
+import 'package:lexitrack/core/constants/app_dimensions.dart';
 import 'package:lexitrack/core/widgets/stat_card.dart';
 import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
 
@@ -14,7 +15,12 @@ class LexiconStatsHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
+      padding: const EdgeInsets.fromLTRB(
+        AppDimensions.pagePadding,
+        AppDimensions.space8,
+        AppDimensions.pagePadding,
+        0,
+      ),
       child: Row(
         children: [
           Expanded(

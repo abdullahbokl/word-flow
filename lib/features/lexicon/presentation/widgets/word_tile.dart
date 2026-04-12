@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:lexitrack/core/constants/app_dimensions.dart';
 
 const _knownColor = Color(0xFF2E7D32);
 
@@ -46,7 +47,10 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
             color: colorScheme.onErrorContainer),
       ),
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+        margin: const EdgeInsets.symmetric(
+          vertical: AppDimensions.space8,
+          horizontal: AppDimensions.pagePadding,
+        ),
         decoration: BoxDecoration(
           color: colorScheme.surface,
           borderRadius: BorderRadius.circular(20),

@@ -4,31 +4,65 @@ import 'package:fpdart/fpdart.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:googleapis/drive/v3.dart' as drive;
 import 'package:lexitrack/core/backup/google_auth_client.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:lexitrack/core/backup/backup_repository.dart';
 import 'package:lexitrack/core/database/app_database.dart';
 import 'package:lexitrack/core/error/failures.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 class BackupRepositoryImpl implements BackupRepository {
   BackupRepositoryImpl(this._db);
   final AppDatabase _db;
-  final GoogleSignIn _googleSignIn = GoogleSignIn(scopes: [drive.DriveApi.driveAppdataScope]);
+  final GoogleSignIn _googleSignIn =
+      GoogleSignIn(scopes: [drive.DriveApi.driveAppdataScope]);
+
+  bool get _isSupported {
+    if (kIsWeb) return true;
+    try {
+      return Platform.isAndroid || Platform.isIOS || Platform.isMacOS;
+    } catch (_) {
+      return false;
+    }
+  }
 
   @override
-  Future<bool> isAuthenticated() async => _googleSignIn.isSignedIn();
-  @override
-  Future<String?> getConnectedEmail() async => _googleSignIn.currentUser?.email;
-  @override
-  Future<void> signOut() async => _googleSignIn.signOut();
+  Future<bool> isAuthenticated() async {
+    if (!_isSupported) {
+      return false;
+    }
+    return _googleSignIn.isSignedIn();
+  }
 
   @override
-  Future<Either<Failure, Unit>> connect() async => (await _getDriveApi()).map((_) => unit);
+  Future<String?> getConnectedEmail() async {
+    if (!_isSupported) {
+      return null;
+    }
+    return _googleSignIn.currentUser?.email;
+  }
+
+  @override
+  Future<void> signOut() async {
+    if (!_isSupported) {
+      return;
+    }
+    await _googleSignIn.signOut();
+  }
+
+  @override
+  Future<Either<Failure, Unit>> connect() async =>
+      (await _getDriveApi()).map((_) => unit);
 
   Future<Either<Failure, drive.DriveApi>> _getDriveApi() async {
+    if (!_isSupported) {
+      return left(const BackupFailure('Backup not supported on this platform'));
+    }
     try {
-      var user = await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
-      if (user == null) return left(const BackupFailure('Google Sign-In cancelled'));
+      final user =
+          await _googleSignIn.signInSilently() ?? await _googleSignIn.signIn();
+      if (user == null) {
+        return left(const BackupFailure('Google Sign-In cancelled'));
+      }
       final headers = await user.authHeaders;
       return right(drive.DriveApi(GoogleAuthClient(headers)));
     } catch (e) {
@@ -40,11 +74,18 @@ class BackupRepositoryImpl implements BackupRepository {
   Future<Either<Failure, BackupMetadata?>> getBackupMetadata() async {
     try {
       final driveRes = await _getDriveApi();
-      if (driveRes.isLeft()) return left(driveRes.getLeft().getOrElse(() => const BackupFailure('Unknown')));
+      if (driveRes.isLeft()) {
+        return left(
+            driveRes.getLeft().getOrElse(() => const BackupFailure('Unknown')));
+      }
       final driveApi = driveRes.getOrElse((_) => throw Exception());
 
-      const q = "name = 'lexitrack_backup.sqlite' and 'appDataFolder' in parents";
-      final files = await driveApi.files.list(q: q, spaces: 'appDataFolder', $fields: 'files(id, modifiedTime, size)');
+      const q =
+          "name = 'lexitrack_backup.sqlite' and 'appDataFolder' in parents";
+      final files = await driveApi.files.list(
+          q: q,
+          spaces: 'appDataFolder',
+          $fields: 'files(id, modifiedTime, size)');
       if (files.files?.isEmpty ?? true) return right(null);
 
       final file = files.files!.first;
@@ -61,21 +102,34 @@ class BackupRepositoryImpl implements BackupRepository {
   Future<Either<Failure, Unit>> backup() async {
     try {
       final driveRes = await _getDriveApi();
-      if (driveRes.isLeft()) return left(driveRes.getLeft().getOrElse(() => const BackupFailure('Unknown')));
+      if (driveRes.isLeft()) {
+        return left(
+            driveRes.getLeft().getOrElse(() => const BackupFailure('Unknown')));
+      }
       final driveApi = driveRes.getOrElse((_) => throw Exception());
 
       await _db.checkpoint();
-      final localFile = File(p.join((await getApplicationDocumentsDirectory()).path, 'lexitrack.sqlite'));
-      if (!await localFile.exists()) return left(const BackupFailure('DB file not found'));
+      final localFile = File(p.join(
+          (await getApplicationDocumentsDirectory()).path, 'lexitrack.sqlite'));
+      if (!await localFile.exists()) {
+        return left(const BackupFailure('DB file not found'));
+      }
 
-      const q = "name = 'lexitrack_backup.sqlite' and 'appDataFolder' in parents";
-      final files = await driveApi.files.list(q: q, spaces: 'appDataFolder', $fields: 'files(id)');
+      const q =
+          "name = 'lexitrack_backup.sqlite' and 'appDataFolder' in parents";
+      final files = await driveApi.files
+          .list(q: q, spaces: 'appDataFolder', $fields: 'files(id)');
       final media = drive.Media(localFile.openRead(), await localFile.length());
 
       if (files.files?.isNotEmpty ?? false) {
-        await driveApi.files.update(drive.File(), files.files!.first.id!, uploadMedia: media);
+        await driveApi.files
+            .update(drive.File(), files.files!.first.id!, uploadMedia: media);
       } else {
-        await driveApi.files.create(drive.File()..name = 'lexitrack_backup.sqlite'..parents = ['appDataFolder'], uploadMedia: media);
+        await driveApi.files.create(
+            drive.File()
+              ..name = 'lexitrack_backup.sqlite'
+              ..parents = ['appDataFolder'],
+            uploadMedia: media);
       }
       return right(unit);
     } catch (e) {
@@ -87,16 +141,25 @@ class BackupRepositoryImpl implements BackupRepository {
   Future<Either<Failure, Unit>> restore() async {
     try {
       final driveRes = await _getDriveApi();
-      if (driveRes.isLeft()) return left(driveRes.getLeft().getOrElse(() => const BackupFailure('Unknown')));
+      if (driveRes.isLeft()) {
+        return left(
+            driveRes.getLeft().getOrElse(() => const BackupFailure('Unknown')));
+      }
       final driveApi = driveRes.getOrElse((_) => throw Exception());
 
-      const q = "name = 'lexitrack_backup.sqlite' and 'appDataFolder' in parents";
-      final files = await driveApi.files.list(q: q, spaces: 'appDataFolder', $fields: 'files(id)');
-      if (files.files?.isEmpty ?? true) return left(const BackupFailure('No backup found'));
+      const q =
+          "name = 'lexitrack_backup.sqlite' and 'appDataFolder' in parents";
+      final files = await driveApi.files
+          .list(q: q, spaces: 'appDataFolder', $fields: 'files(id)');
+      if (files.files?.isEmpty ?? true) {
+        return left(const BackupFailure('No backup found'));
+      }
 
-      final media = await driveApi.files.get(files.files!.first.id!, downloadOptions: drive.DownloadOptions.fullMedia) as drive.Media;
+      final media = await driveApi.files.get(files.files!.first.id!,
+          downloadOptions: drive.DownloadOptions.fullMedia) as drive.Media;
       await _db.close();
-      final localFile = File(p.join((await getApplicationDocumentsDirectory()).path, 'lexitrack.sqlite'));
+      final localFile = File(p.join(
+          (await getApplicationDocumentsDirectory()).path, 'lexitrack.sqlite'));
       for (var ext in ['-wal', '-shm']) {
         final f = File('${localFile.path}$ext');
         if (await f.exists()) await f.delete();
