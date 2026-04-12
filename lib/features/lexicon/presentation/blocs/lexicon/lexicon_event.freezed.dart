@@ -56,6 +56,7 @@ extension LexiconEventPatterns on LexiconEvent {
     TResult Function(LexiconErrorReceived value)? errorReceived,
     TResult Function(ToggleWordStatusEvent value)? toggleStatus,
     TResult Function(DeleteWordEvent value)? delete,
+    TResult Function(RestoreWordEvent value)? restore,
     TResult Function(SearchLexicon value)? search,
     TResult Function(FilterLexicon value)? filter,
     TResult Function(AddWordManuallyEvent value)? addManually,
@@ -78,6 +79,8 @@ extension LexiconEventPatterns on LexiconEvent {
         return toggleStatus(_that);
       case DeleteWordEvent() when delete != null:
         return delete(_that);
+      case RestoreWordEvent() when restore != null:
+        return restore(_that);
       case SearchLexicon() when search != null:
         return search(_that);
       case FilterLexicon() when filter != null:
@@ -117,6 +120,7 @@ extension LexiconEventPatterns on LexiconEvent {
     required TResult Function(LexiconErrorReceived value) errorReceived,
     required TResult Function(ToggleWordStatusEvent value) toggleStatus,
     required TResult Function(DeleteWordEvent value) delete,
+    required TResult Function(RestoreWordEvent value) restore,
     required TResult Function(SearchLexicon value) search,
     required TResult Function(FilterLexicon value) filter,
     required TResult Function(AddWordManuallyEvent value) addManually,
@@ -138,6 +142,8 @@ extension LexiconEventPatterns on LexiconEvent {
         return toggleStatus(_that);
       case DeleteWordEvent():
         return delete(_that);
+      case RestoreWordEvent():
+        return restore(_that);
       case SearchLexicon():
         return search(_that);
       case FilterLexicon():
@@ -175,6 +181,7 @@ extension LexiconEventPatterns on LexiconEvent {
     TResult? Function(LexiconErrorReceived value)? errorReceived,
     TResult? Function(ToggleWordStatusEvent value)? toggleStatus,
     TResult? Function(DeleteWordEvent value)? delete,
+    TResult? Function(RestoreWordEvent value)? restore,
     TResult? Function(SearchLexicon value)? search,
     TResult? Function(FilterLexicon value)? filter,
     TResult? Function(AddWordManuallyEvent value)? addManually,
@@ -196,6 +203,8 @@ extension LexiconEventPatterns on LexiconEvent {
         return toggleStatus(_that);
       case DeleteWordEvent() when delete != null:
         return delete(_that);
+      case RestoreWordEvent() when restore != null:
+        return restore(_that);
       case SearchLexicon() when search != null:
         return search(_that);
       case FilterLexicon() when filter != null:
@@ -235,6 +244,9 @@ extension LexiconEventPatterns on LexiconEvent {
     TResult Function(String message)? errorReceived,
     TResult Function(int wordId)? toggleStatus,
     TResult Function(int wordId)? delete,
+    TResult Function(String text, int previousId, int previousFrequency,
+            bool wasFullyDeleted)?
+        restore,
     TResult Function(String query)? search,
     TResult Function(WordFilter filter)? filter,
     TResult Function(String word)? addManually,
@@ -267,6 +279,9 @@ extension LexiconEventPatterns on LexiconEvent {
         return toggleStatus(_that.wordId);
       case DeleteWordEvent() when delete != null:
         return delete(_that.wordId);
+      case RestoreWordEvent() when restore != null:
+        return restore(_that.text, _that.previousId, _that.previousFrequency,
+            _that.wasFullyDeleted);
       case SearchLexicon() when search != null:
         return search(_that.query);
       case FilterLexicon() when filter != null:
@@ -315,6 +330,9 @@ extension LexiconEventPatterns on LexiconEvent {
     required TResult Function(String message) errorReceived,
     required TResult Function(int wordId) toggleStatus,
     required TResult Function(int wordId) delete,
+    required TResult Function(String text, int previousId,
+            int previousFrequency, bool wasFullyDeleted)
+        restore,
     required TResult Function(String query) search,
     required TResult Function(WordFilter filter) filter,
     required TResult Function(String word) addManually,
@@ -346,6 +364,9 @@ extension LexiconEventPatterns on LexiconEvent {
         return toggleStatus(_that.wordId);
       case DeleteWordEvent():
         return delete(_that.wordId);
+      case RestoreWordEvent():
+        return restore(_that.text, _that.previousId, _that.previousFrequency,
+            _that.wasFullyDeleted);
       case SearchLexicon():
         return search(_that.query);
       case FilterLexicon():
@@ -393,6 +414,9 @@ extension LexiconEventPatterns on LexiconEvent {
     TResult? Function(String message)? errorReceived,
     TResult? Function(int wordId)? toggleStatus,
     TResult? Function(int wordId)? delete,
+    TResult? Function(String text, int previousId, int previousFrequency,
+            bool wasFullyDeleted)?
+        restore,
     TResult? Function(String query)? search,
     TResult? Function(WordFilter filter)? filter,
     TResult? Function(String word)? addManually,
@@ -424,6 +448,9 @@ extension LexiconEventPatterns on LexiconEvent {
         return toggleStatus(_that.wordId);
       case DeleteWordEvent() when delete != null:
         return delete(_that.wordId);
+      case RestoreWordEvent() when restore != null:
+        return restore(_that.text, _that.previousId, _that.previousFrequency,
+            _that.wasFullyDeleted);
       case SearchLexicon() when search != null:
         return search(_that.query);
       case FilterLexicon() when filter != null:
@@ -840,6 +867,102 @@ class _$DeleteWordEventCopyWithImpl<$Res>
           ? _self.wordId
           : wordId // ignore: cast_nullable_to_non_nullable
               as int,
+    ));
+  }
+}
+
+/// @nodoc
+
+class RestoreWordEvent implements LexiconEvent {
+  const RestoreWordEvent(this.text,
+      {required this.previousId,
+      required this.previousFrequency,
+      required this.wasFullyDeleted});
+
+  final String text;
+  final int previousId;
+  final int previousFrequency;
+  final bool wasFullyDeleted;
+
+  /// Create a copy of LexiconEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $RestoreWordEventCopyWith<RestoreWordEvent> get copyWith =>
+      _$RestoreWordEventCopyWithImpl<RestoreWordEvent>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is RestoreWordEvent &&
+            (identical(other.text, text) || other.text == text) &&
+            (identical(other.previousId, previousId) ||
+                other.previousId == previousId) &&
+            (identical(other.previousFrequency, previousFrequency) ||
+                other.previousFrequency == previousFrequency) &&
+            (identical(other.wasFullyDeleted, wasFullyDeleted) ||
+                other.wasFullyDeleted == wasFullyDeleted));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, text, previousId, previousFrequency, wasFullyDeleted);
+
+  @override
+  String toString() {
+    return 'LexiconEvent.restore(text: $text, previousId: $previousId, previousFrequency: $previousFrequency, wasFullyDeleted: $wasFullyDeleted)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $RestoreWordEventCopyWith<$Res>
+    implements $LexiconEventCopyWith<$Res> {
+  factory $RestoreWordEventCopyWith(
+          RestoreWordEvent value, $Res Function(RestoreWordEvent) _then) =
+      _$RestoreWordEventCopyWithImpl;
+  @useResult
+  $Res call(
+      {String text,
+      int previousId,
+      int previousFrequency,
+      bool wasFullyDeleted});
+}
+
+/// @nodoc
+class _$RestoreWordEventCopyWithImpl<$Res>
+    implements $RestoreWordEventCopyWith<$Res> {
+  _$RestoreWordEventCopyWithImpl(this._self, this._then);
+
+  final RestoreWordEvent _self;
+  final $Res Function(RestoreWordEvent) _then;
+
+  /// Create a copy of LexiconEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? text = null,
+    Object? previousId = null,
+    Object? previousFrequency = null,
+    Object? wasFullyDeleted = null,
+  }) {
+    return _then(RestoreWordEvent(
+      null == text
+          ? _self.text
+          : text // ignore: cast_nullable_to_non_nullable
+              as String,
+      previousId: null == previousId
+          ? _self.previousId
+          : previousId // ignore: cast_nullable_to_non_nullable
+              as int,
+      previousFrequency: null == previousFrequency
+          ? _self.previousFrequency
+          : previousFrequency // ignore: cast_nullable_to_non_nullable
+              as int,
+      wasFullyDeleted: null == wasFullyDeleted
+          ? _self.wasFullyDeleted
+          : wasFullyDeleted // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }

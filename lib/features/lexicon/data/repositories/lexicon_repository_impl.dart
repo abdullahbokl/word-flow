@@ -41,9 +41,8 @@ class LexiconRepositoryImpl implements LexiconRepository {
     WordSort sort = WordSort.frequencyDesc,
     String query = '',
   }) =>
-      _local
-          .watchWords(filter: filter, sort: sort, query: query)
-          .map((rows) => Right(rows.toEntities()));
+      _local.watchWords(filter: filter, sort: sort, query: query).asyncMap(
+          (rows) async => Right(await compute((r) => r.toEntities(), rows)));
 
   @override
   TaskEither<Failure, WordEntity> toggleStatus(int wordId) =>
@@ -87,8 +86,28 @@ class LexiconRepositoryImpl implements LexiconRepository {
       );
 
   @override
-  TaskEither<Failure, LexiconStats> getStats() => TaskEither.tryCatch(
-      _local.getStats, (e, s) => DatabaseFailure('$e', s));
+  TaskEither<Failure, WordEntity> restoreWord(RestoreWordCommand command) =>
+      TaskEither.tryCatch(
+        () async => (await _local.restoreWord(
+          command.text,
+          command.previousId,
+          command.previousFrequency,
+          command.wasFullyDeleted,
+        ))
+            .toEntity(),
+        (error, stack) => DatabaseFailure('$error', stack),
+      );
+
+  @override
+  TaskEither<Failure, WordEntity?> getWordByText(String text) =>
+      TaskEither.tryCatch(
+        () async => (await _local.getWordByText(text))?.toEntity(),
+        (error, stack) => DatabaseFailure('$error', stack),
+      );
+
+  @override
+  TaskEither<Failure, LexiconStats> getStats() =>
+      TaskEither.tryCatch(_local.getStats, (e, s) => DatabaseFailure('$e', s));
 
   @override
   Stream<Either<Failure, LexiconStats>> watchStats() =>

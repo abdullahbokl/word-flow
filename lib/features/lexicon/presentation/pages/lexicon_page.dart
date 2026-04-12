@@ -7,6 +7,9 @@ import 'package:lexitrack/core/domain/entities/word_entity.dart';
 import 'package:lexitrack/core/widgets/app_loader.dart';
 import 'package:lexitrack/core/widgets/page_header.dart';
 import 'package:lexitrack/core/widgets/sliver_status_view.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
+import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
 import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
 import 'package:lexitrack/features/lexicon/presentation/widgets/add_word_dialog.dart';
 import 'package:lexitrack/features/lexicon/presentation/widgets/edit_word_dialog.dart';
@@ -94,41 +97,57 @@ class _LexiconPageState extends State<LexiconPage>
       floatingActionButton: FloatingActionButton(
           onPressed: _showAdd, child: const Icon(Icons.add)),
       body: SafeArea(
-        child: BlocBuilder<LexiconBloc, LexiconState>(
-          builder: (ctx, state) => CustomScrollView(
-            controller: _listScrollController,
-            slivers: [
-              const SliverToBoxAdapter(
-                  child: PageHeader(title: AppStrings.myLexicon)),
-              SliverAppBar(
-                floating: true,
-                snap: true,
-                elevation: 1,
-                toolbarHeight: 0,
-                expandedHeight: 235,
-                backgroundColor: Theme.of(context).scaffoldBackgroundColor,
-                flexibleSpace: FlexibleSpaceBar(
-                  background: LexiconToolbar(
-                    stats: state.stats,
-                    searchCtrl: _searchCtrl,
-                    filter: state.filter,
-                    sort: state.sort,
-                    onSearchChanged: _onSearchChanged,
+        child: CustomScrollView(
+          controller: _listScrollController,
+          slivers: [
+            const SliverToBoxAdapter(
+                child: PageHeader(title: AppStrings.myLexicon)),
+            SliverAppBar(
+              floating: true,
+              elevation: 1,
+              toolbarHeight: 0,
+              expandedHeight: 235,
+              backgroundColor: Theme.of(context).scaffoldBackgroundColor,
+              flexibleSpace: FlexibleSpaceBar(
+                background: RepaintBoundary(
+                  child: BlocSelector<LexiconBloc, LexiconState,
+                      ({LexiconStats stats, WordFilter filter, WordSort sort})>(
+                    selector: (state) => (
+                      stats: state.stats,
+                      filter: state.filter,
+                      sort: state.sort,
+                    ),
+                    builder: (ctx, toolbarState) => LexiconToolbar(
+                      stats: toolbarState.stats,
+                      searchCtrl: _searchCtrl,
+                      filter: toolbarState.filter,
+                      sort: toolbarState.sort,
+                      onSearchChanged: _onSearchChanged,
+                    ),
                   ),
                 ),
               ),
-              SliverStatusView<List<WordEntity>>(
-                status: state.status,
-                animate: false,
-                onInitial: () => const SliverFillRemaining(
-                    child: AppLoader(message: AppStrings.loadingLexicon)),
-                onSuccess: (words) => WordsSliverList(
+            ),
+            BlocBuilder<LexiconBloc, LexiconState>(
+              buildWhen: (prev, curr) =>
+                  prev.status != curr.status ||
+                  prev.hasReachedMax != curr.hasReachedMax,
+              builder: (ctx, state) {
+                final s = state.status;
+                return SliverStatusView<List<WordEntity>>(
+                  status: s,
+                  animate: false,
+                  onInitial: () => const SliverFillRemaining(
+                      child: AppLoader(message: AppStrings.loadingLexicon)),
+                  onSuccess: (words) => WordsSliverList(
                     words: words,
                     hasReachedMax: state.hasReachedMax,
-                    onEdit: _showEdit),
-              ),
-            ],
-          ),
+                    onEdit: _showEdit,
+                  ),
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

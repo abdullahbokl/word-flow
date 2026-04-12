@@ -18,11 +18,14 @@ import 'package:lexitrack/features/lexicon/data/datasources/lexicon_cache.dart';
 import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds.dart';
 import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds_impl.dart';
 import 'package:lexitrack/features/lexicon/data/repositories/lexicon_repository_impl.dart';
+import 'package:lexitrack/features/lexicon/domain/repositories/lexicon_preferences.dart';
 import 'package:lexitrack/features/lexicon/domain/repositories/lexicon_repository.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/add_word_manually.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/delete_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/get_lexicon_stats.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/get_word_by_text.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/get_words.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/restore_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/toggle_word_status.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/update_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
@@ -53,7 +56,7 @@ Future<void> initDI() async {
   // Core
   final db = AppDatabase();
   final prefs = await SharedPreferences.getInstance();
-  
+
   sl
     ..registerSingleton<AppDatabase>(db)
     ..registerSingleton<LocalCache>(LocalCacheImpl(prefs))
@@ -67,11 +70,13 @@ Future<void> initDI() async {
     ..registerLazySingleton(() => ToggleWordStatus(sl()))
     ..registerLazySingleton(() => DeleteWord(sl()))
     ..registerLazySingleton(() => AddWordManually(sl()))
+    ..registerLazySingleton(() => RestoreWord(sl()))
     ..registerLazySingleton(() => UpdateWord(sl()))
     ..registerLazySingleton(() => GetLexiconStats(sl()))
+    ..registerLazySingleton(() => GetWordByText(sl()))
     ..registerLazySingleton(() => WatchWords(sl()))
     ..registerLazySingleton(() => WatchLexiconStats(sl()))
-    ..registerLazySingleton(() => LexiconCache(sl()))
+    ..registerLazySingleton<LexiconPreferences>(() => LexiconCache(sl()))
     ..registerFactory(() => LexiconBloc(
           getWords: sl(),
           toggleWordStatus: sl(),
@@ -80,6 +85,8 @@ Future<void> initDI() async {
           updateWord: sl(),
           watchStats: sl(),
           cache: sl(),
+          restoreWord: sl(),
+          getWordByText: sl(),
         ))
 
     // Features - Text Analyzer
@@ -105,7 +112,7 @@ Future<void> initDI() async {
           deleteHistoryItem: sl(),
         ))
     ..registerFactory(() => HistoryDetailBloc(sl(), sl()))
-    
+
     // Features - Settings / Backup
     ..registerLazySingleton<BackupRepository>(() => BackupRepositoryImpl(sl()))
     ..registerFactory(() => BackupBloc(sl()))

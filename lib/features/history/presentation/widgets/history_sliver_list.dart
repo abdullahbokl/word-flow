@@ -39,12 +39,14 @@ class HistorySliverList extends StatelessWidget {
             delegate: SliverChildBuilderDelegate(
               (ctx, i) {
                 final item = items[i];
-                return Padding(
-                  padding: const EdgeInsets.only(bottom: 12),
-                  child: HistoryCard(
-                    item: item,
-                    onTap: () => AppNavigator.toHistoryDetail(item.id),
-                    onDelete: () => onDelete(item.id),
+                return RepaintBoundary(
+                  child: Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: HistoryCard(
+                      item: item,
+                      onTap: () => AppNavigator.toHistoryDetail(item.id),
+                      onDelete: () => onDelete(item.id),
+                    ),
                   ),
                 );
               },

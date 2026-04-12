@@ -22,6 +22,12 @@ abstract class LexiconEvent with _$LexiconEvent {
       LexiconErrorReceived;
   const factory LexiconEvent.toggleStatus(int wordId) = ToggleWordStatusEvent;
   const factory LexiconEvent.delete(int wordId) = DeleteWordEvent;
+  const factory LexiconEvent.restore(
+    String text, {
+    required int previousId,
+    required int previousFrequency,
+    required bool wasFullyDeleted,
+  }) = RestoreWordEvent;
   const factory LexiconEvent.search(String query) = SearchLexicon;
   const factory LexiconEvent.filter(WordFilter filter) = FilterLexicon;
   const factory LexiconEvent.addManually(String word) = AddWordManuallyEvent;

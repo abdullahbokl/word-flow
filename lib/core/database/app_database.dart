@@ -18,7 +18,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting({required QueryExecutor e}) : super(e);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration {
@@ -68,6 +68,11 @@ class AppDatabase extends _$AppDatabase {
         if (from < 8) {
           await m.createTable(excludedWords);
         }
+        if (from < 9) {
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_analyzed_texts_created_at ON analyzed_texts (created_at DESC)',
+          );
+        }
       },
       beforeOpen: (details) async {
         await customStatement('PRAGMA foreign_keys = ON');
@@ -83,6 +88,9 @@ class AppDatabase extends _$AppDatabase {
         );
         await customStatement(
           'CREATE INDEX IF NOT EXISTS idx_text_word_entries_word_id ON text_word_entries (word_id)',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_analyzed_texts_created_at ON analyzed_texts (created_at DESC)',
         );
       },
     );

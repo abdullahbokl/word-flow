@@ -14,7 +14,9 @@ import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
 import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/add_word_manually.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/delete_word.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/get_word_by_text.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/get_words.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/restore_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/toggle_word_status.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/update_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
@@ -22,11 +24,21 @@ import 'package:lexitrack/features/lexicon/presentation/blocs/lexicon/lexicon_bl
 import 'package:mocktail/mocktail.dart';
 
 class MockGetWords extends Mock implements GetWords {}
+
 class MockToggleWordStatus extends Mock implements ToggleWordStatus {}
+
 class MockDeleteWord extends Mock implements DeleteWord {}
+
 class MockAddWordManually extends Mock implements AddWordManually {}
+
 class MockUpdateWord extends Mock implements UpdateWord {}
+
+class MockRestoreWord extends Mock implements RestoreWord {}
+
+class MockGetWordByText extends Mock implements GetWordByText {}
+
 class MockWatchLexiconStats extends Mock implements WatchLexiconStats {}
+
 class MockLexiconCache extends Mock implements LexiconCache {}
 
 void main() {
@@ -36,6 +48,8 @@ void main() {
   late MockDeleteWord mockDeleteWord;
   late MockAddWordManually mockAddWordManually;
   late MockUpdateWord mockUpdateWord;
+  late MockRestoreWord mockRestoreWord;
+  late MockGetWordByText mockGetWordByText;
   late MockWatchLexiconStats mockWatchStats;
   late MockLexiconCache mockCache;
 
@@ -52,7 +66,16 @@ void main() {
     registerFallbackValue(const LexiconQueryParams());
     registerFallbackValue(const AddWordCommand(text: ''));
     registerFallbackValue(const UpdateWordCommand(id: 1));
+    registerFallbackValue(const RestoreWordCommand(
+      text: '',
+      previousId: 1,
+      previousFrequency: 1,
+      wasFullyDeleted: false,
+    ));
     registerFallbackValue(const NoParams());
+    registerFallbackValue(WordFilter.all);
+    registerFallbackValue(WordSort.frequencyDesc);
+    registerFallbackValue('');
   });
 
   setUp(() {
@@ -61,11 +84,14 @@ void main() {
     mockDeleteWord = MockDeleteWord();
     mockAddWordManually = MockAddWordManually();
     mockUpdateWord = MockUpdateWord();
+    mockRestoreWord = MockRestoreWord();
+    mockGetWordByText = MockGetWordByText();
     mockWatchStats = MockWatchLexiconStats();
     mockCache = MockLexiconCache();
 
     // Default mock behavior
-    when(() => mockWatchStats(any())).thenAnswer((_) => Stream.value(const Right(LexiconStats(total: 0, known: 0, unknown: 0))));
+    when(() => mockWatchStats(any())).thenAnswer((_) => Stream.value(
+        const Right(LexiconStats(total: 0, known: 0, unknown: 0))));
     when(() => mockCache.getFilter()).thenReturn(WordFilter.all);
     when(() => mockCache.getSort()).thenReturn(WordSort.frequencyDesc);
     when(() => mockCache.saveFilter(any())).thenAnswer((_) async {});
@@ -79,6 +105,8 @@ void main() {
       updateWord: mockUpdateWord,
       watchStats: mockWatchStats,
       cache: mockCache,
+      restoreWord: mockRestoreWord,
+      getWordByText: mockGetWordByText,
     );
   });
 
@@ -94,7 +122,8 @@ void main() {
     blocTest<LexiconBloc, LexiconState>(
       'emits [loading, success] when LoadLexicon succeeds',
       build: () {
-        when(() => mockGetWords(any())).thenAnswer((_) => TaskEither.right([tWord]));
+        when(() => mockGetWords(any()))
+            .thenAnswer((_) => TaskEither.right([tWord]));
         return bloc;
       },
       act: (bloc) => bloc.add(const LoadLexicon()),
@@ -110,7 +139,8 @@ void main() {
     blocTest<LexiconBloc, LexiconState>(
       'emits [loading, failure] when LoadLexicon fails',
       build: () {
-        when(() => mockGetWords(any())).thenAnswer((_) => TaskEither.left(const DatabaseFailure('error')));
+        when(() => mockGetWords(any()))
+            .thenAnswer((_) => TaskEither.left(const DatabaseFailure('error')));
         return bloc;
       },
       act: (bloc) => bloc.add(const LoadLexicon()),
@@ -123,13 +153,15 @@ void main() {
     blocTest<LexiconBloc, LexiconState>(
       'updates words when ToggleWordStatusEvent is added',
       build: () {
-        when(() => mockToggleWordStatus(any())).thenAnswer((_) => TaskEither.right(tWord.copyWith(isKnown: true)));
+        when(() => mockToggleWordStatus(any()))
+            .thenAnswer((_) => TaskEither.right(tWord.copyWith(isKnown: true)));
         return bloc;
       },
       seed: () => LexiconState(status: BlocStatus.success(data: [tWord])),
       act: (bloc) => bloc.add(const ToggleWordStatusEvent(1)),
       expect: () => [
-        LexiconState(status: BlocStatus.success(data: [tWord.copyWith(isKnown: true)])),
+        LexiconState(
+            status: BlocStatus.success(data: [tWord.copyWith(isKnown: true)])),
         // Note: The handler emits twice, once optimistically and once after completion if the result is different or confirmed.
         // In our case the optimistic update and final result are the same ID, but let's see.
       ],
@@ -141,7 +173,8 @@ void main() {
     blocTest<LexiconBloc, LexiconState>(
       'removes word when DeleteWordEvent is added',
       build: () {
-        when(() => mockDeleteWord(any())).thenAnswer((_) => TaskEither.right(unit));
+        when(() => mockDeleteWord(any()))
+            .thenAnswer((_) => TaskEither.right(unit));
         return bloc;
       },
       seed: () => LexiconState(status: BlocStatus.success(data: [tWord])),
@@ -173,12 +206,14 @@ void main() {
     blocTest<LexiconBloc, LexiconState>(
       'updates stats when LexiconStatsUpdateReceived is added',
       build: () => bloc,
-      act: (bloc) => bloc.add(const LexiconStatsUpdateReceived(LexiconStats(total: 10, known: 5, unknown: 5))),
+      act: (bloc) => bloc.add(const LexiconStatsUpdateReceived(
+          LexiconStats(total: 10, known: 5, unknown: 5))),
       expect: () => [
-        const LexiconState(stats: LexiconStats(total: 10, known: 5, unknown: 5)),
+        const LexiconState(
+            stats: LexiconStats(total: 10, known: 5, unknown: 5)),
       ],
     );
-   group('Pagination', () {
+    group('Pagination', () {
       blocTest<LexiconBloc, LexiconState>(
         'does not load more if hasReachedMax is true',
         build: () => bloc,
@@ -193,7 +228,8 @@ void main() {
       blocTest<LexiconBloc, LexiconState>(
         'loads more words correctly',
         build: () {
-          when(() => mockGetWords(any())).thenAnswer((_) => TaskEither.right([tWord.copyWith(id: 2)]));
+          when(() => mockGetWords(any()))
+              .thenAnswer((_) => TaskEither.right([tWord.copyWith(id: 2)]));
           return bloc;
         },
         seed: () => LexiconState(

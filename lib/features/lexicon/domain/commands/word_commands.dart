@@ -10,6 +10,16 @@ abstract class AddWordCommand with _$AddWordCommand {
 }
 
 @freezed
+abstract class RestoreWordCommand with _$RestoreWordCommand {
+  const factory RestoreWordCommand({
+    required String text,
+    required int previousId,
+    required int previousFrequency,
+    required bool wasFullyDeleted,
+  }) = _RestoreWordCommand;
+}
+
+@freezed
 abstract class UpdateWordCommand with _$UpdateWordCommand {
   const factory UpdateWordCommand({
     required int id,

@@ -31,7 +31,7 @@ class LexiconToolbar extends StatelessWidget {
     return Column(
       children: [
         LexiconStatsHeader(stats: stats),
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: AppTextField(
@@ -41,7 +41,7 @@ class LexiconToolbar extends StatelessWidget {
             onChanged: onSearchChanged,
           ),
         ),
-        const SizedBox(height: 10),
+        const SizedBox(height: 6),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: WordFilterBar(
@@ -52,7 +52,7 @@ class LexiconToolbar extends StatelessWidget {
                 context.read<LexiconBloc>().add(SortLexicon(s)),
           ),
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 6),
       ],
     );
   }

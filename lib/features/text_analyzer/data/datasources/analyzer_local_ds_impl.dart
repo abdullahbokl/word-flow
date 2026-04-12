@@ -6,9 +6,34 @@ import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local
 import 'package:lexitrack/features/text_analyzer/data/models/analysis_result_model.dart';
 
 class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
-  const AnalyzerLocalDataSourceImpl(this._db);
+  AnalyzerLocalDataSourceImpl(this._db);
 
   final AppDatabase _db;
+  bool _excludedDefaultsInitialized = false;
+
+  Future<void> _ensureExcludedDefaults() async {
+    if (_excludedDefaultsInitialized) return;
+
+    final excludedRows = await _db.select(_db.excludedWords).get();
+    if (excludedRows.isEmpty) {
+      final defaults = DefaultExcludedWords.words;
+      final now = DateTime.now();
+      await _db.batch((batch) {
+        for (final word in defaults) {
+          batch.insert(
+            _db.excludedWords,
+            ExcludedWordsCompanion.insert(
+              word: word,
+              createdAt: now,
+            ),
+            mode: InsertMode.insertOrIgnore,
+          );
+        }
+      });
+    }
+
+    _excludedDefaultsInitialized = true;
+  }
 
   @override
   Future<AnalysisResultModel> analyze({
@@ -16,34 +41,19 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
     required String content,
   }) async {
     final freq = await TextProcessor.process(content);
-    
-    var excludedRows = await _db.select(_db.excludedWords).get();
-    
-    // Auto-initialize defaults if empty
-    if (excludedRows.isEmpty) {
-      final defaults = DefaultExcludedWords.words;
-      await _db.batch((batch) {
-        for (final word in defaults) {
-          batch.insert(
-            _db.excludedWords,
-            ExcludedWordsCompanion.insert(
-              word: word,
-              createdAt: DateTime.now(),
-            ),
-            mode: InsertMode.insertOrIgnore,
-          );
-        }
-      });
-      excludedRows = await _db.select(_db.excludedWords).get();
-    }
+    await _ensureExcludedDefaults();
 
-    final excludedSet = excludedRows.map((r) => r.word.trim().toLowerCase()).toSet();
-    
+    final excludedRows = await _db.select(_db.excludedWords).get();
+
+    final excludedSet =
+        excludedRows.map((r) => r.word.trim().toLowerCase()).toSet();
+
     final excludedWordsFound = freq.keys
         .where((word) => excludedSet.contains(word.trim().toLowerCase()))
         .toList();
-        
-    freq.removeWhere((word, _) => excludedSet.contains(word.trim().toLowerCase()));
+
+    freq.removeWhere(
+        (word, _) => excludedSet.contains(word.trim().toLowerCase()));
 
     final totalWords = TextProcessor.totalTokenCount(freq);
     final uniqueTokens = freq.keys.toList();
@@ -74,10 +84,12 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
           .get();
 
       final wordIdMap = {for (final r in allWordRows) r.word: r.id};
-      
+
       // Calculate new words count for the summary (words created in this transaction or with 0 freq)
       // Note: This is an approximation since words with 0 freq might have been added before but never seen.
-      final newWordsCount = allWordRows.where((r) => r.createdAt == now || r.frequency == 0).length;
+      final newWordsCount = allWordRows
+          .where((r) => r.createdAt == now || r.frequency == 0)
+          .length;
 
       final wordSnapshots = allWordRows.map((row) {
         return {

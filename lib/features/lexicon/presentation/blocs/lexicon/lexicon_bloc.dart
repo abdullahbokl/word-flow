@@ -4,13 +4,15 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lexitrack/core/common/state/bloc_status.dart';
 import 'package:lexitrack/core/domain/entities/word_entity.dart';
 import 'package:lexitrack/core/usecase/usecase.dart';
-import 'package:lexitrack/features/lexicon/data/datasources/lexicon_cache.dart';
 import 'package:lexitrack/features/lexicon/domain/commands/word_commands.dart';
 import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
 import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
+import 'package:lexitrack/features/lexicon/domain/repositories/lexicon_preferences.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/add_word_manually.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/delete_word.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/get_word_by_text.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/get_words.dart';
+import 'package:lexitrack/features/lexicon/domain/usecases/restore_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/toggle_word_status.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/update_word.dart';
 import 'package:lexitrack/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
@@ -30,7 +32,9 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
     required AddWordManually addWordManually,
     required UpdateWord updateWord,
     required WatchLexiconStats watchStats,
-    required LexiconCache cache,
+    required LexiconPreferences cache,
+    required RestoreWord restoreWord,
+    required GetWordByText getWordByText,
   })  : _getWords = getWords,
         _toggleWordStatus = toggleWordStatus,
         _deleteWord = deleteWord,
@@ -38,6 +42,8 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
         _updateWord = updateWord,
         _watchStats = watchStats,
         _cache = cache,
+        _restoreWord = restoreWord,
+        _getWordByText = getWordByText,
         super(LexiconState(
           filter: cache.getFilter(),
           sort: cache.getSort(),
@@ -48,6 +54,7 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
     on<LexiconErrorReceived>(_onErrorReceived);
     on<ToggleWordStatusEvent>(_onToggleStatus);
     on<DeleteWordEvent>(_onDelete);
+    on<RestoreWordEvent>(_onRestore);
     on<AddWordManuallyEvent>((e, emit) async {
       final res = await _addWordManually(AddWordCommand(text: e.word)).run();
       res.fold(
@@ -55,12 +62,9 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
         (_) => add(const LoadLexicon()),
       );
     });
-    on<SearchLexicon>(
-        (e, emit) => _onFetch(emit: emit, query: e.query));
-    on<FilterLexicon>(
-        (e, emit) => _onFetch(emit: emit, filter: e.filter));
-    on<SortLexicon>(
-        (e, emit) => _onFetch(emit: emit, sort: e.sort));
+    on<SearchLexicon>((e, emit) => _onFetch(emit: emit, query: e.query));
+    on<FilterLexicon>((e, emit) => _onFetch(emit: emit, filter: e.filter));
+    on<SortLexicon>((e, emit) => _onFetch(emit: emit, sort: e.sort));
     on<UpdateWordEvent>(_onUpdate);
   }
 
@@ -71,7 +75,9 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
   final DeleteWord _deleteWord;
   final AddWordManually _addWordManually;
   final UpdateWord _updateWord;
-  final LexiconCache _cache;
+  final RestoreWord _restoreWord;
+  final GetWordByText _getWordByText;
+  final LexiconPreferences _cache;
   StreamSubscription? _statsSub;
 
   @override

@@ -14,7 +14,6 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   int _currentIndex = 0;
-  late final PageController _pageController;
 
   final List<Widget> _pages = const [
     AnalyzerPage(),
@@ -23,28 +22,7 @@ class _AppShellState extends State<AppShell> {
     SettingsPage(),
   ];
 
-  @override
-  void initState() {
-    super.initState();
-    _pageController = PageController(initialPage: _currentIndex);
-  }
-
-  @override
-  void dispose() {
-    _pageController.dispose();
-    super.dispose();
-  }
-
   void _onTapped(int index) {
-    if (index == _currentIndex) return;
-    _pageController.animateToPage(
-      index,
-      duration: const Duration(milliseconds: 280),
-      curve: Curves.easeOutCubic,
-    );
-  }
-
-  void _onPageChanged(int index) {
     if (index == _currentIndex) return;
     setState(() {
       _currentIndex = index;
@@ -73,9 +51,8 @@ class _AppShellState extends State<AppShell> {
           }
         },
         child: Scaffold(
-          body: PageView(
-            controller: _pageController,
-            onPageChanged: _onPageChanged,
+          body: IndexedStack(
+            index: _currentIndex,
             children: _pages,
           ),
           bottomNavigationBar: NavigationBar(

@@ -65,6 +65,8 @@ class WordEntity extends Equatable {
         text,
         frequency,
         isKnown,
+        createdAt,
+        updatedAt,
         meaning,
         description,
         definitions,

@@ -13,7 +13,7 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
 
   final AppDatabase _db;
   final LocalCache _cache;
-  
+
   static const _statsCacheKey = 'lexicon_stats_cache';
 
   @override
@@ -87,6 +87,28 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
   }
 
   @override
+  Future<WordRow> restoreWord(
+    String text,
+    int previousId,
+    int previousFrequency,
+    bool wasFullyDeleted,
+  ) async {
+    return restoreWordRow(
+      _db,
+      text,
+      previousId,
+      previousFrequency,
+      wasFullyDeleted,
+    );
+  }
+
+  @override
+  Future<WordRow?> getWordByText(String text) async {
+    return (_db.select(_db.words)..where((row) => row.word.equals(text)))
+        .getSingleOrNull();
+  }
+
+  @override
   Future<LexiconStats> getStats() async {
     final stats = await getLexiconStats(_db);
     _saveStatsToCache(stats);
@@ -127,6 +149,7 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
   }
 
   void _saveStatsToCache(LexiconStats stats) {
-    _cache.setString(_statsCacheKey, '${stats.total}:${stats.known}:${stats.unknown}');
+    _cache.setString(
+        _statsCacheKey, '${stats.total}:${stats.known}:${stats.unknown}');
   }
 }

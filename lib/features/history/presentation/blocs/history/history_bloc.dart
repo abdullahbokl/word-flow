@@ -26,12 +26,14 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
   final WatchHistory _watchHistory;
   final DeleteHistoryItem _deleteHistoryItem;
 
-  Future<void> _onLoadHistory(LoadHistory event, Emitter<HistoryState> emit) async {
+  Future<void> _onLoadHistory(
+      LoadHistory event, Emitter<HistoryState> emit) async {
     emit(state.copyWith(status: const BlocStatus.loading()));
     await _onFetch(emit: emit, force: true);
   }
 
-  Future<void> _onLoadMore(LoadMoreHistory event, Emitter<HistoryState> emit) async {
+  Future<void> _onLoadMore(
+      LoadMoreHistory event, Emitter<HistoryState> emit) async {
     if (state.hasReachedMax || !state.status.isSuccess) return;
     await _onFetch(emit: emit);
   }
@@ -61,7 +63,8 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     );
   }
 
-  void _onUpdateReceived(HistoryUpdateReceived event, Emitter<HistoryState> emit) {
+  void _onUpdateReceived(
+      HistoryUpdateReceived event, Emitter<HistoryState> emit) {
     emit(state.copyWith(status: BlocStatus.success(data: event.items)));
   }
 
@@ -77,7 +80,8 @@ class HistoryBloc extends Bloc<HistoryEvent, HistoryState> {
     );
     result.fold(
       (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),
-      (_) => add(const LoadHistory()), // Reload to maintain pagination integrity
+      (_) =>
+          add(const LoadHistory()), // Reload to maintain pagination integrity
     );
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_animate/flutter_animate.dart';
 
 import 'package:lexitrack/core/common/enums/state_status.dart';
 import 'package:lexitrack/core/common/state/bloc_status.dart';
@@ -41,13 +40,23 @@ class StatusView<T> extends StatelessWidget {
           ),
     };
 
+    final resolved = widget ?? const SizedBox.shrink();
+
     if (animate && !status.isInitial) {
-      return widget!.animate().fadeIn(duration: 300.ms).moveY(
-            begin: 10,
-            end: 0,
-            curve: Curves.easeOutQuad,
-          );
+      return AnimatedSwitcher(
+        duration: const Duration(milliseconds: 220),
+        switchInCurve: Curves.easeOutQuad,
+        switchOutCurve: Curves.easeInQuad,
+        transitionBuilder: (child, animation) => FadeTransition(
+          opacity: animation,
+          child: child,
+        ),
+        child: KeyedSubtree(
+          key: ValueKey(status.status),
+          child: resolved,
+        ),
+      );
     }
-    return widget!;
+    return resolved;
   }
 }

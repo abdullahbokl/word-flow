@@ -300,6 +300,367 @@ class __$AddWordCommandCopyWithImpl<$Res>
 }
 
 /// @nodoc
+mixin _$RestoreWordCommand {
+  String get text;
+  int get previousId;
+  int get previousFrequency;
+  bool get wasFullyDeleted;
+
+  /// Create a copy of RestoreWordCommand
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $RestoreWordCommandCopyWith<RestoreWordCommand> get copyWith =>
+      _$RestoreWordCommandCopyWithImpl<RestoreWordCommand>(
+          this as RestoreWordCommand, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is RestoreWordCommand &&
+            (identical(other.text, text) || other.text == text) &&
+            (identical(other.previousId, previousId) ||
+                other.previousId == previousId) &&
+            (identical(other.previousFrequency, previousFrequency) ||
+                other.previousFrequency == previousFrequency) &&
+            (identical(other.wasFullyDeleted, wasFullyDeleted) ||
+                other.wasFullyDeleted == wasFullyDeleted));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, text, previousId, previousFrequency, wasFullyDeleted);
+
+  @override
+  String toString() {
+    return 'RestoreWordCommand(text: $text, previousId: $previousId, previousFrequency: $previousFrequency, wasFullyDeleted: $wasFullyDeleted)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $RestoreWordCommandCopyWith<$Res> {
+  factory $RestoreWordCommandCopyWith(
+          RestoreWordCommand value, $Res Function(RestoreWordCommand) _then) =
+      _$RestoreWordCommandCopyWithImpl;
+  @useResult
+  $Res call(
+      {String text,
+      int previousId,
+      int previousFrequency,
+      bool wasFullyDeleted});
+}
+
+/// @nodoc
+class _$RestoreWordCommandCopyWithImpl<$Res>
+    implements $RestoreWordCommandCopyWith<$Res> {
+  _$RestoreWordCommandCopyWithImpl(this._self, this._then);
+
+  final RestoreWordCommand _self;
+  final $Res Function(RestoreWordCommand) _then;
+
+  /// Create a copy of RestoreWordCommand
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? text = null,
+    Object? previousId = null,
+    Object? previousFrequency = null,
+    Object? wasFullyDeleted = null,
+  }) {
+    return _then(_self.copyWith(
+      text: null == text
+          ? _self.text
+          : text // ignore: cast_nullable_to_non_nullable
+              as String,
+      previousId: null == previousId
+          ? _self.previousId
+          : previousId // ignore: cast_nullable_to_non_nullable
+              as int,
+      previousFrequency: null == previousFrequency
+          ? _self.previousFrequency
+          : previousFrequency // ignore: cast_nullable_to_non_nullable
+              as int,
+      wasFullyDeleted: null == wasFullyDeleted
+          ? _self.wasFullyDeleted
+          : wasFullyDeleted // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// Adds pattern-matching-related methods to [RestoreWordCommand].
+extension RestoreWordCommandPatterns on RestoreWordCommand {
+  /// A variant of `map` that fallback to returning `orElse`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeMap<TResult extends Object?>(
+    TResult Function(_RestoreWordCommand value)? $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _RestoreWordCommand() when $default != null:
+        return $default(_that);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// Callbacks receives the raw object, upcasted.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case final Subclass2 value:
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult map<TResult extends Object?>(
+    TResult Function(_RestoreWordCommand value) $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _RestoreWordCommand():
+        return $default(_that);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `map` that fallback to returning `null`.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case final Subclass value:
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? mapOrNull<TResult extends Object?>(
+    TResult? Function(_RestoreWordCommand value)? $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _RestoreWordCommand() when $default != null:
+        return $default(_that);
+      case _:
+        return null;
+    }
+  }
+
+  /// A variant of `when` that fallback to an `orElse` callback.
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return orElse();
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult maybeWhen<TResult extends Object?>(
+    TResult Function(String text, int previousId, int previousFrequency,
+            bool wasFullyDeleted)?
+        $default, {
+    required TResult orElse(),
+  }) {
+    final _that = this;
+    switch (_that) {
+      case _RestoreWordCommand() when $default != null:
+        return $default(_that.text, _that.previousId, _that.previousFrequency,
+            _that.wasFullyDeleted);
+      case _:
+        return orElse();
+    }
+  }
+
+  /// A `switch`-like method, using callbacks.
+  ///
+  /// As opposed to `map`, this offers destructuring.
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case Subclass2(:final field2):
+  ///     return ...;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult when<TResult extends Object?>(
+    TResult Function(String text, int previousId, int previousFrequency,
+            bool wasFullyDeleted)
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _RestoreWordCommand():
+        return $default(_that.text, _that.previousId, _that.previousFrequency,
+            _that.wasFullyDeleted);
+      case _:
+        throw StateError('Unexpected subclass');
+    }
+  }
+
+  /// A variant of `when` that fallback to returning `null`
+  ///
+  /// It is equivalent to doing:
+  /// ```dart
+  /// switch (sealedClass) {
+  ///   case Subclass(:final field):
+  ///     return ...;
+  ///   case _:
+  ///     return null;
+  /// }
+  /// ```
+
+  @optionalTypeArgs
+  TResult? whenOrNull<TResult extends Object?>(
+    TResult? Function(String text, int previousId, int previousFrequency,
+            bool wasFullyDeleted)?
+        $default,
+  ) {
+    final _that = this;
+    switch (_that) {
+      case _RestoreWordCommand() when $default != null:
+        return $default(_that.text, _that.previousId, _that.previousFrequency,
+            _that.wasFullyDeleted);
+      case _:
+        return null;
+    }
+  }
+}
+
+/// @nodoc
+
+class _RestoreWordCommand implements RestoreWordCommand {
+  const _RestoreWordCommand(
+      {required this.text,
+      required this.previousId,
+      required this.previousFrequency,
+      required this.wasFullyDeleted});
+
+  @override
+  final String text;
+  @override
+  final int previousId;
+  @override
+  final int previousFrequency;
+  @override
+  final bool wasFullyDeleted;
+
+  /// Create a copy of RestoreWordCommand
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  _$RestoreWordCommandCopyWith<_RestoreWordCommand> get copyWith =>
+      __$RestoreWordCommandCopyWithImpl<_RestoreWordCommand>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _RestoreWordCommand &&
+            (identical(other.text, text) || other.text == text) &&
+            (identical(other.previousId, previousId) ||
+                other.previousId == previousId) &&
+            (identical(other.previousFrequency, previousFrequency) ||
+                other.previousFrequency == previousFrequency) &&
+            (identical(other.wasFullyDeleted, wasFullyDeleted) ||
+                other.wasFullyDeleted == wasFullyDeleted));
+  }
+
+  @override
+  int get hashCode => Object.hash(
+      runtimeType, text, previousId, previousFrequency, wasFullyDeleted);
+
+  @override
+  String toString() {
+    return 'RestoreWordCommand(text: $text, previousId: $previousId, previousFrequency: $previousFrequency, wasFullyDeleted: $wasFullyDeleted)';
+  }
+}
+
+/// @nodoc
+abstract mixin class _$RestoreWordCommandCopyWith<$Res>
+    implements $RestoreWordCommandCopyWith<$Res> {
+  factory _$RestoreWordCommandCopyWith(
+          _RestoreWordCommand value, $Res Function(_RestoreWordCommand) _then) =
+      __$RestoreWordCommandCopyWithImpl;
+  @override
+  @useResult
+  $Res call(
+      {String text,
+      int previousId,
+      int previousFrequency,
+      bool wasFullyDeleted});
+}
+
+/// @nodoc
+class __$RestoreWordCommandCopyWithImpl<$Res>
+    implements _$RestoreWordCommandCopyWith<$Res> {
+  __$RestoreWordCommandCopyWithImpl(this._self, this._then);
+
+  final _RestoreWordCommand _self;
+  final $Res Function(_RestoreWordCommand) _then;
+
+  /// Create a copy of RestoreWordCommand
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? text = null,
+    Object? previousId = null,
+    Object? previousFrequency = null,
+    Object? wasFullyDeleted = null,
+  }) {
+    return _then(_RestoreWordCommand(
+      text: null == text
+          ? _self.text
+          : text // ignore: cast_nullable_to_non_nullable
+              as String,
+      previousId: null == previousId
+          ? _self.previousId
+          : previousId // ignore: cast_nullable_to_non_nullable
+              as int,
+      previousFrequency: null == previousFrequency
+          ? _self.previousFrequency
+          : previousFrequency // ignore: cast_nullable_to_non_nullable
+              as int,
+      wasFullyDeleted: null == wasFullyDeleted
+          ? _self.wasFullyDeleted
+          : wasFullyDeleted // ignore: cast_nullable_to_non_nullable
+              as bool,
+    ));
+  }
+}
+
+/// @nodoc
 mixin _$UpdateWordCommand {
   int get id;
   String? get text;

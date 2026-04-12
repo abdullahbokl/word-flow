@@ -30,6 +30,13 @@ abstract interface class LexiconLocalDataSource {
   });
   Future<void> deleteWord(int wordId);
   Future<WordRow> addWord(String text);
+  Future<WordRow> restoreWord(
+    String text,
+    int previousId,
+    int previousFrequency,
+    bool wasFullyDeleted,
+  );
+  Future<WordRow?> getWordByText(String text);
   Future<LexiconStats> getStats();
   Stream<LexiconStats> watchStats();
 }

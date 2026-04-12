@@ -32,8 +32,10 @@ class WordFilterBar extends StatelessWidget {
                   return Padding(
                     padding: const EdgeInsets.only(right: 8),
                     child: ChoiceChip(
-                      visualDensity: VisualDensity.compact,
-                      label: Text(f.name[0].toUpperCase() + f.name.substring(1)),
+                      label: Text(
+                        f.name[0].toUpperCase() + f.name.substring(1),
+                        style: const TextStyle(fontSize: 13),
+                      ),
                       selected: isActive,
                       onSelected: (_) => onChanged(f),
                       selectedColor: AppColors.primary.withValues(alpha: 0.15),

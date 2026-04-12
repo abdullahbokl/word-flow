@@ -40,24 +40,33 @@ class WordsSliverList extends StatelessWidget {
           delegate: SliverChildBuilderDelegate(
             (ctx, i) {
               final w = words[i];
-              return WordTile(
-                key: ValueKey(w.id),
-                word: w,
-                onToggle: () =>
-                    ctx.read<LexiconBloc>().add(ToggleWordStatusEvent(w.id)),
-                onDelete: () {
-                  final wordText = w.text;
-                  ctx.read<LexiconBloc>().add(DeleteWordEvent(w.id));
-                  AppUIUtils.showSnackBar(
-                    ctx,
-                    message: AppStrings.wordDeleted(wordText),
-                    actionLabel: AppStrings.undo,
-                    onAction: () => ctx
-                        .read<LexiconBloc>()
-                        .add(AddWordManuallyEvent(wordText)),
-                  );
-                },
-                onEdit: () => onEdit(w),
+              return RepaintBoundary(
+                child: WordTile(
+                  key: ValueKey(w.id),
+                  word: w,
+                  onToggle: () =>
+                      ctx.read<LexiconBloc>().add(ToggleWordStatusEvent(w.id)),
+                  onDelete: () {
+                    final wordText = w.text;
+                    final previousId = w.id;
+                    final previousFrequency = w.frequency;
+                    final wasFullyDeleted = w.frequency <= 1;
+                    ctx.read<LexiconBloc>().add(DeleteWordEvent(w.id));
+                    AppUIUtils.showSnackBar(
+                      ctx,
+                      message: AppStrings.wordDeleted(wordText),
+                      actionLabel: AppStrings.undo,
+                      onAction: () =>
+                          ctx.read<LexiconBloc>().add(RestoreWordEvent(
+                                wordText,
+                                previousId: previousId,
+                                previousFrequency: previousFrequency,
+                                wasFullyDeleted: wasFullyDeleted,
+                              )),
+                    );
+                  },
+                  onEdit: () => onEdit(w),
+                ),
               );
             },
             childCount: words.length,

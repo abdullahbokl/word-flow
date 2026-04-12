@@ -29,6 +29,10 @@ abstract interface class LexiconRepository {
 
   TaskEither<Failure, WordEntity> addWord(AddWordCommand command);
 
+  TaskEither<Failure, WordEntity> restoreWord(RestoreWordCommand command);
+
+  TaskEither<Failure, WordEntity?> getWordByText(String text);
+
   TaskEither<Failure, LexiconStats> getStats();
 
   Stream<Either<Failure, LexiconStats>> watchStats();

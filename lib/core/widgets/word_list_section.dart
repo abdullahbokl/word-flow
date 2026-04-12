@@ -7,7 +7,8 @@ import 'package:lexitrack/core/widgets/word_list_section_status_button.dart';
 
 class WordListSection extends StatefulWidget {
   const WordListSection({
-    required this.words, super.key,
+    required this.words,
+    super.key,
     this.title = AppStrings.wordBreakdown,
     this.onToggleStatus,
   });
@@ -74,64 +75,67 @@ class _WordListSectionState extends State<WordListSection> {
               delegate: SliverChildBuilderDelegate(
                 (ctx, index) {
                   final w = filtered[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 12),
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: theme.colorScheme.surfaceContainerLowest,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(
-                        color: theme.colorScheme.outline.withValues(alpha: 0.1),
+                  return RepaintBoundary(
+                    child: Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: theme.colorScheme.surfaceContainerLowest,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(
+                          color:
+                              theme.colorScheme.outline.withValues(alpha: 0.1),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 8,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Row(
-                      children: [
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                w.word.text,
-                                style: theme.textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w700,
-                                  color: theme.colorScheme.onSurface,
-                                ),
-                              ),
-                              if (w.word.meaning != null) ...[
-                                const SizedBox(height: 4),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  w.word.meaning!,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: theme.colorScheme.onSurfaceVariant,
+                                  w.word.text,
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    fontWeight: FontWeight.w700,
+                                    color: theme.colorScheme.onSurface,
                                   ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
                                 ),
+                                if (w.word.meaning != null) ...[
+                                  const SizedBox(height: 4),
+                                  Text(
+                                    w.word.meaning!,
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: theme.colorScheme.onSurfaceVariant,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
                               ],
-                            ],
+                            ),
                           ),
-                        ),
-                        Text(
-                          '${w.localFrequency}x',
-                          style: TextStyle(
-                            color: theme.colorScheme.primary,
-                            fontWeight: FontWeight.w800,
-                            fontSize: 16,
+                          Text(
+                            '${w.localFrequency}x',
+                            style: TextStyle(
+                              color: theme.colorScheme.primary,
+                              fontWeight: FontWeight.w800,
+                              fontSize: 16,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 16),
-                        WordListSectionStatusButton(
-                          isKnown: w.word.isKnown,
-                          onToggle: () => widget.onToggleStatus?.call(w),
-                        ),
-                      ],
+                          const SizedBox(width: 16),
+                          WordListSectionStatusButton(
+                            isKnown: w.word.isKnown,
+                            onToggle: () => widget.onToggleStatus?.call(w),
+                          ),
+                        ],
+                      ),
                     ),
                   );
                 },

@@ -41,10 +41,13 @@ Future<WordRow> updateWordRow(
     WordsCompanion(
       word: text != null ? Value(text) : const Value.absent(),
       meaning: meaning != null ? Value(meaning) : const Value.absent(),
-      description: description != null ? Value(description) : const Value.absent(),
-      definitions: definitions != null ? Value(definitions) : const Value.absent(),
+      description:
+          description != null ? Value(description) : const Value.absent(),
+      definitions:
+          definitions != null ? Value(definitions) : const Value.absent(),
       examples: examples != null ? Value(examples) : const Value.absent(),
-      translations: translations != null ? Value(translations) : const Value.absent(),
+      translations:
+          translations != null ? Value(translations) : const Value.absent(),
       synonyms: synonyms != null ? Value(synonyms) : const Value.absent(),
       isKnown: isKnown != null ? Value(isKnown) : const Value.absent(),
       updatedAt: Value(now),
@@ -75,6 +78,51 @@ Future<void> deleteWordRow(AppDatabase db, int wordId) async {
         ..where((entry) => entry.wordId.equals(wordId)))
       .go();
   await (db.delete(db.words)..where((row) => row.id.equals(wordId))).go();
+}
+
+Future<WordRow> restoreWordRow(
+  AppDatabase db,
+  String text,
+  int previousId,
+  int previousFrequency,
+  bool wasFullyDeleted,
+) async {
+  if (wasFullyDeleted) {
+    final now = DateTime.now();
+    final id = await db.into(db.words).insert(
+          WordsCompanion.insert(
+            word: text,
+            frequency: const Value(1),
+            isKnown: const Value(false),
+            createdAt: now,
+            updatedAt: now,
+          ),
+          mode: InsertMode.insertOrIgnore,
+        );
+    if (id == 0) {
+      throw const DatabaseException('Word could not be restored');
+    }
+    return WordRow(
+      id: id,
+      word: text,
+      frequency: 1,
+      isKnown: false,
+      createdAt: now,
+      updatedAt: now,
+    );
+  } else {
+    await (db.update(db.words)..where((row) => row.id.equals(previousId)))
+        .write(
+      WordsCompanion(
+        frequency: Value(previousFrequency),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+    final row = await (db.select(db.words)
+          ..where((row) => row.id.equals(previousId)))
+        .getSingle();
+    return row;
+  }
 }
 
 Future<WordRow> addWordRow(AppDatabase db, String text) async {
