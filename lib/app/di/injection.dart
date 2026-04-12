@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 import 'package:lexitrack/core/backup/backup_repository.dart';
+import 'package:lexitrack/core/backup/backup_repository_impl.dart';
 import 'package:lexitrack/core/cache/local_cache.dart';
 import 'package:lexitrack/core/database/app_database.dart';
 import 'package:lexitrack/core/theme/theme_cubit.dart';
@@ -106,7 +107,7 @@ Future<void> initDI() async {
     ..registerFactory(() => HistoryDetailBloc(sl(), sl()))
     
     // Features - Settings / Backup
-    ..registerLazySingleton<BackupRepository>(BackupRepositoryImpl.new)
+    ..registerLazySingleton<BackupRepository>(() => BackupRepositoryImpl(sl()))
     ..registerFactory(() => BackupBloc(sl()))
 
     // Features - Excluded Words

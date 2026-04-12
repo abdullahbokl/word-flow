@@ -20,13 +20,14 @@ class SettingsPage extends StatelessWidget {
             padding:
                 const EdgeInsets.symmetric(horizontal: AppDimensions.pagePadding),
             child: BlocListener<BackupBloc, BackupState>(
+              listenWhen: (previous, current) =>
+                  previous.message != current.message &&
+                  current.message != null,
               listener: (context, state) {
-                if (state.message != null) {
-                  AppUIUtils.showSnackBar(
-                    context,
-                    message: state.message!,
-                  );
-                }
+                AppUIUtils.showSnackBar(
+                  context,
+                  message: state.message!,
+                );
               },
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -205,7 +206,7 @@ class _BackupSettings extends StatelessWidget {
               fontSize: 12,
             ),
             trailing: const Icon(Icons.chevron_right),
-            onTap: () => context.read<BackupBloc>().add(PerformBackup()),
+            onTap: () => context.read<BackupBloc>().add(ConnectDrive()),
           );
         }
 
@@ -250,6 +251,29 @@ class _BackupSettings extends StatelessWidget {
                   ? null
                   : () => _showRestoreDialog(context),
             ),
+            const Divider(height: 1),
+            if (state.lastBackup != null)
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                color: Theme.of(context).colorScheme.primary.withAlpha(10),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const AppText.label('CLOUD BACKUP STATUS', fontSize: 10),
+                    const SizedBox(height: 4),
+                    AppText.body(
+                      'Last synced: ${state.lastBackup!.modifiedTime.toString().split('.')[0]}',
+                      fontSize: 12,
+                    ),
+                    AppText.body(
+                      'File size: ${(state.lastBackup!.size / 1024).toStringAsFixed(1)} KB',
+                      fontSize: 12,
+                      color: Colors.grey,
+                    ),
+                  ],
+                ),
+              ),
             if (state.status == BackupStatus.loading)
               const LinearProgressIndicator(),
           ],

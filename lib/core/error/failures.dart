@@ -25,3 +25,7 @@ final class NetworkFailure extends Failure {
 final class ValidationFailure extends Failure {
   const ValidationFailure(super.message);
 }
+
+final class BackupFailure extends Failure {
+  const BackupFailure(super.message, [super.stackTrace]);
+}

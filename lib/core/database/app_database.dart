@@ -1,4 +1,3 @@
-
 import 'dart:io';
 
 import 'package:drift/drift.dart';
@@ -87,6 +86,10 @@ class AppDatabase extends _$AppDatabase {
         );
       },
     );
+  }
+
+  Future<void> checkpoint() async {
+    await customStatement('PRAGMA wal_checkpoint(TRUNCATE)');
   }
 }
 
