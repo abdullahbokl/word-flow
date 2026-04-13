@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:wordflow/app/exit_dialog.dart';
 import 'package:wordflow/features/history/presentation/pages/history_page.dart';
 import 'package:wordflow/features/lexicon/presentation/pages/lexicon_page.dart';
@@ -45,9 +46,7 @@ class _AppShellState extends State<AppShell> {
 
           final exit = await showExitDialog(context);
           if (exit == true) {
-            if (context.mounted) {
-              Navigator.of(context).pop();
-            }
+            await SystemNavigator.pop();
           }
         },
         child: Scaffold(
