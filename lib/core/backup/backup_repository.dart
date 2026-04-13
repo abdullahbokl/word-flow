@@ -1,5 +1,5 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:lexitrack/core/error/failures.dart';
+import 'package:wordflow/core/error/failures.dart';
 
 class BackupMetadata {
   final DateTime modifiedTime;

@@ -1,8 +1,8 @@
 import 'package:fpdart/fpdart.dart';
 
-import 'package:lexitrack/core/error/failures.dart';
-import 'package:lexitrack/core/usecase/usecase.dart';
-import 'package:lexitrack/features/history/domain/repositories/history_repository.dart';
+import 'package:wordflow/core/error/failures.dart';
+import 'package:wordflow/core/usecase/usecase.dart';
+import 'package:wordflow/features/history/domain/repositories/history_repository.dart';
 
 class DeleteHistoryItemParams {
   const DeleteHistoryItemParams({required this.id, required this.deleteUniqueWords});

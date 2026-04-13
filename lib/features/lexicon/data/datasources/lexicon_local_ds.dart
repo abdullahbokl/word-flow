@@ -1,7 +1,7 @@
-import 'package:lexitrack/core/database/app_database.dart';
-import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
-import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
-import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
+import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/features/lexicon/domain/entities/lexicon_stats.dart';
+import 'package:wordflow/features/lexicon/domain/entities/word_filter.dart';
+import 'package:wordflow/features/lexicon/domain/entities/word_sort.dart';
 
 abstract interface class LexiconLocalDataSource {
   Future<List<WordRow>> getWords({

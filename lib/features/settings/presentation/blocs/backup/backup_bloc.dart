@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/services.dart';
-import 'package:lexitrack/core/backup/backup_repository.dart';
+import 'package:wordflow/core/backup/backup_repository.dart';
 
 abstract class BackupEvent extends Equatable {
   const BackupEvent();

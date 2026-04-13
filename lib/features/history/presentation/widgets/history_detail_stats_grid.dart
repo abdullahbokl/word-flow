@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:lexitrack/core/theme/app_colors.dart';
-import 'package:lexitrack/core/widgets/stat_card.dart';
-import 'package:lexitrack/features/history/domain/entities/history_detail.dart';
+import 'package:wordflow/core/theme/app_colors.dart';
+import 'package:wordflow/core/widgets/stat_card.dart';
+import 'package:wordflow/features/history/domain/entities/history_detail.dart';
 
 class HistoryDetailStatsGrid extends StatelessWidget {
   const HistoryDetailStatsGrid({required this.detail, super.key});

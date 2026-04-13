@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lexitrack/core/common/state/bloc_status.dart';
-import 'package:lexitrack/core/widgets/app_error_widget.dart';
-import 'package:lexitrack/core/widgets/app_loader.dart';
-import 'package:lexitrack/core/widgets/status_view.dart';
+import 'package:wordflow/core/common/state/bloc_status.dart';
+import 'package:wordflow/core/widgets/app_error_widget.dart';
+import 'package:wordflow/core/widgets/app_loader.dart';
+import 'package:wordflow/core/widgets/status_view.dart';
 
 void main() {
   group('StatusView', () {

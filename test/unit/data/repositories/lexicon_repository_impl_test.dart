@@ -1,12 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:lexitrack/core/database/app_database.dart';
-import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds.dart';
-import 'package:lexitrack/features/lexicon/data/repositories/lexicon_repository_impl.dart';
-import 'package:lexitrack/features/lexicon/domain/commands/word_commands.dart';
-import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
-import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
-import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
+import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/features/lexicon/data/datasources/lexicon_local_ds.dart';
+import 'package:wordflow/features/lexicon/data/repositories/lexicon_repository_impl.dart';
+import 'package:wordflow/features/lexicon/domain/commands/word_commands.dart';
+import 'package:wordflow/features/lexicon/domain/entities/lexicon_stats.dart';
+import 'package:wordflow/features/lexicon/domain/entities/word_filter.dart';
+import 'package:wordflow/features/lexicon/domain/entities/word_sort.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockLexiconLocalDataSource extends Mock implements LexiconLocalDataSource {}

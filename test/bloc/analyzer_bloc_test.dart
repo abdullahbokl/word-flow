@@ -1,18 +1,18 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
-import 'package:lexitrack/core/common/state/bloc_status.dart';
-import 'package:lexitrack/core/domain/entities/word_entity.dart';
-import 'package:lexitrack/core/error/failures.dart';
-import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
-import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
-import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
-import 'package:lexitrack/features/text_analyzer/domain/usecases/get_analysis_result.dart';
-import 'package:lexitrack/features/text_analyzer/domain/usecases/update_analysis_counts.dart';
-import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
-import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
-import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
+import 'package:wordflow/core/common/models/word_with_local_freq.dart';
+import 'package:wordflow/core/common/state/bloc_status.dart';
+import 'package:wordflow/core/domain/entities/word_entity.dart';
+import 'package:wordflow/core/error/failures.dart';
+import 'package:wordflow/features/text_analyzer/domain/entities/analysis_result.dart';
+import 'package:wordflow/features/text_analyzer/domain/repositories/analyzer_repository.dart';
+import 'package:wordflow/features/text_analyzer/domain/usecases/analyze_text.dart';
+import 'package:wordflow/features/text_analyzer/domain/usecases/get_analysis_result.dart';
+import 'package:wordflow/features/text_analyzer/domain/usecases/update_analysis_counts.dart';
+import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
+import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
+import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAnalyzerRepository extends Mock implements AnalyzerRepository {}

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:lexitrack/core/constants/app_strings.dart';
-import 'package:lexitrack/core/domain/entities/word_entity.dart';
-import 'package:lexitrack/core/widgets/app_text.dart';
-import 'package:lexitrack/core/widgets/app_text_field.dart';
+import 'package:wordflow/core/constants/app_strings.dart';
+import 'package:wordflow/core/domain/entities/word_entity.dart';
+import 'package:wordflow/core/widgets/app_text.dart';
+import 'package:wordflow/core/widgets/app_text_field.dart';
 
 class EditWordDialog extends StatefulWidget {
   const EditWordDialog({required this.word, super.key});

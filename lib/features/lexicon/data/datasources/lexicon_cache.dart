@@ -1,7 +1,7 @@
-import 'package:lexitrack/core/cache/local_cache.dart';
-import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
-import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
-import 'package:lexitrack/features/lexicon/domain/repositories/lexicon_preferences.dart';
+import 'package:wordflow/core/cache/local_cache.dart';
+import 'package:wordflow/features/lexicon/domain/entities/word_filter.dart';
+import 'package:wordflow/features/lexicon/domain/entities/word_sort.dart';
+import 'package:wordflow/features/lexicon/domain/repositories/lexicon_preferences.dart';
 
 class LexiconCache implements LexiconPreferences {
   const LexiconCache(this._cache);

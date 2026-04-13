@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
-import 'package:lexitrack/app/app.dart';
-import 'package:lexitrack/app/di/injection.dart';
+import 'package:wordflow/app/app.dart';
+import 'package:wordflow/app/di/injection.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

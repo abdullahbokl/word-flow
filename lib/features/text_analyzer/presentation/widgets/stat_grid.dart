@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:lexitrack/core/widgets/stat_card.dart';
-import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
+import 'package:wordflow/core/widgets/stat_card.dart';
+import 'package:wordflow/features/text_analyzer/domain/entities/analysis_result.dart';
 
 class StatGrid extends StatelessWidget {
   const StatGrid({required this.result, super.key});

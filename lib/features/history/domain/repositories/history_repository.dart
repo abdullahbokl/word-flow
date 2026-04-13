@@ -1,8 +1,8 @@
 import 'package:fpdart/fpdart.dart';
 
-import 'package:lexitrack/core/error/failures.dart';
-import 'package:lexitrack/features/history/domain/entities/history_detail.dart';
-import 'package:lexitrack/features/history/domain/entities/history_item.dart';
+import 'package:wordflow/core/error/failures.dart';
+import 'package:wordflow/features/history/domain/entities/history_detail.dart';
+import 'package:wordflow/features/history/domain/entities/history_item.dart';
 
 abstract class HistoryRepository {
   /// Fetches a list of history items, optionally paged.

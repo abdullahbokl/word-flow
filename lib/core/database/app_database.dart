@@ -1,7 +1,7 @@
 import 'package:drift/drift.dart';
 import 'package:drift_flutter/drift_flutter.dart';
-import 'package:lexitrack/core/database/converters/string_list_converter.dart';
-import 'package:lexitrack/core/database/tables.dart';
+import 'package:wordflow/core/database/converters/string_list_converter.dart';
+import 'package:wordflow/core/database/tables.dart';
 
 part 'app_database.g.dart';
 

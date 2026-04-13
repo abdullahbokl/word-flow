@@ -1,18 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:lexitrack/app/di/injection.dart';
-import 'package:lexitrack/core/constants/app_dimensions.dart';
-import 'package:lexitrack/core/widgets/app_loader.dart';
-import 'package:lexitrack/core/widgets/app_text.dart';
-import 'package:lexitrack/core/widgets/status_view.dart';
-import 'package:lexitrack/core/widgets/theme_toggle.dart';
-import 'package:lexitrack/core/widgets/word_list_section.dart';
-import 'package:lexitrack/features/history/domain/entities/history_detail.dart';
-import 'package:lexitrack/features/history/presentation/blocs/history_detail/history_detail_bloc.dart';
-import 'package:lexitrack/features/history/presentation/blocs/history_detail/history_detail_event.dart';
-import 'package:lexitrack/features/history/presentation/blocs/history_detail/history_detail_state.dart';
-import 'package:lexitrack/features/history/presentation/widgets/history_detail_stats_grid.dart';
+import 'package:wordflow/app/di/injection.dart';
+import 'package:wordflow/core/constants/app_dimensions.dart';
+import 'package:wordflow/core/widgets/app_loader.dart';
+import 'package:wordflow/core/widgets/app_text.dart';
+import 'package:wordflow/core/widgets/status_view.dart';
+import 'package:wordflow/core/widgets/theme_toggle.dart';
+import 'package:wordflow/core/widgets/word_list_section.dart';
+import 'package:wordflow/features/history/domain/entities/history_detail.dart';
+import 'package:wordflow/features/history/presentation/blocs/history_detail/history_detail_bloc.dart';
+import 'package:wordflow/features/history/presentation/blocs/history_detail/history_detail_event.dart';
+import 'package:wordflow/features/history/presentation/blocs/history_detail/history_detail_state.dart';
+import 'package:wordflow/features/history/presentation/widgets/history_detail_stats_grid.dart';
 
 class HistoryDetailPage extends StatelessWidget {
   const HistoryDetailPage({required this.id, super.key});

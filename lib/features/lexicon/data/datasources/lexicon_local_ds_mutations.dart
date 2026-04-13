@@ -1,8 +1,8 @@
 import 'package:drift/drift.dart';
 
-import 'package:lexitrack/core/database/app_database.dart';
-import 'package:lexitrack/core/error/exceptions.dart';
-import 'package:lexitrack/features/lexicon/domain/entities/lexicon_stats.dart';
+import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/core/error/exceptions.dart';
+import 'package:wordflow/features/lexicon/domain/entities/lexicon_stats.dart';
 
 Future<WordRow> toggleWordStatus(AppDatabase db, int wordId) async {
   final word = await (db.select(db.words)

@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import 'package:lexitrack/core/constants/app_dimensions.dart';
-import 'package:lexitrack/core/constants/app_strings.dart';
-import 'package:lexitrack/core/widgets/app_button.dart';
-import 'package:lexitrack/core/widgets/app_text.dart';
-import 'package:lexitrack/core/widgets/app_text_field.dart';
-import 'package:lexitrack/core/widgets/page_header.dart';
+import 'package:wordflow/core/constants/app_dimensions.dart';
+import 'package:wordflow/core/constants/app_strings.dart';
+import 'package:wordflow/core/widgets/app_button.dart';
+import 'package:wordflow/core/widgets/app_text.dart';
+import 'package:wordflow/core/widgets/app_text_field.dart';
+import 'package:wordflow/core/widgets/page_header.dart';
 
 class AnalyzerInputBody extends StatelessWidget {
   const AnalyzerInputBody({

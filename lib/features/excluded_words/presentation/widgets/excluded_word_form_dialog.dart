@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lexitrack/core/widgets/app_button.dart';
-import 'package:lexitrack/core/widgets/app_text.dart';
-import 'package:lexitrack/core/widgets/app_text_field.dart';
-import 'package:lexitrack/features/excluded_words/domain/entities/excluded_word.dart';
-import 'package:lexitrack/features/excluded_words/presentation/cubit/excluded_words_cubit.dart';
+import 'package:wordflow/core/widgets/app_button.dart';
+import 'package:wordflow/core/widgets/app_text.dart';
+import 'package:wordflow/core/widgets/app_text_field.dart';
+import 'package:wordflow/features/excluded_words/domain/entities/excluded_word.dart';
+import 'package:wordflow/features/excluded_words/presentation/cubit/excluded_words_cubit.dart';
 
 class ExcludedWordFormDialog extends StatelessWidget {
   const ExcludedWordFormDialog({this.word, super.key});

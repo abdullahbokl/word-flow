@@ -1,4 +1,4 @@
-import 'package:lexitrack/core/database/app_database.dart';
+import 'package:wordflow/core/database/app_database.dart';
 
 abstract class ExcludedWordsLocalDataSource {
   Future<List<ExcludedWordRow>> getExcludedWords();

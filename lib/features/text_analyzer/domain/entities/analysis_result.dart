@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
+import 'package:wordflow/core/common/models/word_with_local_freq.dart';
 
 part 'analysis_result.freezed.dart';
 

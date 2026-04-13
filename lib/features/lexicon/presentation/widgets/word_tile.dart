@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:lexitrack/core/domain/entities/word_entity.dart';
-import 'package:lexitrack/core/constants/app_dimensions.dart';
+import 'package:wordflow/core/domain/entities/word_entity.dart';
+import 'package:wordflow/core/constants/app_dimensions.dart';
 
 const _knownColor = Color(0xFF2E7D32);
 

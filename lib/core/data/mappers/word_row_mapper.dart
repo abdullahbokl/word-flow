@@ -1,5 +1,5 @@
-import 'package:lexitrack/core/database/app_database.dart';
-import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/core/domain/entities/word_entity.dart';
 
 extension WordRowMapper on WordRow {
   WordEntity toEntity() {

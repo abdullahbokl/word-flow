@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lexitrack/core/data/mappers/word_row_mapper.dart';
-import 'package:lexitrack/core/database/app_database.dart';
+import 'package:wordflow/core/data/mappers/word_row_mapper.dart';
+import 'package:wordflow/core/database/app_database.dart';
 
 void main() {
   group('WordRowMapper.toEntity', () {

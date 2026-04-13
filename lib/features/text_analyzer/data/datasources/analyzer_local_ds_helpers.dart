@@ -1,5 +1,5 @@
 import 'package:drift/drift.dart';
-import 'package:lexitrack/core/database/app_database.dart';
+import 'package:wordflow/core/database/app_database.dart';
 
 Future<void> updateAnalyzedTextCounts(AppDatabase db, int analysisId) async {
   final entries = await (db.select(db.textWordEntries).join([

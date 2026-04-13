@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 
-import 'package:lexitrack/core/common/state/bloc_status.dart';
-import 'package:lexitrack/features/history/domain/entities/history_detail.dart';
+import 'package:wordflow/core/common/state/bloc_status.dart';
+import 'package:wordflow/features/history/domain/entities/history_detail.dart';
 
 class HistoryDetailState extends Equatable {
   const HistoryDetailState({

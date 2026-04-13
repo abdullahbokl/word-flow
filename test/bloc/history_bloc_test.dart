@@ -1,12 +1,12 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:lexitrack/core/error/failures.dart';
-import 'package:lexitrack/features/history/domain/entities/history_item.dart';
-import 'package:lexitrack/features/history/domain/repositories/history_repository.dart';
-import 'package:lexitrack/features/history/domain/usecases/delete_history_item.dart';
-import 'package:lexitrack/features/history/domain/usecases/watch_history.dart';
-import 'package:lexitrack/features/history/presentation/blocs/history/history_bloc.dart';
+import 'package:wordflow/core/error/failures.dart';
+import 'package:wordflow/features/history/domain/entities/history_item.dart';
+import 'package:wordflow/features/history/domain/repositories/history_repository.dart';
+import 'package:wordflow/features/history/domain/usecases/delete_history_item.dart';
+import 'package:wordflow/features/history/domain/usecases/watch_history.dart';
+import 'package:wordflow/features/history/presentation/blocs/history/history_bloc.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockHistoryRepository extends Mock implements HistoryRepository {}

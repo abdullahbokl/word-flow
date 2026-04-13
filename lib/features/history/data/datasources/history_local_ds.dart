@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
 
-import 'package:lexitrack/core/database/app_database.dart';
+import 'package:wordflow/core/database/app_database.dart';
 
 abstract interface class HistoryLocalDataSource {
   Future<List<AnalyzedTextRow>> getHistory({int? limit, int? offset});

@@ -1,11 +1,11 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:lexitrack/core/database/app_database.dart';
-import 'package:lexitrack/core/error/failures.dart';
-import 'package:lexitrack/features/excluded_words/data/datasources/excluded_words_local_data_source.dart';
-import 'package:lexitrack/features/excluded_words/data/mappers/excluded_word_mapper.dart';
-import 'package:lexitrack/features/excluded_words/domain/entities/excluded_word.dart';
-import 'package:lexitrack/core/constants/default_excluded_words.dart';
-import 'package:lexitrack/features/excluded_words/domain/repositories/excluded_words_repository.dart';
+import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/core/error/failures.dart';
+import 'package:wordflow/features/excluded_words/data/datasources/excluded_words_local_data_source.dart';
+import 'package:wordflow/features/excluded_words/data/mappers/excluded_word_mapper.dart';
+import 'package:wordflow/features/excluded_words/domain/entities/excluded_word.dart';
+import 'package:wordflow/core/constants/default_excluded_words.dart';
+import 'package:wordflow/features/excluded_words/domain/repositories/excluded_words_repository.dart';
 
 class ExcludedWordsRepositoryImpl implements ExcludedWordsRepository {
   final ExcludedWordsLocalDataSource localDataSource;

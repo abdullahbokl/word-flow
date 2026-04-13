@@ -1,6 +1,6 @@
 import 'package:drift/drift.dart';
-import 'package:lexitrack/core/database/app_database.dart';
-import 'package:lexitrack/features/excluded_words/data/datasources/excluded_words_local_data_source.dart';
+import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/features/excluded_words/data/datasources/excluded_words_local_data_source.dart';
 
 class ExcludedWordsLocalDataSourceImpl implements ExcludedWordsLocalDataSource {
   final AppDatabase _db;

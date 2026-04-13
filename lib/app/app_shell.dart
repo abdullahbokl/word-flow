@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:lexitrack/app/exit_dialog.dart';
-import 'package:lexitrack/features/history/presentation/pages/history_page.dart';
-import 'package:lexitrack/features/lexicon/presentation/pages/lexicon_page.dart';
-import 'package:lexitrack/features/settings/presentation/pages/settings_page.dart';
-import 'package:lexitrack/features/text_analyzer/presentation/pages/analyzer_page.dart';
+import 'package:wordflow/app/exit_dialog.dart';
+import 'package:wordflow/features/history/presentation/pages/history_page.dart';
+import 'package:wordflow/features/lexicon/presentation/pages/lexicon_page.dart';
+import 'package:wordflow/features/settings/presentation/pages/settings_page.dart';
+import 'package:wordflow/features/text_analyzer/presentation/pages/analyzer_page.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({super.key});

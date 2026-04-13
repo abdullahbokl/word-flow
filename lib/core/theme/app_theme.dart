@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:lexitrack/core/theme/app_colors.dart';
-import 'package:lexitrack/core/theme/app_typography.dart';
-import 'package:lexitrack/core/theme/design_tokens.dart';
+import 'package:wordflow/core/theme/app_colors.dart';
+import 'package:wordflow/core/theme/app_typography.dart';
+import 'package:wordflow/core/theme/design_tokens.dart';
 
 abstract final class AppTheme {
   static ThemeData get light => _buildTheme(AppColors.lightScheme);

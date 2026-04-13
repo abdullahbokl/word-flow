@@ -1,5 +1,5 @@
-import 'package:lexitrack/features/lexicon/domain/entities/word_filter.dart';
-import 'package:lexitrack/features/lexicon/domain/entities/word_sort.dart';
+import 'package:wordflow/features/lexicon/domain/entities/word_filter.dart';
+import 'package:wordflow/features/lexicon/domain/entities/word_sort.dart';
 
 abstract interface class LexiconPreferences {
   WordFilter getFilter();

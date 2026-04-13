@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lexitrack/core/utils/text_processor.dart';
+import 'package:wordflow/core/utils/text_processor.dart';
 
 void main() {
   group('TextProcessor._tokenizeAndCount via process()', () {

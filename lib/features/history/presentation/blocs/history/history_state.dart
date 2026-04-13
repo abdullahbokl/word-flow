@@ -1,6 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:lexitrack/core/common/state/bloc_status.dart';
-import 'package:lexitrack/features/history/domain/entities/history_item.dart';
+import 'package:wordflow/core/common/state/bloc_status.dart';
+import 'package:wordflow/features/history/domain/entities/history_item.dart';
 
 part 'history_state.freezed.dart';
 

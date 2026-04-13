@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:lexitrack/core/database/app_database.dart';
-import 'package:lexitrack/features/history/data/datasources/history_local_ds.dart';
-import 'package:lexitrack/features/history/data/repositories/history_repository_impl.dart';
+import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/features/history/data/datasources/history_local_ds.dart';
+import 'package:wordflow/features/history/data/repositories/history_repository_impl.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockHistoryLocalDataSource extends Mock implements HistoryLocalDataSource {}

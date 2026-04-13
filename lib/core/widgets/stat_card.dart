@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:lexitrack/core/theme/design_tokens.dart';
+import 'package:wordflow/core/theme/design_tokens.dart';
 
 class StatCard extends StatelessWidget {
   const StatCard({

@@ -1,5 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:lexitrack/core/domain/entities/word_entity.dart';
+import 'package:wordflow/core/domain/entities/word_entity.dart';
 
 class WordWithLocalFreq extends Equatable {
   const WordWithLocalFreq({

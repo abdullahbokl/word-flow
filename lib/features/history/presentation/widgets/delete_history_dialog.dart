@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:lexitrack/features/history/presentation/blocs/history/history_bloc.dart';
+import 'package:wordflow/features/history/presentation/blocs/history/history_bloc.dart';
 
 class DeleteHistoryDialog extends StatelessWidget {
   const DeleteHistoryDialog({required this.id, super.key});

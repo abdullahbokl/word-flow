@@ -1,6 +1,6 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:lexitrack/core/error/failures.dart';
-import 'package:lexitrack/features/excluded_words/domain/entities/excluded_word.dart';
+import 'package:wordflow/core/error/failures.dart';
+import 'package:wordflow/features/excluded_words/domain/entities/excluded_word.dart';
 
 abstract interface class ExcludedWordsRepository {
   TaskEither<Failure, List<ExcludedWord>> getExcludedWords();

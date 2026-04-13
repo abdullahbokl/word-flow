@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:lexitrack/core/widgets/app_loader.dart';
-import 'package:lexitrack/core/widgets/page_header.dart';
-import 'package:lexitrack/core/widgets/sliver_status_view.dart';
-import 'package:lexitrack/features/history/domain/entities/history_item.dart';
-import 'package:lexitrack/features/history/presentation/blocs/history/history_bloc.dart';
-import 'package:lexitrack/features/history/presentation/widgets/delete_history_dialog.dart';
-import 'package:lexitrack/features/history/presentation/widgets/history_sliver_list.dart';
+import 'package:wordflow/core/widgets/app_loader.dart';
+import 'package:wordflow/core/widgets/page_header.dart';
+import 'package:wordflow/core/widgets/sliver_status_view.dart';
+import 'package:wordflow/features/history/domain/entities/history_item.dart';
+import 'package:wordflow/features/history/presentation/blocs/history/history_bloc.dart';
+import 'package:wordflow/features/history/presentation/widgets/delete_history_dialog.dart';
+import 'package:wordflow/features/history/presentation/widgets/history_sliver_list.dart';
 
 class HistoryPage extends StatefulWidget {
   const HistoryPage({super.key});

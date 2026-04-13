@@ -1,10 +1,10 @@
 import 'package:drift/drift.dart';
-import 'package:lexitrack/core/constants/default_excluded_words.dart';
-import 'package:lexitrack/core/database/app_database.dart';
-import 'package:lexitrack/core/utils/text_processor.dart';
-import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds.dart';
-import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds_helpers.dart';
-import 'package:lexitrack/features/text_analyzer/data/models/analysis_result_model.dart';
+import 'package:wordflow/core/constants/default_excluded_words.dart';
+import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/core/utils/text_processor.dart';
+import 'package:wordflow/features/text_analyzer/data/datasources/analyzer_local_ds.dart';
+import 'package:wordflow/features/text_analyzer/data/datasources/analyzer_local_ds_helpers.dart';
+import 'package:wordflow/features/text_analyzer/data/models/analysis_result_model.dart';
 
 class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
   AnalyzerLocalDataSourceImpl(this._db);

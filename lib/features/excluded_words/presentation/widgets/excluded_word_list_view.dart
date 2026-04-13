@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lexitrack/core/widgets/app_empty_state.dart';
-import 'package:lexitrack/core/widgets/app_error_widget.dart';
-import 'package:lexitrack/core/widgets/app_loader.dart';
-import 'package:lexitrack/core/widgets/app_text.dart';
-import 'package:lexitrack/features/excluded_words/presentation/cubit/excluded_words_cubit.dart';
-import 'package:lexitrack/features/excluded_words/presentation/cubit/excluded_words_state.dart';
+import 'package:wordflow/core/widgets/app_empty_state.dart';
+import 'package:wordflow/core/widgets/app_error_widget.dart';
+import 'package:wordflow/core/widgets/app_loader.dart';
+import 'package:wordflow/core/widgets/app_text.dart';
+import 'package:wordflow/features/excluded_words/presentation/cubit/excluded_words_cubit.dart';
+import 'package:wordflow/features/excluded_words/presentation/cubit/excluded_words_state.dart';
 import 'excluded_word_form_dialog.dart';
 
 class ExcludedWordListView extends StatelessWidget {

@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lexitrack/core/constants/app_dimensions.dart';
-import 'package:lexitrack/core/theme/theme_cubit.dart';
-import 'package:lexitrack/core/utils/ui_utils.dart';
-import 'package:lexitrack/core/widgets/app_text.dart';
-import 'package:lexitrack/core/widgets/page_header.dart';
-import 'package:lexitrack/features/excluded_words/presentation/pages/excluded_words_screen.dart';
-import 'package:lexitrack/features/settings/presentation/blocs/backup/backup_bloc.dart';
+import 'package:wordflow/core/constants/app_dimensions.dart';
+import 'package:wordflow/core/theme/theme_cubit.dart';
+import 'package:wordflow/core/utils/ui_utils.dart';
+import 'package:wordflow/core/widgets/app_text.dart';
+import 'package:wordflow/core/widgets/page_header.dart';
+import 'package:wordflow/features/excluded_words/presentation/pages/excluded_words_screen.dart';
+import 'package:wordflow/features/settings/presentation/blocs/backup/backup_bloc.dart';
 
 class SettingsPage extends StatelessWidget {
   const SettingsPage({super.key});

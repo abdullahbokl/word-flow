@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:lexitrack/core/constants/app_strings.dart';
+import 'package:wordflow/core/constants/app_strings.dart';
 
 class WordListSectionFilterToggle extends StatelessWidget {
   const WordListSectionFilterToggle({

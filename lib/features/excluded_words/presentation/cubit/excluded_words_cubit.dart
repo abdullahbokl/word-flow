@@ -1,14 +1,14 @@
 import 'dart:async';
 
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:lexitrack/core/usecase/usecase.dart';
-import 'package:lexitrack/features/excluded_words/domain/entities/excluded_word.dart';
-import 'package:lexitrack/features/excluded_words/domain/usecases/add_excluded_word.dart';
-import 'package:lexitrack/features/excluded_words/domain/usecases/delete_excluded_word.dart';
-import 'package:lexitrack/features/excluded_words/domain/usecases/get_excluded_words.dart';
-import 'package:lexitrack/features/excluded_words/domain/usecases/initialize_default_excluded_words.dart';
-import 'package:lexitrack/features/excluded_words/domain/usecases/update_excluded_word.dart';
-import 'package:lexitrack/features/excluded_words/presentation/cubit/excluded_words_state.dart';
+import 'package:wordflow/core/usecase/usecase.dart';
+import 'package:wordflow/features/excluded_words/domain/entities/excluded_word.dart';
+import 'package:wordflow/features/excluded_words/domain/usecases/add_excluded_word.dart';
+import 'package:wordflow/features/excluded_words/domain/usecases/delete_excluded_word.dart';
+import 'package:wordflow/features/excluded_words/domain/usecases/get_excluded_words.dart';
+import 'package:wordflow/features/excluded_words/domain/usecases/initialize_default_excluded_words.dart';
+import 'package:wordflow/features/excluded_words/domain/usecases/update_excluded_word.dart';
+import 'package:wordflow/features/excluded_words/presentation/cubit/excluded_words_state.dart';
 
 class ExcludedWordsCubit extends Cubit<ExcludedWordsState> {
   final GetExcludedWordsUseCase _getExcludedWords;

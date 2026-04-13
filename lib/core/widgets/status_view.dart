@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
-import 'package:lexitrack/core/common/enums/state_status.dart';
-import 'package:lexitrack/core/common/state/bloc_status.dart';
-import 'package:lexitrack/core/widgets/app_error_widget.dart';
-import 'package:lexitrack/core/widgets/app_loader.dart';
+import 'package:wordflow/core/common/enums/state_status.dart';
+import 'package:wordflow/core/common/state/bloc_status.dart';
+import 'package:wordflow/core/widgets/app_error_widget.dart';
+import 'package:wordflow/core/widgets/app_loader.dart';
 
 class StatusView<T> extends StatelessWidget {
   const StatusView({

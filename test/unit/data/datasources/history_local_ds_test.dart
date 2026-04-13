@@ -1,7 +1,7 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lexitrack/core/database/app_database.dart';
-import 'package:lexitrack/features/history/data/datasources/history_local_ds.dart';
+import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/features/history/data/datasources/history_local_ds.dart';
 
 void main() {
   late AppDatabase db;

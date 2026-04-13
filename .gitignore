@@ -57,7 +57,7 @@ analysis_*.txt
 word_flow.db*
 
 # IDE / Build Artifacts
-lexitrack.iml
+wordflow.iml
 
 .github/
 PLAN.md

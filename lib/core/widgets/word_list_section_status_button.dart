@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import 'package:lexitrack/core/constants/app_strings.dart';
-import 'package:lexitrack/core/theme/app_colors.dart';
+import 'package:wordflow/core/constants/app_strings.dart';
+import 'package:wordflow/core/theme/app_colors.dart';
 
 class WordListSectionStatusButton extends StatelessWidget {
   const WordListSectionStatusButton({

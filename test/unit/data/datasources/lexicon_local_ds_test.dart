@@ -1,8 +1,8 @@
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:lexitrack/core/cache/local_cache.dart';
-import 'package:lexitrack/core/database/app_database.dart';
-import 'package:lexitrack/features/lexicon/data/datasources/lexicon_local_ds_impl.dart';
+import 'package:wordflow/core/cache/local_cache.dart';
+import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/features/lexicon/data/datasources/lexicon_local_ds_impl.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockLocalCache extends Mock implements LocalCache {}

@@ -1,7 +1,7 @@
 import 'package:equatable/equatable.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:lexitrack/core/error/failures.dart';
-import 'package:lexitrack/features/history/domain/entities/history_detail.dart';
+import 'package:wordflow/core/error/failures.dart';
+import 'package:wordflow/features/history/domain/entities/history_detail.dart';
 
 abstract class HistoryDetailEvent extends Equatable {
   const HistoryDetailEvent();

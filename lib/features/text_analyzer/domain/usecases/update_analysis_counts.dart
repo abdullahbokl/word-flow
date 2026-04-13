@@ -1,7 +1,7 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:lexitrack/core/error/failures.dart';
-import 'package:lexitrack/core/usecase/usecase.dart';
-import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
+import 'package:wordflow/core/error/failures.dart';
+import 'package:wordflow/core/usecase/usecase.dart';
+import 'package:wordflow/features/text_analyzer/domain/repositories/analyzer_repository.dart';
 
 class UpdateAnalysisCounts extends AsyncUseCase<Unit, int> {
   const UpdateAnalysisCounts(this._repository);

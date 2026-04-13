@@ -61,6 +61,7 @@ class AppTextField extends StatelessWidget {
         labelText: label,
         prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
         suffixIcon: suffix,
+        alignLabelWithHint: true,
       ),
     );
   }

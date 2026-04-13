@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:lexitrack/features/excluded_words/domain/entities/excluded_word.dart';
+import 'package:wordflow/features/excluded_words/domain/entities/excluded_word.dart';
 
 part 'excluded_words_state.freezed.dart';
 

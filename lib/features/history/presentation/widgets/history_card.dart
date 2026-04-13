@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-import 'package:lexitrack/core/theme/app_colors.dart';
-import 'package:lexitrack/features/history/domain/entities/history_item.dart';
+import 'package:wordflow/core/theme/app_colors.dart';
+import 'package:wordflow/features/history/domain/entities/history_item.dart';
 
 class HistoryCard extends StatelessWidget {
   const HistoryCard({
