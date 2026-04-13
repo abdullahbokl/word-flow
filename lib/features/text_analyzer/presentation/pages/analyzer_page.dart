@@ -85,46 +85,66 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
     super.build(context);
     return Scaffold(
       body: SafeArea(
-        child: BlocConsumer<AnalyzerBloc, AnalyzerState>(
-          listener: (context, state) {
-            if (state.status.isFailed) {
-              AppUIUtils.showSnackBar(
-                context,
-                message: state.status.error ?? AppStrings.error,
-              );
-            }
-            if (state.status.isSuccess) {
-              context.read<LexiconBloc>().add(const LoadLexicon());
-              context.read<HistoryBloc>().add(const LoadHistory());
-            }
-          },
-          builder: (context, state) => StatusView<AnalysisResult>(
-            status: state.status,
-            animate: false,
-            onInitial: () => AnalyzerInputBody(
-              titleCtrl: _titleCtrl,
-              contentCtrl: _contentCtrl,
-              onAnalyze: _onAnalyze,
-              onPickFile: _onPickFile,
-            ),
-            onFailure: (_) => AnalyzerInputBody(
-              titleCtrl: _titleCtrl,
-              contentCtrl: _contentCtrl,
-              onAnalyze: _onAnalyze,
-              onPickFile: _onPickFile,
-            ),
-            onLoading: () => const AppLoader(message: 'Processing text...'),
-            onSuccess: (result) => AnalysisSummary(
-              result: result,
-              onReset: () {
-                _titleCtrl.clear();
-                _contentCtrl.clear();
-                context.read<AnalyzerBloc>().add(const ResetAnalysis());
+        child: MultiBlocListener(
+          listeners: [
+            BlocListener<AnalyzerBloc, AnalyzerState>(
+              listener: (context, state) {
+                if (state.status.isFailed) {
+                  AppUIUtils.showSnackBar(
+                    context,
+                    message: state.status.error ?? AppStrings.error,
+                  );
+                }
+                if (state.status.isSuccess) {
+                  context.read<LexiconBloc>().add(const LoadLexicon());
+                  context.read<HistoryBloc>().add(const LoadHistory());
+                }
               },
-              onToggleStatus: (w) {
-                context.read<LexiconBloc>().add(ToggleWordStatusEvent(w.word.id));
-                context.read<AnalyzerBloc>().add(ToggleWordStatusInResult(wordId: w.word.id));
+            ),
+            BlocListener<LexiconBloc, LexiconState>(
+              listener: (context, lexiconState) {
+                // Trigger sync when Lexicon successfully updates, as statuses might have changed
+                if (lexiconState.status.isSuccess) {
+                  context
+                      .read<AnalyzerBloc>()
+                      .add(const SyncCurrentResultWithLexicon());
+                }
               },
+            ),
+          ],
+          child: BlocBuilder<AnalyzerBloc, AnalyzerState>(
+            builder: (context, state) => StatusView<AnalysisResult>(
+              status: state.status,
+              animate: false,
+              onInitial: () => AnalyzerInputBody(
+                titleCtrl: _titleCtrl,
+                contentCtrl: _contentCtrl,
+                onAnalyze: _onAnalyze,
+                onPickFile: _onPickFile,
+              ),
+              onFailure: (_) => AnalyzerInputBody(
+                titleCtrl: _titleCtrl,
+                contentCtrl: _contentCtrl,
+                onAnalyze: _onAnalyze,
+                onPickFile: _onPickFile,
+              ),
+              onLoading: () => const AppLoader(message: 'Processing text...'),
+              onSuccess: (result) => AnalysisSummary(
+                result: result,
+                onReset: () {
+                  _titleCtrl.clear();
+                  _contentCtrl.clear();
+                  context.read<AnalyzerBloc>().add(const ResetAnalysis());
+                },
+                onToggleStatus: (w) {
+                  context
+                      .read<LexiconBloc>()
+                      .add(ToggleWordStatusEvent(w.word.id));
+                  context
+                      .read<AnalyzerBloc>()
+                      .add(ToggleWordStatusInResult(wordId: w.word.id));
+                },
+              ),
             ),
           ),
         ),

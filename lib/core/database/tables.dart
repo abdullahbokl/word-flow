@@ -4,7 +4,7 @@ import 'package:lexitrack/core/database/converters/string_list_converter.dart';
 @DataClassName('WordRow')
 class Words extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get word => text().unique()();
+  TextColumn get word => text().unique().customConstraint('COLLATE NOCASE')();
   IntColumn get frequency => integer().withDefault(const Constant(0))();
   BoolColumn get isKnown => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
@@ -48,6 +48,6 @@ class TextWordEntries extends Table {
 @DataClassName('ExcludedWordRow')
 class ExcludedWords extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get word => text().unique()();
+  TextColumn get word => text().unique().customConstraint('COLLATE NOCASE')();
   DateTimeColumn get createdAt => dateTime()();
 }

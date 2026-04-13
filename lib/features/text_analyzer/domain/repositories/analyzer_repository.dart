@@ -8,4 +8,8 @@ abstract interface class AnalyzerRepository {
     required String title,
     required String content,
   });
+
+  TaskEither<Failure, AnalysisResult> getAnalysisResult(int id);
+
+  TaskEither<Failure, Unit> updateAnalysisCounts(int id);
 }

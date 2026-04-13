@@ -3,6 +3,7 @@ import 'package:lexitrack/core/constants/default_excluded_words.dart';
 import 'package:lexitrack/core/database/app_database.dart';
 import 'package:lexitrack/core/utils/text_processor.dart';
 import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds.dart';
+import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local_ds_helpers.dart';
 import 'package:lexitrack/features/text_analyzer/data/models/analysis_result_model.dart';
 
 class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
@@ -64,10 +65,11 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
       // 1. Ensure all unique words exist in the database (Idempotent batch insert)
       await _db.batch((b) {
         for (final t in uniqueTokens) {
+          final normalized = t.trim().toLowerCase();
           b.insert(
             _db.words,
             WordsCompanion.insert(
-              word: t,
+              word: normalized,
               frequency: const Value(0),
               isKnown: const Value(false),
               createdAt: now,
@@ -161,5 +163,50 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
 
       return AnalysisResultModel.fromMap(analysisMap);
     });
+  }
+
+  @override
+  Future<AnalysisResultModel> getAnalysisResult(int id) async {
+    final text = await (_db.select(_db.analyzedTexts)..where((t) => t.id.equals(id))).getSingle();
+
+    final query = _db.select(_db.textWordEntries).join([
+      innerJoin(_db.words, _db.words.id.equalsExp(_db.textWordEntries.wordId)),
+    ])
+      ..where(_db.textWordEntries.textId.equals(id));
+
+    final results = await query.get();
+
+    final wordSnapshots = results.map((r) {
+      final word = r.readTable(_db.words);
+      final entry = r.readTable(_db.textWordEntries);
+      return {
+        'id': word.id,
+        'text': word.word,
+        'frequency': word.frequency,
+        'isKnown': word.isKnown,
+        'createdAtMs': word.createdAt.millisecondsSinceEpoch,
+        'updatedAtMs': word.updatedAt.millisecondsSinceEpoch,
+        'meaning': word.meaning,
+        'description': word.description,
+        'localFrequency': entry.localFrequency,
+      };
+    }).toList();
+
+    final analysisMap = await TextProcessor.summarizeAnalysis(
+      id: text.id,
+      title: text.title,
+      totalWords: text.totalWords,
+      uniqueWords: text.uniqueWords,
+      newWordsCount: 0, // Not relevant for retrieval
+      words: wordSnapshots,
+      excludedWordsFound: [], // Not stored separately in DB currently, would need a fetch if critical
+    );
+
+    return AnalysisResultModel.fromMap(analysisMap);
+  }
+
+  @override
+  Future<void> updateAnalysisCounts(int id) async {
+    await updateAnalyzedTextCounts(_db, id);
   }
 }

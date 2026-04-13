@@ -3,19 +3,28 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lexitrack/core/common/models/word_with_local_freq.dart';
 import 'package:lexitrack/core/common/state/bloc_status.dart';
 import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
+import 'package:lexitrack/features/text_analyzer/domain/usecases/get_analysis_result.dart';
+import 'package:lexitrack/features/text_analyzer/domain/usecases/update_analysis_counts.dart';
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
-
 class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
-  AnalyzerBloc({required AnalyzeText analyzeText})
-      : _analyzeText = analyzeText,
+  AnalyzerBloc({
+    required AnalyzeText analyzeText,
+    required GetAnalysisResult getAnalysisResult,
+    required UpdateAnalysisCounts updateAnalysisCounts,
+  })  : _analyzeText = analyzeText,
+        _getAnalysisResult = getAnalysisResult,
+        _updateAnalysisCounts = updateAnalysisCounts,
         super(const AnalyzerState()) {
     on<StartAnalysis>(_onStart);
     on<ToggleWordStatusInResult>(_onToggleWordStatus);
     on<ResetAnalysis>(_onReset);
+    on<SyncCurrentResultWithLexicon>(_onSync);
   }
 
   final AnalyzeText _analyzeText;
+  final GetAnalysisResult _getAnalysisResult;
+  final UpdateAnalysisCounts _updateAnalysisCounts;
 
   Future<void> _onStart(StartAnalysis e, Emitter<AnalyzerState> emit) async {
     emit(state.copyWith(status: const BlocStatus.loading()));
@@ -28,8 +37,8 @@ class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
     );
   }
 
-  void _onToggleWordStatus(
-      ToggleWordStatusInResult e, Emitter<AnalyzerState> emit) {
+  Future<void> _onToggleWordStatus(
+      ToggleWordStatusInResult e, Emitter<AnalyzerState> emit) async {
     if (!state.status.isSuccess) return;
     final res = state.status.data!;
 
@@ -51,9 +60,25 @@ class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
     );
 
     emit(state.copyWith(status: BlocStatus.success(data: updatedResult)));
+
+    // Persist to DB - ensure counts in history are updated
+    await _updateAnalysisCounts(res.id).run();
   }
 
   void _onReset(ResetAnalysis e, Emitter<AnalyzerState> emit) {
     emit(const AnalyzerState());
+  }
+
+  Future<void> _onSync(
+      SyncCurrentResultWithLexicon e, Emitter<AnalyzerState> emit) async {
+    if (!state.status.isSuccess) return;
+    final currentResult = state.status.data!;
+
+    final result = await _getAnalysisResult(currentResult.id).run();
+    result.fold(
+      (f) => null, // Silently fail sync
+      (updatedResult) =>
+          emit(state.copyWith(status: BlocStatus.success(data: updatedResult))),
+    );
   }
 }

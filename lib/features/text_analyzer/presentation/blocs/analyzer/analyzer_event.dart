@@ -27,3 +27,7 @@ final class ToggleWordStatusInResult extends AnalyzerEvent {
 final class ResetAnalysis extends AnalyzerEvent {
   const ResetAnalysis();
 }
+
+final class SyncCurrentResultWithLexicon extends AnalyzerEvent {
+  const SyncCurrentResultWithLexicon();
+}

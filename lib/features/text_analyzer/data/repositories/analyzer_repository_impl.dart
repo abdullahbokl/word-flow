@@ -23,4 +23,26 @@ class AnalyzerRepositoryImpl implements AnalyzerRepository {
       (error, stack) => DatabaseFailure('$error', stack),
     );
   }
+
+  @override
+  TaskEither<Failure, AnalysisResult> getAnalysisResult(int id) {
+    return TaskEither.tryCatch(
+      () async {
+        final model = await _local.getAnalysisResult(id);
+        return model.toEntity();
+      },
+      (error, stack) => DatabaseFailure('$error', stack),
+    );
+  }
+
+  @override
+  TaskEither<Failure, Unit> updateAnalysisCounts(int id) {
+    return TaskEither.tryCatch(
+      () async {
+        await _local.updateAnalysisCounts(id);
+        return unit;
+      },
+      (error, stack) => DatabaseFailure('$error', stack),
+    );
+  }
 }

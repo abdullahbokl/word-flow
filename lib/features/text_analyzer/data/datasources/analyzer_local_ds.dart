@@ -5,4 +5,8 @@ abstract interface class AnalyzerLocalDataSource {
     required String title,
     required String content,
   });
+
+  Future<AnalysisResultModel> getAnalysisResult(int id);
+
+  Future<void> updateAnalysisCounts(int id);
 }

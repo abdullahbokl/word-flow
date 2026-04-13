@@ -4,6 +4,16 @@ import 'package:lexitrack/core/backup/backup_repository_impl.dart';
 import 'package:lexitrack/core/cache/local_cache.dart';
 import 'package:lexitrack/core/database/app_database.dart';
 import 'package:lexitrack/core/theme/theme_cubit.dart';
+import 'package:lexitrack/features/excluded_words/data/datasources/excluded_words_local_data_source.dart';
+import 'package:lexitrack/features/excluded_words/data/datasources/excluded_words_local_data_source_impl.dart';
+import 'package:lexitrack/features/excluded_words/data/repositories/excluded_words_repository_impl.dart';
+import 'package:lexitrack/features/excluded_words/domain/repositories/excluded_words_repository.dart';
+import 'package:lexitrack/features/excluded_words/domain/usecases/add_excluded_word.dart';
+import 'package:lexitrack/features/excluded_words/domain/usecases/delete_excluded_word.dart';
+import 'package:lexitrack/features/excluded_words/domain/usecases/get_excluded_words.dart';
+import 'package:lexitrack/features/excluded_words/domain/usecases/initialize_default_excluded_words.dart';
+import 'package:lexitrack/features/excluded_words/domain/usecases/update_excluded_word.dart';
+import 'package:lexitrack/features/excluded_words/presentation/cubit/excluded_words_cubit.dart';
 import 'package:lexitrack/features/history/data/datasources/history_local_ds.dart';
 import 'package:lexitrack/features/history/data/repositories/history_repository_impl.dart';
 import 'package:lexitrack/features/history/domain/repositories/history_repository.dart';
@@ -37,17 +47,9 @@ import 'package:lexitrack/features/text_analyzer/data/datasources/analyzer_local
 import 'package:lexitrack/features/text_analyzer/data/repositories/analyzer_repository_impl.dart';
 import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
 import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
+import 'package:lexitrack/features/text_analyzer/domain/usecases/get_analysis_result.dart';
+import 'package:lexitrack/features/text_analyzer/domain/usecases/update_analysis_counts.dart';
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
-import 'package:lexitrack/features/excluded_words/data/datasources/excluded_words_local_data_source.dart';
-import 'package:lexitrack/features/excluded_words/data/datasources/excluded_words_local_data_source_impl.dart';
-import 'package:lexitrack/features/excluded_words/data/repositories/excluded_words_repository_impl.dart';
-import 'package:lexitrack/features/excluded_words/domain/repositories/excluded_words_repository.dart';
-import 'package:lexitrack/features/excluded_words/domain/usecases/add_excluded_word.dart';
-import 'package:lexitrack/features/excluded_words/domain/usecases/delete_excluded_word.dart';
-import 'package:lexitrack/features/excluded_words/domain/usecases/get_excluded_words.dart';
-import 'package:lexitrack/features/excluded_words/domain/usecases/initialize_default_excluded_words.dart';
-import 'package:lexitrack/features/excluded_words/domain/usecases/update_excluded_word.dart';
-import 'package:lexitrack/features/excluded_words/presentation/cubit/excluded_words_cubit.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
@@ -95,7 +97,13 @@ Future<void> initDI() async {
     ..registerLazySingleton<AnalyzerRepository>(
         () => AnalyzerRepositoryImpl(sl()))
     ..registerLazySingleton(() => AnalyzeText(sl()))
-    ..registerFactory(() => AnalyzerBloc(analyzeText: sl()))
+    ..registerLazySingleton(() => GetAnalysisResult(sl()))
+    ..registerLazySingleton(() => UpdateAnalysisCounts(sl()))
+    ..registerFactory(() => AnalyzerBloc(
+          analyzeText: sl(),
+          getAnalysisResult: sl(),
+          updateAnalysisCounts: sl(),
+        ))
 
     // Features - History
     ..registerLazySingleton<HistoryLocalDataSource>(

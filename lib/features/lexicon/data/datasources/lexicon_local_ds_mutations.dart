@@ -39,7 +39,7 @@ Future<WordRow> updateWordRow(
   final now = DateTime.now();
   await (db.update(db.words)..where((row) => row.id.equals(id))).write(
     WordsCompanion(
-      word: text != null ? Value(text) : const Value.absent(),
+      word: text != null ? Value(text.trim().toLowerCase()) : const Value.absent(),
       meaning: meaning != null ? Value(meaning) : const Value.absent(),
       description:
           description != null ? Value(description) : const Value.absent(),
@@ -91,7 +91,7 @@ Future<WordRow> restoreWordRow(
     final now = DateTime.now();
     final id = await db.into(db.words).insert(
           WordsCompanion.insert(
-            word: text,
+            word: text.trim().toLowerCase(),
             frequency: const Value(1),
             isKnown: const Value(false),
             createdAt: now,
@@ -129,7 +129,7 @@ Future<WordRow> addWordRow(AppDatabase db, String text) async {
   final now = DateTime.now();
   final id = await db.into(db.words).insert(
         WordsCompanion.insert(
-          word: text,
+          word: text.trim().toLowerCase(),
           frequency: const Value(0),
           isKnown: const Value(false),
           createdAt: now,

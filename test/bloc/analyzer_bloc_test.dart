@@ -8,6 +8,8 @@ import 'package:lexitrack/core/error/failures.dart';
 import 'package:lexitrack/features/text_analyzer/domain/entities/analysis_result.dart';
 import 'package:lexitrack/features/text_analyzer/domain/repositories/analyzer_repository.dart';
 import 'package:lexitrack/features/text_analyzer/domain/usecases/analyze_text.dart';
+import 'package:lexitrack/features/text_analyzer/domain/usecases/get_analysis_result.dart';
+import 'package:lexitrack/features/text_analyzer/domain/usecases/update_analysis_counts.dart';
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
 import 'package:lexitrack/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
@@ -56,13 +58,21 @@ void main() {
   });
 
   late MockAnalyzerRepository repository;
-  late AnalyzeText usecase;
+  late AnalyzeText analyzeText;
+  late GetAnalysisResult getAnalysisResult;
+  late UpdateAnalysisCounts updateAnalysisCounts;
   late AnalyzerBloc bloc;
 
   setUp(() {
     repository = MockAnalyzerRepository();
-    usecase = AnalyzeText(repository);
-    bloc = AnalyzerBloc(analyzeText: usecase);
+    analyzeText = AnalyzeText(repository);
+    getAnalysisResult = GetAnalysisResult(repository);
+    updateAnalysisCounts = UpdateAnalysisCounts(repository);
+    bloc = AnalyzerBloc(
+      analyzeText: analyzeText,
+      getAnalysisResult: getAnalysisResult,
+      updateAnalysisCounts: updateAnalysisCounts,
+    );
   });
 
   tearDown(() => bloc.close());
@@ -120,7 +130,11 @@ void main() {
 
     blocTest<AnalyzerBloc, AnalyzerState>(
       'toggles a single word without rescanning the whole result',
-      build: () => bloc,
+      build: () {
+        when(() => repository.updateAnalysisCounts(any()))
+            .thenAnswer((_) => TaskEither.right(unit));
+        return bloc;
+      },
       seed: () => AnalyzerState(
         status: BlocStatus.success(data: _makeResult()),
       ),
