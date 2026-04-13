@@ -45,11 +45,13 @@ class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
   }
 
   @override
-  Future<void> deleteHistoryItem(int id, {bool deleteUniqueWords = false}) async {
+  Future<void> deleteHistoryItem(int id,
+      {bool deleteUniqueWords = false}) async {
     await _db.transaction(() async {
       // 1. Get all words and their frequencies in one join
       final query = _db.select(_db.textWordEntries).join([
-        innerJoin(_db.words, _db.words.id.equalsExp(_db.textWordEntries.wordId)),
+        innerJoin(
+            _db.words, _db.words.id.equalsExp(_db.textWordEntries.wordId)),
       ])
         ..where(_db.textWordEntries.textId.equals(id));
 
@@ -77,7 +79,8 @@ class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
       });
 
       // 2. Clean up junction entries and the analyzed text record
-      await (_db.delete(_db.textWordEntries)..where((e) => e.textId.equals(id))).go();
+      await (_db.delete(_db.textWordEntries)..where((e) => e.textId.equals(id)))
+          .go();
       await (_db.delete(_db.analyzedTexts)..where((t) => t.id.equals(id))).go();
     });
   }
@@ -98,24 +101,30 @@ class HistoryLocalDataSourceImpl implements HistoryLocalDataSource {
   Future<List<(WordRow, TextWordEntryRow)>> getAnalysisWords(int id) async {
     final results = await (_db.select(_db.textWordEntries).join([
       innerJoin(_db.words, _db.words.id.equalsExp(_db.textWordEntries.wordId)),
-    ])..where(_db.textWordEntries.textId.equals(id)))
+    ])
+          ..where(_db.textWordEntries.textId.equals(id)))
         .get();
 
-    return results.map((r) => (
-          r.readTable(_db.words),
-          r.readTable(_db.textWordEntries),
-        )).toList();
+    return results
+        .map((r) => (
+              r.readTable(_db.words),
+              r.readTable(_db.textWordEntries),
+            ))
+        .toList();
   }
 
   @override
   Stream<List<(WordRow, TextWordEntryRow)>> watchAnalysisWords(int id) {
     return (_db.select(_db.textWordEntries).join([
       innerJoin(_db.words, _db.words.id.equalsExp(_db.textWordEntries.wordId)),
-    ])..where(_db.textWordEntries.textId.equals(id)))
+    ])
+          ..where(_db.textWordEntries.textId.equals(id)))
         .watch()
-        .map((results) => results.map((r) => (
-              r.readTable(_db.words),
-              r.readTable(_db.textWordEntries),
-            )).toList());
+        .map((results) => results
+            .map((r) => (
+                  r.readTable(_db.words),
+                  r.readTable(_db.textWordEntries),
+                ))
+            .toList());
   }
 }

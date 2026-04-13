@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wordflow/core/widgets/app_button.dart';
@@ -12,13 +13,13 @@ class ExcludedWordFormDialog extends StatelessWidget {
   final ExcludedWord? word;
 
   static void show(BuildContext context, {ExcludedWord? word}) {
-    showDialog(
+    unawaited(showDialog(
       context: context,
       builder: (dialogContext) => BlocProvider.value(
         value: context.read<ExcludedWordsCubit>(),
         child: ExcludedWordFormDialog(word: word),
       ),
-    );
+    ));
   }
 
   @override
@@ -43,9 +44,9 @@ class ExcludedWordFormDialog extends StatelessWidget {
             if (text.isNotEmpty) {
               final cubit = context.read<ExcludedWordsCubit>();
               if (word == null) {
-                cubit.addWord(text);
+                unawaited(cubit.addWord(text));
               } else {
-                cubit.updateWord(word!.copyWith(word: text));
+                unawaited(cubit.updateWord(word!.copyWith(word: text)));
               }
               Navigator.pop(context);
             }

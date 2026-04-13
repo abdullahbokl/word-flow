@@ -15,7 +15,8 @@ class StatGrid extends StatelessWidget {
         Row(
           children: [
             Expanded(
-              child: StatCard(label: 'Total Words', value: '${result.totalWords}'),
+              child:
+                  StatCard(label: 'Total Words', value: '${result.totalWords}'),
             ),
             const SizedBox(width: 16),
             Expanded(

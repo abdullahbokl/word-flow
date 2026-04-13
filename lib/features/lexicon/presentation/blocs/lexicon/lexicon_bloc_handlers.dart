@@ -104,8 +104,7 @@ extension LexiconBlocHandlers on LexiconBloc {
     // Optimistic update - immediate UI response
     final updatedWords = List<WordEntity>.from(currentWords);
     final isKnownNow = !updatedWords[index].isKnown;
-    updatedWords[index] =
-        updatedWords[index].copyWith(isKnown: isKnownNow);
+    updatedWords[index] = updatedWords[index].copyWith(isKnown: isKnownNow);
 
     final updatedStats = state.stats.copyWith(
       known: state.stats.known + (isKnownNow ? 1 : -1),

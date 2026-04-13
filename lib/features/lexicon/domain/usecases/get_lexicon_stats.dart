@@ -11,5 +11,6 @@ class GetLexiconStats extends AsyncUseCase<LexiconStats, NoParams> {
   final LexiconRepository _repository;
 
   @override
-  TaskEither<Failure, LexiconStats> call(NoParams params) => _repository.getStats();
+  TaskEither<Failure, LexiconStats> call(NoParams params) =>
+      _repository.getStats();
 }

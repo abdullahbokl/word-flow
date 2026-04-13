@@ -6,7 +6,7 @@ import 'package:wordflow/core/widgets/app_loader.dart';
 import 'package:wordflow/core/widgets/app_text.dart';
 import 'package:wordflow/features/excluded_words/presentation/cubit/excluded_words_cubit.dart';
 import 'package:wordflow/features/excluded_words/presentation/cubit/excluded_words_state.dart';
-import 'excluded_word_form_dialog.dart';
+import 'package:wordflow/features/excluded_words/presentation/widgets/excluded_word_form_dialog.dart';
 
 class ExcludedWordListView extends StatelessWidget {
   const ExcludedWordListView({
@@ -25,11 +25,14 @@ class ExcludedWordListView extends StatelessWidget {
           loading: () => const AppLoader(),
           error: (message) => AppErrorWidget(
             error: message,
-            onRetry: () => context.read<ExcludedWordsCubit>().loadExcludedWords(),
+            onRetry: () =>
+                context.read<ExcludedWordsCubit>().loadExcludedWords(),
           ),
           loaded: (words) {
             final displayWords = filter != null
-                ? words.where((w) => filter!.contains(w.word.toLowerCase())).toList()
+                ? words
+                    .where((w) => filter!.contains(w.word.toLowerCase()))
+                    .toList()
                 : words;
 
             if (displayWords.isEmpty) {
@@ -51,11 +54,15 @@ class ExcludedWordListView extends StatelessWidget {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.edit_outlined, size: 20),
-                        onPressed: () => ExcludedWordFormDialog.show(context, word: word),
+                        onPressed: () =>
+                            ExcludedWordFormDialog.show(context, word: word),
                       ),
                       IconButton(
-                        icon: const Icon(Icons.delete_outline, size: 20, color: Colors.red),
-                        onPressed: () => context.read<ExcludedWordsCubit>().deleteWord(word.id!),
+                        icon: const Icon(Icons.delete_outline,
+                            size: 20, color: Colors.red),
+                        onPressed: () => context
+                            .read<ExcludedWordsCubit>()
+                            .deleteWord(word.id!),
                       ),
                     ],
                   ),

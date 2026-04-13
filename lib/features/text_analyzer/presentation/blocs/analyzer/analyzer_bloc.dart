@@ -1,13 +1,13 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-
 import 'package:wordflow/core/common/models/word_with_local_freq.dart';
 import 'package:wordflow/core/common/state/bloc_status.dart';
+import 'package:wordflow/features/lexicon/domain/usecases/toggle_word_status.dart';
 import 'package:wordflow/features/text_analyzer/domain/usecases/analyze_text.dart';
 import 'package:wordflow/features/text_analyzer/domain/usecases/get_analysis_result.dart';
 import 'package:wordflow/features/text_analyzer/domain/usecases/update_analysis_counts.dart';
-import 'package:wordflow/features/lexicon/domain/usecases/toggle_word_status.dart';
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
+
 class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
   AnalyzerBloc({
     required AnalyzeText analyzeText,

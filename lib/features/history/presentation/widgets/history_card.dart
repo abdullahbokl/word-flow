@@ -6,7 +6,8 @@ import 'package:wordflow/features/history/domain/entities/history_item.dart';
 
 class HistoryCard extends StatelessWidget {
   const HistoryCard({
-    required this.item, super.key,
+    required this.item,
+    super.key,
     this.onTap,
     this.onDelete,
   });
@@ -25,7 +26,9 @@ class HistoryCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: isDark ? Colors.white.withValues(alpha: 0.1) : Colors.black.withValues(alpha: 0.05),
+          color: isDark
+              ? Colors.white.withValues(alpha: 0.1)
+              : Colors.black.withValues(alpha: 0.05),
         ),
       ),
       child: InkWell(
@@ -50,7 +53,8 @@ class HistoryCard extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.delete_outline, color: AppColors.error),
+                    icon: const Icon(Icons.delete_outline,
+                        color: AppColors.error),
                     onPressed: onDelete,
                     iconSize: 20,
                   ),
@@ -76,7 +80,8 @@ class HistoryCard extends StatelessWidget {
               Text(
                 DateFormat('MMM dd, yyyy • HH:mm').format(item.createdAt),
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
+                  color:
+                      theme.textTheme.bodySmall?.color?.withValues(alpha: 0.6),
                 ),
               ),
             ],

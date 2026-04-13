@@ -16,9 +16,8 @@ class TextProcessor {
       ' ',
     );
 
-    final cleaned = withoutUrls
-        .toLowerCase()
-        .replaceAll(RegExp(r"[^a-z'\s]"), ' ');
+    final cleaned =
+        withoutUrls.toLowerCase().replaceAll(RegExp(r"[^a-z'\s]"), ' ');
 
     final tokens = cleaned
         .split(RegExp(r'\s+'))

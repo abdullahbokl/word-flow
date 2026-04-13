@@ -1,4 +1,5 @@
 import 'package:fpdart/fpdart.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:wordflow/core/common/models/word_with_local_freq.dart';
 import 'package:wordflow/core/data/mappers/word_row_mapper.dart';
 import 'package:wordflow/core/database/app_database.dart';
@@ -8,7 +9,6 @@ import 'package:wordflow/features/history/data/mappers/history_mapper.dart';
 import 'package:wordflow/features/history/domain/entities/history_detail.dart';
 import 'package:wordflow/features/history/domain/entities/history_item.dart';
 import 'package:wordflow/features/history/domain/repositories/history_repository.dart';
-import 'package:rxdart/rxdart.dart';
 
 class HistoryRepositoryImpl implements HistoryRepository {
   const HistoryRepositoryImpl(this._local);
@@ -16,7 +16,8 @@ class HistoryRepositoryImpl implements HistoryRepository {
   final HistoryLocalDataSource _local;
 
   @override
-  Future<Either<Failure, List<HistoryItem>>> getHistory({int? limit, int? offset}) async {
+  Future<Either<Failure, List<HistoryItem>>> getHistory(
+      {int? limit, int? offset}) async {
     try {
       final rows = await _local.getHistory(limit: limit, offset: offset);
       return Right(rows.map((r) => r.toEntity()).toList());
@@ -26,10 +27,11 @@ class HistoryRepositoryImpl implements HistoryRepository {
   }
 
   @override
-  Stream<Either<Failure, List<HistoryItem>>> watchHistory({int? limit, int? offset}) {
+  Stream<Either<Failure, List<HistoryItem>>> watchHistory(
+      {int? limit, int? offset}) {
     return _local.watchHistory(limit: limit, offset: offset).map(
-      (rows) => Right(rows.map((r) => r.toEntity()).toList()),
-    );
+          (rows) => Right(rows.map((r) => r.toEntity()).toList()),
+        );
   }
 
   @override
@@ -71,13 +73,14 @@ class HistoryRepositoryImpl implements HistoryRepository {
     final itemStream = _local.watchHistoryItem(id);
     final wordsStream = _local.watchAnalysisWords(id);
 
-    return Rx.combineLatest2<AnalyzedTextRow?, List<(WordRow, TextWordEntryRow)>,
-        Either<Failure, HistoryDetail>>(
+    return Rx.combineLatest2<AnalyzedTextRow?,
+        List<(WordRow, TextWordEntryRow)>, Either<Failure, HistoryDetail>>(
       itemStream,
       wordsStream,
       (item, words) {
         if (item == null) {
-          return Left(DatabaseFailure('Analysis not found', StackTrace.current));
+          return Left(
+              DatabaseFailure('Analysis not found', StackTrace.current));
         }
 
         final detail = HistoryDetail(

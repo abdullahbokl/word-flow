@@ -2,7 +2,6 @@ import 'package:http/http.dart' as http;
 
 /// A simple [http.Client] that adds authentication headers to every request.
 class GoogleAuthClient extends http.BaseClient {
-
   GoogleAuthClient(this._headers);
   final Map<String, String> _headers;
   final http.Client _client = http.Client();

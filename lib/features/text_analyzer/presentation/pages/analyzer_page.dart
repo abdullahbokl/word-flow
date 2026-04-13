@@ -4,6 +4,7 @@ import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
+import 'package:path/path.dart' as p;
 import 'package:wordflow/core/constants/app_strings.dart';
 import 'package:wordflow/core/utils/ui_utils.dart';
 import 'package:wordflow/core/widgets/app_loader.dart';
@@ -16,7 +17,6 @@ import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/anal
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
 import 'package:wordflow/features/text_analyzer/presentation/widgets/analysis_summary.dart';
 import 'package:wordflow/features/text_analyzer/presentation/widgets/analyzer_input_body.dart';
-import 'package:path/path.dart' as p;
 
 class AnalyzerPage extends StatefulWidget {
   const AnalyzerPage({super.key});
@@ -25,7 +25,8 @@ class AnalyzerPage extends StatefulWidget {
   State<AnalyzerPage> createState() => _AnalyzerPageState();
 }
 
-class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClientMixin {
+class _AnalyzerPageState extends State<AnalyzerPage>
+    with AutomaticKeepAliveClientMixin {
   final _titleCtrl = TextEditingController();
   final _contentCtrl = TextEditingController();
 
@@ -50,7 +51,7 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
         final file = File(result.files.single.path!);
         final content = await file.readAsString();
         final fileName = result.files.single.name;
-        
+
         setState(() {
           _titleCtrl.text = p.basenameWithoutExtension(fileName);
           _contentCtrl.text = content;
@@ -68,8 +69,8 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
 
   void _onAnalyze() {
     final rawTitle = _titleCtrl.text.trim();
-    final title = rawTitle.isEmpty 
-        ? 'Analysis - ${DateFormat('MMM dd, HH:mm').format(DateTime.now())}' 
+    final title = rawTitle.isEmpty
+        ? 'Analysis - ${DateFormat('MMM dd, HH:mm').format(DateTime.now())}'
         : rawTitle;
 
     context.read<AnalyzerBloc>().add(

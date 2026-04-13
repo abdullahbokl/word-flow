@@ -11,11 +11,13 @@ class HistoryPaginationParams {
   final int? offset;
 }
 
-class WatchHistory extends StreamUseCase<List<HistoryItem>, HistoryPaginationParams> {
+class WatchHistory
+    extends StreamUseCase<List<HistoryItem>, HistoryPaginationParams> {
   const WatchHistory(this._repository);
   final HistoryRepository _repository;
 
   @override
-  Stream<Either<Failure, List<HistoryItem>>> call(HistoryPaginationParams params) =>
+  Stream<Either<Failure, List<HistoryItem>>> call(
+          HistoryPaginationParams params) =>
       _repository.watchHistory(limit: params.limit, offset: params.offset);
 }

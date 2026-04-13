@@ -91,11 +91,13 @@ class _EditWordDialogState extends State<EditWordDialog> {
               const SizedBox(height: 16),
               _buildSection('Definitions', _defCtrls, 'e.g. A small animal...'),
               const SizedBox(height: 24),
-              _buildSection('Examples', _exCtrls, 'e.g. The cat sat on the mat.'),
+              _buildSection(
+                  'Examples', _exCtrls, 'e.g. The cat sat on the mat.'),
               const SizedBox(height: 24),
               _buildSection('Translations', _transCtrls, 'e.g. Gato, Chat...'),
               const SizedBox(height: 24),
-              _buildSection('Similar Words', _synCtrls, 'e.g. feline, kitty...'),
+              _buildSection(
+                  'Similar Words', _synCtrls, 'e.g. feline, kitty...'),
               const SizedBox(height: 24),
               const Divider(),
               const SizedBox(height: 8),

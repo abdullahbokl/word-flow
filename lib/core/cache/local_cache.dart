@@ -15,7 +15,8 @@ class LocalCacheImpl implements LocalCache {
   final SharedPreferences _prefs;
 
   @override
-  Future<void> setString(String key, String value) async => _prefs.setString(key, value);
+  Future<void> setString(String key, String value) async =>
+      _prefs.setString(key, value);
 
   @override
   String? getString(String key) => _prefs.getString(key);
@@ -27,7 +28,8 @@ class LocalCacheImpl implements LocalCache {
   int? getInt(String key) => _prefs.getInt(key);
 
   @override
-  Future<void> setBool(String key, bool value) async => _prefs.setBool(key, value);
+  Future<void> setBool(String key, bool value) async =>
+      _prefs.setBool(key, value);
 
   @override
   bool? getBool(String key) => _prefs.getBool(key);

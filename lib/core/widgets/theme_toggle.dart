@@ -9,8 +9,9 @@ class ThemeToggle extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<ThemeCubit, ThemeMode>(
       builder: (context, mode) {
-        final isDark = mode == ThemeMode.dark || 
-            (mode == ThemeMode.system && MediaQuery.of(context).platformBrightness == Brightness.dark);
+        final isDark = mode == ThemeMode.dark ||
+            (mode == ThemeMode.system &&
+                MediaQuery.of(context).platformBrightness == Brightness.dark);
 
         return IconButton(
           icon: Icon(isDark ? Icons.light_mode : Icons.dark_mode),

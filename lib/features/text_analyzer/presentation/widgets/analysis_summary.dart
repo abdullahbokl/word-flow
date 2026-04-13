@@ -31,7 +31,8 @@ class AnalysisSummary extends StatelessWidget {
         SliverPadding(
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           sliver: SliverToBoxAdapter(
-            child: ExcludedWordsShortcut(excludedWords: result.excludedWordsFound),
+            child:
+                ExcludedWordsShortcut(excludedWords: result.excludedWordsFound),
           ),
         ),
         SliverPadding(
@@ -54,7 +55,8 @@ class AnalysisSummary extends StatelessWidget {
         sliver: SliverToBoxAdapter(
           child: Row(
             children: [
-              const Expanded(child: AppText.headline(AppStrings.analysisResults)),
+              const Expanded(
+                  child: AppText.headline(AppStrings.analysisResults)),
               IconButton(
                 onPressed: onReset,
                 icon: const Icon(Icons.refresh_rounded),

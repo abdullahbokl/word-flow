@@ -31,16 +31,17 @@ class SliverStatusView<T> extends StatelessWidget {
     final widget = switch (status.status) {
       StateStatus.initial => onInitial?.call() ??
           const SliverFillRemaining(child: SizedBox.shrink()),
-      StateStatus.loading => onLoading?.call() ??
-          const SliverFillRemaining(child: AppLoader()),
-      StateStatus.success =>
-        onSuccess?.call(status.data as T) ?? const SliverToBoxAdapter(child: SizedBox.shrink()),
-      StateStatus.empty => onEmpty?.call() ??
-          const SliverFillRemaining(child: SizedBox.shrink()),
-      StateStatus.failure => onFailure?.call(status.error ?? 'An error occurred') ??
-          SliverFillRemaining(
-            child: AppErrorWidget(error: status.error ?? 'An error occurred'),
-          ),
+      StateStatus.loading =>
+        onLoading?.call() ?? const SliverFillRemaining(child: AppLoader()),
+      StateStatus.success => onSuccess?.call(status.data as T) ??
+          const SliverToBoxAdapter(child: SizedBox.shrink()),
+      StateStatus.empty =>
+        onEmpty?.call() ?? const SliverFillRemaining(child: SizedBox.shrink()),
+      StateStatus.failure =>
+        onFailure?.call(status.error ?? 'An error occurred') ??
+            SliverFillRemaining(
+              child: AppErrorWidget(error: status.error ?? 'An error occurred'),
+            ),
     };
 
     return widget;

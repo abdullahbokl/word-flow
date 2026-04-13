@@ -98,7 +98,8 @@ void main() {
 
       expect(result['knownWords'], 1);
       expect(result['unknownWords'], 1);
-      expect((result['words'] as List).first['text'], 'beta');
+      final words = result['words'] as List;
+      expect((words.first as Map<String, dynamic>)['text'], 'beta');
     });
   });
 

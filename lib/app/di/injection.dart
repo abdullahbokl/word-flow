@@ -1,4 +1,5 @@
 import 'package:get_it/get_it.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:wordflow/core/backup/backup_repository.dart';
 import 'package:wordflow/core/backup/backup_repository_impl.dart';
 import 'package:wordflow/core/cache/local_cache.dart';
@@ -50,7 +51,6 @@ import 'package:wordflow/features/text_analyzer/domain/usecases/analyze_text.dar
 import 'package:wordflow/features/text_analyzer/domain/usecases/get_analysis_result.dart';
 import 'package:wordflow/features/text_analyzer/domain/usecases/update_analysis_counts.dart';
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 final sl = GetIt.instance;
 

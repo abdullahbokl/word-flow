@@ -17,7 +17,7 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
 
     final excludedRows = await _db.select(_db.excludedWords).get();
     if (excludedRows.isEmpty) {
-      final defaults = DefaultExcludedWords.words;
+      const defaults = DefaultExcludedWords.words;
       final now = DateTime.now();
       await _db.batch((batch) {
         for (final word in defaults) {
@@ -167,7 +167,9 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
 
   @override
   Future<AnalysisResultModel> getAnalysisResult(int id) async {
-    final text = await (_db.select(_db.analyzedTexts)..where((t) => t.id.equals(id))).getSingle();
+    final text = await (_db.select(_db.analyzedTexts)
+          ..where((t) => t.id.equals(id)))
+        .getSingle();
 
     final query = _db.select(_db.textWordEntries).join([
       innerJoin(_db.words, _db.words.id.equalsExp(_db.textWordEntries.wordId)),

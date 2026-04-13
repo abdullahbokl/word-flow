@@ -2,9 +2,9 @@ import 'package:fpdart/fpdart.dart';
 import 'package:wordflow/core/error/failures.dart';
 
 class BackupMetadata {
+  const BackupMetadata({required this.modifiedTime, required this.size});
   final DateTime modifiedTime;
   final int size;
-  const BackupMetadata({required this.modifiedTime, required this.size});
 }
 
 abstract class BackupRepository {

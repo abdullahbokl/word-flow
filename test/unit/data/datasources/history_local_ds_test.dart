@@ -30,13 +30,13 @@ void main() {
           );
 
       final history = await dataSource.getHistory();
-      
+
       expect(history.length, 1);
       expect(history.first.title, 'History 1');
     });
 
     test('deleteHistoryItem should remove item and optionally words', () async {
-       final id = await db.into(db.analyzedTexts).insert(
+      final id = await db.into(db.analyzedTexts).insert(
             AnalyzedTextsCompanion.insert(
               title: 'To Delete',
               content: 'Content',
@@ -47,7 +47,7 @@ void main() {
           );
 
       await dataSource.deleteHistoryItem(id);
-      
+
       final history = await dataSource.getHistory();
       expect(history.isEmpty, true);
     });

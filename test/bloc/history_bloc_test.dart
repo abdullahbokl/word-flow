@@ -1,13 +1,13 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:wordflow/core/error/failures.dart';
 import 'package:wordflow/features/history/domain/entities/history_item.dart';
 import 'package:wordflow/features/history/domain/repositories/history_repository.dart';
 import 'package:wordflow/features/history/domain/usecases/delete_history_item.dart';
 import 'package:wordflow/features/history/domain/usecases/watch_history.dart';
 import 'package:wordflow/features/history/presentation/blocs/history/history_bloc.dart';
-import 'package:mocktail/mocktail.dart';
 
 class MockHistoryRepository extends Mock implements HistoryRepository {}
 
@@ -92,7 +92,8 @@ void main() {
     blocTest<HistoryBloc, HistoryState>(
       'calls deleteHistoryItem when DeleteHistoryItemEvent is added',
       build: () {
-        when(() => repository.deleteHistoryItem(1, deleteUniqueWords: any(named: 'deleteUniqueWords')))
+        when(() => repository.deleteHistoryItem(1,
+                deleteUniqueWords: any(named: 'deleteUniqueWords')))
             .thenAnswer((_) async => const Right<Failure, void>(null));
         when(() => repository.watchHistory(
               limit: any(named: 'limit'),
@@ -104,8 +105,7 @@ void main() {
       },
       act: (bloc) => bloc.add(const DeleteHistoryItemEvent(1)),
       verify: (_) {
-        verify(() => repository.deleteHistoryItem(1))
-            .called(1);
+        verify(() => repository.deleteHistoryItem(1)).called(1);
       },
     );
   });

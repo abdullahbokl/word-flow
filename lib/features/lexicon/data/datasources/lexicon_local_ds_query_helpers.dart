@@ -31,7 +31,7 @@ Selectable<WordRow> buildWordQuery(
 }
 
 void _applySorting(
-    SimpleSelectStatement<dynamic, WordRow> query, WordSort sort) {
+    SimpleSelectStatement<$WordsTable, WordRow> query, WordSort sort) {
   switch (sort) {
     case WordSort.frequencyDesc:
       query.orderBy([

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:wordflow/core/widgets/app_text.dart';
 import 'package:wordflow/core/constants/app_dimensions.dart';
+import 'package:wordflow/core/widgets/app_text.dart';
 
 class PageHeader extends StatelessWidget {
   const PageHeader({

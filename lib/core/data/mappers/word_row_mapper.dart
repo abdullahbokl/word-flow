@@ -19,6 +19,7 @@ extension WordRowMapper on WordRow {
     );
   }
 }
+
 extension WordRowListMapper on List<WordRow> {
   List<WordEntity> toEntities() => map((r) => r.toEntity()).toList();
 }

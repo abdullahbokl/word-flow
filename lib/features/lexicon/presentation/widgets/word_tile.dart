@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-
-import 'package:wordflow/core/domain/entities/word_entity.dart';
 import 'package:wordflow/core/constants/app_dimensions.dart';
+import 'package:wordflow/core/domain/entities/word_entity.dart';
 
 const _knownColor = Color(0xFF2E7D32);
 
@@ -23,7 +22,8 @@ class WordTile extends StatefulWidget {
   State<WordTile> createState() => _WordTileState();
 }
 
-class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin {
+class _WordTileState extends State<WordTile>
+    with SingleTickerProviderStateMixin {
   bool _isExpanded = false;
 
   @override
@@ -118,7 +118,9 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
                             word.isKnown
                                 ? Icons.check_circle_rounded
                                 : Icons.radio_button_unchecked_rounded,
-                            color: word.isKnown ? _knownColor : colorScheme.outline,
+                            color: word.isKnown
+                                ? _knownColor
+                                : colorScheme.outline,
                             size: 28,
                           ),
                         ),
@@ -126,7 +128,8 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
                           _isExpanded
                               ? Icons.expand_less_rounded
                               : Icons.expand_more_rounded,
-                          color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
+                          color: colorScheme.onSurfaceVariant
+                              .withValues(alpha: 0.5),
                         ),
                       ],
                     ),
@@ -191,7 +194,8 @@ class _WordTileState extends State<WordTile> with SingleTickerProviderStateMixin
                             margin: const EdgeInsets.only(top: 16),
                             padding: const EdgeInsets.all(12),
                             decoration: BoxDecoration(
-                              color: colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
+                              color: colorScheme.surfaceContainerHighest
+                                  .withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Row(
@@ -299,8 +303,8 @@ class _DetailRow extends StatelessWidget {
               Icon(
                 icon,
                 size: 14,
-                color:
-                    color ?? theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
+                color: color ??
+                    theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
               const SizedBox(width: 8),
               Text(
@@ -321,7 +325,8 @@ class _DetailRow extends StatelessWidget {
                   children: [
                     Text('• ',
                         style: TextStyle(
-                            color: color ?? theme.colorScheme.onSurfaceVariant)),
+                            color:
+                                color ?? theme.colorScheme.onSurfaceVariant)),
                     Expanded(
                       child: Text(
                         item,

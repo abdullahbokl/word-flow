@@ -26,10 +26,10 @@ class _ExcludedWordsView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: SafeArea(
+      body: const SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppDimensions.pagePadding),
-          child: const Column(
+          padding: EdgeInsets.symmetric(horizontal: AppDimensions.pagePadding),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               PageHeader(title: 'Excluded Words', showBackButton: true),

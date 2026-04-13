@@ -6,9 +6,8 @@ import 'package:wordflow/features/excluded_words/domain/repositories/excluded_wo
 
 class InitializeDefaultExcludedWordsUseCase
     extends AsyncUseCase<List<ExcludedWord>, NoParams> {
-  final ExcludedWordsRepository repository;
-
   InitializeDefaultExcludedWordsUseCase(this.repository);
+  final ExcludedWordsRepository repository;
 
   @override
   TaskEither<Failure, List<ExcludedWord>> call(NoParams params) {

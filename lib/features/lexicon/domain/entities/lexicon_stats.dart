@@ -12,5 +12,6 @@ abstract class LexiconStats with _$LexiconStats {
 
   const LexiconStats._();
 
-  factory LexiconStats.empty() => const LexiconStats(total: 0, known: 0, unknown: 0);
+  factory LexiconStats.empty() =>
+      const LexiconStats(total: 0, known: 0, unknown: 0);
 }

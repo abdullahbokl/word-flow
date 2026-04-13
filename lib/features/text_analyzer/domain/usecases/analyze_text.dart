@@ -22,7 +22,8 @@ class AnalyzeText extends AsyncUseCase<AnalysisResult, AnalyzeTextParams> {
       return TaskEither.left(const ValidationFailure('Title cannot be empty'));
     }
     if (params.content.trim().isEmpty) {
-      return TaskEither.left(const ValidationFailure('Content cannot be empty'));
+      return TaskEither.left(
+          const ValidationFailure('Content cannot be empty'));
     }
     return _repository.analyze(title: params.title, content: params.content);
   }

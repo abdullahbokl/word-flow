@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:sliver_tools/sliver_tools.dart';
 import 'package:wordflow/core/constants/app_strings.dart';
 import 'package:wordflow/core/domain/entities/word_entity.dart';
 import 'package:wordflow/core/utils/ui_utils.dart';
@@ -7,7 +8,6 @@ import 'package:wordflow/core/widgets/app_empty_state.dart';
 import 'package:wordflow/core/widgets/app_loader.dart';
 import 'package:wordflow/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
 import 'package:wordflow/features/lexicon/presentation/widgets/word_tile.dart';
-import 'package:sliver_tools/sliver_tools.dart';
 
 class WordsSliverList extends StatelessWidget {
   const WordsSliverList({

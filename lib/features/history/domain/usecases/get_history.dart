@@ -11,5 +11,6 @@ class GetHistory extends FutureUseCase<List<HistoryItem>, NoParams> {
   final HistoryRepository _repository;
 
   @override
-  Future<Either<Failure, List<HistoryItem>>> call(NoParams params) => _repository.getHistory();
+  Future<Either<Failure, List<HistoryItem>>> call(NoParams params) =>
+      _repository.getHistory();
 }

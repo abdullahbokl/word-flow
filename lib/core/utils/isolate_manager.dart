@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:isolate';
 
 class IsolateManager {
+  factory IsolateManager() => _instance;
   IsolateManager._internal();
   static final IsolateManager _instance = IsolateManager._internal();
-  factory IsolateManager() => _instance;
-  
+
   final Map<String, Isolate> _isolates = {};
   final Map<String, ReceivePort> _receivePorts = {};
   final Map<String, Completer<dynamic>> _completers = {};
@@ -50,7 +50,8 @@ class IsolateManager {
       // Timeout after 30 seconds
       Timer(const Duration(seconds: 30), () {
         if (!completer.isCompleted) {
-          completer.completeError(TimeoutException('Isolate computation timeout'));
+          completer
+              .completeError(TimeoutException('Isolate computation timeout'));
           _cleanup(taskId);
         }
       });
@@ -102,17 +103,15 @@ class IsolateManager {
 
 /// Message class for isolate communication
 class _IsolateMessage {
+  _IsolateMessage(this.sendPort, this.function, this.params);
   final SendPort sendPort;
   final Function function;
   final dynamic params;
-
-  _IsolateMessage(this.sendPort, this.function, this.params);
 }
 
 /// Error wrapper for isolate communication
 class _IsolateError {
+  _IsolateError(this.error, this.stackTrace);
   final String error;
   final String stackTrace;
-
-  _IsolateError(this.error, this.stackTrace);
 }

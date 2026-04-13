@@ -11,12 +11,6 @@ import 'package:wordflow/features/excluded_words/domain/usecases/update_excluded
 import 'package:wordflow/features/excluded_words/presentation/cubit/excluded_words_state.dart';
 
 class ExcludedWordsCubit extends Cubit<ExcludedWordsState> {
-  final GetExcludedWordsUseCase _getExcludedWords;
-  final AddExcludedWordUseCase _addExcludedWord;
-  final UpdateExcludedWordUseCase _updateExcludedWord;
-  final DeleteExcludedWordUseCase _deleteExcludedWord;
-  final InitializeDefaultExcludedWordsUseCase _initializeDefaults;
-
   ExcludedWordsCubit({
     required GetExcludedWordsUseCase getExcludedWords,
     required AddExcludedWordUseCase addExcludedWord,
@@ -29,6 +23,11 @@ class ExcludedWordsCubit extends Cubit<ExcludedWordsState> {
         _deleteExcludedWord = deleteExcludedWord,
         _initializeDefaults = initializeDefaults,
         super(const ExcludedWordsState.initial());
+  final GetExcludedWordsUseCase _getExcludedWords;
+  final AddExcludedWordUseCase _addExcludedWord;
+  final UpdateExcludedWordUseCase _updateExcludedWord;
+  final DeleteExcludedWordUseCase _deleteExcludedWord;
+  final InitializeDefaultExcludedWordsUseCase _initializeDefaults;
 
   Future<void> loadExcludedWords() => _refreshExcludedWords(withLoading: true);
 
@@ -67,7 +66,6 @@ class ExcludedWordsCubit extends Cubit<ExcludedWordsState> {
     );
     if (previousWords != null) {
       final optimistic = ExcludedWord(
-        id: null,
         word: word,
         createdAt: DateTime.now(),
       );

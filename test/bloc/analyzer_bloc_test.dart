@@ -1,10 +1,13 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:wordflow/core/common/models/word_with_local_freq.dart';
 import 'package:wordflow/core/common/state/bloc_status.dart';
 import 'package:wordflow/core/domain/entities/word_entity.dart';
 import 'package:wordflow/core/error/failures.dart';
+import 'package:wordflow/features/lexicon/domain/repositories/lexicon_repository.dart';
+import 'package:wordflow/features/lexicon/domain/usecases/toggle_word_status.dart';
 import 'package:wordflow/features/text_analyzer/domain/entities/analysis_result.dart';
 import 'package:wordflow/features/text_analyzer/domain/repositories/analyzer_repository.dart';
 import 'package:wordflow/features/text_analyzer/domain/usecases/analyze_text.dart';
@@ -13,9 +16,6 @@ import 'package:wordflow/features/text_analyzer/domain/usecases/update_analysis_
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
-import 'package:wordflow/features/lexicon/domain/repositories/lexicon_repository.dart';
-import 'package:wordflow/features/lexicon/domain/usecases/toggle_word_status.dart';
-import 'package:mocktail/mocktail.dart';
 
 class MockAnalyzerRepository extends Mock implements AnalyzerRepository {}
 
@@ -142,8 +142,8 @@ void main() {
       build: () {
         when(() => repository.updateAnalysisCounts(any()))
             .thenAnswer((_) => TaskEither.right(unit));
-        when(() => lexiconRepository.toggleStatus(any()))
-            .thenAnswer((_) => TaskEither.right(_makeResult().words.first.word));
+        when(() => lexiconRepository.toggleStatus(any())).thenAnswer(
+            (_) => TaskEither.right(_makeResult().words.first.word));
         return bloc;
       },
       seed: () => AnalyzerState(

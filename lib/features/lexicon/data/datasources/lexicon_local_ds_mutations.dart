@@ -39,7 +39,9 @@ Future<WordRow> updateWordRow(
   final now = DateTime.now();
   await (db.update(db.words)..where((row) => row.id.equals(id))).write(
     WordsCompanion(
-      word: text != null ? Value(text.trim().toLowerCase()) : const Value.absent(),
+      word: text != null
+          ? Value(text.trim().toLowerCase())
+          : const Value.absent(),
       meaning: meaning != null ? Value(meaning) : const Value.absent(),
       description:
           description != null ? Value(description) : const Value.absent(),
@@ -165,13 +167,13 @@ Future<LexiconStats> getLexiconStats(AppDatabase db) async {
 Stream<LexiconStats> watchLexiconStats(AppDatabase db) {
   return db
       .customSelect(
-    'SELECT COUNT(*) as total, SUM(CASE WHEN is_known = 1 THEN 1 ELSE 0 END) as known FROM words',
-    readsFrom: {db.words},
-  )
+        'SELECT COUNT(*) as total, SUM(CASE WHEN is_known = 1 THEN 1 ELSE 0 END) as known FROM words',
+        readsFrom: {db.words},
+      )
       .watchSingle()
       .map((res) {
-    final total = res.read<int>('total');
-    final known = res.read<int?>('known') ?? 0;
-    return LexiconStats(total: total, known: known, unknown: total - known);
-  });
+        final total = res.read<int>('total');
+        final known = res.read<int?>('known') ?? 0;
+        return LexiconStats(total: total, known: known, unknown: total - known);
+      });
 }

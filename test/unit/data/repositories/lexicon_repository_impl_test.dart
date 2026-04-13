@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:wordflow/core/database/app_database.dart';
 import 'package:wordflow/features/lexicon/data/datasources/lexicon_local_ds.dart';
 import 'package:wordflow/features/lexicon/data/repositories/lexicon_repository_impl.dart';
@@ -7,9 +8,9 @@ import 'package:wordflow/features/lexicon/domain/commands/word_commands.dart';
 import 'package:wordflow/features/lexicon/domain/entities/lexicon_stats.dart';
 import 'package:wordflow/features/lexicon/domain/entities/word_filter.dart';
 import 'package:wordflow/features/lexicon/domain/entities/word_sort.dart';
-import 'package:mocktail/mocktail.dart';
 
-class MockLexiconLocalDataSource extends Mock implements LexiconLocalDataSource {}
+class MockLexiconLocalDataSource extends Mock
+    implements LexiconLocalDataSource {}
 
 void main() {
   late LexiconRepositoryImpl repository;
@@ -53,7 +54,8 @@ void main() {
 
   group('addWord', () {
     test('should call data source to add word', () async {
-      when(() => mockDataSource.addWord(any())).thenAnswer((_) async => tWordRow);
+      when(() => mockDataSource.addWord(any()))
+          .thenAnswer((_) async => tWordRow);
 
       const command = AddWordCommand(text: 'new');
       final result = await repository.addWord(command).run();

@@ -57,7 +57,8 @@ class _DetailView extends StatelessWidget {
                       AppText.headline(detail.item.title),
                       const SizedBox(height: AppDimensions.space8),
                       const AppText.label('Full text content excerpt:'),
-                      _SnippetBox(snippet: detail.item.contentSnippet, isDark: isDark),
+                      _SnippetBox(
+                          snippet: detail.item.contentSnippet, isDark: isDark),
                       const SizedBox(height: AppDimensions.space24),
                       HistoryDetailStatsGrid(detail: detail),
                       const SizedBox(height: AppDimensions.space32),
@@ -66,13 +67,17 @@ class _DetailView extends StatelessWidget {
                 ),
               ),
               SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: AppDimensions.pagePadding),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: AppDimensions.pagePadding),
                 sliver: WordListSection(
                   words: detail.words,
-                  onToggleStatus: (w) => context.read<HistoryDetailBloc>().add(ToggleWordStatusInHistory(w.word.id)),
+                  onToggleStatus: (w) => context
+                      .read<HistoryDetailBloc>()
+                      .add(ToggleWordStatusInHistory(w.word.id)),
                 ),
               ),
-              const SliverToBoxAdapter(child: SizedBox(height: AppDimensions.space32)),
+              const SliverToBoxAdapter(
+                  child: SizedBox(height: AppDimensions.space32)),
             ],
           ),
         ),
@@ -93,7 +98,9 @@ class _SnippetBox extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: isDark ? Colors.white.withValues(alpha: 0.05) : Colors.black.withValues(alpha: 0.03),
+        color: isDark
+            ? Colors.white.withValues(alpha: 0.05)
+            : Colors.black.withValues(alpha: 0.03),
         borderRadius: BorderRadius.circular(8),
       ),
       child: AppText.body(

@@ -5,7 +5,8 @@ import 'package:wordflow/core/usecase/usecase.dart';
 import 'package:wordflow/features/history/domain/repositories/history_repository.dart';
 
 class DeleteHistoryItemParams {
-  const DeleteHistoryItemParams({required this.id, required this.deleteUniqueWords});
+  const DeleteHistoryItemParams(
+      {required this.id, required this.deleteUniqueWords});
   final int id;
   final bool deleteUniqueWords;
 }
@@ -17,5 +18,6 @@ class DeleteHistoryItem extends FutureUseCase<void, DeleteHistoryItemParams> {
 
   @override
   Future<Either<Failure, void>> call(DeleteHistoryItemParams params) =>
-      _repository.deleteHistoryItem(params.id, deleteUniqueWords: params.deleteUniqueWords);
+      _repository.deleteHistoryItem(params.id,
+          deleteUniqueWords: params.deleteUniqueWords);
 }

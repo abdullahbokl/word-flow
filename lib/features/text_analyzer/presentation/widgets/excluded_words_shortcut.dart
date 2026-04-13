@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wordflow/app/di/injection.dart';
@@ -22,8 +23,8 @@ class ExcludedWordsShortcut extends StatelessWidget {
           child: _ShortcutButton(
             icon: Icons.visibility_outlined,
             label: 'Excluded (${excludedWords.length})',
-            onTap: excludedWords.isEmpty 
-                ? null 
+            onTap: excludedWords.isEmpty
+                ? null
                 : () => _showExcludedWordsBottomSheet(context),
           ),
         ),
@@ -42,16 +43,20 @@ class ExcludedWordsShortcut extends StatelessWidget {
   }
 
   void _showExcludedWordsBottomSheet(BuildContext context) {
-    showModalBottomSheet(
+    unawaited(showModalBottomSheet(
       context: context,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (_) => BlocProvider(
-        create: (context) => sl<ExcludedWordsCubit>()..loadExcludedWords(),
+        create: (context) {
+          final cubit = sl<ExcludedWordsCubit>();
+          unawaited(cubit.loadExcludedWords());
+          return cubit;
+        },
         child: _ExcludedBottomSheetBody(filter: excludedWords),
       ),
-    );
+    ));
   }
 }
 
@@ -90,7 +95,7 @@ class _ShortcutButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDisabled = onTap == null;
-    
+
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(12),
@@ -105,7 +110,8 @@ class _ShortcutButton extends StatelessWidget {
           ),
           child: Column(
             children: [
-              Icon(icon, size: 20, color: isDisabled ? theme.disabledColor : null),
+              Icon(icon,
+                  size: 20, color: isDisabled ? theme.disabledColor : null),
               const SizedBox(height: 4),
               AppText.caption(
                 label,

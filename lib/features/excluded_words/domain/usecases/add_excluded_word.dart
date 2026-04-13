@@ -5,9 +5,8 @@ import 'package:wordflow/features/excluded_words/domain/entities/excluded_word.d
 import 'package:wordflow/features/excluded_words/domain/repositories/excluded_words_repository.dart';
 
 class AddExcludedWordUseCase extends AsyncUseCase<ExcludedWord, String> {
-  final ExcludedWordsRepository repository;
-
   AddExcludedWordUseCase(this.repository);
+  final ExcludedWordsRepository repository;
 
   @override
   TaskEither<Failure, ExcludedWord> call(String word) {

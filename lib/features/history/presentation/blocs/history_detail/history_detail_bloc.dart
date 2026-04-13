@@ -20,16 +20,17 @@ class HistoryDetailBloc extends Bloc<HistoryDetailEvent, HistoryDetailState> {
   final ToggleWordStatus _toggleWord;
   StreamSubscription? _sub;
 
-  void _onLoad(LoadHistoryDetail e, Emitter<HistoryDetailState> emit) {
+  void _onLoad(LoadHistoryDetail e, Emitter<HistoryDetailState> emit) async {
     emit(state.copyWith(status: const BlocStatus.loading()));
-    _sub?.cancel();
+    await _sub?.cancel();
     _sub = _watchDetail(e.id).listen((res) => add(HistoryDetailUpdated(res)));
   }
 
   void _onUpdated(HistoryDetailUpdated e, Emitter<HistoryDetailState> emit) {
     e.result.fold(
       (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),
-      (d) => emit(state.copyWith(status: BlocStatus<HistoryDetail>.success(data: d))),
+      (d) => emit(
+          state.copyWith(status: BlocStatus<HistoryDetail>.success(data: d))),
     );
   }
 
@@ -43,8 +44,8 @@ class HistoryDetailBloc extends Bloc<HistoryDetailEvent, HistoryDetailState> {
   }
 
   @override
-  Future<void> close() {
-    _sub?.cancel();
+  Future<void> close() async {
+    await _sub?.cancel();
     return super.close();
   }
 }

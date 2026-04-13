@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:rxdart/rxdart.dart';
 import 'package:wordflow/core/cache/local_cache.dart';
 import 'package:wordflow/core/database/app_database.dart';
 import 'package:wordflow/features/lexicon/data/datasources/lexicon_local_ds.dart';
@@ -6,7 +8,6 @@ import 'package:wordflow/features/lexicon/data/datasources/lexicon_local_ds_quer
 import 'package:wordflow/features/lexicon/domain/entities/lexicon_stats.dart';
 import 'package:wordflow/features/lexicon/domain/entities/word_filter.dart';
 import 'package:wordflow/features/lexicon/domain/entities/word_sort.dart';
-import 'package:rxdart/rxdart.dart';
 
 class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
   const LexiconLocalDataSourceImpl(this._db, this._cache);
@@ -149,7 +150,7 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
   }
 
   void _saveStatsToCache(LexiconStats stats) {
-    _cache.setString(
-        _statsCacheKey, '${stats.total}:${stats.known}:${stats.unknown}');
+    unawaited(_cache.setString(
+        _statsCacheKey, '${stats.total}:${stats.known}:${stats.unknown}'));
   }
 }

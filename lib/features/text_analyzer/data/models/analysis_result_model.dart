@@ -8,7 +8,8 @@ class WordWithLocalFreqModel extends Equatable {
     required this.isKnown,
     required this.createdAt,
     required this.updatedAt,
-    required this.localFrequency, this.meaning,
+    required this.localFrequency,
+    this.meaning,
     this.description,
   });
 
@@ -76,7 +77,8 @@ class AnalysisResultModel extends Equatable {
           .cast<Map<String, Object?>>()
           .map(WordWithLocalFreqModel.fromMap)
           .toList(),
-      excludedWordsFound: (map['excludedWordsFound'] as List<Object?>?)?.cast<String>() ?? [],
+      excludedWordsFound:
+          (map['excludedWordsFound'] as List<Object?>?)?.cast<String>() ?? [],
     );
   }
 

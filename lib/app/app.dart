@@ -10,8 +10,8 @@ import 'package:wordflow/features/lexicon/presentation/blocs/lexicon/lexicon_blo
 import 'package:wordflow/features/settings/presentation/blocs/backup/backup_bloc.dart';
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
 
-class LexiTrackApp extends StatelessWidget {
-  const LexiTrackApp({super.key});
+class WordFlowApp extends StatelessWidget {
+  const WordFlowApp({super.key});
 
   @override
   Widget build(BuildContext context) {

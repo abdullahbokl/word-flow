@@ -3,9 +3,8 @@ import 'package:wordflow/core/database/app_database.dart';
 import 'package:wordflow/features/excluded_words/data/datasources/excluded_words_local_data_source.dart';
 
 class ExcludedWordsLocalDataSourceImpl implements ExcludedWordsLocalDataSource {
-  final AppDatabase _db;
-
   ExcludedWordsLocalDataSourceImpl(this._db);
+  final AppDatabase _db;
 
   @override
   Future<List<ExcludedWordRow>> getExcludedWords() async {

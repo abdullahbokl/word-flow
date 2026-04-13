@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:wordflow/core/common/state/bloc_status.dart';
 import 'package:wordflow/core/domain/entities/word_entity.dart';
 import 'package:wordflow/core/error/failures.dart';
@@ -21,7 +22,6 @@ import 'package:wordflow/features/lexicon/domain/usecases/toggle_word_status.dar
 import 'package:wordflow/features/lexicon/domain/usecases/update_word.dart';
 import 'package:wordflow/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
 import 'package:wordflow/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
-import 'package:mocktail/mocktail.dart';
 
 class MockGetWords extends Mock implements GetWords {}
 
@@ -110,8 +110,8 @@ void main() {
     );
   });
 
-  tearDown(() {
-    bloc.close();
+  tearDown(() async {
+    await bloc.close();
   });
 
   group('LexiconBloc', () {

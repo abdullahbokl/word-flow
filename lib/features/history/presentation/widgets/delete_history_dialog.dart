@@ -39,7 +39,9 @@ class DeleteHistoryDialog extends StatelessWidget {
         ),
         ElevatedButton(
           onPressed: () {
-            context.read<HistoryBloc>().add(DeleteHistoryItemEvent(id, deleteUniqueWords: true));
+            context
+                .read<HistoryBloc>()
+                .add(DeleteHistoryItemEvent(id, deleteUniqueWords: true));
             Navigator.pop(context);
           },
           style: ElevatedButton.styleFrom(

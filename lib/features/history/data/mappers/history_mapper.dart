@@ -11,7 +11,8 @@ extension AnalyzedTextRowMapper on AnalyzedTextRow {
       knownWords: knownWords,
       unknownWords: unknownWords,
       createdAt: createdAt,
-      contentSnippet: content.length > 100 ? '${content.substring(0, 100)}...' : content,
+      contentSnippet:
+          content.length > 100 ? '${content.substring(0, 100)}...' : content,
     );
   }
 }

@@ -1,15 +1,14 @@
 import 'package:equatable/equatable.dart';
 
 class ExcludedWord extends Equatable {
+  const ExcludedWord({
+    required this.word,
+    required this.createdAt,
+    this.id,
+  });
   final int? id;
   final String word;
   final DateTime createdAt;
-
-  const ExcludedWord({
-    this.id,
-    required this.word,
-    required this.createdAt,
-  });
 
   @override
   List<Object?> get props => [id, word, createdAt];

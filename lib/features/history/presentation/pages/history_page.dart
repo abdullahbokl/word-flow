@@ -16,7 +16,8 @@ class HistoryPage extends StatefulWidget {
   State<HistoryPage> createState() => _HistoryPageState();
 }
 
-class _HistoryPageState extends State<HistoryPage> with AutomaticKeepAliveClientMixin {
+class _HistoryPageState extends State<HistoryPage>
+    with AutomaticKeepAliveClientMixin {
   final _scrollController = ScrollController();
 
   @override
@@ -52,14 +53,18 @@ class _HistoryPageState extends State<HistoryPage> with AutomaticKeepAliveClient
             controller: _scrollController,
             key: const PageStorageKey<String>('history_scroll_view'),
             slivers: [
-              const SliverToBoxAdapter(child: PageHeader(title: 'Analysis History')),
+              const SliverToBoxAdapter(
+                  child: PageHeader(title: 'Analysis History')),
               SliverStatusView<List<HistoryItem>>(
                 status: state.status,
-                onInitial: () => const SliverFillRemaining(child: AppLoader(message: 'Loading history...')),
+                onInitial: () => const SliverFillRemaining(
+                    child: AppLoader(message: 'Loading history...')),
                 onSuccess: (items) => HistorySliverList(
                   items: items,
                   hasReachedMax: state.hasReachedMax,
-                  onDelete: (id) => showDialog(context: context, builder: (_) => DeleteHistoryDialog(id: id)),
+                  onDelete: (id) => showDialog(
+                      context: context,
+                      builder: (_) => DeleteHistoryDialog(id: id)),
                 ),
               ),
             ],

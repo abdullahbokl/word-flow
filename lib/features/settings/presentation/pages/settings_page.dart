@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:wordflow/core/constants/app_dimensions.dart';
@@ -17,8 +18,8 @@ class SettingsPage extends StatelessWidget {
       body: SafeArea(
         child: SingleChildScrollView(
           child: Padding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: AppDimensions.pagePadding),
+            padding: const EdgeInsets.symmetric(
+                horizontal: AppDimensions.pagePadding),
             child: BlocListener<BackupBloc, BackupState>(
               listenWhen: (previous, current) =>
                   previous.message != current.message &&
@@ -32,15 +33,15 @@ class SettingsPage extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  PageHeader(title: 'Settings'),
-                  SizedBox(height: 32),
-                  _Section(
+                  const PageHeader(title: 'Settings'),
+                  const SizedBox(height: 32),
+                  const _Section(
                     title: 'Appearance',
                     children: [
                       _ThemeSelector(),
                     ],
                   ),
-                  SizedBox(height: 32),
+                  const SizedBox(height: 32),
                   _Section(
                     title: 'Analysis Settings',
                     children: [
@@ -48,7 +49,7 @@ class SettingsPage extends StatelessWidget {
                         leading: const Icon(Icons.block),
                         title: const AppText.body('Excluded Words'),
                         subtitle: const AppText.body(
-                          'Words that won\'t be counted in analysis',
+                          "Words that won't be counted in analysis",
                           color: Colors.grey,
                           fontSize: 12,
                         ),
@@ -62,14 +63,14 @@ class SettingsPage extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 32),
-                  _Section(
+                  const _Section(
                     title: 'Data & Sync',
                     children: [
                       _BackupSettings(),
                     ],
                   ),
-                  SizedBox(height: 32),
-                  _Section(
+                  const SizedBox(height: 32),
+                  const _Section(
                     title: 'About',
                     children: [
                       ListTile(
@@ -221,7 +222,8 @@ class _BackupSettings extends StatelessWidget {
                 fontSize: 12,
               ),
               trailing: TextButton(
-                onPressed: () => context.read<BackupBloc>().add(SignOutBackup()),
+                onPressed: () =>
+                    context.read<BackupBloc>().add(SignOutBackup()),
                 child: const AppText.body('Sign Out', color: Colors.red),
               ),
             ),
@@ -283,7 +285,7 @@ class _BackupSettings extends StatelessWidget {
   }
 
   void _showRestoreDialog(BuildContext context) {
-    showDialog(
+    unawaited(showDialog(
       context: context,
       builder: (dialogContext) => AlertDialog(
         title: const AppText.label('Restore Data?'),
@@ -304,6 +306,6 @@ class _BackupSettings extends StatelessWidget {
           ),
         ],
       ),
-    );
+    ));
   }
 }

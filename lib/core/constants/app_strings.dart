@@ -26,7 +26,8 @@ abstract final class AppStrings {
   // History page
   static const history = 'History';
   static const deleteAnalysis = 'Delete Analysis';
-  static const deletionInstructions = 'How would you like to delete this analysis?';
+  static const deletionInstructions =
+      'How would you like to delete this analysis?';
   static const deletionOptions =
       '• Only history: Keeps all words in your lexicon.\n'
       '• History & unique words: Removes words that are only found in this text.';
