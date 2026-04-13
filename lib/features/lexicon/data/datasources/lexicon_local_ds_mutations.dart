@@ -165,7 +165,9 @@ Future<LexiconStats> getLexiconStats(AppDatabase db) async {
 Stream<LexiconStats> watchLexiconStats(AppDatabase db) {
   return db
       .customSelect(
-          'SELECT COUNT(*) as total, SUM(CASE WHEN is_known = 1 THEN 1 ELSE 0 END) as known FROM words')
+    'SELECT COUNT(*) as total, SUM(CASE WHEN is_known = 1 THEN 1 ELSE 0 END) as known FROM words',
+    readsFrom: {db.words},
+  )
       .watchSingle()
       .map((res) {
     final total = res.read<int>('total');

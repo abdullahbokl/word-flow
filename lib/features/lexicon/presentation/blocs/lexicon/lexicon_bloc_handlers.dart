@@ -99,19 +99,33 @@ extension LexiconBlocHandlers on LexiconBloc {
 
     // Store original state for rollback
     final originalWords = List<WordEntity>.from(currentWords);
+    final originalStats = state.stats;
 
     // Optimistic update - immediate UI response
     final updatedWords = List<WordEntity>.from(currentWords);
+    final isKnownNow = !updatedWords[index].isKnown;
     updatedWords[index] =
-        updatedWords[index].copyWith(isKnown: !updatedWords[index].isKnown);
-    emit(state.copyWith(status: BlocStatus.success(data: updatedWords)));
+        updatedWords[index].copyWith(isKnown: isKnownNow);
+
+    final updatedStats = state.stats.copyWith(
+      known: state.stats.known + (isKnownNow ? 1 : -1),
+      unknown: state.stats.unknown + (isKnownNow ? -1 : 1),
+    );
+
+    emit(state.copyWith(
+      status: BlocStatus.success(data: updatedWords),
+      stats: updatedStats,
+    ));
 
     // Perform database operation with rollback on failure
     final res = await _toggleWordStatus(e.wordId).run();
     await res.fold(
       (failure) async {
         // Rollback to original state on error
-        emit(state.copyWith(status: BlocStatus.success(data: originalWords)));
+        emit(state.copyWith(
+          status: BlocStatus.success(data: originalWords),
+          stats: originalStats,
+        ));
         add(const LexiconEvent.errorReceived('Failed to update word status'));
       },
       (newWord) {
@@ -134,19 +148,35 @@ extension LexiconBlocHandlers on LexiconBloc {
     if (!status.isSuccess) return;
 
     final currentWords = status.data as List<WordEntity>;
+    final index = currentWords.indexWhere((w) => w.id == e.wordId);
+    if (index == -1) return;
+
     final originalWords = List<WordEntity>.from(currentWords);
+    final originalStats = state.stats;
 
     // Optimistic delete - immediate UI update
+    final deletedWord = currentWords[index];
+    final updatedStats = state.stats.copyWith(
+      total: state.stats.total - 1,
+      known: state.stats.known - (deletedWord.isKnown ? 1 : 0),
+      unknown: state.stats.unknown - (deletedWord.isKnown ? 0 : 1),
+    );
+
     emit(state.copyWith(
-        status: BlocStatus.success(
-            data: currentWords.where((w) => w.id != e.wordId).toList())));
+      status: BlocStatus.success(
+          data: currentWords.where((w) => w.id != e.wordId).toList()),
+      stats: updatedStats,
+    ));
 
     // Perform database operation with rollback on failure
     final res = await _deleteWord(e.wordId).run();
     res.fold(
       (failure) {
         // Rollback on error
-        emit(state.copyWith(status: BlocStatus.success(data: originalWords)));
+        emit(state.copyWith(
+          status: BlocStatus.success(data: originalWords),
+          stats: originalStats,
+        ));
         add(const LexiconEvent.errorReceived('Failed to delete word'));
       },
       (_) {
@@ -171,10 +201,17 @@ extension LexiconBlocHandlers on LexiconBloc {
 
     final currentWords = status.data as List<WordEntity>;
     final originalWords = List<WordEntity>.from(currentWords);
+    final originalStats = state.stats;
 
     // Optimistic restore - immediate UI update
+    final updatedStats = state.stats.copyWith(
+      total: state.stats.total + 1,
+      unknown: state.stats.unknown + 1,
+    );
+
     emit(state.copyWith(
       status: BlocStatus.success(data: [...currentWords, optimisticWord]),
+      stats: updatedStats,
     ));
 
     final res = await _restoreWord(RestoreWordCommand(
@@ -187,7 +224,10 @@ extension LexiconBlocHandlers on LexiconBloc {
     await res.fold(
       (f) async {
         // Rollback on error
-        emit(state.copyWith(status: BlocStatus.success(data: originalWords)));
+        emit(state.copyWith(
+          status: BlocStatus.success(data: originalWords),
+          stats: originalStats,
+        ));
         add(LexiconEvent.errorReceived(f.message));
       },
       (_) async {
@@ -220,6 +260,7 @@ extension LexiconBlocHandlers on LexiconBloc {
     if (index == -1) return;
 
     final originalWords = List<WordEntity>.from(currentWords);
+    final originalStats = state.stats;
 
     // Optimistic update - immediate UI feedback
     final updatedWords = List<WordEntity>.from(currentWords);
@@ -246,9 +287,12 @@ extension LexiconBlocHandlers on LexiconBloc {
     )).run();
 
     res.fold(
-      (f) {
+      (failure) {
         // Rollback on error
-        emit(state.copyWith(status: BlocStatus.success(data: originalWords)));
+        emit(state.copyWith(
+          status: BlocStatus.success(data: originalWords),
+          stats: originalStats,
+        ));
         add(const LexiconEvent.errorReceived('Failed to update word'));
       },
       (newWord) {

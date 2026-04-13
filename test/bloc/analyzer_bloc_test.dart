@@ -13,9 +13,13 @@ import 'package:wordflow/features/text_analyzer/domain/usecases/update_analysis_
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
+import 'package:wordflow/features/lexicon/domain/repositories/lexicon_repository.dart';
+import 'package:wordflow/features/lexicon/domain/usecases/toggle_word_status.dart';
 import 'package:mocktail/mocktail.dart';
 
 class MockAnalyzerRepository extends Mock implements AnalyzerRepository {}
+
+class MockLexiconRepository extends Mock implements LexiconRepository {}
 
 WordWithLocalFreq _makeWord({
   required int id,
@@ -58,20 +62,25 @@ void main() {
   });
 
   late MockAnalyzerRepository repository;
+  late MockLexiconRepository lexiconRepository;
   late AnalyzeText analyzeText;
   late GetAnalysisResult getAnalysisResult;
   late UpdateAnalysisCounts updateAnalysisCounts;
+  late ToggleWordStatus toggleWordStatus;
   late AnalyzerBloc bloc;
 
   setUp(() {
     repository = MockAnalyzerRepository();
+    lexiconRepository = MockLexiconRepository();
     analyzeText = AnalyzeText(repository);
     getAnalysisResult = GetAnalysisResult(repository);
     updateAnalysisCounts = UpdateAnalysisCounts(repository);
+    toggleWordStatus = ToggleWordStatus(lexiconRepository);
     bloc = AnalyzerBloc(
       analyzeText: analyzeText,
       getAnalysisResult: getAnalysisResult,
       updateAnalysisCounts: updateAnalysisCounts,
+      toggleWordStatus: toggleWordStatus,
     );
   });
 
@@ -133,6 +142,8 @@ void main() {
       build: () {
         when(() => repository.updateAnalysisCounts(any()))
             .thenAnswer((_) => TaskEither.right(unit));
+        when(() => lexiconRepository.toggleStatus(any()))
+            .thenAnswer((_) => TaskEither.right(_makeResult().words.first.word));
         return bloc;
       },
       seed: () => AnalyzerState(

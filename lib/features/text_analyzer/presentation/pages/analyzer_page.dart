@@ -101,16 +101,6 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
                 }
               },
             ),
-            BlocListener<LexiconBloc, LexiconState>(
-              listener: (context, lexiconState) {
-                // Trigger sync when Lexicon successfully updates, as statuses might have changed
-                if (lexiconState.status.isSuccess) {
-                  context
-                      .read<AnalyzerBloc>()
-                      .add(const SyncCurrentResultWithLexicon());
-                }
-              },
-            ),
           ],
           child: BlocBuilder<AnalyzerBloc, AnalyzerState>(
             builder: (context, state) => StatusView<AnalysisResult>(
@@ -137,9 +127,6 @@ class _AnalyzerPageState extends State<AnalyzerPage> with AutomaticKeepAliveClie
                   context.read<AnalyzerBloc>().add(const ResetAnalysis());
                 },
                 onToggleStatus: (w) {
-                  context
-                      .read<LexiconBloc>()
-                      .add(ToggleWordStatusEvent(w.word.id));
                   context
                       .read<AnalyzerBloc>()
                       .add(ToggleWordStatusInResult(wordId: w.word.id));

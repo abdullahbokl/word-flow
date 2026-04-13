@@ -5,6 +5,7 @@ import 'package:wordflow/core/common/state/bloc_status.dart';
 import 'package:wordflow/features/text_analyzer/domain/usecases/analyze_text.dart';
 import 'package:wordflow/features/text_analyzer/domain/usecases/get_analysis_result.dart';
 import 'package:wordflow/features/text_analyzer/domain/usecases/update_analysis_counts.dart';
+import 'package:wordflow/features/lexicon/domain/usecases/toggle_word_status.dart';
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_event.dart';
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_state.dart';
 class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
@@ -12,9 +13,11 @@ class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
     required AnalyzeText analyzeText,
     required GetAnalysisResult getAnalysisResult,
     required UpdateAnalysisCounts updateAnalysisCounts,
+    required ToggleWordStatus toggleWordStatus,
   })  : _analyzeText = analyzeText,
         _getAnalysisResult = getAnalysisResult,
         _updateAnalysisCounts = updateAnalysisCounts,
+        _toggleWordStatus = toggleWordStatus,
         super(const AnalyzerState()) {
     on<StartAnalysis>(_onStart);
     on<ToggleWordStatusInResult>(_onToggleWordStatus);
@@ -25,6 +28,7 @@ class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
   final AnalyzeText _analyzeText;
   final GetAnalysisResult _getAnalysisResult;
   final UpdateAnalysisCounts _updateAnalysisCounts;
+  final ToggleWordStatus _toggleWordStatus;
 
   Future<void> _onStart(StartAnalysis e, Emitter<AnalyzerState> emit) async {
     emit(state.copyWith(status: const BlocStatus.loading()));
@@ -61,7 +65,8 @@ class AnalyzerBloc extends Bloc<AnalyzerEvent, AnalyzerState> {
 
     emit(state.copyWith(status: BlocStatus.success(data: updatedResult)));
 
-    // Persist to DB - ensure counts in history are updated
+    // Persist to DB
+    await _toggleWordStatus(e.wordId).run();
     await _updateAnalysisCounts(res.id).run();
   }
 

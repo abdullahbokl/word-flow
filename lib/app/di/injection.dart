@@ -103,6 +103,7 @@ Future<void> initDI() async {
           analyzeText: sl(),
           getAnalysisResult: sl(),
           updateAnalysisCounts: sl(),
+          toggleWordStatus: sl(),
         ))
 
     // Features - History
