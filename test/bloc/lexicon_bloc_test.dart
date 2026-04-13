@@ -194,7 +194,12 @@ void main() {
         return bloc;
       },
       act: (bloc) => bloc.add(const SearchLexicon('query')),
+      wait: const Duration(milliseconds: 400),
       expect: () => [
+        const LexiconState(
+          status: BlocStatus.loading(),
+          query: 'query',
+        ),
         const LexiconState(
           status: BlocStatus.success(data: []),
           query: 'query',
@@ -221,7 +226,7 @@ void main() {
           status: BlocStatus.success(data: []),
           hasReachedMax: true,
         ),
-        act: (bloc) => bloc.add(const LoadMoreLexicon()),
+        act: (bloc) => bloc.add(const FetchMoreLexicon()),
         expect: () => [],
       );
 
@@ -235,7 +240,7 @@ void main() {
         seed: () => LexiconState(
           status: BlocStatus.success(data: [tWord]),
         ),
-        act: (bloc) => bloc.add(const LoadMoreLexicon()),
+        act: (bloc) => bloc.add(const FetchMoreLexicon()),
         expect: () => [
           LexiconState(
             status: BlocStatus.success(data: [tWord, tWord.copyWith(id: 2)]),

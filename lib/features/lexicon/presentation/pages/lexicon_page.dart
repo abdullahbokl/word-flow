@@ -30,7 +30,6 @@ class _LexiconPageState extends State<LexiconPage>
     with AutomaticKeepAliveClientMixin {
   final _searchCtrl = TextEditingController();
   final _listScrollController = ScrollController();
-  Timer? _searchDebounce;
 
   @override
   bool get wantKeepAlive => true;
@@ -46,25 +45,21 @@ class _LexiconPageState extends State<LexiconPage>
     if (_listScrollController.hasClients &&
         _listScrollController.offset >=
             (_listScrollController.position.maxScrollExtent * 0.9)) {
-      context.read<LexiconBloc>().add(const LoadMoreLexicon());
+      context.read<LexiconBloc>().add(const FetchMoreLexicon());
     }
   }
 
   @override
   void dispose() {
-    _searchDebounce?.cancel();
     _searchCtrl.dispose();
     _listScrollController.dispose();
     super.dispose();
   }
 
   void _onSearchChanged(String q) {
-    _searchDebounce?.cancel();
-    _searchDebounce = Timer(const Duration(milliseconds: 250), () {
-      if (q != context.read<LexiconBloc>().state.query) {
-        context.read<LexiconBloc>().add(SearchLexicon(q));
-      }
-    });
+    if (q != context.read<LexiconBloc>().state.query) {
+      context.read<LexiconBloc>().add(SearchLexicon(q));
+    }
   }
 
   Future<void> _showAdd() async {
@@ -132,19 +127,34 @@ class _LexiconPageState extends State<LexiconPage>
                         ),
                       ),
                       const SizedBox(height: AppDimensions.space8),
-                      BlocSelector<LexiconBloc, LexiconState,
-                          ({WordFilter filter, WordSort sort})>(
-                        selector: (state) => (
-                          filter: state.filter,
-                          sort: state.sort,
-                        ),
-                        builder: (ctx, filterState) => WordFilterBar(
-                          active: filterState.filter,
-                          onChanged: (f) =>
-                              ctx.read<LexiconBloc>().add(FilterLexicon(f)),
-                          activeSort: filterState.sort,
-                          onSortChanged: (s) =>
-                              ctx.read<LexiconBloc>().add(SortLexicon(s)),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppDimensions.pagePadding),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: BlocSelector<LexiconBloc, LexiconState,
+                                  WordFilter>(
+                                selector: (state) => state.filter,
+                                builder: (ctx, filter) => WordFilterBar(
+                                  active: filter,
+                                  onChanged: (f) => ctx
+                                      .read<LexiconBloc>()
+                                      .add(FilterLexicon(f)),
+                                  // activeSort: filterState.sort, // Removed from here
+                                  // onSortChanged: (s) => ctx.read<LexiconBloc>().add(SortLexicon(s)),
+                                ),
+                              ),
+                            ),
+                            BlocSelector<LexiconBloc, LexiconState, WordSort>(
+                              selector: (state) => state.sort,
+                              builder: (ctx, sort) => _SortButton(
+                                active: sort,
+                                onChanged: (s) =>
+                                    ctx.read<LexiconBloc>().add(SortLexicon(s)),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                       const SizedBox(height: 6),
@@ -175,6 +185,48 @@ class _LexiconPageState extends State<LexiconPage>
           ],
         ),
       ),
+    );
+  }
+}
+
+class _SortButton extends StatelessWidget {
+  const _SortButton({required this.active, required this.onChanged});
+  final WordSort active;
+  final ValueChanged<WordSort> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return MenuAnchor(
+      builder: (context, controller, child) => IconButton(
+        icon: const Icon(Icons.sort_rounded, size: 20),
+        tooltip: 'Sort by',
+        visualDensity: VisualDensity.compact,
+        onPressed: () {
+          if (controller.isOpen) {
+            controller.close();
+          } else {
+            controller.open();
+          }
+        },
+      ),
+      menuChildren: WordSort.values.map((sort) {
+        final isSelected = sort == active;
+        return MenuItemButton(
+          onPressed: () => onChanged(sort),
+          leadingIcon: Icon(
+            isSelected ? Icons.radio_button_checked : Icons.radio_button_off,
+            size: 18,
+            color: isSelected ? Theme.of(context).colorScheme.primary : null,
+          ),
+          child: Text(
+            sort.label,
+            style: TextStyle(
+              fontSize: 13,
+              fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

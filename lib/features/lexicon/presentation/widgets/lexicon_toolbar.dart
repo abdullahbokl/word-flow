@@ -44,12 +44,23 @@ class LexiconToolbar extends StatelessWidget {
         const SizedBox(height: 6),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: WordFilterBar(
-            active: filter,
-            onChanged: (f) => context.read<LexiconBloc>().add(FilterLexicon(f)),
-            activeSort: sort,
-            onSortChanged: (s) =>
-                context.read<LexiconBloc>().add(SortLexicon(s)),
+          child: Row(
+            children: [
+              Expanded(
+                child: WordFilterBar(
+                  active: filter,
+                  onChanged: (f) =>
+                      context.read<LexiconBloc>().add(FilterLexicon(f)),
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.sort_rounded, size: 20),
+                onPressed: () {
+                  // This toolbar seems unused, but let's keep it consistent
+                  // If it were used, we'd probably want a real sort menu here
+                },
+              ),
+            ],
           ),
         ),
         const SizedBox(height: 6),

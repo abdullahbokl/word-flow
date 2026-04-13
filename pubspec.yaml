@@ -10,6 +10,7 @@ environment:
 dependencies:
   bloc_concurrency: ^0.3.0
   drift: ^2.20.0
+  drift_flutter: ^0.2.8
   equatable: ^2.0.5
   file_picker: ^11.0.2
   flutter:
@@ -33,8 +34,11 @@ dependencies:
   sliver_tools: ^0.2.12
   sqlite3: ^2.5.0
   sqlite3_flutter_libs: ^0.5.42
+  sqlite3_web: ^0.4.1
 
 dev_dependencies:
+  integration_test:
+    sdk: flutter
   bloc_test: ^10.0.0
   build_runner: ^2.4.9
   drift_dev: ^2.15.0

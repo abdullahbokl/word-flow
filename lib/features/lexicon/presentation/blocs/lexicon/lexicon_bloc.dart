@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:rxdart/rxdart.dart';
 import 'package:lexitrack/core/common/state/bloc_status.dart';
 import 'package:lexitrack/core/domain/entities/word_entity.dart';
 import 'package:lexitrack/core/usecase/usecase.dart';
@@ -50,7 +51,7 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
           sort: cache.getSort(),
         )) {
     on<LoadLexicon>(_onLoad);
-    on<LoadMoreLexicon>(_onLoadMore);
+    on<FetchMoreLexicon>(_onFetchMore);
     on<LexiconStatsUpdateReceived>(_onStatsUpdate);
     on<LexiconErrorReceived>(_onErrorReceived);
     on<ToggleWordStatusEvent>(_onToggleStatus);
@@ -64,12 +65,19 @@ class LexiconBloc extends Bloc<LexiconEvent, LexiconState> {
       );
     });
     on<SearchLexicon>((e, emit) => _onFetch(emit: emit, query: e.query),
-        transformer: restartable());
+        transformer: _debouncedRestartable());
     on<FilterLexicon>((e, emit) => _onFetch(emit: emit, filter: e.filter),
         transformer: restartable());
     on<SortLexicon>((e, emit) => _onFetch(emit: emit, sort: e.sort),
         transformer: restartable());
     on<UpdateWordEvent>(_onUpdate);
+  }
+
+  EventTransformer<T> _debouncedRestartable<T>() {
+    return (events, mapper) => restartable<T>()(
+          events.debounceTime(const Duration(milliseconds: 300)),
+          mapper,
+        );
   }
 
   static const _pageSize = 50;

@@ -62,7 +62,7 @@ extension LexiconEventPatterns on LexiconEvent {
     TResult Function(AddWordManuallyEvent value)? addManually,
     TResult Function(UpdateWordEvent value)? update,
     TResult Function(SortLexicon value)? sort,
-    TResult Function(LoadMoreLexicon value)? loadMore,
+    TResult Function(FetchMoreLexicon value)? fetchMore,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -91,8 +91,8 @@ extension LexiconEventPatterns on LexiconEvent {
         return update(_that);
       case SortLexicon() when sort != null:
         return sort(_that);
-      case LoadMoreLexicon() when loadMore != null:
-        return loadMore(_that);
+      case FetchMoreLexicon() when fetchMore != null:
+        return fetchMore(_that);
       case _:
         return orElse();
     }
@@ -126,7 +126,7 @@ extension LexiconEventPatterns on LexiconEvent {
     required TResult Function(AddWordManuallyEvent value) addManually,
     required TResult Function(UpdateWordEvent value) update,
     required TResult Function(SortLexicon value) sort,
-    required TResult Function(LoadMoreLexicon value) loadMore,
+    required TResult Function(FetchMoreLexicon value) fetchMore,
   }) {
     final _that = this;
     switch (_that) {
@@ -154,8 +154,8 @@ extension LexiconEventPatterns on LexiconEvent {
         return update(_that);
       case SortLexicon():
         return sort(_that);
-      case LoadMoreLexicon():
-        return loadMore(_that);
+      case FetchMoreLexicon():
+        return fetchMore(_that);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -187,7 +187,7 @@ extension LexiconEventPatterns on LexiconEvent {
     TResult? Function(AddWordManuallyEvent value)? addManually,
     TResult? Function(UpdateWordEvent value)? update,
     TResult? Function(SortLexicon value)? sort,
-    TResult? Function(LoadMoreLexicon value)? loadMore,
+    TResult? Function(FetchMoreLexicon value)? fetchMore,
   }) {
     final _that = this;
     switch (_that) {
@@ -215,8 +215,8 @@ extension LexiconEventPatterns on LexiconEvent {
         return update(_that);
       case SortLexicon() when sort != null:
         return sort(_that);
-      case LoadMoreLexicon() when loadMore != null:
-        return loadMore(_that);
+      case FetchMoreLexicon() when fetchMore != null:
+        return fetchMore(_that);
       case _:
         return null;
     }
@@ -261,7 +261,7 @@ extension LexiconEventPatterns on LexiconEvent {
             List<String>? synonyms)?
         update,
     TResult Function(WordSort sort)? sort,
-    TResult Function()? loadMore,
+    TResult Function()? fetchMore,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -300,8 +300,8 @@ extension LexiconEventPatterns on LexiconEvent {
             _that.synonyms);
       case SortLexicon() when sort != null:
         return sort(_that.sort);
-      case LoadMoreLexicon() when loadMore != null:
-        return loadMore();
+      case FetchMoreLexicon() when fetchMore != null:
+        return fetchMore();
       case _:
         return orElse();
     }
@@ -347,7 +347,7 @@ extension LexiconEventPatterns on LexiconEvent {
             List<String>? synonyms)
         update,
     required TResult Function(WordSort sort) sort,
-    required TResult Function() loadMore,
+    required TResult Function() fetchMore,
   }) {
     final _that = this;
     switch (_that) {
@@ -385,8 +385,8 @@ extension LexiconEventPatterns on LexiconEvent {
             _that.synonyms);
       case SortLexicon():
         return sort(_that.sort);
-      case LoadMoreLexicon():
-        return loadMore();
+      case FetchMoreLexicon():
+        return fetchMore();
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -431,7 +431,7 @@ extension LexiconEventPatterns on LexiconEvent {
             List<String>? synonyms)?
         update,
     TResult? Function(WordSort sort)? sort,
-    TResult? Function()? loadMore,
+    TResult? Function()? fetchMore,
   }) {
     final _that = this;
     switch (_that) {
@@ -469,8 +469,8 @@ extension LexiconEventPatterns on LexiconEvent {
             _that.synonyms);
       case SortLexicon() when sort != null:
         return sort(_that.sort);
-      case LoadMoreLexicon() when loadMore != null:
-        return loadMore();
+      case FetchMoreLexicon() when fetchMore != null:
+        return fetchMore();
       case _:
         return null;
     }
@@ -1400,13 +1400,13 @@ class _$SortLexiconCopyWithImpl<$Res> implements $SortLexiconCopyWith<$Res> {
 
 /// @nodoc
 
-class LoadMoreLexicon implements LexiconEvent {
-  const LoadMoreLexicon();
+class FetchMoreLexicon implements LexiconEvent {
+  const FetchMoreLexicon();
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
-        (other.runtimeType == runtimeType && other is LoadMoreLexicon);
+        (other.runtimeType == runtimeType && other is FetchMoreLexicon);
   }
 
   @override
@@ -1414,7 +1414,7 @@ class LoadMoreLexicon implements LexiconEvent {
 
   @override
   String toString() {
-    return 'LexiconEvent.loadMore()';
+    return 'LexiconEvent.fetchMore()';
   }
 }
 

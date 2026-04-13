@@ -47,19 +47,21 @@ extension LexiconBlocHandlers on LexiconBloc {
     res.fold(
       (f) => emit(state.copyWith(status: BlocStatus.failure(error: f.message))),
       (w) {
-        if (filter != null) unawaited(_cache.saveFilter(filter));
-        if (sort != null) unawaited(_cache.saveSort(sort));
         emit(state.copyWith(
           status: BlocStatus.success(data: w),
           page: 0,
           hasReachedMax: w.length < LexiconBloc._pageSize,
         ));
+
+        // ✅ Persist only on success
+        if (filter != null) unawaited(_cache.saveFilter(filter));
+        if (sort != null) unawaited(_cache.saveSort(sort));
       },
     );
   }
 
-  Future<void> _onLoadMore(
-      LoadMoreLexicon e, Emitter<LexiconState> emit) async {
+  Future<void> _onFetchMore(
+      FetchMoreLexicon e, Emitter<LexiconState> emit) async {
     if (state.hasReachedMax || !state.status.isSuccess) return;
 
     final nextPage = state.page + 1;
@@ -97,7 +99,7 @@ extension LexiconBlocHandlers on LexiconBloc {
 
     // Store original state for rollback
     final originalWords = List<WordEntity>.from(currentWords);
-    
+
     // Optimistic update - immediate UI response
     final updatedWords = List<WordEntity>.from(currentWords);
     updatedWords[index] =
@@ -115,7 +117,7 @@ extension LexiconBlocHandlers on LexiconBloc {
       (newWord) {
         // Ensure we're still on a successful state before updating
         if (!state.status.isSuccess) return;
-        
+
         final latestWords =
             List<WordEntity>.from(state.status.data as List<WordEntity>);
         final latestIndex = latestWords.indexWhere((w) => w.id == newWord.id);
@@ -133,12 +135,12 @@ extension LexiconBlocHandlers on LexiconBloc {
 
     final currentWords = status.data as List<WordEntity>;
     final originalWords = List<WordEntity>.from(currentWords);
-    
+
     // Optimistic delete - immediate UI update
     emit(state.copyWith(
         status: BlocStatus.success(
             data: currentWords.where((w) => w.id != e.wordId).toList())));
-    
+
     // Perform database operation with rollback on failure
     final res = await _deleteWord(e.wordId).run();
     res.fold(
@@ -166,10 +168,10 @@ extension LexiconBlocHandlers on LexiconBloc {
 
     final status = state.status;
     if (!status.isSuccess) return;
-    
+
     final currentWords = status.data as List<WordEntity>;
     final originalWords = List<WordEntity>.from(currentWords);
-    
+
     // Optimistic restore - immediate UI update
     emit(state.copyWith(
       status: BlocStatus.success(data: [...currentWords, optimisticWord]),
@@ -218,7 +220,7 @@ extension LexiconBlocHandlers on LexiconBloc {
     if (index == -1) return;
 
     final originalWords = List<WordEntity>.from(currentWords);
-    
+
     // Optimistic update - immediate UI feedback
     final updatedWords = List<WordEntity>.from(currentWords);
     final updatedWord = updatedWords[index].copyWith(
@@ -252,8 +254,7 @@ extension LexiconBlocHandlers on LexiconBloc {
       (newWord) {
         final latestWords =
             List<WordEntity>.from(state.status.data as List<WordEntity>);
-        final latestIndex =
-            latestWords.indexWhere((w) => w.id == newWord.id);
+        final latestIndex = latestWords.indexWhere((w) => w.id == newWord.id);
         if (latestIndex != -1) {
           latestWords[latestIndex] = newWord;
           emit(state.copyWith(status: BlocStatus.success(data: latestWords)));

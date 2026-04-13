@@ -40,8 +40,8 @@ AnalysisResult _makeResult({int id = 1}) {
     title: 'Test',
     totalWords: 10,
     uniqueWords: 2,
-    knownWords: 6,
-    unknownWords: 4,
+    knownWords: 1,
+    unknownWords: 1,
     newWordsCount: 0,
     words: [
       _makeWord(id: 1, text: 'alpha', isKnown: false, localFrequency: 4),
@@ -79,8 +79,10 @@ void main() {
       },
       act: (b) => b.add(const StartAnalysis(title: 'Test', content: 'Hello')),
       expect: () => [
-        isA<AnalyzerState>().having((s) => s.status.isLoading, 'isLoading', true),
-        isA<AnalyzerState>().having((s) => s.status.isSuccess, 'isSuccess', true),
+        isA<AnalyzerState>()
+            .having((s) => s.status.isLoading, 'isLoading', true),
+        isA<AnalyzerState>()
+            .having((s) => s.status.isSuccess, 'isSuccess', true),
       ],
     );
 
@@ -91,13 +93,14 @@ void main() {
               title: any(named: 'title'),
               content: any(named: 'content'),
             )).thenAnswer(
-              (_) => TaskEither.left(const DatabaseFailure('db error')),
-            );
+          (_) => TaskEither.left(const DatabaseFailure('db error')),
+        );
         return bloc;
       },
       act: (b) => b.add(const StartAnalysis(title: 'Test', content: 'Hello')),
       expect: () => [
-        isA<AnalyzerState>().having((s) => s.status.isLoading, 'isLoading', true),
+        isA<AnalyzerState>()
+            .having((s) => s.status.isLoading, 'isLoading', true),
         isA<AnalyzerState>().having((s) => s.status.isFailed, 'isFailed', true),
       ],
     );
@@ -110,7 +113,8 @@ void main() {
       ),
       act: (b) => b.add(const ResetAnalysis()),
       expect: () => [
-        isA<AnalyzerState>().having((s) => s.status.isInitial, 'isInitial', true),
+        isA<AnalyzerState>()
+            .having((s) => s.status.isInitial, 'isInitial', true),
       ],
     );
 
@@ -124,9 +128,11 @@ void main() {
       expect: () => [
         isA<AnalyzerState>()
             .having((s) => s.status.isSuccess, 'isSuccess', true)
-            .having((s) => s.status.data!.knownWords, 'knownWords', 10) // 6 + 4
-            .having((s) => s.status.data!.unknownWords, 'unknownWords', 0) // 4 - 4
-            .having((s) => s.status.data!.words.first.word.isKnown, 'first word isKnown', true),
+            .having((s) => s.status.data!.knownWords, 'knownWords', 2) // 1 + 1
+            .having(
+                (s) => s.status.data!.unknownWords, 'unknownWords', 0) // 1 - 1
+            .having((s) => s.status.data!.words.first.word.isKnown,
+                'first word isKnown', true),
       ],
     );
   });

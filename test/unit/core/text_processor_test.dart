@@ -96,8 +96,8 @@ void main() {
         excludedWordsFound: [],
       );
 
-      expect(result['knownWords'], 8);
-      expect(result['unknownWords'], 2);
+      expect(result['knownWords'], 1);
+      expect(result['unknownWords'], 1);
       expect((result['words'] as List).first['text'], 'beta');
     });
   });

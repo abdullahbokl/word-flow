@@ -42,5 +42,5 @@ abstract class LexiconEvent with _$LexiconEvent {
     List<String>? synonyms,
   }) = UpdateWordEvent;
   const factory LexiconEvent.sort(WordSort sort) = SortLexicon;
-  const factory LexiconEvent.loadMore() = LoadMoreLexicon;
+  const factory LexiconEvent.fetchMore() = FetchMoreLexicon;
 }
