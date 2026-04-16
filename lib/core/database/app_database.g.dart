@@ -796,6 +796,13 @@ class $AnalyzedTextsTable extends AnalyzedTexts
       requiredDuringInsert: false,
       defaultValue: const Constant(0));
   @override
+  late final GeneratedColumnWithTypeConverter<List<String>?, String>
+      excludedWords = GeneratedColumn<String>(
+              'excluded_words', aliasedName, true,
+              type: DriftSqlType.string, requiredDuringInsert: false)
+          .withConverter<List<String>?>(
+              $AnalyzedTextsTable.$converterexcludedWordsn);
+  @override
   List<GeneratedColumn> get $columns => [
         id,
         title,
@@ -804,7 +811,8 @@ class $AnalyzedTextsTable extends AnalyzedTexts
         uniqueWords,
         createdAt,
         knownWords,
-        unknownWords
+        unknownWords,
+        excludedWords
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -890,6 +898,9 @@ class $AnalyzedTextsTable extends AnalyzedTexts
           .read(DriftSqlType.int, data['${effectivePrefix}known_words'])!,
       unknownWords: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}unknown_words'])!,
+      excludedWords: $AnalyzedTextsTable.$converterexcludedWordsn.fromSql(
+          attachedDatabase.typeMapping.read(
+              DriftSqlType.string, data['${effectivePrefix}excluded_words'])),
     );
   }
 
@@ -897,6 +908,11 @@ class $AnalyzedTextsTable extends AnalyzedTexts
   $AnalyzedTextsTable createAlias(String alias) {
     return $AnalyzedTextsTable(attachedDatabase, alias);
   }
+
+  static TypeConverter<List<String>, String> $converterexcludedWords =
+      const StringListConverter();
+  static TypeConverter<List<String>?, String?> $converterexcludedWordsn =
+      NullAwareTypeConverter.wrap($converterexcludedWords);
 }
 
 class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
@@ -908,6 +924,7 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
   final DateTime createdAt;
   final int knownWords;
   final int unknownWords;
+  final List<String>? excludedWords;
   const AnalyzedTextRow(
       {required this.id,
       required this.title,
@@ -916,7 +933,8 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
       required this.uniqueWords,
       required this.createdAt,
       required this.knownWords,
-      required this.unknownWords});
+      required this.unknownWords,
+      this.excludedWords});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -928,6 +946,10 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
     map['created_at'] = Variable<DateTime>(createdAt);
     map['known_words'] = Variable<int>(knownWords);
     map['unknown_words'] = Variable<int>(unknownWords);
+    if (!nullToAbsent || excludedWords != null) {
+      map['excluded_words'] = Variable<String>(
+          $AnalyzedTextsTable.$converterexcludedWordsn.toSql(excludedWords));
+    }
     return map;
   }
 
@@ -941,6 +963,9 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
       createdAt: Value(createdAt),
       knownWords: Value(knownWords),
       unknownWords: Value(unknownWords),
+      excludedWords: excludedWords == null && nullToAbsent
+          ? const Value.absent()
+          : Value(excludedWords),
     );
   }
 
@@ -956,6 +981,7 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       knownWords: serializer.fromJson<int>(json['knownWords']),
       unknownWords: serializer.fromJson<int>(json['unknownWords']),
+      excludedWords: serializer.fromJson<List<String>?>(json['excludedWords']),
     );
   }
   @override
@@ -970,6 +996,7 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'knownWords': serializer.toJson<int>(knownWords),
       'unknownWords': serializer.toJson<int>(unknownWords),
+      'excludedWords': serializer.toJson<List<String>?>(excludedWords),
     };
   }
 
@@ -981,7 +1008,8 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
           int? uniqueWords,
           DateTime? createdAt,
           int? knownWords,
-          int? unknownWords}) =>
+          int? unknownWords,
+          Value<List<String>?> excludedWords = const Value.absent()}) =>
       AnalyzedTextRow(
         id: id ?? this.id,
         title: title ?? this.title,
@@ -991,6 +1019,8 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
         createdAt: createdAt ?? this.createdAt,
         knownWords: knownWords ?? this.knownWords,
         unknownWords: unknownWords ?? this.unknownWords,
+        excludedWords:
+            excludedWords.present ? excludedWords.value : this.excludedWords,
       );
   AnalyzedTextRow copyWithCompanion(AnalyzedTextsCompanion data) {
     return AnalyzedTextRow(
@@ -1007,6 +1037,9 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
       unknownWords: data.unknownWords.present
           ? data.unknownWords.value
           : this.unknownWords,
+      excludedWords: data.excludedWords.present
+          ? data.excludedWords.value
+          : this.excludedWords,
     );
   }
 
@@ -1020,14 +1053,15 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
           ..write('uniqueWords: $uniqueWords, ')
           ..write('createdAt: $createdAt, ')
           ..write('knownWords: $knownWords, ')
-          ..write('unknownWords: $unknownWords')
+          ..write('unknownWords: $unknownWords, ')
+          ..write('excludedWords: $excludedWords')
           ..write(')'))
         .toString();
   }
 
   @override
   int get hashCode => Object.hash(id, title, content, totalWords, uniqueWords,
-      createdAt, knownWords, unknownWords);
+      createdAt, knownWords, unknownWords, excludedWords);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1039,7 +1073,8 @@ class AnalyzedTextRow extends DataClass implements Insertable<AnalyzedTextRow> {
           other.uniqueWords == this.uniqueWords &&
           other.createdAt == this.createdAt &&
           other.knownWords == this.knownWords &&
-          other.unknownWords == this.unknownWords);
+          other.unknownWords == this.unknownWords &&
+          other.excludedWords == this.excludedWords);
 }
 
 class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
@@ -1051,6 +1086,7 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
   final Value<DateTime> createdAt;
   final Value<int> knownWords;
   final Value<int> unknownWords;
+  final Value<List<String>?> excludedWords;
   const AnalyzedTextsCompanion({
     this.id = const Value.absent(),
     this.title = const Value.absent(),
@@ -1060,6 +1096,7 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
     this.createdAt = const Value.absent(),
     this.knownWords = const Value.absent(),
     this.unknownWords = const Value.absent(),
+    this.excludedWords = const Value.absent(),
   });
   AnalyzedTextsCompanion.insert({
     this.id = const Value.absent(),
@@ -1070,6 +1107,7 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
     required DateTime createdAt,
     this.knownWords = const Value.absent(),
     this.unknownWords = const Value.absent(),
+    this.excludedWords = const Value.absent(),
   })  : title = Value(title),
         content = Value(content),
         totalWords = Value(totalWords),
@@ -1084,6 +1122,7 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
     Expression<DateTime>? createdAt,
     Expression<int>? knownWords,
     Expression<int>? unknownWords,
+    Expression<String>? excludedWords,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1094,6 +1133,7 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
       if (createdAt != null) 'created_at': createdAt,
       if (knownWords != null) 'known_words': knownWords,
       if (unknownWords != null) 'unknown_words': unknownWords,
+      if (excludedWords != null) 'excluded_words': excludedWords,
     });
   }
 
@@ -1105,7 +1145,8 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
       Value<int>? uniqueWords,
       Value<DateTime>? createdAt,
       Value<int>? knownWords,
-      Value<int>? unknownWords}) {
+      Value<int>? unknownWords,
+      Value<List<String>?>? excludedWords}) {
     return AnalyzedTextsCompanion(
       id: id ?? this.id,
       title: title ?? this.title,
@@ -1115,6 +1156,7 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
       createdAt: createdAt ?? this.createdAt,
       knownWords: knownWords ?? this.knownWords,
       unknownWords: unknownWords ?? this.unknownWords,
+      excludedWords: excludedWords ?? this.excludedWords,
     );
   }
 
@@ -1145,6 +1187,11 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
     if (unknownWords.present) {
       map['unknown_words'] = Variable<int>(unknownWords.value);
     }
+    if (excludedWords.present) {
+      map['excluded_words'] = Variable<String>($AnalyzedTextsTable
+          .$converterexcludedWordsn
+          .toSql(excludedWords.value));
+    }
     return map;
   }
 
@@ -1158,7 +1205,8 @@ class AnalyzedTextsCompanion extends UpdateCompanion<AnalyzedTextRow> {
           ..write('uniqueWords: $uniqueWords, ')
           ..write('createdAt: $createdAt, ')
           ..write('knownWords: $knownWords, ')
-          ..write('unknownWords: $unknownWords')
+          ..write('unknownWords: $unknownWords, ')
+          ..write('excludedWords: $excludedWords')
           ..write(')'))
         .toString();
   }
@@ -2326,6 +2374,7 @@ typedef $$AnalyzedTextsTableCreateCompanionBuilder = AnalyzedTextsCompanion
   required DateTime createdAt,
   Value<int> knownWords,
   Value<int> unknownWords,
+  Value<List<String>?> excludedWords,
 });
 typedef $$AnalyzedTextsTableUpdateCompanionBuilder = AnalyzedTextsCompanion
     Function({
@@ -2337,6 +2386,7 @@ typedef $$AnalyzedTextsTableUpdateCompanionBuilder = AnalyzedTextsCompanion
   Value<DateTime> createdAt,
   Value<int> knownWords,
   Value<int> unknownWords,
+  Value<List<String>?> excludedWords,
 });
 
 final class $$AnalyzedTextsTableReferences extends BaseReferences<_$AppDatabase,
@@ -2395,6 +2445,11 @@ class $$AnalyzedTextsTableFilterComposer
   ColumnFilters<int> get unknownWords => $composableBuilder(
       column: $table.unknownWords, builder: (column) => ColumnFilters(column));
 
+  ColumnWithTypeConverterFilters<List<String>?, List<String>, String>
+      get excludedWords => $composableBuilder(
+          column: $table.excludedWords,
+          builder: (column) => ColumnWithTypeConverterFilters(column));
+
   Expression<bool> textWordEntriesRefs(
       Expression<bool> Function($$TextWordEntriesTableFilterComposer f) f) {
     final $$TextWordEntriesTableFilterComposer composer = $composerBuilder(
@@ -2450,6 +2505,10 @@ class $$AnalyzedTextsTableOrderingComposer
   ColumnOrderings<int> get unknownWords => $composableBuilder(
       column: $table.unknownWords,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get excludedWords => $composableBuilder(
+      column: $table.excludedWords,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$AnalyzedTextsTableAnnotationComposer
@@ -2484,6 +2543,10 @@ class $$AnalyzedTextsTableAnnotationComposer
 
   GeneratedColumn<int> get unknownWords => $composableBuilder(
       column: $table.unknownWords, builder: (column) => column);
+
+  GeneratedColumnWithTypeConverter<List<String>?, String> get excludedWords =>
+      $composableBuilder(
+          column: $table.excludedWords, builder: (column) => column);
 
   Expression<T> textWordEntriesRefs<T extends Object>(
       Expression<T> Function($$TextWordEntriesTableAnnotationComposer a) f) {
@@ -2538,6 +2601,7 @@ class $$AnalyzedTextsTableTableManager extends RootTableManager<
             Value<DateTime> createdAt = const Value.absent(),
             Value<int> knownWords = const Value.absent(),
             Value<int> unknownWords = const Value.absent(),
+            Value<List<String>?> excludedWords = const Value.absent(),
           }) =>
               AnalyzedTextsCompanion(
             id: id,
@@ -2548,6 +2612,7 @@ class $$AnalyzedTextsTableTableManager extends RootTableManager<
             createdAt: createdAt,
             knownWords: knownWords,
             unknownWords: unknownWords,
+            excludedWords: excludedWords,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -2558,6 +2623,7 @@ class $$AnalyzedTextsTableTableManager extends RootTableManager<
             required DateTime createdAt,
             Value<int> knownWords = const Value.absent(),
             Value<int> unknownWords = const Value.absent(),
+            Value<List<String>?> excludedWords = const Value.absent(),
           }) =>
               AnalyzedTextsCompanion.insert(
             id: id,
@@ -2568,6 +2634,7 @@ class $$AnalyzedTextsTableTableManager extends RootTableManager<
             createdAt: createdAt,
             knownWords: knownWords,
             unknownWords: unknownWords,
+            excludedWords: excludedWords,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (

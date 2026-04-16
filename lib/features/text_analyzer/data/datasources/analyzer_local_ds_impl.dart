@@ -140,6 +140,7 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
               uniqueWords: uniqueTokens.length,
               knownWords: Value(uniqueKnown),
               unknownWords: Value(uniqueUnknown),
+              excludedWords: Value(excludedWordsFound),
               createdAt: now,
             ),
           );
@@ -208,7 +209,7 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
       uniqueWords: text.uniqueWords,
       newWordsCount: 0, // Not relevant for retrieval
       words: wordSnapshots,
-      excludedWordsFound: [], // Not stored separately in DB currently, would need a fetch if critical
+      excludedWordsFound: text.excludedWords ?? [],
     );
 
     return AnalysisResultModel.fromMap(analysisMap);
@@ -261,7 +262,7 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
           'knownWords': text.knownWords,
           'newWordsCount': 0,
           'words': wordSnapshots,
-          'excludedWordsFound': <String>[],
+          'excludedWordsFound': text.excludedWords ?? [],
         };
 
         return AnalysisResultModel.fromMap(analysisMap);

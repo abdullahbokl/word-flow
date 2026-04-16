@@ -39,8 +39,8 @@ class _MainAppScaffoldState extends State<MainAppScaffold> {
         index: _currentIndex,
         children: [
           _buildTabNavigator(0, const DashboardPage()),
-          _buildTabNavigator(1, const LexiconPage()),
-          _buildTabNavigator(2, const AnalyzerPage()),
+          _buildTabNavigator(1, const AnalyzerPage()),
+          _buildTabNavigator(2, const LexiconPage()),
           _buildTabNavigator(3, const SettingsPage()),
         ],
       ),
@@ -53,12 +53,12 @@ class _MainAppScaffoldState extends State<MainAppScaffold> {
             label: 'Dashboard',
           ),
           NavigationDestination(
-            icon: Icon(Icons.menu_book_rounded),
-            label: 'Lexicon',
-          ),
-          NavigationDestination(
             icon: Icon(Icons.analytics_rounded),
             label: 'Analyzer',
+          ),
+          NavigationDestination(
+            icon: Icon(Icons.menu_book_rounded),
+            label: 'Lexicon',
           ),
           NavigationDestination(
             icon: Icon(Icons.settings_rounded),

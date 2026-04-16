@@ -35,6 +35,7 @@ class AnalyzedTexts extends Table {
   DateTimeColumn get createdAt => dateTime()();
   IntColumn get knownWords => integer().withDefault(const Constant(0))();
   IntColumn get unknownWords => integer().withDefault(const Constant(0))();
+  TextColumn get excludedWords => text().map(const StringListConverter()).nullable()();
 }
 
 @DataClassName('TextWordEntryRow')

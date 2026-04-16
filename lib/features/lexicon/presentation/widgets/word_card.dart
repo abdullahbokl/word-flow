@@ -40,11 +40,13 @@ class _WordCardState extends State<WordCard> {
     return Dismissible(
       key: ValueKey(word.id),
       // L->R excludes, R->L marks known
-      onDismissed: (direction) {
+      confirmDismiss: (direction) async {
         if (direction == DismissDirection.startToEnd) {
           widget.onExclude();
+          return true;
         } else {
           widget.onToggle();
+          return false;
         }
       },
       background: _buildBackground(

@@ -10,41 +10,35 @@ class StatGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    return Column(
-      children: [
-        Row(
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isWide = constraints.maxWidth > 600; // Consistent with AppTokens.maxMobileWidth
+        final crossAxisCount = isWide ? 4 : 2;
+        final childAspectRatio = isWide ? 1.35 : 1.5;
+
+        return GridView.count(
+          crossAxisCount: crossAxisCount,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          mainAxisSpacing: 16,
+          crossAxisSpacing: 16,
+          childAspectRatio: childAspectRatio,
           children: [
-            Expanded(
-              child:
-                  StatCard(label: 'Total Words', value: '${result.totalWords}'),
+            StatCard(label: 'Total Words', value: '${result.totalWords}'),
+            StatCard(label: 'Unique', value: '${result.uniqueWords}'),
+            StatCard(
+              label: 'Unknown',
+              value: '${result.unknownWords}',
+              color: theme.colorScheme.error,
             ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: StatCard(label: 'Unique', value: '${result.uniqueWords}'),
+            StatCard(
+              label: 'Known Words',
+              value: '${result.knownWords}',
+              color: theme.colorScheme.primary,
             ),
           ],
-        ),
-        const SizedBox(height: 16),
-        Row(
-          children: [
-            Expanded(
-              child: StatCard(
-                label: 'Unknown',
-                value: '${result.unknownWords}',
-                color: theme.colorScheme.error,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: StatCard(
-                label: 'Known Words',
-                value: '${result.knownWords}',
-                color: theme.colorScheme.primary,
-              ),
-            ),
-          ],
-        ),
-      ],
+        );
+      },
     );
   }
 }

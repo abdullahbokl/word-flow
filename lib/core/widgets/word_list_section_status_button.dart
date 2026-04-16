@@ -22,13 +22,13 @@ class WordListSectionStatusButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
           color: isKnown
-              ? AppColors.secondary.withValues(alpha: 0.1)
-              : AppColors.error.withValues(alpha: 0.1),
+              ? AppColors.statusKnown.withValues(alpha: 0.1)
+              : AppColors.statusUnknown.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(6),
           border: Border.all(
             color: isKnown
-                ? AppColors.secondary.withValues(alpha: 0.2)
-                : AppColors.error.withValues(alpha: 0.2),
+                ? AppColors.statusKnown.withValues(alpha: 0.2)
+                : AppColors.statusUnknown.withValues(alpha: 0.2),
           ),
         ),
         child: Row(
@@ -37,7 +37,7 @@ class WordListSectionStatusButton extends StatelessWidget {
             Icon(
               isKnown ? Icons.check_circle : Icons.help_outline,
               size: 14,
-              color: isKnown ? AppColors.secondary : AppColors.error,
+              color: isKnown ? AppColors.statusKnown : AppColors.statusUnknown,
             ),
             const SizedBox(width: 4),
             Text(
@@ -45,7 +45,7 @@ class WordListSectionStatusButton extends StatelessWidget {
               style: TextStyle(
                 fontSize: 11,
                 fontWeight: FontWeight.bold,
-                color: isKnown ? AppColors.secondary : AppColors.error,
+                color: isKnown ? AppColors.statusKnown : AppColors.statusUnknown,
               ),
             ),
           ],

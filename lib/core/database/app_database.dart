@@ -13,7 +13,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase.forTesting({required QueryExecutor e}) : super(e);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration {
@@ -97,6 +97,9 @@ class AppDatabase extends _$AppDatabase {
           await customStatement(
             'CREATE INDEX IF NOT EXISTS idx_words_category ON words (category)',
           );
+        }
+        if (from < 12) {
+          await m.addColumn(analyzedTexts, analyzedTexts.excludedWords);
         }
       },
       beforeOpen: (details) async {

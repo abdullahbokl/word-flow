@@ -97,43 +97,51 @@ class ProgressSection extends StatelessWidget {
               orElse: () => 0,
             );
 
-            return Column(
-              children: [
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: AppTokens.space16,
-                  crossAxisSpacing: AppTokens.space16,
-                  childAspectRatio: 1.5,
+            return LayoutBuilder(
+              builder: (context, constraints) {
+                final isWide = constraints.maxWidth > AppTokens.maxMobileWidth;
+                final crossAxisCount = isWide ? 4 : 2;
+                final childAspectRatio = isWide ? 1.35 : 1.5;
+
+                return Column(
                   children: [
-                    StatCard(
-                      label: 'TOTAL WORDS',
-                      value: stats.total.toString(),
-                      color: AppColors.primary,
+                    GridView.count(
+                      crossAxisCount: crossAxisCount,
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      mainAxisSpacing: AppTokens.space16,
+                      crossAxisSpacing: AppTokens.space16,
+                      childAspectRatio: childAspectRatio,
+                      children: [
+                        StatCard(
+                          label: 'TOTAL WORDS',
+                          value: stats.total.toString(),
+                          color: AppColors.primary,
+                        ),
+                        StatCard(
+                          label: 'KNOWN',
+                          value: stats.known.toString(),
+                          color: AppColors.statusKnown,
+                        ),
+                        StatCard(
+                          label: 'UNKNOWN',
+                          value: stats.unknown.toString(),
+                          color: AppColors.statusUnknown,
+                        ),
+                        StatCard(
+                          label: 'DUE FOR REVIEW',
+                          value: dueCount.toString(),
+                          color: AppColors.secondary,
+                        ),
+                      ],
                     ),
-                    StatCard(
-                      label: 'KNOWN',
-                      value: stats.known.toString(),
-                      color: AppColors.statusKnown,
-                    ),
-                    StatCard(
-                      label: 'UNKNOWN',
-                      value: stats.unknown.toString(),
-                      color: AppColors.statusUnknown,
-                    ),
-                    StatCard(
-                      label: 'DUE FOR REVIEW',
-                      value: dueCount.toString(),
-                      color: AppColors.secondary,
-                    ),
+                    if (dueCount > 0) ...[
+                      const SizedBox(height: AppTokens.space24),
+                      _buildReviewCTA(context, dueCount),
+                    ],
                   ],
-                ),
-                if (dueCount > 0) ...[
-                  const SizedBox(height: AppTokens.space24),
-                  _buildReviewCTA(context, dueCount),
-                ],
-              ],
+                );
+              },
             );
           },
         );
