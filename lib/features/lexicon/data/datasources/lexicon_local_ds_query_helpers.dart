@@ -13,10 +13,18 @@ Selectable<WordRow> buildWordQuery(
   int? offset,
 }) {
   final selectable = db.select(db.words);
-  if (filter == WordFilter.known) {
-    selectable.where((table) => table.isKnown.equals(true));
-  } else if (filter == WordFilter.unknown) {
-    selectable.where((table) => table.isKnown.equals(false));
+  if (filter == WordFilter.excluded) {
+    selectable.where((table) => table.isExcluded.equals(true));
+  } else {
+    selectable.where((table) => table.isExcluded.equals(false));
+
+    if (filter == WordFilter.known) {
+      selectable.where((table) => table.isKnown.equals(true));
+    } else if (filter == WordFilter.unknown) {
+      selectable.where((table) => table.isKnown.equals(false));
+    } else if (filter == WordFilter.due) {
+      selectable.where((table) => table.reviewSchedule.isNotNull());
+    }
   }
 
   if (query.isNotEmpty) {

@@ -1,5 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-
+import 'package:wordflow/core/domain/entities/word_category.dart';
 import 'package:wordflow/core/domain/entities/word_entity.dart';
 import 'package:wordflow/features/lexicon/domain/entities/lexicon_stats.dart';
 import 'package:wordflow/features/lexicon/domain/entities/word_filter.dart';
@@ -43,4 +43,8 @@ abstract class LexiconEvent with _$LexiconEvent {
   }) = UpdateWordEvent;
   const factory LexiconEvent.sort(WordSort sort) = SortLexicon;
   const factory LexiconEvent.fetchMore() = FetchMoreLexicon;
+  const factory LexiconEvent.exclude(int wordId) = ExcludeWordEvent;
+  const factory LexiconEvent.updateCategory(int wordId, WordCategory category) =
+      UpdateWordCategory;
+  const factory LexiconEvent.startReview(int wordId) = StartReview;
 }

@@ -9,6 +9,7 @@ import 'package:wordflow/core/widgets/app_loader.dart';
 import 'package:wordflow/core/widgets/app_text_field.dart';
 import 'package:wordflow/core/widgets/page_header.dart';
 import 'package:wordflow/core/widgets/sliver_status_view.dart';
+import 'package:wordflow/features/excluded_words/presentation/pages/excluded_words_screen.dart';
 import 'package:wordflow/features/lexicon/domain/entities/lexicon_stats.dart';
 import 'package:wordflow/features/lexicon/domain/entities/word_filter.dart';
 import 'package:wordflow/features/lexicon/domain/entities/word_sort.dart';
@@ -88,6 +89,12 @@ class _LexiconPageState extends State<LexiconPage>
     }
   }
 
+  void _goToExcludedWords() {
+    unawaited(Navigator.of(context).push(
+      MaterialPageRoute(builder: (_) => const ExcludedWordsScreen()),
+    ));
+  }
+
   @override
   Widget build(BuildContext context) {
     super.build(context);
@@ -98,8 +105,18 @@ class _LexiconPageState extends State<LexiconPage>
         child: CustomScrollView(
           controller: _listScrollController,
           slivers: [
-            const SliverToBoxAdapter(
-                child: PageHeader(title: AppStrings.myLexicon)),
+            SliverToBoxAdapter(
+              child: PageHeader(
+                title: AppStrings.myLexicon,
+                actions: [
+                  IconButton(
+                    onPressed: _goToExcludedWords,
+                    icon: const Icon(Icons.block_rounded),
+                    tooltip: 'Excluded Words',
+                  ),
+                ],
+              ),
+            ),
             SliverAppBar(
               floating: true,
               elevation: 1,

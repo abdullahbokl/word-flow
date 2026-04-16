@@ -36,6 +36,13 @@ class AnalyzerRepositoryImpl implements AnalyzerRepository {
   }
 
   @override
+  Stream<Either<Failure, AnalysisResult>> watchAnalysisResult(int id) {
+    return _local.watchAnalysisResult(id).map(
+          (model) => Right(model.toEntity()),
+        );
+  }
+
+  @override
   TaskEither<Failure, Unit> updateAnalysisCounts(int id) {
     return TaskEither.tryCatch(
       () async {

@@ -1,20 +1,11 @@
-import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/core/domain/entities/word_entity.dart';
 import 'package:wordflow/features/excluded_words/domain/entities/excluded_word.dart';
 
-extension ExcludedWordRowMapper on ExcludedWordRow {
-  ExcludedWord toEntity() {
+extension WordEntityToExcludedMapper on WordEntity {
+  ExcludedWord toExcludedWord() {
     return ExcludedWord(
       id: id,
-      word: word,
-      createdAt: createdAt,
-    );
-  }
-}
-
-extension ExcludedWordEntityMapper on ExcludedWord {
-  ExcludedWordsCompanion toCompanion() {
-    return ExcludedWordsCompanion.insert(
-      word: word,
+      word: text,
       createdAt: createdAt,
     );
   }

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wordflow/core/theme/app_colors.dart';
+import 'package:wordflow/core/theme/design_tokens.dart';
 import 'package:wordflow/core/widgets/app_empty_state.dart';
 import 'package:wordflow/core/widgets/app_error_widget.dart';
 import 'package:wordflow/core/widgets/app_loader.dart';
@@ -37,35 +40,73 @@ class ExcludedWordListView extends StatelessWidget {
 
             if (displayWords.isEmpty) {
               return const AppEmptyState(
-                icon: Icons.block,
+                icon: Icons.block_rounded,
                 title: 'No excluded words',
                 subtitle: 'Add words that you want to ignore during analysis.',
-              );
+              ).animate().fadeIn().scale(duration: AppTokens.durNormal);
             }
-            return ListView.separated(
+
+            return ListView.builder(
               itemCount: displayWords.length,
-              separatorBuilder: (_, __) => const Divider(height: 1),
+              padding: const EdgeInsets.only(bottom: AppTokens.space64),
               itemBuilder: (context, index) {
                 final word = displayWords[index];
-                return ListTile(
-                  title: AppText.body(word.word),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.edit_outlined, size: 20),
-                        onPressed: () =>
-                            ExcludedWordFormDialog.show(context, word: word),
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: AppTokens.space12),
+                  child: Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius:
+                          BorderRadius.circular(AppTokens.defaultRadius),
+                      side: BorderSide(
+                        color: Theme.of(context)
+                            .dividerColor
+                            .withValues(alpha: 0.1),
                       ),
-                      IconButton(
-                        icon: const Icon(Icons.delete_outline,
-                            size: 20, color: Colors.red),
-                        onPressed: () => context
-                            .read<ExcludedWordsCubit>()
-                            .deleteWord(word.id!),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: AppTokens.space16,
+                        vertical: AppTokens.space4,
                       ),
-                    ],
-                  ),
+                      title: AppText.body(
+                        word.word,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          IconButton(
+                            icon: Icon(
+                              Icons.edit_rounded,
+                              size: 20,
+                              color: Theme.of(context).colorScheme.primary,
+                            ),
+                            onPressed: () => ExcludedWordFormDialog.show(
+                                context,
+                                word: word),
+                          ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.restore_rounded,
+                              size: 20,
+                              color: AppColors.secondary,
+                            ),
+                            tooltip: 'Restore to Lexicon',
+                            onPressed: () => context
+                                .read<ExcludedWordsCubit>()
+                                .deleteWord(word.id!),
+                          ),
+                        ],
+                      ),
+                    ),
+                  )
+                      .animate()
+                      .fadeIn(
+                        delay: (index * 50).ms,
+                        duration: AppTokens.durNormal,
+                      )
+                      .slideY(begin: 0.1, curve: Curves.easeOutQuad),
                 );
               },
             );

@@ -4,7 +4,8 @@ import 'package:wordflow/core/database/converters/string_list_converter.dart';
 @DataClassName('WordRow')
 class Words extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get word => text().unique().customConstraint('COLLATE NOCASE')();
+  TextColumn get word =>
+      text().customConstraint('UNIQUE NOT NULL COLLATE NOCASE')();
   IntColumn get frequency => integer().withDefault(const Constant(0))();
   BoolColumn get isKnown => boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime()();
@@ -19,6 +20,9 @@ class Words extends Table {
       text().map(const StringListConverter()).nullable()();
   TextColumn get synonyms =>
       text().map(const StringListConverter()).nullable()();
+  BoolColumn get isExcluded => boolean().withDefault(const Constant(false))();
+  TextColumn get category => text().nullable()();
+  TextColumn get reviewSchedule => text().nullable()();
 }
 
 @DataClassName('AnalyzedTextRow')
@@ -45,9 +49,19 @@ class TextWordEntries extends Table {
   Set<Column> get primaryKey => {textId, wordId};
 }
 
-@DataClassName('ExcludedWordRow')
-class ExcludedWords extends Table {
+@DataClassName('CustomTagRow')
+class CustomTags extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get word => text().unique().customConstraint('COLLATE NOCASE')();
-  DateTimeColumn get createdAt => dateTime()();
+  TextColumn get name => text().unique()();
+}
+
+@DataClassName('WordCustomTagRow')
+class WordCustomTags extends Table {
+  IntColumn get wordId =>
+      integer().references(Words, #id, onDelete: KeyAction.cascade)();
+  IntColumn get tagId =>
+      integer().references(CustomTags, #id, onDelete: KeyAction.cascade)();
+
+  @override
+  Set<Column> get primaryKey => {wordId, tagId};
 }

@@ -8,5 +8,7 @@ abstract interface class AnalyzerLocalDataSource {
 
   Future<AnalysisResultModel> getAnalysisResult(int id);
 
+  Stream<AnalysisResultModel> watchAnalysisResult(int id);
+
   Future<void> updateAnalysisCounts(int id);
 }

@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:fpdart/fpdart.dart';
+import 'package:wordflow/core/constants/default_excluded_words.dart';
 import 'package:wordflow/core/data/mappers/word_row_mapper.dart';
 import 'package:wordflow/core/domain/entities/word_entity.dart';
 import 'package:wordflow/core/error/failures.dart';
@@ -41,13 +42,39 @@ class LexiconRepositoryImpl implements LexiconRepository {
     WordSort sort = WordSort.frequencyDesc,
     String query = '',
   }) =>
-      _local.watchWords(filter: filter, sort: sort, query: query).asyncMap(
-          (rows) async => Right(await compute((r) => r.toEntities(), rows)));
+      _local
+          .watchWords(filter: filter, sort: sort, query: query)
+          .asyncMap((rows) async {
+        var entities = await compute((r) => r.toEntities(), rows);
+        if (filter == WordFilter.due) {
+          final now = DateTime.now();
+          entities = entities
+              .where((e) =>
+                  e.reviewSchedule != null &&
+                  !e.reviewSchedule!.nextReviewDate.isAfter(now))
+              .toList();
+        }
+        return Right(entities);
+      });
 
   @override
   TaskEither<Failure, WordEntity> toggleStatus(int wordId) =>
       TaskEither.tryCatch(
         () async => (await _local.toggleStatus(wordId)).toEntity(),
+        (error, stack) => DatabaseFailure('$error', stack),
+      );
+
+  @override
+  TaskEither<Failure, WordEntity> excludeWord(int wordId) =>
+      TaskEither.tryCatch(
+        () async => (await _local.excludeWord(wordId)).toEntity(),
+        (error, stack) => DatabaseFailure('$error', stack),
+      );
+
+  @override
+  TaskEither<Failure, WordEntity> unexcludeWord(int wordId) =>
+      TaskEither.tryCatch(
+        () async => (await _local.unexcludeWord(wordId)).toEntity(),
         (error, stack) => DatabaseFailure('$error', stack),
       );
 
@@ -64,6 +91,8 @@ class LexiconRepositoryImpl implements LexiconRepository {
           translations: command.translations,
           synonyms: command.synonyms,
           isKnown: command.isKnown,
+          isExcluded: command.isExcluded,
+          reviewSchedule: command.reviewSchedule?.toJson(),
         ))
             .toEntity(),
         (error, stack) => DatabaseFailure('$error', stack),
@@ -81,7 +110,9 @@ class LexiconRepositoryImpl implements LexiconRepository {
   @override
   TaskEither<Failure, WordEntity> addWord(AddWordCommand command) =>
       TaskEither.tryCatch(
-        () async => (await _local.addWord(command.text)).toEntity(),
+        () async =>
+            (await _local.addWord(command.text, isExcluded: command.isExcluded))
+                .toEntity(),
         (error, stack) => DatabaseFailure('$error', stack),
       );
 
@@ -102,6 +133,17 @@ class LexiconRepositoryImpl implements LexiconRepository {
   TaskEither<Failure, WordEntity?> getWordByText(String text) =>
       TaskEither.tryCatch(
         () async => (await _local.getWordByText(text))?.toEntity(),
+        (error, stack) => DatabaseFailure('$error', stack),
+      );
+
+  @override
+  TaskEither<Failure, List<WordEntity>> initializeDefaultExcludedWords() =>
+      TaskEither.tryCatch(
+        () async {
+          final rows = await _local.addMultipleWords(DefaultExcludedWords.words,
+              isExcluded: true);
+          return compute((r) => r.toEntities(), rows);
+        },
         (error, stack) => DatabaseFailure('$error', stack),
       );
 

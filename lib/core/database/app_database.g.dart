@@ -23,7 +23,7 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
       'word', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
-      defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
+      $customConstraints: 'UNIQUE NOT NULL COLLATE NOCASE');
   static const VerificationMeta _frequencyMeta =
       const VerificationMeta('frequency');
   @override
@@ -86,6 +86,28 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
       GeneratedColumn<String>('synonyms', aliasedName, true,
               type: DriftSqlType.string, requiredDuringInsert: false)
           .withConverter<List<String>?>($WordsTable.$convertersynonymsn);
+  static const VerificationMeta _isExcludedMeta =
+      const VerificationMeta('isExcluded');
+  @override
+  late final GeneratedColumn<bool> isExcluded = GeneratedColumn<bool>(
+      'is_excluded', aliasedName, false,
+      type: DriftSqlType.bool,
+      requiredDuringInsert: false,
+      defaultConstraints:
+          GeneratedColumn.constraintIsAlways('CHECK ("is_excluded" IN (0, 1))'),
+      defaultValue: const Constant(false));
+  static const VerificationMeta _categoryMeta =
+      const VerificationMeta('category');
+  @override
+  late final GeneratedColumn<String> category = GeneratedColumn<String>(
+      'category', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _reviewScheduleMeta =
+      const VerificationMeta('reviewSchedule');
+  @override
+  late final GeneratedColumn<String> reviewSchedule = GeneratedColumn<String>(
+      'review_schedule', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   @override
   List<GeneratedColumn> get $columns => [
         id,
@@ -99,7 +121,10 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
         definitions,
         examples,
         translations,
-        synonyms
+        synonyms,
+        isExcluded,
+        category,
+        reviewSchedule
       ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -150,6 +175,22 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
           description.isAcceptableOrUnknown(
               data['description']!, _descriptionMeta));
     }
+    if (data.containsKey('is_excluded')) {
+      context.handle(
+          _isExcludedMeta,
+          isExcluded.isAcceptableOrUnknown(
+              data['is_excluded']!, _isExcludedMeta));
+    }
+    if (data.containsKey('category')) {
+      context.handle(_categoryMeta,
+          category.isAcceptableOrUnknown(data['category']!, _categoryMeta));
+    }
+    if (data.containsKey('review_schedule')) {
+      context.handle(
+          _reviewScheduleMeta,
+          reviewSchedule.isAcceptableOrUnknown(
+              data['review_schedule']!, _reviewScheduleMeta));
+    }
     return context;
   }
 
@@ -187,6 +228,12 @@ class $WordsTable extends Words with TableInfo<$WordsTable, WordRow> {
       synonyms: $WordsTable.$convertersynonymsn.fromSql(attachedDatabase
           .typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}synonyms'])),
+      isExcluded: attachedDatabase.typeMapping
+          .read(DriftSqlType.bool, data['${effectivePrefix}is_excluded'])!,
+      category: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}category']),
+      reviewSchedule: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}review_schedule']),
     );
   }
 
@@ -226,6 +273,9 @@ class WordRow extends DataClass implements Insertable<WordRow> {
   final List<String>? examples;
   final List<String>? translations;
   final List<String>? synonyms;
+  final bool isExcluded;
+  final String? category;
+  final String? reviewSchedule;
   const WordRow(
       {required this.id,
       required this.word,
@@ -238,7 +288,10 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       this.definitions,
       this.examples,
       this.translations,
-      this.synonyms});
+      this.synonyms,
+      required this.isExcluded,
+      this.category,
+      this.reviewSchedule});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -270,6 +323,13 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       map['synonyms'] =
           Variable<String>($WordsTable.$convertersynonymsn.toSql(synonyms));
     }
+    map['is_excluded'] = Variable<bool>(isExcluded);
+    if (!nullToAbsent || category != null) {
+      map['category'] = Variable<String>(category);
+    }
+    if (!nullToAbsent || reviewSchedule != null) {
+      map['review_schedule'] = Variable<String>(reviewSchedule);
+    }
     return map;
   }
 
@@ -299,6 +359,13 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       synonyms: synonyms == null && nullToAbsent
           ? const Value.absent()
           : Value(synonyms),
+      isExcluded: Value(isExcluded),
+      category: category == null && nullToAbsent
+          ? const Value.absent()
+          : Value(category),
+      reviewSchedule: reviewSchedule == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reviewSchedule),
     );
   }
 
@@ -318,6 +385,9 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       examples: serializer.fromJson<List<String>?>(json['examples']),
       translations: serializer.fromJson<List<String>?>(json['translations']),
       synonyms: serializer.fromJson<List<String>?>(json['synonyms']),
+      isExcluded: serializer.fromJson<bool>(json['isExcluded']),
+      category: serializer.fromJson<String?>(json['category']),
+      reviewSchedule: serializer.fromJson<String?>(json['reviewSchedule']),
     );
   }
   @override
@@ -336,6 +406,9 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       'examples': serializer.toJson<List<String>?>(examples),
       'translations': serializer.toJson<List<String>?>(translations),
       'synonyms': serializer.toJson<List<String>?>(synonyms),
+      'isExcluded': serializer.toJson<bool>(isExcluded),
+      'category': serializer.toJson<String?>(category),
+      'reviewSchedule': serializer.toJson<String?>(reviewSchedule),
     };
   }
 
@@ -351,7 +424,10 @@ class WordRow extends DataClass implements Insertable<WordRow> {
           Value<List<String>?> definitions = const Value.absent(),
           Value<List<String>?> examples = const Value.absent(),
           Value<List<String>?> translations = const Value.absent(),
-          Value<List<String>?> synonyms = const Value.absent()}) =>
+          Value<List<String>?> synonyms = const Value.absent(),
+          bool? isExcluded,
+          Value<String?> category = const Value.absent(),
+          Value<String?> reviewSchedule = const Value.absent()}) =>
       WordRow(
         id: id ?? this.id,
         word: word ?? this.word,
@@ -366,6 +442,10 @@ class WordRow extends DataClass implements Insertable<WordRow> {
         translations:
             translations.present ? translations.value : this.translations,
         synonyms: synonyms.present ? synonyms.value : this.synonyms,
+        isExcluded: isExcluded ?? this.isExcluded,
+        category: category.present ? category.value : this.category,
+        reviewSchedule:
+            reviewSchedule.present ? reviewSchedule.value : this.reviewSchedule,
       );
   WordRow copyWithCompanion(WordsCompanion data) {
     return WordRow(
@@ -385,6 +465,12 @@ class WordRow extends DataClass implements Insertable<WordRow> {
           ? data.translations.value
           : this.translations,
       synonyms: data.synonyms.present ? data.synonyms.value : this.synonyms,
+      isExcluded:
+          data.isExcluded.present ? data.isExcluded.value : this.isExcluded,
+      category: data.category.present ? data.category.value : this.category,
+      reviewSchedule: data.reviewSchedule.present
+          ? data.reviewSchedule.value
+          : this.reviewSchedule,
     );
   }
 
@@ -402,7 +488,10 @@ class WordRow extends DataClass implements Insertable<WordRow> {
           ..write('definitions: $definitions, ')
           ..write('examples: $examples, ')
           ..write('translations: $translations, ')
-          ..write('synonyms: $synonyms')
+          ..write('synonyms: $synonyms, ')
+          ..write('isExcluded: $isExcluded, ')
+          ..write('category: $category, ')
+          ..write('reviewSchedule: $reviewSchedule')
           ..write(')'))
         .toString();
   }
@@ -420,7 +509,10 @@ class WordRow extends DataClass implements Insertable<WordRow> {
       definitions,
       examples,
       translations,
-      synonyms);
+      synonyms,
+      isExcluded,
+      category,
+      reviewSchedule);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -436,7 +528,10 @@ class WordRow extends DataClass implements Insertable<WordRow> {
           other.definitions == this.definitions &&
           other.examples == this.examples &&
           other.translations == this.translations &&
-          other.synonyms == this.synonyms);
+          other.synonyms == this.synonyms &&
+          other.isExcluded == this.isExcluded &&
+          other.category == this.category &&
+          other.reviewSchedule == this.reviewSchedule);
 }
 
 class WordsCompanion extends UpdateCompanion<WordRow> {
@@ -452,6 +547,9 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
   final Value<List<String>?> examples;
   final Value<List<String>?> translations;
   final Value<List<String>?> synonyms;
+  final Value<bool> isExcluded;
+  final Value<String?> category;
+  final Value<String?> reviewSchedule;
   const WordsCompanion({
     this.id = const Value.absent(),
     this.word = const Value.absent(),
@@ -465,6 +563,9 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
     this.examples = const Value.absent(),
     this.translations = const Value.absent(),
     this.synonyms = const Value.absent(),
+    this.isExcluded = const Value.absent(),
+    this.category = const Value.absent(),
+    this.reviewSchedule = const Value.absent(),
   });
   WordsCompanion.insert({
     this.id = const Value.absent(),
@@ -479,6 +580,9 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
     this.examples = const Value.absent(),
     this.translations = const Value.absent(),
     this.synonyms = const Value.absent(),
+    this.isExcluded = const Value.absent(),
+    this.category = const Value.absent(),
+    this.reviewSchedule = const Value.absent(),
   })  : word = Value(word),
         createdAt = Value(createdAt),
         updatedAt = Value(updatedAt);
@@ -495,6 +599,9 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
     Expression<String>? examples,
     Expression<String>? translations,
     Expression<String>? synonyms,
+    Expression<bool>? isExcluded,
+    Expression<String>? category,
+    Expression<String>? reviewSchedule,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -509,6 +616,9 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
       if (examples != null) 'examples': examples,
       if (translations != null) 'translations': translations,
       if (synonyms != null) 'synonyms': synonyms,
+      if (isExcluded != null) 'is_excluded': isExcluded,
+      if (category != null) 'category': category,
+      if (reviewSchedule != null) 'review_schedule': reviewSchedule,
     });
   }
 
@@ -524,7 +634,10 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
       Value<List<String>?>? definitions,
       Value<List<String>?>? examples,
       Value<List<String>?>? translations,
-      Value<List<String>?>? synonyms}) {
+      Value<List<String>?>? synonyms,
+      Value<bool>? isExcluded,
+      Value<String?>? category,
+      Value<String?>? reviewSchedule}) {
     return WordsCompanion(
       id: id ?? this.id,
       word: word ?? this.word,
@@ -538,6 +651,9 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
       examples: examples ?? this.examples,
       translations: translations ?? this.translations,
       synonyms: synonyms ?? this.synonyms,
+      isExcluded: isExcluded ?? this.isExcluded,
+      category: category ?? this.category,
+      reviewSchedule: reviewSchedule ?? this.reviewSchedule,
     );
   }
 
@@ -584,6 +700,15 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
       map['synonyms'] = Variable<String>(
           $WordsTable.$convertersynonymsn.toSql(synonyms.value));
     }
+    if (isExcluded.present) {
+      map['is_excluded'] = Variable<bool>(isExcluded.value);
+    }
+    if (category.present) {
+      map['category'] = Variable<String>(category.value);
+    }
+    if (reviewSchedule.present) {
+      map['review_schedule'] = Variable<String>(reviewSchedule.value);
+    }
     return map;
   }
 
@@ -601,7 +726,10 @@ class WordsCompanion extends UpdateCompanion<WordRow> {
           ..write('definitions: $definitions, ')
           ..write('examples: $examples, ')
           ..write('translations: $translations, ')
-          ..write('synonyms: $synonyms')
+          ..write('synonyms: $synonyms, ')
+          ..write('isExcluded: $isExcluded, ')
+          ..write('category: $category, ')
+          ..write('reviewSchedule: $reviewSchedule')
           ..write(')'))
         .toString();
   }
@@ -1277,12 +1405,12 @@ class TextWordEntriesCompanion extends UpdateCompanion<TextWordEntryRow> {
   }
 }
 
-class $ExcludedWordsTable extends ExcludedWords
-    with TableInfo<$ExcludedWordsTable, ExcludedWordRow> {
+class $CustomTagsTable extends CustomTags
+    with TableInfo<$CustomTagsTable, CustomTagRow> {
   @override
   final GeneratedDatabase attachedDatabase;
   final String? _alias;
-  $ExcludedWordsTable(this.attachedDatabase, [this._alias]);
+  $CustomTagsTable(this.attachedDatabase, [this._alias]);
   static const VerificationMeta _idMeta = const VerificationMeta('id');
   @override
   late final GeneratedColumn<int> id = GeneratedColumn<int>(
@@ -1292,45 +1420,33 @@ class $ExcludedWordsTable extends ExcludedWords
       requiredDuringInsert: false,
       defaultConstraints:
           GeneratedColumn.constraintIsAlways('PRIMARY KEY AUTOINCREMENT'));
-  static const VerificationMeta _wordMeta = const VerificationMeta('word');
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
   @override
-  late final GeneratedColumn<String> word = GeneratedColumn<String>(
-      'word', aliasedName, false,
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+      'name', aliasedName, false,
       type: DriftSqlType.string,
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'));
-  static const VerificationMeta _createdAtMeta =
-      const VerificationMeta('createdAt');
   @override
-  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
-      'created_at', aliasedName, false,
-      type: DriftSqlType.dateTime, requiredDuringInsert: true);
-  @override
-  List<GeneratedColumn> get $columns => [id, word, createdAt];
+  List<GeneratedColumn> get $columns => [id, name];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
   String get actualTableName => $name;
-  static const String $name = 'excluded_words';
+  static const String $name = 'custom_tags';
   @override
-  VerificationContext validateIntegrity(Insertable<ExcludedWordRow> instance,
+  VerificationContext validateIntegrity(Insertable<CustomTagRow> instance,
       {bool isInserting = false}) {
     final context = VerificationContext();
     final data = instance.toColumns(true);
     if (data.containsKey('id')) {
       context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
     }
-    if (data.containsKey('word')) {
+    if (data.containsKey('name')) {
       context.handle(
-          _wordMeta, word.isAcceptableOrUnknown(data['word']!, _wordMeta));
+          _nameMeta, name.isAcceptableOrUnknown(data['name']!, _nameMeta));
     } else if (isInserting) {
-      context.missing(_wordMeta);
-    }
-    if (data.containsKey('created_at')) {
-      context.handle(_createdAtMeta,
-          createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta));
-    } else if (isInserting) {
-      context.missing(_createdAtMeta);
+      context.missing(_nameMeta);
     }
     return context;
   }
@@ -1338,54 +1454,47 @@ class $ExcludedWordsTable extends ExcludedWords
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
-  ExcludedWordRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+  CustomTagRow map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
-    return ExcludedWordRow(
+    return CustomTagRow(
       id: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
-      word: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}word'])!,
-      createdAt: attachedDatabase.typeMapping
-          .read(DriftSqlType.dateTime, data['${effectivePrefix}created_at'])!,
+      name: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}name'])!,
     );
   }
 
   @override
-  $ExcludedWordsTable createAlias(String alias) {
-    return $ExcludedWordsTable(attachedDatabase, alias);
+  $CustomTagsTable createAlias(String alias) {
+    return $CustomTagsTable(attachedDatabase, alias);
   }
 }
 
-class ExcludedWordRow extends DataClass implements Insertable<ExcludedWordRow> {
+class CustomTagRow extends DataClass implements Insertable<CustomTagRow> {
   final int id;
-  final String word;
-  final DateTime createdAt;
-  const ExcludedWordRow(
-      {required this.id, required this.word, required this.createdAt});
+  final String name;
+  const CustomTagRow({required this.id, required this.name});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
-    map['word'] = Variable<String>(word);
-    map['created_at'] = Variable<DateTime>(createdAt);
+    map['name'] = Variable<String>(name);
     return map;
   }
 
-  ExcludedWordsCompanion toCompanion(bool nullToAbsent) {
-    return ExcludedWordsCompanion(
+  CustomTagsCompanion toCompanion(bool nullToAbsent) {
+    return CustomTagsCompanion(
       id: Value(id),
-      word: Value(word),
-      createdAt: Value(createdAt),
+      name: Value(name),
     );
   }
 
-  factory ExcludedWordRow.fromJson(Map<String, dynamic> json,
+  factory CustomTagRow.fromJson(Map<String, dynamic> json,
       {ValueSerializer? serializer}) {
     serializer ??= driftRuntimeOptions.defaultSerializer;
-    return ExcludedWordRow(
+    return CustomTagRow(
       id: serializer.fromJson<int>(json['id']),
-      word: serializer.fromJson<String>(json['word']),
-      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      name: serializer.fromJson<String>(json['name']),
     );
   }
   @override
@@ -1393,79 +1502,63 @@ class ExcludedWordRow extends DataClass implements Insertable<ExcludedWordRow> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
-      'word': serializer.toJson<String>(word),
-      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'name': serializer.toJson<String>(name),
     };
   }
 
-  ExcludedWordRow copyWith({int? id, String? word, DateTime? createdAt}) =>
-      ExcludedWordRow(
+  CustomTagRow copyWith({int? id, String? name}) => CustomTagRow(
         id: id ?? this.id,
-        word: word ?? this.word,
-        createdAt: createdAt ?? this.createdAt,
+        name: name ?? this.name,
       );
-  ExcludedWordRow copyWithCompanion(ExcludedWordsCompanion data) {
-    return ExcludedWordRow(
+  CustomTagRow copyWithCompanion(CustomTagsCompanion data) {
+    return CustomTagRow(
       id: data.id.present ? data.id.value : this.id,
-      word: data.word.present ? data.word.value : this.word,
-      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      name: data.name.present ? data.name.value : this.name,
     );
   }
 
   @override
   String toString() {
-    return (StringBuffer('ExcludedWordRow(')
+    return (StringBuffer('CustomTagRow(')
           ..write('id: $id, ')
-          ..write('word: $word, ')
-          ..write('createdAt: $createdAt')
+          ..write('name: $name')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, word, createdAt);
+  int get hashCode => Object.hash(id, name);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      (other is ExcludedWordRow &&
-          other.id == this.id &&
-          other.word == this.word &&
-          other.createdAt == this.createdAt);
+      (other is CustomTagRow && other.id == this.id && other.name == this.name);
 }
 
-class ExcludedWordsCompanion extends UpdateCompanion<ExcludedWordRow> {
+class CustomTagsCompanion extends UpdateCompanion<CustomTagRow> {
   final Value<int> id;
-  final Value<String> word;
-  final Value<DateTime> createdAt;
-  const ExcludedWordsCompanion({
+  final Value<String> name;
+  const CustomTagsCompanion({
     this.id = const Value.absent(),
-    this.word = const Value.absent(),
-    this.createdAt = const Value.absent(),
+    this.name = const Value.absent(),
   });
-  ExcludedWordsCompanion.insert({
+  CustomTagsCompanion.insert({
     this.id = const Value.absent(),
-    required String word,
-    required DateTime createdAt,
-  })  : word = Value(word),
-        createdAt = Value(createdAt);
-  static Insertable<ExcludedWordRow> custom({
+    required String name,
+  }) : name = Value(name);
+  static Insertable<CustomTagRow> custom({
     Expression<int>? id,
-    Expression<String>? word,
-    Expression<DateTime>? createdAt,
+    Expression<String>? name,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
-      if (word != null) 'word': word,
-      if (createdAt != null) 'created_at': createdAt,
+      if (name != null) 'name': name,
     });
   }
 
-  ExcludedWordsCompanion copyWith(
-      {Value<int>? id, Value<String>? word, Value<DateTime>? createdAt}) {
-    return ExcludedWordsCompanion(
+  CustomTagsCompanion copyWith({Value<int>? id, Value<String>? name}) {
+    return CustomTagsCompanion(
       id: id ?? this.id,
-      word: word ?? this.word,
-      createdAt: createdAt ?? this.createdAt,
+      name: name ?? this.name,
     );
   }
 
@@ -1475,21 +1568,214 @@ class ExcludedWordsCompanion extends UpdateCompanion<ExcludedWordRow> {
     if (id.present) {
       map['id'] = Variable<int>(id.value);
     }
-    if (word.present) {
-      map['word'] = Variable<String>(word.value);
-    }
-    if (createdAt.present) {
-      map['created_at'] = Variable<DateTime>(createdAt.value);
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
     }
     return map;
   }
 
   @override
   String toString() {
-    return (StringBuffer('ExcludedWordsCompanion(')
+    return (StringBuffer('CustomTagsCompanion(')
           ..write('id: $id, ')
-          ..write('word: $word, ')
-          ..write('createdAt: $createdAt')
+          ..write('name: $name')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $WordCustomTagsTable extends WordCustomTags
+    with TableInfo<$WordCustomTagsTable, WordCustomTagRow> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $WordCustomTagsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _wordIdMeta = const VerificationMeta('wordId');
+  @override
+  late final GeneratedColumn<int> wordId = GeneratedColumn<int>(
+      'word_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES words (id) ON DELETE CASCADE'));
+  static const VerificationMeta _tagIdMeta = const VerificationMeta('tagId');
+  @override
+  late final GeneratedColumn<int> tagId = GeneratedColumn<int>(
+      'tag_id', aliasedName, false,
+      type: DriftSqlType.int,
+      requiredDuringInsert: true,
+      defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'REFERENCES custom_tags (id) ON DELETE CASCADE'));
+  @override
+  List<GeneratedColumn> get $columns => [wordId, tagId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'word_custom_tags';
+  @override
+  VerificationContext validateIntegrity(Insertable<WordCustomTagRow> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('word_id')) {
+      context.handle(_wordIdMeta,
+          wordId.isAcceptableOrUnknown(data['word_id']!, _wordIdMeta));
+    } else if (isInserting) {
+      context.missing(_wordIdMeta);
+    }
+    if (data.containsKey('tag_id')) {
+      context.handle(
+          _tagIdMeta, tagId.isAcceptableOrUnknown(data['tag_id']!, _tagIdMeta));
+    } else if (isInserting) {
+      context.missing(_tagIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {wordId, tagId};
+  @override
+  WordCustomTagRow map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return WordCustomTagRow(
+      wordId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}word_id'])!,
+      tagId: attachedDatabase.typeMapping
+          .read(DriftSqlType.int, data['${effectivePrefix}tag_id'])!,
+    );
+  }
+
+  @override
+  $WordCustomTagsTable createAlias(String alias) {
+    return $WordCustomTagsTable(attachedDatabase, alias);
+  }
+}
+
+class WordCustomTagRow extends DataClass
+    implements Insertable<WordCustomTagRow> {
+  final int wordId;
+  final int tagId;
+  const WordCustomTagRow({required this.wordId, required this.tagId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['word_id'] = Variable<int>(wordId);
+    map['tag_id'] = Variable<int>(tagId);
+    return map;
+  }
+
+  WordCustomTagsCompanion toCompanion(bool nullToAbsent) {
+    return WordCustomTagsCompanion(
+      wordId: Value(wordId),
+      tagId: Value(tagId),
+    );
+  }
+
+  factory WordCustomTagRow.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return WordCustomTagRow(
+      wordId: serializer.fromJson<int>(json['wordId']),
+      tagId: serializer.fromJson<int>(json['tagId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'wordId': serializer.toJson<int>(wordId),
+      'tagId': serializer.toJson<int>(tagId),
+    };
+  }
+
+  WordCustomTagRow copyWith({int? wordId, int? tagId}) => WordCustomTagRow(
+        wordId: wordId ?? this.wordId,
+        tagId: tagId ?? this.tagId,
+      );
+  WordCustomTagRow copyWithCompanion(WordCustomTagsCompanion data) {
+    return WordCustomTagRow(
+      wordId: data.wordId.present ? data.wordId.value : this.wordId,
+      tagId: data.tagId.present ? data.tagId.value : this.tagId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WordCustomTagRow(')
+          ..write('wordId: $wordId, ')
+          ..write('tagId: $tagId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(wordId, tagId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is WordCustomTagRow &&
+          other.wordId == this.wordId &&
+          other.tagId == this.tagId);
+}
+
+class WordCustomTagsCompanion extends UpdateCompanion<WordCustomTagRow> {
+  final Value<int> wordId;
+  final Value<int> tagId;
+  final Value<int> rowid;
+  const WordCustomTagsCompanion({
+    this.wordId = const Value.absent(),
+    this.tagId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  WordCustomTagsCompanion.insert({
+    required int wordId,
+    required int tagId,
+    this.rowid = const Value.absent(),
+  })  : wordId = Value(wordId),
+        tagId = Value(tagId);
+  static Insertable<WordCustomTagRow> custom({
+    Expression<int>? wordId,
+    Expression<int>? tagId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (wordId != null) 'word_id': wordId,
+      if (tagId != null) 'tag_id': tagId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  WordCustomTagsCompanion copyWith(
+      {Value<int>? wordId, Value<int>? tagId, Value<int>? rowid}) {
+    return WordCustomTagsCompanion(
+      wordId: wordId ?? this.wordId,
+      tagId: tagId ?? this.tagId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (wordId.present) {
+      map['word_id'] = Variable<int>(wordId.value);
+    }
+    if (tagId.present) {
+      map['tag_id'] = Variable<int>(tagId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('WordCustomTagsCompanion(')
+          ..write('wordId: $wordId, ')
+          ..write('tagId: $tagId, ')
+          ..write('rowid: $rowid')
           ..write(')'))
         .toString();
   }
@@ -1502,13 +1788,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AnalyzedTextsTable analyzedTexts = $AnalyzedTextsTable(this);
   late final $TextWordEntriesTable textWordEntries =
       $TextWordEntriesTable(this);
-  late final $ExcludedWordsTable excludedWords = $ExcludedWordsTable(this);
+  late final $CustomTagsTable customTags = $CustomTagsTable(this);
+  late final $WordCustomTagsTable wordCustomTags = $WordCustomTagsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
   List<DatabaseSchemaEntity> get allSchemaEntities =>
-      [words, analyzedTexts, textWordEntries, excludedWords];
+      [words, analyzedTexts, textWordEntries, customTags, wordCustomTags];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
         [
@@ -1524,6 +1811,20 @@ abstract class _$AppDatabase extends GeneratedDatabase {
                 limitUpdateKind: UpdateKind.delete),
             result: [
               TableUpdate('text_word_entries', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('words',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('word_custom_tags', kind: UpdateKind.delete),
+            ],
+          ),
+          WritePropagation(
+            on: TableUpdateQuery.onTableName('custom_tags',
+                limitUpdateKind: UpdateKind.delete),
+            result: [
+              TableUpdate('word_custom_tags', kind: UpdateKind.delete),
             ],
           ),
         ],
@@ -1543,6 +1844,9 @@ typedef $$WordsTableCreateCompanionBuilder = WordsCompanion Function({
   Value<List<String>?> examples,
   Value<List<String>?> translations,
   Value<List<String>?> synonyms,
+  Value<bool> isExcluded,
+  Value<String?> category,
+  Value<String?> reviewSchedule,
 });
 typedef $$WordsTableUpdateCompanionBuilder = WordsCompanion Function({
   Value<int> id,
@@ -1557,6 +1861,9 @@ typedef $$WordsTableUpdateCompanionBuilder = WordsCompanion Function({
   Value<List<String>?> examples,
   Value<List<String>?> translations,
   Value<List<String>?> synonyms,
+  Value<bool> isExcluded,
+  Value<String?> category,
+  Value<String?> reviewSchedule,
 });
 
 final class $$WordsTableReferences
@@ -1576,6 +1883,21 @@ final class $$WordsTableReferences
 
     final cache =
         $_typedResult.readTableOrNull(_textWordEntriesRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+
+  static MultiTypedResultKey<$WordCustomTagsTable, List<WordCustomTagRow>>
+      _wordCustomTagsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.wordCustomTags,
+              aliasName:
+                  $_aliasNameGenerator(db.words.id, db.wordCustomTags.wordId));
+
+  $$WordCustomTagsTableProcessedTableManager get wordCustomTagsRefs {
+    final manager = $$WordCustomTagsTableTableManager($_db, $_db.wordCustomTags)
+        .filter((f) => f.wordId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_wordCustomTagsRefsTable($_db));
     return ProcessedTableManager(
         manager.$state.copyWith(prefetchedData: cache));
   }
@@ -1633,6 +1955,16 @@ class $$WordsTableFilterComposer extends Composer<_$AppDatabase, $WordsTable> {
           column: $table.synonyms,
           builder: (column) => ColumnWithTypeConverterFilters(column));
 
+  ColumnFilters<bool> get isExcluded => $composableBuilder(
+      column: $table.isExcluded, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get reviewSchedule => $composableBuilder(
+      column: $table.reviewSchedule,
+      builder: (column) => ColumnFilters(column));
+
   Expression<bool> textWordEntriesRefs(
       Expression<bool> Function($$TextWordEntriesTableFilterComposer f) f) {
     final $$TextWordEntriesTableFilterComposer composer = $composerBuilder(
@@ -1646,6 +1978,27 @@ class $$WordsTableFilterComposer extends Composer<_$AppDatabase, $WordsTable> {
             $$TextWordEntriesTableFilterComposer(
               $db: $db,
               $table: $db.textWordEntries,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
+
+  Expression<bool> wordCustomTagsRefs(
+      Expression<bool> Function($$WordCustomTagsTableFilterComposer f) f) {
+    final $$WordCustomTagsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.wordCustomTags,
+        getReferencedColumn: (t) => t.wordId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WordCustomTagsTableFilterComposer(
+              $db: $db,
+              $table: $db.wordCustomTags,
               $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
               joinBuilder: joinBuilder,
               $removeJoinBuilderFromRootComposer:
@@ -1700,6 +2053,16 @@ class $$WordsTableOrderingComposer
 
   ColumnOrderings<String> get synonyms => $composableBuilder(
       column: $table.synonyms, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<bool> get isExcluded => $composableBuilder(
+      column: $table.isExcluded, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get category => $composableBuilder(
+      column: $table.category, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get reviewSchedule => $composableBuilder(
+      column: $table.reviewSchedule,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$WordsTableAnnotationComposer
@@ -1749,6 +2112,15 @@ class $$WordsTableAnnotationComposer
   GeneratedColumnWithTypeConverter<List<String>?, String> get synonyms =>
       $composableBuilder(column: $table.synonyms, builder: (column) => column);
 
+  GeneratedColumn<bool> get isExcluded => $composableBuilder(
+      column: $table.isExcluded, builder: (column) => column);
+
+  GeneratedColumn<String> get category =>
+      $composableBuilder(column: $table.category, builder: (column) => column);
+
+  GeneratedColumn<String> get reviewSchedule => $composableBuilder(
+      column: $table.reviewSchedule, builder: (column) => column);
+
   Expression<T> textWordEntriesRefs<T extends Object>(
       Expression<T> Function($$TextWordEntriesTableAnnotationComposer a) f) {
     final $$TextWordEntriesTableAnnotationComposer composer = $composerBuilder(
@@ -1769,6 +2141,27 @@ class $$WordsTableAnnotationComposer
             ));
     return f(composer);
   }
+
+  Expression<T> wordCustomTagsRefs<T extends Object>(
+      Expression<T> Function($$WordCustomTagsTableAnnotationComposer a) f) {
+    final $$WordCustomTagsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.wordCustomTags,
+        getReferencedColumn: (t) => t.wordId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WordCustomTagsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.wordCustomTags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
 class $$WordsTableTableManager extends RootTableManager<
@@ -1782,7 +2175,8 @@ class $$WordsTableTableManager extends RootTableManager<
     $$WordsTableUpdateCompanionBuilder,
     (WordRow, $$WordsTableReferences),
     WordRow,
-    PrefetchHooks Function({bool textWordEntriesRefs})> {
+    PrefetchHooks Function(
+        {bool textWordEntriesRefs, bool wordCustomTagsRefs})> {
   $$WordsTableTableManager(_$AppDatabase db, $WordsTable table)
       : super(TableManagerState(
           db: db,
@@ -1806,6 +2200,9 @@ class $$WordsTableTableManager extends RootTableManager<
             Value<List<String>?> examples = const Value.absent(),
             Value<List<String>?> translations = const Value.absent(),
             Value<List<String>?> synonyms = const Value.absent(),
+            Value<bool> isExcluded = const Value.absent(),
+            Value<String?> category = const Value.absent(),
+            Value<String?> reviewSchedule = const Value.absent(),
           }) =>
               WordsCompanion(
             id: id,
@@ -1820,6 +2217,9 @@ class $$WordsTableTableManager extends RootTableManager<
             examples: examples,
             translations: translations,
             synonyms: synonyms,
+            isExcluded: isExcluded,
+            category: category,
+            reviewSchedule: reviewSchedule,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -1834,6 +2234,9 @@ class $$WordsTableTableManager extends RootTableManager<
             Value<List<String>?> examples = const Value.absent(),
             Value<List<String>?> translations = const Value.absent(),
             Value<List<String>?> synonyms = const Value.absent(),
+            Value<bool> isExcluded = const Value.absent(),
+            Value<String?> category = const Value.absent(),
+            Value<String?> reviewSchedule = const Value.absent(),
           }) =>
               WordsCompanion.insert(
             id: id,
@@ -1848,16 +2251,21 @@ class $$WordsTableTableManager extends RootTableManager<
             examples: examples,
             translations: translations,
             synonyms: synonyms,
+            isExcluded: isExcluded,
+            category: category,
+            reviewSchedule: reviewSchedule,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) =>
                   (e.readTable(table), $$WordsTableReferences(db, table, e)))
               .toList(),
-          prefetchHooksCallback: ({textWordEntriesRefs = false}) {
+          prefetchHooksCallback: (
+              {textWordEntriesRefs = false, wordCustomTagsRefs = false}) {
             return PrefetchHooks(
               db: db,
               explicitlyWatchedTables: [
-                if (textWordEntriesRefs) db.textWordEntries
+                if (textWordEntriesRefs) db.textWordEntries,
+                if (wordCustomTagsRefs) db.wordCustomTags
               ],
               addJoins: null,
               getPrefetchedDataCallback: (items) async {
@@ -1871,6 +2279,19 @@ class $$WordsTableTableManager extends RootTableManager<
                         managerFromTypedResult: (p0) =>
                             $$WordsTableReferences(db, table, p0)
                                 .textWordEntriesRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.wordId == item.id),
+                        typedResults: items),
+                  if (wordCustomTagsRefs)
+                    await $_getPrefetchedData<WordRow, $WordsTable,
+                            WordCustomTagRow>(
+                        currentTable: table,
+                        referencedTable:
+                            $$WordsTableReferences._wordCustomTagsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$WordsTableReferences(db, table, p0)
+                                .wordCustomTagsRefs,
                         referencedItemsForCurrentItem: (item,
                                 referencedItems) =>
                             referencedItems.where((e) => e.wordId == item.id),
@@ -1893,7 +2314,8 @@ typedef $$WordsTableProcessedTableManager = ProcessedTableManager<
     $$WordsTableUpdateCompanionBuilder,
     (WordRow, $$WordsTableReferences),
     WordRow,
-    PrefetchHooks Function({bool textWordEntriesRefs})>;
+    PrefetchHooks Function(
+        {bool textWordEntriesRefs, bool wordCustomTagsRefs})>;
 typedef $$AnalyzedTextsTableCreateCompanionBuilder = AnalyzedTextsCompanion
     Function({
   Value<int> id,
@@ -2518,22 +2940,38 @@ typedef $$TextWordEntriesTableProcessedTableManager = ProcessedTableManager<
     (TextWordEntryRow, $$TextWordEntriesTableReferences),
     TextWordEntryRow,
     PrefetchHooks Function({bool textId, bool wordId})>;
-typedef $$ExcludedWordsTableCreateCompanionBuilder = ExcludedWordsCompanion
-    Function({
+typedef $$CustomTagsTableCreateCompanionBuilder = CustomTagsCompanion Function({
   Value<int> id,
-  required String word,
-  required DateTime createdAt,
+  required String name,
 });
-typedef $$ExcludedWordsTableUpdateCompanionBuilder = ExcludedWordsCompanion
-    Function({
+typedef $$CustomTagsTableUpdateCompanionBuilder = CustomTagsCompanion Function({
   Value<int> id,
-  Value<String> word,
-  Value<DateTime> createdAt,
+  Value<String> name,
 });
 
-class $$ExcludedWordsTableFilterComposer
-    extends Composer<_$AppDatabase, $ExcludedWordsTable> {
-  $$ExcludedWordsTableFilterComposer({
+final class $$CustomTagsTableReferences
+    extends BaseReferences<_$AppDatabase, $CustomTagsTable, CustomTagRow> {
+  $$CustomTagsTableReferences(super.$_db, super.$_table, super.$_typedResult);
+
+  static MultiTypedResultKey<$WordCustomTagsTable, List<WordCustomTagRow>>
+      _wordCustomTagsRefsTable(_$AppDatabase db) =>
+          MultiTypedResultKey.fromTable(db.wordCustomTags,
+              aliasName: $_aliasNameGenerator(
+                  db.customTags.id, db.wordCustomTags.tagId));
+
+  $$WordCustomTagsTableProcessedTableManager get wordCustomTagsRefs {
+    final manager = $$WordCustomTagsTableTableManager($_db, $_db.wordCustomTags)
+        .filter((f) => f.tagId.id.sqlEquals($_itemColumn<int>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(_wordCustomTagsRefsTable($_db));
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: cache));
+  }
+}
+
+class $$CustomTagsTableFilterComposer
+    extends Composer<_$AppDatabase, $CustomTagsTable> {
+  $$CustomTagsTableFilterComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2543,16 +2981,34 @@ class $$ExcludedWordsTableFilterComposer
   ColumnFilters<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<String> get word => $composableBuilder(
-      column: $table.word, builder: (column) => ColumnFilters(column));
+  ColumnFilters<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnFilters(column));
 
-  ColumnFilters<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnFilters(column));
+  Expression<bool> wordCustomTagsRefs(
+      Expression<bool> Function($$WordCustomTagsTableFilterComposer f) f) {
+    final $$WordCustomTagsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.wordCustomTags,
+        getReferencedColumn: (t) => t.tagId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WordCustomTagsTableFilterComposer(
+              $db: $db,
+              $table: $db.wordCustomTags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
-class $$ExcludedWordsTableOrderingComposer
-    extends Composer<_$AppDatabase, $ExcludedWordsTable> {
-  $$ExcludedWordsTableOrderingComposer({
+class $$CustomTagsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CustomTagsTable> {
+  $$CustomTagsTableOrderingComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2562,16 +3018,13 @@ class $$ExcludedWordsTableOrderingComposer
   ColumnOrderings<int> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
-  ColumnOrderings<String> get word => $composableBuilder(
-      column: $table.word, builder: (column) => ColumnOrderings(column));
-
-  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
-      column: $table.createdAt, builder: (column) => ColumnOrderings(column));
+  ColumnOrderings<String> get name => $composableBuilder(
+      column: $table.name, builder: (column) => ColumnOrderings(column));
 }
 
-class $$ExcludedWordsTableAnnotationComposer
-    extends Composer<_$AppDatabase, $ExcludedWordsTable> {
-  $$ExcludedWordsTableAnnotationComposer({
+class $$CustomTagsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CustomTagsTable> {
+  $$CustomTagsTableAnnotationComposer({
     required super.$db,
     required super.$table,
     super.joinBuilder,
@@ -2581,80 +3034,423 @@ class $$ExcludedWordsTableAnnotationComposer
   GeneratedColumn<int> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get word =>
-      $composableBuilder(column: $table.word, builder: (column) => column);
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
 
-  GeneratedColumn<DateTime> get createdAt =>
-      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+  Expression<T> wordCustomTagsRefs<T extends Object>(
+      Expression<T> Function($$WordCustomTagsTableAnnotationComposer a) f) {
+    final $$WordCustomTagsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.id,
+        referencedTable: $db.wordCustomTags,
+        getReferencedColumn: (t) => t.tagId,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WordCustomTagsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.wordCustomTags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return f(composer);
+  }
 }
 
-class $$ExcludedWordsTableTableManager extends RootTableManager<
+class $$CustomTagsTableTableManager extends RootTableManager<
     _$AppDatabase,
-    $ExcludedWordsTable,
-    ExcludedWordRow,
-    $$ExcludedWordsTableFilterComposer,
-    $$ExcludedWordsTableOrderingComposer,
-    $$ExcludedWordsTableAnnotationComposer,
-    $$ExcludedWordsTableCreateCompanionBuilder,
-    $$ExcludedWordsTableUpdateCompanionBuilder,
-    (
-      ExcludedWordRow,
-      BaseReferences<_$AppDatabase, $ExcludedWordsTable, ExcludedWordRow>
-    ),
-    ExcludedWordRow,
-    PrefetchHooks Function()> {
-  $$ExcludedWordsTableTableManager(_$AppDatabase db, $ExcludedWordsTable table)
+    $CustomTagsTable,
+    CustomTagRow,
+    $$CustomTagsTableFilterComposer,
+    $$CustomTagsTableOrderingComposer,
+    $$CustomTagsTableAnnotationComposer,
+    $$CustomTagsTableCreateCompanionBuilder,
+    $$CustomTagsTableUpdateCompanionBuilder,
+    (CustomTagRow, $$CustomTagsTableReferences),
+    CustomTagRow,
+    PrefetchHooks Function({bool wordCustomTagsRefs})> {
+  $$CustomTagsTableTableManager(_$AppDatabase db, $CustomTagsTable table)
       : super(TableManagerState(
           db: db,
           table: table,
           createFilteringComposer: () =>
-              $$ExcludedWordsTableFilterComposer($db: db, $table: table),
+              $$CustomTagsTableFilterComposer($db: db, $table: table),
           createOrderingComposer: () =>
-              $$ExcludedWordsTableOrderingComposer($db: db, $table: table),
+              $$CustomTagsTableOrderingComposer($db: db, $table: table),
           createComputedFieldComposer: () =>
-              $$ExcludedWordsTableAnnotationComposer($db: db, $table: table),
+              $$CustomTagsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            Value<String> word = const Value.absent(),
-            Value<DateTime> createdAt = const Value.absent(),
+            Value<String> name = const Value.absent(),
           }) =>
-              ExcludedWordsCompanion(
+              CustomTagsCompanion(
             id: id,
-            word: word,
-            createdAt: createdAt,
+            name: name,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
-            required String word,
-            required DateTime createdAt,
+            required String name,
           }) =>
-              ExcludedWordsCompanion.insert(
+              CustomTagsCompanion.insert(
             id: id,
-            word: word,
-            createdAt: createdAt,
+            name: name,
           ),
           withReferenceMapper: (p0) => p0
-              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .map((e) => (
+                    e.readTable(table),
+                    $$CustomTagsTableReferences(db, table, e)
+                  ))
               .toList(),
-          prefetchHooksCallback: null,
+          prefetchHooksCallback: ({wordCustomTagsRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (wordCustomTagsRefs) db.wordCustomTags
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (wordCustomTagsRefs)
+                    await $_getPrefetchedData<CustomTagRow, $CustomTagsTable,
+                            WordCustomTagRow>(
+                        currentTable: table,
+                        referencedTable: $$CustomTagsTableReferences
+                            ._wordCustomTagsRefsTable(db),
+                        managerFromTypedResult: (p0) =>
+                            $$CustomTagsTableReferences(db, table, p0)
+                                .wordCustomTagsRefs,
+                        referencedItemsForCurrentItem: (item,
+                                referencedItems) =>
+                            referencedItems.where((e) => e.tagId == item.id),
+                        typedResults: items)
+                ];
+              },
+            );
+          },
         ));
 }
 
-typedef $$ExcludedWordsTableProcessedTableManager = ProcessedTableManager<
+typedef $$CustomTagsTableProcessedTableManager = ProcessedTableManager<
     _$AppDatabase,
-    $ExcludedWordsTable,
-    ExcludedWordRow,
-    $$ExcludedWordsTableFilterComposer,
-    $$ExcludedWordsTableOrderingComposer,
-    $$ExcludedWordsTableAnnotationComposer,
-    $$ExcludedWordsTableCreateCompanionBuilder,
-    $$ExcludedWordsTableUpdateCompanionBuilder,
-    (
-      ExcludedWordRow,
-      BaseReferences<_$AppDatabase, $ExcludedWordsTable, ExcludedWordRow>
-    ),
-    ExcludedWordRow,
-    PrefetchHooks Function()>;
+    $CustomTagsTable,
+    CustomTagRow,
+    $$CustomTagsTableFilterComposer,
+    $$CustomTagsTableOrderingComposer,
+    $$CustomTagsTableAnnotationComposer,
+    $$CustomTagsTableCreateCompanionBuilder,
+    $$CustomTagsTableUpdateCompanionBuilder,
+    (CustomTagRow, $$CustomTagsTableReferences),
+    CustomTagRow,
+    PrefetchHooks Function({bool wordCustomTagsRefs})>;
+typedef $$WordCustomTagsTableCreateCompanionBuilder = WordCustomTagsCompanion
+    Function({
+  required int wordId,
+  required int tagId,
+  Value<int> rowid,
+});
+typedef $$WordCustomTagsTableUpdateCompanionBuilder = WordCustomTagsCompanion
+    Function({
+  Value<int> wordId,
+  Value<int> tagId,
+  Value<int> rowid,
+});
+
+final class $$WordCustomTagsTableReferences extends BaseReferences<
+    _$AppDatabase, $WordCustomTagsTable, WordCustomTagRow> {
+  $$WordCustomTagsTableReferences(
+      super.$_db, super.$_table, super.$_typedResult);
+
+  static $WordsTable _wordIdTable(_$AppDatabase db) => db.words
+      .createAlias($_aliasNameGenerator(db.wordCustomTags.wordId, db.words.id));
+
+  $$WordsTableProcessedTableManager get wordId {
+    final $_column = $_itemColumn<int>('word_id')!;
+
+    final manager = $$WordsTableTableManager($_db, $_db.words)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_wordIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+
+  static $CustomTagsTable _tagIdTable(_$AppDatabase db) =>
+      db.customTags.createAlias(
+          $_aliasNameGenerator(db.wordCustomTags.tagId, db.customTags.id));
+
+  $$CustomTagsTableProcessedTableManager get tagId {
+    final $_column = $_itemColumn<int>('tag_id')!;
+
+    final manager = $$CustomTagsTableTableManager($_db, $_db.customTags)
+        .filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_tagIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+        manager.$state.copyWith(prefetchedData: [item]));
+  }
+}
+
+class $$WordCustomTagsTableFilterComposer
+    extends Composer<_$AppDatabase, $WordCustomTagsTable> {
+  $$WordCustomTagsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$WordsTableFilterComposer get wordId {
+    final $$WordsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.wordId,
+        referencedTable: $db.words,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WordsTableFilterComposer(
+              $db: $db,
+              $table: $db.words,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$CustomTagsTableFilterComposer get tagId {
+    final $$CustomTagsTableFilterComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.tagId,
+        referencedTable: $db.customTags,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CustomTagsTableFilterComposer(
+              $db: $db,
+              $table: $db.customTags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WordCustomTagsTableOrderingComposer
+    extends Composer<_$AppDatabase, $WordCustomTagsTable> {
+  $$WordCustomTagsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$WordsTableOrderingComposer get wordId {
+    final $$WordsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.wordId,
+        referencedTable: $db.words,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WordsTableOrderingComposer(
+              $db: $db,
+              $table: $db.words,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$CustomTagsTableOrderingComposer get tagId {
+    final $$CustomTagsTableOrderingComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.tagId,
+        referencedTable: $db.customTags,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CustomTagsTableOrderingComposer(
+              $db: $db,
+              $table: $db.customTags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WordCustomTagsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $WordCustomTagsTable> {
+  $$WordCustomTagsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  $$WordsTableAnnotationComposer get wordId {
+    final $$WordsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.wordId,
+        referencedTable: $db.words,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$WordsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.words,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+
+  $$CustomTagsTableAnnotationComposer get tagId {
+    final $$CustomTagsTableAnnotationComposer composer = $composerBuilder(
+        composer: this,
+        getCurrentColumn: (t) => t.tagId,
+        referencedTable: $db.customTags,
+        getReferencedColumn: (t) => t.id,
+        builder: (joinBuilder,
+                {$addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer}) =>
+            $$CustomTagsTableAnnotationComposer(
+              $db: $db,
+              $table: $db.customTags,
+              $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+              joinBuilder: joinBuilder,
+              $removeJoinBuilderFromRootComposer:
+                  $removeJoinBuilderFromRootComposer,
+            ));
+    return composer;
+  }
+}
+
+class $$WordCustomTagsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $WordCustomTagsTable,
+    WordCustomTagRow,
+    $$WordCustomTagsTableFilterComposer,
+    $$WordCustomTagsTableOrderingComposer,
+    $$WordCustomTagsTableAnnotationComposer,
+    $$WordCustomTagsTableCreateCompanionBuilder,
+    $$WordCustomTagsTableUpdateCompanionBuilder,
+    (WordCustomTagRow, $$WordCustomTagsTableReferences),
+    WordCustomTagRow,
+    PrefetchHooks Function({bool wordId, bool tagId})> {
+  $$WordCustomTagsTableTableManager(
+      _$AppDatabase db, $WordCustomTagsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$WordCustomTagsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$WordCustomTagsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$WordCustomTagsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<int> wordId = const Value.absent(),
+            Value<int> tagId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              WordCustomTagsCompanion(
+            wordId: wordId,
+            tagId: tagId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required int wordId,
+            required int tagId,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              WordCustomTagsCompanion.insert(
+            wordId: wordId,
+            tagId: tagId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (
+                    e.readTable(table),
+                    $$WordCustomTagsTableReferences(db, table, e)
+                  ))
+              .toList(),
+          prefetchHooksCallback: ({wordId = false, tagId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins: <
+                  T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic>>(state) {
+                if (wordId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.wordId,
+                    referencedTable:
+                        $$WordCustomTagsTableReferences._wordIdTable(db),
+                    referencedColumn:
+                        $$WordCustomTagsTableReferences._wordIdTable(db).id,
+                  ) as T;
+                }
+                if (tagId) {
+                  state = state.withJoin(
+                    currentTable: table,
+                    currentColumn: table.tagId,
+                    referencedTable:
+                        $$WordCustomTagsTableReferences._tagIdTable(db),
+                    referencedColumn:
+                        $$WordCustomTagsTableReferences._tagIdTable(db).id,
+                  ) as T;
+                }
+
+                return state;
+              },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ));
+}
+
+typedef $$WordCustomTagsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $WordCustomTagsTable,
+    WordCustomTagRow,
+    $$WordCustomTagsTableFilterComposer,
+    $$WordCustomTagsTableOrderingComposer,
+    $$WordCustomTagsTableAnnotationComposer,
+    $$WordCustomTagsTableCreateCompanionBuilder,
+    $$WordCustomTagsTableUpdateCompanionBuilder,
+    (WordCustomTagRow, $$WordCustomTagsTableReferences),
+    WordCustomTagRow,
+    PrefetchHooks Function({bool wordId, bool tagId})>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -2665,6 +3461,8 @@ class $AppDatabaseManager {
       $$AnalyzedTextsTableTableManager(_db, _db.analyzedTexts);
   $$TextWordEntriesTableTableManager get textWordEntries =>
       $$TextWordEntriesTableTableManager(_db, _db.textWordEntries);
-  $$ExcludedWordsTableTableManager get excludedWords =>
-      $$ExcludedWordsTableTableManager(_db, _db.excludedWords);
+  $$CustomTagsTableTableManager get customTags =>
+      $$CustomTagsTableTableManager(_db, _db.customTags);
+  $$WordCustomTagsTableTableManager get wordCustomTags =>
+      $$WordCustomTagsTableTableManager(_db, _db.wordCustomTags);
 }

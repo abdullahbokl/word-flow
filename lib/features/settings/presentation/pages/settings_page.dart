@@ -1,16 +1,104 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:wordflow/app/di/injection.dart';
 import 'package:wordflow/core/constants/app_dimensions.dart';
+import 'package:wordflow/core/export/export_result.dart';
+import 'package:wordflow/core/export/pdf_export_service.dart';
+import 'package:wordflow/core/notifications/notification_service.dart';
 import 'package:wordflow/core/theme/theme_cubit.dart';
 import 'package:wordflow/core/utils/ui_utils.dart';
 import 'package:wordflow/core/widgets/app_text.dart';
 import 'package:wordflow/core/widgets/page_header.dart';
 import 'package:wordflow/features/excluded_words/presentation/pages/excluded_words_screen.dart';
+import 'package:wordflow/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
 import 'package:wordflow/features/settings/presentation/blocs/backup/backup_bloc.dart';
+import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
 
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
+
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+class _SettingsPageState extends State<SettingsPage> {
+  bool _aiEnabled = true;
+  bool _notificationsEnabled = true;
+
+  Future<void> _exportWords() async {
+    final words = context.read<LexiconBloc>().state.status.data;
+    if (words == null || words.isEmpty) {
+      AppUIUtils.showSnackBar(context, message: 'No words to export');
+      return;
+    }
+
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath =
+          '${directory.path}/word_list_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      const exportService = PdfExportService();
+      final result = await exportService.exportWords(words, filePath);
+
+      if (!mounted) return;
+      switch (result) {
+        case ExportSuccess(:final path):
+          AppUIUtils.showSnackBar(context, message: 'Exported to: $path');
+        case ExportFailure(:final message):
+          AppUIUtils.showSnackBar(context, message: message);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      AppUIUtils.showSnackBar(context, message: 'Export failed: $e');
+    }
+  }
+
+  Future<void> _exportAnalysis() async {
+    final analysis = context.read<AnalyzerBloc>().state.status.data;
+    if (analysis == null) {
+      AppUIUtils.showSnackBar(context, message: 'No analysis to export');
+      return;
+    }
+
+    try {
+      final directory = await getApplicationDocumentsDirectory();
+      final filePath =
+          '${directory.path}/analysis_${DateTime.now().millisecondsSinceEpoch}.pdf';
+      const exportService = PdfExportService();
+      final result = await exportService.exportAnalysis(analysis, filePath);
+
+      if (!mounted) return;
+      switch (result) {
+        case ExportSuccess(:final path):
+          AppUIUtils.showSnackBar(context, message: 'Exported to: $path');
+        case ExportFailure(:final message):
+          AppUIUtils.showSnackBar(context, message: message);
+      }
+    } catch (e) {
+      if (!mounted) return;
+      AppUIUtils.showSnackBar(context, message: 'Export failed: $e');
+    }
+  }
+
+  Future<void> _sendTestNotification() async {
+    try {
+      final service = sl<NotificationService>();
+      await service.scheduleNotification(
+        999,
+        'Test Notification',
+        'This is a test notification from WordFlow settings.',
+        DateTime.now().add(const Duration(seconds: 5)),
+      );
+      if (!mounted) return;
+      AppUIUtils.showSnackBar(context,
+          message: 'Test notification scheduled (5s delay)');
+    } catch (e) {
+      if (!mounted) return;
+      AppUIUtils.showSnackBar(context,
+          message: 'Failed to schedule notification: $e');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,6 +131,65 @@ class SettingsPage extends StatelessWidget {
                   ),
                   const SizedBox(height: 32),
                   _Section(
+                    title: 'AI Configuration',
+                    children: [
+                      SwitchListTile(
+                        secondary: const Icon(Icons.auto_awesome),
+                        title: const AppText.body('Enable AI Features'),
+                        subtitle: const AppText.body(
+                          'Use AI for meanings and examples',
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                        value: _aiEnabled,
+                        onChanged: (val) => setState(() => _aiEnabled = val),
+                      ),
+                      const Divider(height: 1),
+                      const ListTile(
+                        leading: Icon(Icons.info_outline),
+                        title: AppText.body('AI Provider'),
+                        trailing:
+                            AppText.body('Mock Provider', color: Colors.grey),
+                      ),
+                      const Divider(height: 1),
+                      const ListTile(
+                        leading: Icon(Icons.key),
+                        title: AppText.body('API Key'),
+                        subtitle: AppText.body(
+                          'Coming soon',
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                        enabled: false,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  _Section(
+                    title: 'Notifications',
+                    children: [
+                      SwitchListTile(
+                        secondary: const Icon(Icons.notifications_active),
+                        title: const AppText.body('Daily Reminders'),
+                        subtitle: const AppText.body(
+                          'Get reminded to review words',
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                        value: _notificationsEnabled,
+                        onChanged: (val) =>
+                            setState(() => _notificationsEnabled = val),
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(Icons.notification_important),
+                        title: const AppText.body('Test Notification'),
+                        onTap: _sendTestNotification,
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  _Section(
                     title: 'Analysis Settings',
                     children: [
                       ListTile(
@@ -60,6 +207,21 @@ class SettingsPage extends StatelessWidget {
                           ),
                         ),
                       ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(Icons.label),
+                        title: const AppText.body('Manage Tags'),
+                        subtitle: const AppText.body(
+                          'Organize your words with custom tags',
+                          color: Colors.grey,
+                          fontSize: 12,
+                        ),
+                        trailing: const Icon(Icons.chevron_right),
+                        onTap: () {
+                          AppUIUtils.showSnackBar(context,
+                              message: 'Tag management coming soon');
+                        },
+                      ),
                     ],
                   ),
                   const SizedBox(height: 32),
@@ -67,6 +229,33 @@ class SettingsPage extends StatelessWidget {
                     title: 'Data & Sync',
                     children: [
                       _BackupSettings(),
+                    ],
+                  ),
+                  const SizedBox(height: 32),
+                  _Section(
+                    title: 'Export Data',
+                    children: [
+                      ListTile(
+                        leading: const Icon(Icons.picture_as_pdf),
+                        title: const AppText.body('Export Words'),
+                        subtitle: const AppText.body(
+                          'Save your lexicon as PDF',
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                        onTap: _exportWords,
+                      ),
+                      const Divider(height: 1),
+                      ListTile(
+                        leading: const Icon(Icons.analytics),
+                        title: const AppText.body('Export Analysis'),
+                        subtitle: const AppText.body(
+                          'Save latest analysis as PDF',
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
+                        onTap: _exportAnalysis,
+                      ),
                     ],
                   ),
                   const SizedBox(height: 32),

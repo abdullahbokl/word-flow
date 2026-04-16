@@ -8,6 +8,7 @@ abstract class LexiconStats with _$LexiconStats {
     required int total,
     required int known,
     required int unknown,
+    @Default(0) int excluded,
   }) = _LexiconStats;
 
   const LexiconStats._();

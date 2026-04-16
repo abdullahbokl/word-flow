@@ -17,6 +17,8 @@ abstract interface class LexiconLocalDataSource {
     String query = '',
   });
   Future<WordRow> toggleStatus(int wordId);
+  Future<WordRow> excludeWord(int wordId);
+  Future<WordRow> unexcludeWord(int wordId);
   Future<WordRow> updateWord(
     int id, {
     String? text,
@@ -27,9 +29,14 @@ abstract interface class LexiconLocalDataSource {
     List<String>? translations,
     List<String>? synonyms,
     bool? isKnown,
+    bool? isExcluded,
+    String? category,
+    Map<String, dynamic>? reviewSchedule,
   });
   Future<void> deleteWord(int wordId);
-  Future<WordRow> addWord(String text);
+  Future<WordRow> addWord(String text, {bool isExcluded = false});
+  Future<List<WordRow>> addMultipleWords(List<String> words,
+      {bool isExcluded = false});
   Future<WordRow> restoreWord(
     String text,
     int previousId,

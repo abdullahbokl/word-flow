@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:sliver_tools/sliver_tools.dart';
-import 'package:wordflow/core/navigation/app_navigator.dart';
 import 'package:wordflow/core/widgets/app_empty_state.dart';
 import 'package:wordflow/core/widgets/app_loader.dart';
 import 'package:wordflow/features/history/domain/entities/history_item.dart';
+import 'package:wordflow/features/history/presentation/pages/history_detail_page.dart';
 import 'package:wordflow/features/history/presentation/widgets/history_card.dart';
 
 class HistorySliverList extends StatelessWidget {
@@ -44,7 +44,11 @@ class HistorySliverList extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 12),
                     child: HistoryCard(
                       item: item,
-                      onTap: () => AppNavigator.toHistoryDetail(item.id),
+                      onTap: () => Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => HistoryDetailPage(id: item.id),
+                        ),
+                      ),
                       onDelete: () => onDelete(item.id),
                     ),
                   ),

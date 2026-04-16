@@ -1,1 +1,1 @@
-enum WordFilter { all, known, unknown }
+enum WordFilter { all, known, unknown, excluded, due }

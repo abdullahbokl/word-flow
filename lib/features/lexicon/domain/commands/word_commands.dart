@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:wordflow/core/domain/entities/review_schedule.dart';
 
 part 'word_commands.freezed.dart';
 
@@ -6,6 +7,7 @@ part 'word_commands.freezed.dart';
 abstract class AddWordCommand with _$AddWordCommand {
   const factory AddWordCommand({
     required String text,
+    @Default(false) bool isExcluded,
   }) = _AddWordCommand;
 }
 
@@ -30,6 +32,9 @@ abstract class UpdateWordCommand with _$UpdateWordCommand {
     List<String>? examples,
     List<String>? translations,
     List<String>? synonyms,
+    String? category,
     bool? isKnown,
+    bool? isExcluded,
+    ReviewSchedule? reviewSchedule,
   }) = _UpdateWordCommand;
 }

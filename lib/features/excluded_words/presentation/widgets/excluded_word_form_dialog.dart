@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:wordflow/core/theme/design_tokens.dart';
 import 'package:wordflow/core/widgets/app_button.dart';
 import 'package:wordflow/core/widgets/app_text.dart';
 import 'package:wordflow/core/widgets/app_text_field.dart';
@@ -26,16 +27,28 @@ class ExcludedWordFormDialog extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = TextEditingController(text: word?.word);
     return AlertDialog(
-      title: AppText.label(word == null ? 'Add Excluded Word' : 'Update Word'),
-      content: AppTextField(
-        controller: controller,
-        hint: 'Enter word',
-        autofocus: true,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTokens.radius24),
       ),
+      title: AppText.title(word == null ? 'Add Excluded Word' : 'Update Word'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AppTextField(
+            controller: controller,
+            hint: 'Enter word',
+            autofocus: true,
+          ),
+        ],
+      ),
+      actionsPadding: const EdgeInsets.all(AppTokens.space16),
       actions: [
         TextButton(
           onPressed: () => Navigator.pop(context),
-          child: const AppText.body('Cancel'),
+          child: AppText.body(
+            'Cancel',
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         AppButton(
           label: word == null ? 'Add' : 'Update',

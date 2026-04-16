@@ -15,6 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$AddWordCommand {
   String get text;
+  bool get isExcluded;
 
   /// Create a copy of AddWordCommand
   /// with the given fields replaced by the non-null parameter values.
@@ -29,15 +30,17 @@ mixin _$AddWordCommand {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is AddWordCommand &&
-            (identical(other.text, text) || other.text == text));
+            (identical(other.text, text) || other.text == text) &&
+            (identical(other.isExcluded, isExcluded) ||
+                other.isExcluded == isExcluded));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, text);
+  int get hashCode => Object.hash(runtimeType, text, isExcluded);
 
   @override
   String toString() {
-    return 'AddWordCommand(text: $text)';
+    return 'AddWordCommand(text: $text, isExcluded: $isExcluded)';
   }
 }
 
@@ -47,7 +50,7 @@ abstract mixin class $AddWordCommandCopyWith<$Res> {
           AddWordCommand value, $Res Function(AddWordCommand) _then) =
       _$AddWordCommandCopyWithImpl;
   @useResult
-  $Res call({String text});
+  $Res call({String text, bool isExcluded});
 }
 
 /// @nodoc
@@ -64,12 +67,17 @@ class _$AddWordCommandCopyWithImpl<$Res>
   @override
   $Res call({
     Object? text = null,
+    Object? isExcluded = null,
   }) {
     return _then(_self.copyWith(
       text: null == text
           ? _self.text
           : text // ignore: cast_nullable_to_non_nullable
               as String,
+      isExcluded: null == isExcluded
+          ? _self.isExcluded
+          : isExcluded // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -167,13 +175,13 @@ extension AddWordCommandPatterns on AddWordCommand {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(String text)? $default, {
+    TResult Function(String text, bool isExcluded)? $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _AddWordCommand() when $default != null:
-        return $default(_that.text);
+        return $default(_that.text, _that.isExcluded);
       case _:
         return orElse();
     }
@@ -194,12 +202,12 @@ extension AddWordCommandPatterns on AddWordCommand {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(String text) $default,
+    TResult Function(String text, bool isExcluded) $default,
   ) {
     final _that = this;
     switch (_that) {
       case _AddWordCommand():
-        return $default(_that.text);
+        return $default(_that.text, _that.isExcluded);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -219,12 +227,12 @@ extension AddWordCommandPatterns on AddWordCommand {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(String text)? $default,
+    TResult? Function(String text, bool isExcluded)? $default,
   ) {
     final _that = this;
     switch (_that) {
       case _AddWordCommand() when $default != null:
-        return $default(_that.text);
+        return $default(_that.text, _that.isExcluded);
       case _:
         return null;
     }
@@ -234,10 +242,13 @@ extension AddWordCommandPatterns on AddWordCommand {
 /// @nodoc
 
 class _AddWordCommand implements AddWordCommand {
-  const _AddWordCommand({required this.text});
+  const _AddWordCommand({required this.text, this.isExcluded = false});
 
   @override
   final String text;
+  @override
+  @JsonKey()
+  final bool isExcluded;
 
   /// Create a copy of AddWordCommand
   /// with the given fields replaced by the non-null parameter values.
@@ -252,15 +263,17 @@ class _AddWordCommand implements AddWordCommand {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _AddWordCommand &&
-            (identical(other.text, text) || other.text == text));
+            (identical(other.text, text) || other.text == text) &&
+            (identical(other.isExcluded, isExcluded) ||
+                other.isExcluded == isExcluded));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, text);
+  int get hashCode => Object.hash(runtimeType, text, isExcluded);
 
   @override
   String toString() {
-    return 'AddWordCommand(text: $text)';
+    return 'AddWordCommand(text: $text, isExcluded: $isExcluded)';
   }
 }
 
@@ -272,7 +285,7 @@ abstract mixin class _$AddWordCommandCopyWith<$Res>
       __$AddWordCommandCopyWithImpl;
   @override
   @useResult
-  $Res call({String text});
+  $Res call({String text, bool isExcluded});
 }
 
 /// @nodoc
@@ -289,12 +302,17 @@ class __$AddWordCommandCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   $Res call({
     Object? text = null,
+    Object? isExcluded = null,
   }) {
     return _then(_AddWordCommand(
       text: null == text
           ? _self.text
           : text // ignore: cast_nullable_to_non_nullable
               as String,
+      isExcluded: null == isExcluded
+          ? _self.isExcluded
+          : isExcluded // ignore: cast_nullable_to_non_nullable
+              as bool,
     ));
   }
 }
@@ -670,7 +688,10 @@ mixin _$UpdateWordCommand {
   List<String>? get examples;
   List<String>? get translations;
   List<String>? get synonyms;
+  String? get category;
   bool? get isKnown;
+  bool? get isExcluded;
+  ReviewSchedule? get reviewSchedule;
 
   /// Create a copy of UpdateWordCommand
   /// with the given fields replaced by the non-null parameter values.
@@ -696,7 +717,13 @@ mixin _$UpdateWordCommand {
             const DeepCollectionEquality()
                 .equals(other.translations, translations) &&
             const DeepCollectionEquality().equals(other.synonyms, synonyms) &&
-            (identical(other.isKnown, isKnown) || other.isKnown == isKnown));
+            (identical(other.category, category) ||
+                other.category == category) &&
+            (identical(other.isKnown, isKnown) || other.isKnown == isKnown) &&
+            (identical(other.isExcluded, isExcluded) ||
+                other.isExcluded == isExcluded) &&
+            (identical(other.reviewSchedule, reviewSchedule) ||
+                other.reviewSchedule == reviewSchedule));
   }
 
   @override
@@ -710,11 +737,14 @@ mixin _$UpdateWordCommand {
       const DeepCollectionEquality().hash(examples),
       const DeepCollectionEquality().hash(translations),
       const DeepCollectionEquality().hash(synonyms),
-      isKnown);
+      category,
+      isKnown,
+      isExcluded,
+      reviewSchedule);
 
   @override
   String toString() {
-    return 'UpdateWordCommand(id: $id, text: $text, meaning: $meaning, description: $description, definitions: $definitions, examples: $examples, translations: $translations, synonyms: $synonyms, isKnown: $isKnown)';
+    return 'UpdateWordCommand(id: $id, text: $text, meaning: $meaning, description: $description, definitions: $definitions, examples: $examples, translations: $translations, synonyms: $synonyms, category: $category, isKnown: $isKnown, isExcluded: $isExcluded, reviewSchedule: $reviewSchedule)';
   }
 }
 
@@ -733,7 +763,12 @@ abstract mixin class $UpdateWordCommandCopyWith<$Res> {
       List<String>? examples,
       List<String>? translations,
       List<String>? synonyms,
-      bool? isKnown});
+      String? category,
+      bool? isKnown,
+      bool? isExcluded,
+      ReviewSchedule? reviewSchedule});
+
+  $ReviewScheduleCopyWith<$Res>? get reviewSchedule;
 }
 
 /// @nodoc
@@ -757,7 +792,10 @@ class _$UpdateWordCommandCopyWithImpl<$Res>
     Object? examples = freezed,
     Object? translations = freezed,
     Object? synonyms = freezed,
+    Object? category = freezed,
     Object? isKnown = freezed,
+    Object? isExcluded = freezed,
+    Object? reviewSchedule = freezed,
   }) {
     return _then(_self.copyWith(
       id: null == id
@@ -792,11 +830,37 @@ class _$UpdateWordCommandCopyWithImpl<$Res>
           ? _self.synonyms
           : synonyms // ignore: cast_nullable_to_non_nullable
               as List<String>?,
+      category: freezed == category
+          ? _self.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
       isKnown: freezed == isKnown
           ? _self.isKnown
           : isKnown // ignore: cast_nullable_to_non_nullable
               as bool?,
+      isExcluded: freezed == isExcluded
+          ? _self.isExcluded
+          : isExcluded // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      reviewSchedule: freezed == reviewSchedule
+          ? _self.reviewSchedule
+          : reviewSchedule // ignore: cast_nullable_to_non_nullable
+              as ReviewSchedule?,
     ));
+  }
+
+  /// Create a copy of UpdateWordCommand
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ReviewScheduleCopyWith<$Res>? get reviewSchedule {
+    if (_self.reviewSchedule == null) {
+      return null;
+    }
+
+    return $ReviewScheduleCopyWith<$Res>(_self.reviewSchedule!, (value) {
+      return _then(_self.copyWith(reviewSchedule: value));
+    });
   }
 }
 
@@ -902,7 +966,10 @@ extension UpdateWordCommandPatterns on UpdateWordCommand {
             List<String>? examples,
             List<String>? translations,
             List<String>? synonyms,
-            bool? isKnown)?
+            String? category,
+            bool? isKnown,
+            bool? isExcluded,
+            ReviewSchedule? reviewSchedule)?
         $default, {
     required TResult orElse(),
   }) {
@@ -918,7 +985,10 @@ extension UpdateWordCommandPatterns on UpdateWordCommand {
             _that.examples,
             _that.translations,
             _that.synonyms,
-            _that.isKnown);
+            _that.category,
+            _that.isKnown,
+            _that.isExcluded,
+            _that.reviewSchedule);
       case _:
         return orElse();
     }
@@ -948,7 +1018,10 @@ extension UpdateWordCommandPatterns on UpdateWordCommand {
             List<String>? examples,
             List<String>? translations,
             List<String>? synonyms,
-            bool? isKnown)
+            String? category,
+            bool? isKnown,
+            bool? isExcluded,
+            ReviewSchedule? reviewSchedule)
         $default,
   ) {
     final _that = this;
@@ -963,7 +1036,10 @@ extension UpdateWordCommandPatterns on UpdateWordCommand {
             _that.examples,
             _that.translations,
             _that.synonyms,
-            _that.isKnown);
+            _that.category,
+            _that.isKnown,
+            _that.isExcluded,
+            _that.reviewSchedule);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -992,7 +1068,10 @@ extension UpdateWordCommandPatterns on UpdateWordCommand {
             List<String>? examples,
             List<String>? translations,
             List<String>? synonyms,
-            bool? isKnown)?
+            String? category,
+            bool? isKnown,
+            bool? isExcluded,
+            ReviewSchedule? reviewSchedule)?
         $default,
   ) {
     final _that = this;
@@ -1007,7 +1086,10 @@ extension UpdateWordCommandPatterns on UpdateWordCommand {
             _that.examples,
             _that.translations,
             _that.synonyms,
-            _that.isKnown);
+            _that.category,
+            _that.isKnown,
+            _that.isExcluded,
+            _that.reviewSchedule);
       case _:
         return null;
     }
@@ -1026,7 +1108,10 @@ class _UpdateWordCommand implements UpdateWordCommand {
       final List<String>? examples,
       final List<String>? translations,
       final List<String>? synonyms,
-      this.isKnown})
+      this.category,
+      this.isKnown,
+      this.isExcluded,
+      this.reviewSchedule})
       : _definitions = definitions,
         _examples = examples,
         _translations = translations,
@@ -1081,7 +1166,13 @@ class _UpdateWordCommand implements UpdateWordCommand {
   }
 
   @override
+  final String? category;
+  @override
   final bool? isKnown;
+  @override
+  final bool? isExcluded;
+  @override
+  final ReviewSchedule? reviewSchedule;
 
   /// Create a copy of UpdateWordCommand
   /// with the given fields replaced by the non-null parameter values.
@@ -1107,7 +1198,13 @@ class _UpdateWordCommand implements UpdateWordCommand {
             const DeepCollectionEquality()
                 .equals(other._translations, _translations) &&
             const DeepCollectionEquality().equals(other._synonyms, _synonyms) &&
-            (identical(other.isKnown, isKnown) || other.isKnown == isKnown));
+            (identical(other.category, category) ||
+                other.category == category) &&
+            (identical(other.isKnown, isKnown) || other.isKnown == isKnown) &&
+            (identical(other.isExcluded, isExcluded) ||
+                other.isExcluded == isExcluded) &&
+            (identical(other.reviewSchedule, reviewSchedule) ||
+                other.reviewSchedule == reviewSchedule));
   }
 
   @override
@@ -1121,11 +1218,14 @@ class _UpdateWordCommand implements UpdateWordCommand {
       const DeepCollectionEquality().hash(_examples),
       const DeepCollectionEquality().hash(_translations),
       const DeepCollectionEquality().hash(_synonyms),
-      isKnown);
+      category,
+      isKnown,
+      isExcluded,
+      reviewSchedule);
 
   @override
   String toString() {
-    return 'UpdateWordCommand(id: $id, text: $text, meaning: $meaning, description: $description, definitions: $definitions, examples: $examples, translations: $translations, synonyms: $synonyms, isKnown: $isKnown)';
+    return 'UpdateWordCommand(id: $id, text: $text, meaning: $meaning, description: $description, definitions: $definitions, examples: $examples, translations: $translations, synonyms: $synonyms, category: $category, isKnown: $isKnown, isExcluded: $isExcluded, reviewSchedule: $reviewSchedule)';
   }
 }
 
@@ -1146,7 +1246,13 @@ abstract mixin class _$UpdateWordCommandCopyWith<$Res>
       List<String>? examples,
       List<String>? translations,
       List<String>? synonyms,
-      bool? isKnown});
+      String? category,
+      bool? isKnown,
+      bool? isExcluded,
+      ReviewSchedule? reviewSchedule});
+
+  @override
+  $ReviewScheduleCopyWith<$Res>? get reviewSchedule;
 }
 
 /// @nodoc
@@ -1170,7 +1276,10 @@ class __$UpdateWordCommandCopyWithImpl<$Res>
     Object? examples = freezed,
     Object? translations = freezed,
     Object? synonyms = freezed,
+    Object? category = freezed,
     Object? isKnown = freezed,
+    Object? isExcluded = freezed,
+    Object? reviewSchedule = freezed,
   }) {
     return _then(_UpdateWordCommand(
       id: null == id
@@ -1205,11 +1314,37 @@ class __$UpdateWordCommandCopyWithImpl<$Res>
           ? _self._synonyms
           : synonyms // ignore: cast_nullable_to_non_nullable
               as List<String>?,
+      category: freezed == category
+          ? _self.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as String?,
       isKnown: freezed == isKnown
           ? _self.isKnown
           : isKnown // ignore: cast_nullable_to_non_nullable
               as bool?,
+      isExcluded: freezed == isExcluded
+          ? _self.isExcluded
+          : isExcluded // ignore: cast_nullable_to_non_nullable
+              as bool?,
+      reviewSchedule: freezed == reviewSchedule
+          ? _self.reviewSchedule
+          : reviewSchedule // ignore: cast_nullable_to_non_nullable
+              as ReviewSchedule?,
     ));
+  }
+
+  /// Create a copy of UpdateWordCommand
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @pragma('vm:prefer-inline')
+  $ReviewScheduleCopyWith<$Res>? get reviewSchedule {
+    if (_self.reviewSchedule == null) {
+      return null;
+    }
+
+    return $ReviewScheduleCopyWith<$Res>(_self.reviewSchedule!, (value) {
+      return _then(_self.copyWith(reviewSchedule: value));
+    });
   }
 }
 

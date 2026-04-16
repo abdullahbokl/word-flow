@@ -1,3 +1,4 @@
+import 'package:rxdart/rxdart.dart';
 import 'package:drift/drift.dart';
 import 'package:wordflow/core/constants/default_excluded_words.dart';
 import 'package:wordflow/core/database/app_database.dart';
@@ -15,17 +16,21 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
   Future<void> _ensureExcludedDefaults() async {
     if (_excludedDefaultsInitialized) return;
 
-    final excludedRows = await _db.select(_db.excludedWords).get();
+    final excludedRows = await (_db.select(_db.words)
+          ..where((w) => w.isExcluded.equals(true)))
+        .get();
     if (excludedRows.isEmpty) {
       const defaults = DefaultExcludedWords.words;
       final now = DateTime.now();
       await _db.batch((batch) {
         for (final word in defaults) {
           batch.insert(
-            _db.excludedWords,
-            ExcludedWordsCompanion.insert(
-              word: word,
+            _db.words,
+            WordsCompanion.insert(
+              word: word.trim().toLowerCase(),
+              isExcluded: const Value(true),
               createdAt: now,
+              updatedAt: now,
             ),
             mode: InsertMode.insertOrIgnore,
           );
@@ -44,7 +49,9 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
     final freq = await TextProcessor.process(content);
     await _ensureExcludedDefaults();
 
-    final excludedRows = await _db.select(_db.excludedWords).get();
+    final excludedRows = await (_db.select(_db.words)
+          ..where((w) => w.isExcluded.equals(true)))
+        .get();
 
     final excludedSet =
         excludedRows.map((r) => r.word.trim().toLowerCase()).toSet();
@@ -210,5 +217,55 @@ class AnalyzerLocalDataSourceImpl implements AnalyzerLocalDataSource {
   @override
   Future<void> updateAnalysisCounts(int id) async {
     await updateAnalyzedTextCounts(_db, id);
+  }
+
+  @override
+  Stream<AnalysisResultModel> watchAnalysisResult(int id) {
+    final textStream = (_db.select(_db.analyzedTexts)
+          ..where((t) => t.id.equals(id)))
+        .watchSingle();
+
+    final wordsStream = (_db.select(_db.textWordEntries).join([
+      innerJoin(_db.words, _db.words.id.equalsExp(_db.textWordEntries.wordId)),
+    ])
+          ..where(_db.textWordEntries.textId.equals(id)))
+        .watch();
+
+    return Rx.combineLatest2<AnalyzedTextRow, List<TypedResult>,
+        AnalysisResultModel>(
+      textStream,
+      wordsStream,
+      (text, results) {
+        final wordSnapshots = results.map((r) {
+          final word = r.readTable(_db.words);
+          final entry = r.readTable(_db.textWordEntries);
+          return {
+            'id': word.id,
+            'text': word.word,
+            'frequency': word.frequency,
+            'isKnown': word.isKnown,
+            'createdAtMs': word.createdAt.millisecondsSinceEpoch,
+            'updatedAtMs': word.updatedAt.millisecondsSinceEpoch,
+            'meaning': word.meaning,
+            'description': word.description,
+            'localFrequency': entry.localFrequency,
+          };
+        }).toList();
+
+        final analysisMap = {
+          'id': text.id,
+          'title': text.title,
+          'totalWords': text.totalWords,
+          'uniqueWords': text.uniqueWords,
+          'unknownWords': text.unknownWords,
+          'knownWords': text.knownWords,
+          'newWordsCount': 0,
+          'words': wordSnapshots,
+          'excludedWordsFound': <String>[],
+        };
+
+        return AnalysisResultModel.fromMap(analysisMap);
+      },
+    );
   }
 }

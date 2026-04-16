@@ -52,6 +52,16 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
   }
 
   @override
+  Future<WordRow> excludeWord(int wordId) async {
+    return updateWordRow(_db, wordId, isExcluded: true);
+  }
+
+  @override
+  Future<WordRow> unexcludeWord(int wordId) async {
+    return updateWordRow(_db, wordId, isExcluded: false);
+  }
+
+  @override
   Future<WordRow> updateWord(
     int id, {
     String? text,
@@ -62,6 +72,9 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
     List<String>? translations,
     List<String>? synonyms,
     bool? isKnown,
+    bool? isExcluded,
+    String? category,
+    Map<String, dynamic>? reviewSchedule,
   }) async {
     return updateWordRow(
       _db,
@@ -74,6 +87,9 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
       translations: translations,
       synonyms: synonyms,
       isKnown: isKnown,
+      isExcluded: isExcluded,
+      category: category,
+      reviewSchedule: reviewSchedule,
     );
   }
 
@@ -83,8 +99,14 @@ class LexiconLocalDataSourceImpl implements LexiconLocalDataSource {
   }
 
   @override
-  Future<WordRow> addWord(String text) async {
-    return addWordRow(_db, text);
+  Future<WordRow> addWord(String text, {bool isExcluded = false}) async {
+    return addWordRow(_db, text, isExcluded: isExcluded);
+  }
+
+  @override
+  Future<List<WordRow>> addMultipleWords(List<String> words,
+      {bool isExcluded = false}) async {
+    return addMultipleWordsRow(_db, words, isExcluded: isExcluded);
   }
 
   @override

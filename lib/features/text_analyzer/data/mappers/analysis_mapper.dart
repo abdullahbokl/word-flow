@@ -29,6 +29,7 @@ extension WordWithLocalFreqModelMapper on WordWithLocalFreqModel {
         isKnown: isKnown,
         createdAt: createdAt,
         updatedAt: updatedAt,
+        isExcluded: false, // Default for analysis results
         meaning: meaning,
         description: description,
       ),

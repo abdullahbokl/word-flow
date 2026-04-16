@@ -7,7 +7,7 @@ import 'package:wordflow/core/utils/ui_utils.dart';
 import 'package:wordflow/core/widgets/app_empty_state.dart';
 import 'package:wordflow/core/widgets/app_loader.dart';
 import 'package:wordflow/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
-import 'package:wordflow/features/lexicon/presentation/widgets/word_tile.dart';
+import 'package:wordflow/features/lexicon/presentation/widgets/word_card.dart';
 
 class WordsSliverList extends StatelessWidget {
   const WordsSliverList({
@@ -41,11 +41,13 @@ class WordsSliverList extends StatelessWidget {
             (ctx, i) {
               final w = words[i];
               return RepaintBoundary(
-                child: WordTile(
+                child: WordCard(
                   key: ValueKey(w.id),
                   word: w,
                   onToggle: () =>
                       ctx.read<LexiconBloc>().add(ToggleWordStatusEvent(w.id)),
+                  onExclude: () =>
+                      ctx.read<LexiconBloc>().add(ExcludeWordEvent(w.id)),
                   onDelete: () {
                     final wordText = w.text;
                     final previousId = w.id;
@@ -66,6 +68,10 @@ class WordsSliverList extends StatelessWidget {
                     );
                   },
                   onEdit: () => onEdit(w),
+                  onAILookup: () {
+                    // AI Lookup logic will be implemented in future tasks.
+                    // For now, we just provide the callback.
+                  },
                 ),
               );
             },

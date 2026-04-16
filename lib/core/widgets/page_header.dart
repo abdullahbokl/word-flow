@@ -10,12 +10,14 @@ class PageHeader extends StatelessWidget {
       vertical: AppDimensions.space24,
     ),
     this.showBackButton = false,
+    this.actions,
     super.key,
   });
 
   final String title;
   final EdgeInsets padding;
   final bool showBackButton;
+  final List<Widget>? actions;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +35,7 @@ class PageHeader extends StatelessWidget {
             const SizedBox(width: 16),
           ],
           Expanded(child: AppText.headline(title)),
+          if (actions != null) ...actions!,
         ],
       ),
     );

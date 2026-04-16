@@ -23,6 +23,8 @@ abstract interface class LexiconRepository {
   });
 
   TaskEither<Failure, WordEntity> toggleStatus(int wordId);
+  TaskEither<Failure, WordEntity> excludeWord(int wordId);
+  TaskEither<Failure, WordEntity> unexcludeWord(int wordId);
   TaskEither<Failure, WordEntity> updateWord(UpdateWordCommand command);
 
   TaskEither<Failure, Unit> deleteWord(int wordId);
@@ -32,7 +34,7 @@ abstract interface class LexiconRepository {
   TaskEither<Failure, WordEntity> restoreWord(RestoreWordCommand command);
 
   TaskEither<Failure, WordEntity?> getWordByText(String text);
-
+  TaskEither<Failure, List<WordEntity>> initializeDefaultExcludedWords();
   TaskEither<Failure, LexiconStats> getStats();
 
   Stream<Either<Failure, LexiconStats>> watchStats();

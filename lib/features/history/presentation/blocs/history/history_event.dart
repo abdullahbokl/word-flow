@@ -11,6 +11,7 @@ abstract class HistoryEvent with _$HistoryEvent {
       {required List<HistoryItem> items}) = HistoryUpdateReceived;
   const factory HistoryEvent.errorReceived({required String message}) =
       HistoryErrorReceived;
+  const factory HistoryEvent.statsUpdateReceived() = HistoryStatsUpdateReceived;
   const factory HistoryEvent.deleteItem(
     int id, {
     @Default(false) bool deleteUniqueWords,

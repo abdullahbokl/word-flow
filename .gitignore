@@ -60,4 +60,7 @@ word_flow.db*
 wordflow.iml
 
 .github/
+.sisyphus
+.opencode
+.claude
 PLAN.md

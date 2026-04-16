@@ -17,6 +17,7 @@ mixin _$LexiconStats {
   int get total;
   int get known;
   int get unknown;
+  int get excluded;
 
   /// Create a copy of LexiconStats
   /// with the given fields replaced by the non-null parameter values.
@@ -33,15 +34,17 @@ mixin _$LexiconStats {
             other is LexiconStats &&
             (identical(other.total, total) || other.total == total) &&
             (identical(other.known, known) || other.known == known) &&
-            (identical(other.unknown, unknown) || other.unknown == unknown));
+            (identical(other.unknown, unknown) || other.unknown == unknown) &&
+            (identical(other.excluded, excluded) ||
+                other.excluded == excluded));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, total, known, unknown);
+  int get hashCode => Object.hash(runtimeType, total, known, unknown, excluded);
 
   @override
   String toString() {
-    return 'LexiconStats(total: $total, known: $known, unknown: $unknown)';
+    return 'LexiconStats(total: $total, known: $known, unknown: $unknown, excluded: $excluded)';
   }
 }
 
@@ -51,7 +54,7 @@ abstract mixin class $LexiconStatsCopyWith<$Res> {
           LexiconStats value, $Res Function(LexiconStats) _then) =
       _$LexiconStatsCopyWithImpl;
   @useResult
-  $Res call({int total, int known, int unknown});
+  $Res call({int total, int known, int unknown, int excluded});
 }
 
 /// @nodoc
@@ -69,6 +72,7 @@ class _$LexiconStatsCopyWithImpl<$Res> implements $LexiconStatsCopyWith<$Res> {
     Object? total = null,
     Object? known = null,
     Object? unknown = null,
+    Object? excluded = null,
   }) {
     return _then(_self.copyWith(
       total: null == total
@@ -82,6 +86,10 @@ class _$LexiconStatsCopyWithImpl<$Res> implements $LexiconStatsCopyWith<$Res> {
       unknown: null == unknown
           ? _self.unknown
           : unknown // ignore: cast_nullable_to_non_nullable
+              as int,
+      excluded: null == excluded
+          ? _self.excluded
+          : excluded // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }
@@ -180,13 +188,15 @@ extension LexiconStatsPatterns on LexiconStats {
 
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>(
-    TResult Function(int total, int known, int unknown)? $default, {
+    TResult Function(int total, int known, int unknown, int excluded)?
+        $default, {
     required TResult orElse(),
   }) {
     final _that = this;
     switch (_that) {
       case _LexiconStats() when $default != null:
-        return $default(_that.total, _that.known, _that.unknown);
+        return $default(
+            _that.total, _that.known, _that.unknown, _that.excluded);
       case _:
         return orElse();
     }
@@ -207,12 +217,13 @@ extension LexiconStatsPatterns on LexiconStats {
 
   @optionalTypeArgs
   TResult when<TResult extends Object?>(
-    TResult Function(int total, int known, int unknown) $default,
+    TResult Function(int total, int known, int unknown, int excluded) $default,
   ) {
     final _that = this;
     switch (_that) {
       case _LexiconStats():
-        return $default(_that.total, _that.known, _that.unknown);
+        return $default(
+            _that.total, _that.known, _that.unknown, _that.excluded);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -232,12 +243,14 @@ extension LexiconStatsPatterns on LexiconStats {
 
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>(
-    TResult? Function(int total, int known, int unknown)? $default,
+    TResult? Function(int total, int known, int unknown, int excluded)?
+        $default,
   ) {
     final _that = this;
     switch (_that) {
       case _LexiconStats() when $default != null:
-        return $default(_that.total, _that.known, _that.unknown);
+        return $default(
+            _that.total, _that.known, _that.unknown, _that.excluded);
       case _:
         return null;
     }
@@ -248,7 +261,10 @@ extension LexiconStatsPatterns on LexiconStats {
 
 class _LexiconStats extends LexiconStats {
   const _LexiconStats(
-      {required this.total, required this.known, required this.unknown})
+      {required this.total,
+      required this.known,
+      required this.unknown,
+      this.excluded = 0})
       : super._();
 
   @override
@@ -257,6 +273,9 @@ class _LexiconStats extends LexiconStats {
   final int known;
   @override
   final int unknown;
+  @override
+  @JsonKey()
+  final int excluded;
 
   /// Create a copy of LexiconStats
   /// with the given fields replaced by the non-null parameter values.
@@ -273,15 +292,17 @@ class _LexiconStats extends LexiconStats {
             other is _LexiconStats &&
             (identical(other.total, total) || other.total == total) &&
             (identical(other.known, known) || other.known == known) &&
-            (identical(other.unknown, unknown) || other.unknown == unknown));
+            (identical(other.unknown, unknown) || other.unknown == unknown) &&
+            (identical(other.excluded, excluded) ||
+                other.excluded == excluded));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, total, known, unknown);
+  int get hashCode => Object.hash(runtimeType, total, known, unknown, excluded);
 
   @override
   String toString() {
-    return 'LexiconStats(total: $total, known: $known, unknown: $unknown)';
+    return 'LexiconStats(total: $total, known: $known, unknown: $unknown, excluded: $excluded)';
   }
 }
 
@@ -293,7 +314,7 @@ abstract mixin class _$LexiconStatsCopyWith<$Res>
       __$LexiconStatsCopyWithImpl;
   @override
   @useResult
-  $Res call({int total, int known, int unknown});
+  $Res call({int total, int known, int unknown, int excluded});
 }
 
 /// @nodoc
@@ -312,6 +333,7 @@ class __$LexiconStatsCopyWithImpl<$Res>
     Object? total = null,
     Object? known = null,
     Object? unknown = null,
+    Object? excluded = null,
   }) {
     return _then(_LexiconStats(
       total: null == total
@@ -325,6 +347,10 @@ class __$LexiconStatsCopyWithImpl<$Res>
       unknown: null == unknown
           ? _self.unknown
           : unknown // ignore: cast_nullable_to_non_nullable
+              as int,
+      excluded: null == excluded
+          ? _self.excluded
+          : excluded // ignore: cast_nullable_to_non_nullable
               as int,
     ));
   }

@@ -1,4 +1,5 @@
 import 'package:equatable/equatable.dart';
+import 'package:wordflow/features/text_analyzer/domain/entities/analysis_result.dart';
 
 sealed class AnalyzerEvent extends Equatable {
   const AnalyzerEvent();
@@ -30,4 +31,12 @@ final class ResetAnalysis extends AnalyzerEvent {
 
 final class SyncCurrentResultWithLexicon extends AnalyzerEvent {
   const SyncCurrentResultWithLexicon();
+}
+
+final class AnalysisUpdateReceived extends AnalyzerEvent {
+  const AnalysisUpdateReceived(this.result);
+  final AnalysisResult result;
+
+  @override
+  List<Object?> get props => [result];
 }

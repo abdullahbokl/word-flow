@@ -63,6 +63,9 @@ extension LexiconEventPatterns on LexiconEvent {
     TResult Function(UpdateWordEvent value)? update,
     TResult Function(SortLexicon value)? sort,
     TResult Function(FetchMoreLexicon value)? fetchMore,
+    TResult Function(ExcludeWordEvent value)? exclude,
+    TResult Function(UpdateWordCategory value)? updateCategory,
+    TResult Function(StartReview value)? startReview,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -93,6 +96,12 @@ extension LexiconEventPatterns on LexiconEvent {
         return sort(_that);
       case FetchMoreLexicon() when fetchMore != null:
         return fetchMore(_that);
+      case ExcludeWordEvent() when exclude != null:
+        return exclude(_that);
+      case UpdateWordCategory() when updateCategory != null:
+        return updateCategory(_that);
+      case StartReview() when startReview != null:
+        return startReview(_that);
       case _:
         return orElse();
     }
@@ -127,6 +136,9 @@ extension LexiconEventPatterns on LexiconEvent {
     required TResult Function(UpdateWordEvent value) update,
     required TResult Function(SortLexicon value) sort,
     required TResult Function(FetchMoreLexicon value) fetchMore,
+    required TResult Function(ExcludeWordEvent value) exclude,
+    required TResult Function(UpdateWordCategory value) updateCategory,
+    required TResult Function(StartReview value) startReview,
   }) {
     final _that = this;
     switch (_that) {
@@ -156,6 +168,12 @@ extension LexiconEventPatterns on LexiconEvent {
         return sort(_that);
       case FetchMoreLexicon():
         return fetchMore(_that);
+      case ExcludeWordEvent():
+        return exclude(_that);
+      case UpdateWordCategory():
+        return updateCategory(_that);
+      case StartReview():
+        return startReview(_that);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -188,6 +206,9 @@ extension LexiconEventPatterns on LexiconEvent {
     TResult? Function(UpdateWordEvent value)? update,
     TResult? Function(SortLexicon value)? sort,
     TResult? Function(FetchMoreLexicon value)? fetchMore,
+    TResult? Function(ExcludeWordEvent value)? exclude,
+    TResult? Function(UpdateWordCategory value)? updateCategory,
+    TResult? Function(StartReview value)? startReview,
   }) {
     final _that = this;
     switch (_that) {
@@ -217,6 +238,12 @@ extension LexiconEventPatterns on LexiconEvent {
         return sort(_that);
       case FetchMoreLexicon() when fetchMore != null:
         return fetchMore(_that);
+      case ExcludeWordEvent() when exclude != null:
+        return exclude(_that);
+      case UpdateWordCategory() when updateCategory != null:
+        return updateCategory(_that);
+      case StartReview() when startReview != null:
+        return startReview(_that);
       case _:
         return null;
     }
@@ -262,6 +289,9 @@ extension LexiconEventPatterns on LexiconEvent {
         update,
     TResult Function(WordSort sort)? sort,
     TResult Function()? fetchMore,
+    TResult Function(int wordId)? exclude,
+    TResult Function(int wordId, WordCategory category)? updateCategory,
+    TResult Function(int wordId)? startReview,
     required TResult orElse(),
   }) {
     final _that = this;
@@ -302,6 +332,12 @@ extension LexiconEventPatterns on LexiconEvent {
         return sort(_that.sort);
       case FetchMoreLexicon() when fetchMore != null:
         return fetchMore();
+      case ExcludeWordEvent() when exclude != null:
+        return exclude(_that.wordId);
+      case UpdateWordCategory() when updateCategory != null:
+        return updateCategory(_that.wordId, _that.category);
+      case StartReview() when startReview != null:
+        return startReview(_that.wordId);
       case _:
         return orElse();
     }
@@ -348,6 +384,9 @@ extension LexiconEventPatterns on LexiconEvent {
         update,
     required TResult Function(WordSort sort) sort,
     required TResult Function() fetchMore,
+    required TResult Function(int wordId) exclude,
+    required TResult Function(int wordId, WordCategory category) updateCategory,
+    required TResult Function(int wordId) startReview,
   }) {
     final _that = this;
     switch (_that) {
@@ -387,6 +426,12 @@ extension LexiconEventPatterns on LexiconEvent {
         return sort(_that.sort);
       case FetchMoreLexicon():
         return fetchMore();
+      case ExcludeWordEvent():
+        return exclude(_that.wordId);
+      case UpdateWordCategory():
+        return updateCategory(_that.wordId, _that.category);
+      case StartReview():
+        return startReview(_that.wordId);
       case _:
         throw StateError('Unexpected subclass');
     }
@@ -432,6 +477,9 @@ extension LexiconEventPatterns on LexiconEvent {
         update,
     TResult? Function(WordSort sort)? sort,
     TResult? Function()? fetchMore,
+    TResult? Function(int wordId)? exclude,
+    TResult? Function(int wordId, WordCategory category)? updateCategory,
+    TResult? Function(int wordId)? startReview,
   }) {
     final _that = this;
     switch (_that) {
@@ -471,6 +519,12 @@ extension LexiconEventPatterns on LexiconEvent {
         return sort(_that.sort);
       case FetchMoreLexicon() when fetchMore != null:
         return fetchMore();
+      case ExcludeWordEvent() when exclude != null:
+        return exclude(_that.wordId);
+      case UpdateWordCategory() when updateCategory != null:
+        return updateCategory(_that.wordId, _that.category);
+      case StartReview() when startReview != null:
+        return startReview(_that.wordId);
       case _:
         return null;
     }
@@ -1415,6 +1469,205 @@ class FetchMoreLexicon implements LexiconEvent {
   @override
   String toString() {
     return 'LexiconEvent.fetchMore()';
+  }
+}
+
+/// @nodoc
+
+class ExcludeWordEvent implements LexiconEvent {
+  const ExcludeWordEvent(this.wordId);
+
+  final int wordId;
+
+  /// Create a copy of LexiconEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $ExcludeWordEventCopyWith<ExcludeWordEvent> get copyWith =>
+      _$ExcludeWordEventCopyWithImpl<ExcludeWordEvent>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is ExcludeWordEvent &&
+            (identical(other.wordId, wordId) || other.wordId == wordId));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, wordId);
+
+  @override
+  String toString() {
+    return 'LexiconEvent.exclude(wordId: $wordId)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $ExcludeWordEventCopyWith<$Res>
+    implements $LexiconEventCopyWith<$Res> {
+  factory $ExcludeWordEventCopyWith(
+          ExcludeWordEvent value, $Res Function(ExcludeWordEvent) _then) =
+      _$ExcludeWordEventCopyWithImpl;
+  @useResult
+  $Res call({int wordId});
+}
+
+/// @nodoc
+class _$ExcludeWordEventCopyWithImpl<$Res>
+    implements $ExcludeWordEventCopyWith<$Res> {
+  _$ExcludeWordEventCopyWithImpl(this._self, this._then);
+
+  final ExcludeWordEvent _self;
+  final $Res Function(ExcludeWordEvent) _then;
+
+  /// Create a copy of LexiconEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? wordId = null,
+  }) {
+    return _then(ExcludeWordEvent(
+      null == wordId
+          ? _self.wordId
+          : wordId // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
+  }
+}
+
+/// @nodoc
+
+class UpdateWordCategory implements LexiconEvent {
+  const UpdateWordCategory(this.wordId, this.category);
+
+  final int wordId;
+  final WordCategory category;
+
+  /// Create a copy of LexiconEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $UpdateWordCategoryCopyWith<UpdateWordCategory> get copyWith =>
+      _$UpdateWordCategoryCopyWithImpl<UpdateWordCategory>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is UpdateWordCategory &&
+            (identical(other.wordId, wordId) || other.wordId == wordId) &&
+            (identical(other.category, category) ||
+                other.category == category));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, wordId, category);
+
+  @override
+  String toString() {
+    return 'LexiconEvent.updateCategory(wordId: $wordId, category: $category)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $UpdateWordCategoryCopyWith<$Res>
+    implements $LexiconEventCopyWith<$Res> {
+  factory $UpdateWordCategoryCopyWith(
+          UpdateWordCategory value, $Res Function(UpdateWordCategory) _then) =
+      _$UpdateWordCategoryCopyWithImpl;
+  @useResult
+  $Res call({int wordId, WordCategory category});
+}
+
+/// @nodoc
+class _$UpdateWordCategoryCopyWithImpl<$Res>
+    implements $UpdateWordCategoryCopyWith<$Res> {
+  _$UpdateWordCategoryCopyWithImpl(this._self, this._then);
+
+  final UpdateWordCategory _self;
+  final $Res Function(UpdateWordCategory) _then;
+
+  /// Create a copy of LexiconEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? wordId = null,
+    Object? category = null,
+  }) {
+    return _then(UpdateWordCategory(
+      null == wordId
+          ? _self.wordId
+          : wordId // ignore: cast_nullable_to_non_nullable
+              as int,
+      null == category
+          ? _self.category
+          : category // ignore: cast_nullable_to_non_nullable
+              as WordCategory,
+    ));
+  }
+}
+
+/// @nodoc
+
+class StartReview implements LexiconEvent {
+  const StartReview(this.wordId);
+
+  final int wordId;
+
+  /// Create a copy of LexiconEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @pragma('vm:prefer-inline')
+  $StartReviewCopyWith<StartReview> get copyWith =>
+      _$StartReviewCopyWithImpl<StartReview>(this, _$identity);
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is StartReview &&
+            (identical(other.wordId, wordId) || other.wordId == wordId));
+  }
+
+  @override
+  int get hashCode => Object.hash(runtimeType, wordId);
+
+  @override
+  String toString() {
+    return 'LexiconEvent.startReview(wordId: $wordId)';
+  }
+}
+
+/// @nodoc
+abstract mixin class $StartReviewCopyWith<$Res>
+    implements $LexiconEventCopyWith<$Res> {
+  factory $StartReviewCopyWith(
+          StartReview value, $Res Function(StartReview) _then) =
+      _$StartReviewCopyWithImpl;
+  @useResult
+  $Res call({int wordId});
+}
+
+/// @nodoc
+class _$StartReviewCopyWithImpl<$Res> implements $StartReviewCopyWith<$Res> {
+  _$StartReviewCopyWithImpl(this._self, this._then);
+
+  final StartReview _self;
+  final $Res Function(StartReview) _then;
+
+  /// Create a copy of LexiconEvent
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  $Res call({
+    Object? wordId = null,
+  }) {
+    return _then(StartReview(
+      null == wordId
+          ? _self.wordId
+          : wordId // ignore: cast_nullable_to_non_nullable
+              as int,
+    ));
   }
 }
 

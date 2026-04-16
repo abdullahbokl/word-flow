@@ -5,14 +5,15 @@ import 'package:wordflow/core/database/tables.dart';
 
 part 'app_database.g.dart';
 
-@DriftDatabase(tables: [Words, AnalyzedTexts, TextWordEntries, ExcludedWords])
+@DriftDatabase(
+    tables: [Words, AnalyzedTexts, TextWordEntries, CustomTags, WordCustomTags])
 class AppDatabase extends _$AppDatabase {
   AppDatabase() : super(_openConnection());
 
   AppDatabase.forTesting({required QueryExecutor e}) : super(e);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration {
@@ -60,11 +61,41 @@ class AppDatabase extends _$AppDatabase {
           );
         }
         if (from < 8) {
-          await m.createTable(excludedWords);
+          await customStatement(
+              'CREATE TABLE IF NOT EXISTS excluded_words (id INTEGER PRIMARY KEY AUTOINCREMENT, word TEXT UNIQUE NOT NULL, created_at INTEGER NOT NULL)');
         }
         if (from < 9) {
           await customStatement(
             'CREATE INDEX IF NOT EXISTS idx_analyzed_texts_created_at ON analyzed_texts (created_at DESC)',
+          );
+        }
+        if (from < 10) {
+          // 1. Add new columns to words
+          await m.addColumn(words, words.isExcluded);
+          await m.addColumn(words, words.category);
+          await m.addColumn(words, words.reviewSchedule);
+
+          // 2. Create new tables
+          await m.createTable(customTags);
+          await m.createTable(wordCustomTags);
+
+          // 3. Data migration: excluded_words -> words.is_excluded
+          await customStatement(
+            'UPDATE words SET is_excluded = 1 WHERE word IN (SELECT word FROM excluded_words)',
+          );
+          await customStatement(
+            'UPDATE words SET is_excluded = 0 WHERE is_excluded IS NULL',
+          );
+
+          // 4. Drop old table
+          await customStatement('DROP TABLE IF EXISTS excluded_words');
+
+          // 5. Create indices
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_words_is_excluded ON words (is_excluded)',
+          );
+          await customStatement(
+            'CREATE INDEX IF NOT EXISTS idx_words_category ON words (category)',
           );
         }
       },
@@ -86,8 +117,18 @@ class AppDatabase extends _$AppDatabase {
         await customStatement(
           'CREATE INDEX IF NOT EXISTS idx_analyzed_texts_created_at ON analyzed_texts (created_at DESC)',
         );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_words_is_excluded ON words (is_excluded)',
+        );
+        await customStatement(
+          'CREATE INDEX IF NOT EXISTS idx_words_category ON words (category)',
+        );
       },
     );
+  }
+
+  Stream<List<WordRow>> watchActiveWords() {
+    return (select(words)..where((t) => t.isExcluded.equals(false))).watch();
   }
 
   Future<void> checkpoint() async {

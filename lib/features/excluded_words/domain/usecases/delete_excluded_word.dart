@@ -1,14 +1,14 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:wordflow/core/error/failures.dart';
 import 'package:wordflow/core/usecase/usecase.dart';
-import 'package:wordflow/features/excluded_words/domain/repositories/excluded_words_repository.dart';
+import 'package:wordflow/features/lexicon/domain/repositories/lexicon_repository.dart';
 
 class DeleteExcludedWordUseCase extends AsyncUseCase<Unit, int> {
   DeleteExcludedWordUseCase(this.repository);
-  final ExcludedWordsRepository repository;
+  final LexiconRepository repository;
 
   @override
   TaskEither<Failure, Unit> call(int id) {
-    return repository.deleteExcludedWord(id);
+    return repository.unexcludeWord(id).map((_) => unit);
   }
 }

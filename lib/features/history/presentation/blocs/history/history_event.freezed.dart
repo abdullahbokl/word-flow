@@ -54,6 +54,7 @@ extension HistoryEventPatterns on HistoryEvent {
     TResult Function(LoadMoreHistory value)? loadMore,
     TResult Function(HistoryUpdateReceived value)? updateReceived,
     TResult Function(HistoryErrorReceived value)? errorReceived,
+    TResult Function(HistoryStatsUpdateReceived value)? statsUpdateReceived,
     TResult Function(DeleteHistoryItemEvent value)? deleteItem,
     required TResult orElse(),
   }) {
@@ -67,6 +68,8 @@ extension HistoryEventPatterns on HistoryEvent {
         return updateReceived(_that);
       case HistoryErrorReceived() when errorReceived != null:
         return errorReceived(_that);
+      case HistoryStatsUpdateReceived() when statsUpdateReceived != null:
+        return statsUpdateReceived(_that);
       case DeleteHistoryItemEvent() when deleteItem != null:
         return deleteItem(_that);
       case _:
@@ -93,6 +96,8 @@ extension HistoryEventPatterns on HistoryEvent {
     required TResult Function(LoadMoreHistory value) loadMore,
     required TResult Function(HistoryUpdateReceived value) updateReceived,
     required TResult Function(HistoryErrorReceived value) errorReceived,
+    required TResult Function(HistoryStatsUpdateReceived value)
+        statsUpdateReceived,
     required TResult Function(DeleteHistoryItemEvent value) deleteItem,
   }) {
     final _that = this;
@@ -105,6 +110,8 @@ extension HistoryEventPatterns on HistoryEvent {
         return updateReceived(_that);
       case HistoryErrorReceived():
         return errorReceived(_that);
+      case HistoryStatsUpdateReceived():
+        return statsUpdateReceived(_that);
       case DeleteHistoryItemEvent():
         return deleteItem(_that);
       case _:
@@ -130,6 +137,7 @@ extension HistoryEventPatterns on HistoryEvent {
     TResult? Function(LoadMoreHistory value)? loadMore,
     TResult? Function(HistoryUpdateReceived value)? updateReceived,
     TResult? Function(HistoryErrorReceived value)? errorReceived,
+    TResult? Function(HistoryStatsUpdateReceived value)? statsUpdateReceived,
     TResult? Function(DeleteHistoryItemEvent value)? deleteItem,
   }) {
     final _that = this;
@@ -142,6 +150,8 @@ extension HistoryEventPatterns on HistoryEvent {
         return updateReceived(_that);
       case HistoryErrorReceived() when errorReceived != null:
         return errorReceived(_that);
+      case HistoryStatsUpdateReceived() when statsUpdateReceived != null:
+        return statsUpdateReceived(_that);
       case DeleteHistoryItemEvent() when deleteItem != null:
         return deleteItem(_that);
       case _:
@@ -167,6 +177,7 @@ extension HistoryEventPatterns on HistoryEvent {
     TResult Function()? loadMore,
     TResult Function(List<HistoryItem> items)? updateReceived,
     TResult Function(String message)? errorReceived,
+    TResult Function()? statsUpdateReceived,
     TResult Function(int id, bool deleteUniqueWords)? deleteItem,
     required TResult orElse(),
   }) {
@@ -180,6 +191,8 @@ extension HistoryEventPatterns on HistoryEvent {
         return updateReceived(_that.items);
       case HistoryErrorReceived() when errorReceived != null:
         return errorReceived(_that.message);
+      case HistoryStatsUpdateReceived() when statsUpdateReceived != null:
+        return statsUpdateReceived();
       case DeleteHistoryItemEvent() when deleteItem != null:
         return deleteItem(_that.id, _that.deleteUniqueWords);
       case _:
@@ -206,6 +219,7 @@ extension HistoryEventPatterns on HistoryEvent {
     required TResult Function() loadMore,
     required TResult Function(List<HistoryItem> items) updateReceived,
     required TResult Function(String message) errorReceived,
+    required TResult Function() statsUpdateReceived,
     required TResult Function(int id, bool deleteUniqueWords) deleteItem,
   }) {
     final _that = this;
@@ -218,6 +232,8 @@ extension HistoryEventPatterns on HistoryEvent {
         return updateReceived(_that.items);
       case HistoryErrorReceived():
         return errorReceived(_that.message);
+      case HistoryStatsUpdateReceived():
+        return statsUpdateReceived();
       case DeleteHistoryItemEvent():
         return deleteItem(_that.id, _that.deleteUniqueWords);
       case _:
@@ -243,6 +259,7 @@ extension HistoryEventPatterns on HistoryEvent {
     TResult? Function()? loadMore,
     TResult? Function(List<HistoryItem> items)? updateReceived,
     TResult? Function(String message)? errorReceived,
+    TResult? Function()? statsUpdateReceived,
     TResult? Function(int id, bool deleteUniqueWords)? deleteItem,
   }) {
     final _that = this;
@@ -255,6 +272,8 @@ extension HistoryEventPatterns on HistoryEvent {
         return updateReceived(_that.items);
       case HistoryErrorReceived() when errorReceived != null:
         return errorReceived(_that.message);
+      case HistoryStatsUpdateReceived() when statsUpdateReceived != null:
+        return statsUpdateReceived();
       case DeleteHistoryItemEvent() when deleteItem != null:
         return deleteItem(_that.id, _that.deleteUniqueWords);
       case _:
@@ -437,6 +456,27 @@ class _$HistoryErrorReceivedCopyWithImpl<$Res>
           : message // ignore: cast_nullable_to_non_nullable
               as String,
     ));
+  }
+}
+
+/// @nodoc
+
+class HistoryStatsUpdateReceived implements HistoryEvent {
+  const HistoryStatsUpdateReceived();
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is HistoryStatsUpdateReceived);
+  }
+
+  @override
+  int get hashCode => runtimeType.hashCode;
+
+  @override
+  String toString() {
+    return 'HistoryEvent.statsUpdateReceived()';
   }
 }
 

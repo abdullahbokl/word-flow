@@ -23,30 +23,36 @@ class ExcludedWordsCubit extends Cubit<ExcludedWordsState> {
         _deleteExcludedWord = deleteExcludedWord,
         _initializeDefaults = initializeDefaults,
         super(const ExcludedWordsState.initial());
+
   final GetExcludedWordsUseCase _getExcludedWords;
   final AddExcludedWordUseCase _addExcludedWord;
   final UpdateExcludedWordUseCase _updateExcludedWord;
   final DeleteExcludedWordUseCase _deleteExcludedWord;
   final InitializeDefaultExcludedWordsUseCase _initializeDefaults;
 
-  Future<void> loadExcludedWords() => _refreshExcludedWords(withLoading: true);
+  StreamSubscription? _subscription;
 
-  Future<void> _refreshExcludedWords({bool withLoading = false}) async {
-    if (withLoading) {
-      emit(const ExcludedWordsState.loading());
-    }
+  Future<void> loadExcludedWords() async {
+    emit(const ExcludedWordsState.loading());
+    await _subscription?.cancel();
+    _subscription = _getExcludedWords.watch().listen((result) {
+      result.fold(
+        (failure) => emit(ExcludedWordsState.error(failure.toString())),
+        (words) {
+          if (words.isEmpty) {
+            unawaited(initializeDefaults());
+          } else {
+            emit(ExcludedWordsState.loaded(words));
+          }
+        },
+      );
+    });
+  }
 
-    final result = await _getExcludedWords(const NoParams()).run();
-    result.fold(
-      (failure) => emit(ExcludedWordsState.error(failure.toString())),
-      (words) {
-        if (words.isEmpty) {
-          unawaited(initializeDefaults());
-        } else {
-          emit(ExcludedWordsState.loaded(words));
-        }
-      },
-    );
+  @override
+  Future<void> close() async {
+    await _subscription?.cancel();
+    return super.close();
   }
 
   Future<void> initializeDefaults() async {
@@ -59,80 +65,26 @@ class ExcludedWordsCubit extends Cubit<ExcludedWordsState> {
   }
 
   Future<void> addWord(String word) async {
-    final previous = state;
-    final previousWords = previous.maybeWhen(
-      loaded: (words) => words,
-      orElse: () => null,
-    );
-    if (previousWords != null) {
-      final optimistic = ExcludedWord(
-        word: word,
-        createdAt: DateTime.now(),
-      );
-      emit(ExcludedWordsState.loaded([...previousWords, optimistic]));
-    }
-
     final result = await _addExcludedWord(word).run();
     result.fold(
-      (failure) {
-        if (previousWords != null) {
-          emit(previous);
-          return;
-        }
-        emit(ExcludedWordsState.error(failure.toString()));
-      },
-      (_) => unawaited(_refreshExcludedWords()),
+      (failure) => emit(ExcludedWordsState.error(failure.toString())),
+      (_) => null, // Stream will update UI
     );
   }
 
   Future<void> updateWord(ExcludedWord word) async {
-    final previous = state;
-    final previousWords = previous.maybeWhen(
-      loaded: (words) => words,
-      orElse: () => null,
-    );
-    if (previousWords != null) {
-      final updated = previousWords
-          .map((item) => item.id == word.id ? word : item)
-          .toList(growable: false);
-      emit(ExcludedWordsState.loaded(updated));
-    }
-
     final result = await _updateExcludedWord(word).run();
     result.fold(
-      (failure) {
-        if (previousWords != null) {
-          emit(previous);
-          return;
-        }
-        emit(ExcludedWordsState.error(failure.toString()));
-      },
-      (_) => unawaited(_refreshExcludedWords()),
+      (failure) => emit(ExcludedWordsState.error(failure.toString())),
+      (_) => null, // Stream will update UI
     );
   }
 
   Future<void> deleteWord(int id) async {
-    final previous = state;
-    final previousWords = previous.maybeWhen(
-      loaded: (words) => words,
-      orElse: () => null,
-    );
-    if (previousWords != null) {
-      final updated =
-          previousWords.where((item) => item.id != id).toList(growable: false);
-      emit(ExcludedWordsState.loaded(updated));
-    }
-
     final result = await _deleteExcludedWord(id).run();
     result.fold(
-      (failure) {
-        if (previousWords != null) {
-          emit(previous);
-          return;
-        }
-        emit(ExcludedWordsState.error(failure.toString()));
-      },
-      (_) => unawaited(_refreshExcludedWords()),
+      (failure) => emit(ExcludedWordsState.error(failure.toString())),
+      (_) => null, // Stream will update UI
     );
   }
 }

@@ -24,18 +24,20 @@ abstract final class AppTypography {
         fontWeight: FontWeight.w700,
       ),
       titleLarge: displayBase.titleLarge?.copyWith(
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
       ),
       titleMedium: displayBase.titleMedium?.copyWith(
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
       ),
       titleSmall: displayBase.titleSmall?.copyWith(
         fontWeight: FontWeight.w600,
       ),
       bodyLarge: bodyBase.bodyLarge?.copyWith(
+        fontSize: 17,
         height: 1.5,
       ),
       bodyMedium: bodyBase.bodyMedium?.copyWith(
+        fontSize: 15,
         height: 1.4,
       ),
       bodySmall: bodyBase.bodySmall,

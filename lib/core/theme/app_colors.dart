@@ -2,9 +2,22 @@ import 'package:flutter/material.dart';
 
 abstract final class AppColors {
   // Brand / Core
-  static const primary = Color(0xFF1565C0);
-  static const secondary = Color(0xFF00BFA5);
-  static const accent = Color(0xFF7C4DFF);
+  static const primary = Color(0xFF6C63FF);
+  static const secondary = Color(0xFFFF6584);
+  static const accent = Color(0xFF4ECDC4);
+
+  // Gradients
+  static const primaryGradient = LinearGradient(
+    colors: [primary, secondary],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const accentGradient = LinearGradient(
+    colors: [accent, secondary],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
 
   // Semantic
   static const success = Color(0xFF43A047);

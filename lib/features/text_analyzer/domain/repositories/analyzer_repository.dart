@@ -11,5 +11,7 @@ abstract interface class AnalyzerRepository {
 
   TaskEither<Failure, AnalysisResult> getAnalysisResult(int id);
 
+  Stream<Either<Failure, AnalysisResult>> watchAnalysisResult(int id);
+
   TaskEither<Failure, Unit> updateAnalysisCounts(int id);
 }

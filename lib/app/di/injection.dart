@@ -1,14 +1,14 @@
 import 'package:get_it/get_it.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:wordflow/core/ai/ai_service.dart';
+import 'package:wordflow/core/ai/mock_ai_provider.dart';
 import 'package:wordflow/core/backup/backup_repository.dart';
 import 'package:wordflow/core/backup/backup_repository_impl.dart';
 import 'package:wordflow/core/cache/local_cache.dart';
 import 'package:wordflow/core/database/app_database.dart';
+import 'package:wordflow/core/export/pdf_export_service.dart';
+import 'package:wordflow/core/notifications/notification_service.dart';
 import 'package:wordflow/core/theme/theme_cubit.dart';
-import 'package:wordflow/features/excluded_words/data/datasources/excluded_words_local_data_source.dart';
-import 'package:wordflow/features/excluded_words/data/datasources/excluded_words_local_data_source_impl.dart';
-import 'package:wordflow/features/excluded_words/data/repositories/excluded_words_repository_impl.dart';
-import 'package:wordflow/features/excluded_words/domain/repositories/excluded_words_repository.dart';
 import 'package:wordflow/features/excluded_words/domain/usecases/add_excluded_word.dart';
 import 'package:wordflow/features/excluded_words/domain/usecases/delete_excluded_word.dart';
 import 'package:wordflow/features/excluded_words/domain/usecases/get_excluded_words.dart';
@@ -25,10 +25,14 @@ import 'package:wordflow/features/history/domain/usecases/watch_history.dart';
 import 'package:wordflow/features/history/domain/usecases/watch_history_detail.dart';
 import 'package:wordflow/features/history/presentation/blocs/history/history_bloc.dart';
 import 'package:wordflow/features/history/presentation/blocs/history_detail/history_detail_bloc.dart';
+import 'package:wordflow/features/lexicon/data/datasources/category_local_ds.dart';
+import 'package:wordflow/features/lexicon/data/datasources/category_local_ds_impl.dart';
 import 'package:wordflow/features/lexicon/data/datasources/lexicon_cache.dart';
 import 'package:wordflow/features/lexicon/data/datasources/lexicon_local_ds.dart';
 import 'package:wordflow/features/lexicon/data/datasources/lexicon_local_ds_impl.dart';
+import 'package:wordflow/features/lexicon/data/repositories/category_repository_impl.dart';
 import 'package:wordflow/features/lexicon/data/repositories/lexicon_repository_impl.dart';
+import 'package:wordflow/features/lexicon/domain/repositories/category_repository.dart';
 import 'package:wordflow/features/lexicon/domain/repositories/lexicon_preferences.dart';
 import 'package:wordflow/features/lexicon/domain/repositories/lexicon_repository.dart';
 import 'package:wordflow/features/lexicon/domain/usecases/add_word_manually.dart';
@@ -42,14 +46,16 @@ import 'package:wordflow/features/lexicon/domain/usecases/update_word.dart';
 import 'package:wordflow/features/lexicon/domain/usecases/watch_lexicon_stats.dart';
 import 'package:wordflow/features/lexicon/domain/usecases/watch_words.dart';
 import 'package:wordflow/features/lexicon/presentation/blocs/lexicon/lexicon_bloc.dart';
+import 'package:wordflow/features/lexicon/presentation/cubit/category_cubit.dart';
+import 'package:wordflow/features/review/presentation/blocs/review_bloc.dart';
 import 'package:wordflow/features/settings/presentation/blocs/backup/backup_bloc.dart';
 import 'package:wordflow/features/text_analyzer/data/datasources/analyzer_local_ds.dart';
 import 'package:wordflow/features/text_analyzer/data/datasources/analyzer_local_ds_impl.dart';
 import 'package:wordflow/features/text_analyzer/data/repositories/analyzer_repository_impl.dart';
 import 'package:wordflow/features/text_analyzer/domain/repositories/analyzer_repository.dart';
 import 'package:wordflow/features/text_analyzer/domain/usecases/analyze_text.dart';
-import 'package:wordflow/features/text_analyzer/domain/usecases/get_analysis_result.dart';
 import 'package:wordflow/features/text_analyzer/domain/usecases/update_analysis_counts.dart';
+import 'package:wordflow/features/text_analyzer/domain/usecases/watch_analysis_result.dart';
 import 'package:wordflow/features/text_analyzer/presentation/blocs/analyzer/analyzer_bloc.dart';
 
 final sl = GetIt.instance;
@@ -62,12 +68,19 @@ Future<void> initDI() async {
   sl
     ..registerSingleton<AppDatabase>(db)
     ..registerSingleton<LocalCache>(LocalCacheImpl(prefs))
+    ..registerSingleton<NotificationService>(NotificationServiceImpl())
+    ..registerSingleton<PdfExportService>(const PdfExportService())
+    ..registerFactory<AiService>(MockAiProvider.new)
     ..registerFactory(ThemeCubit.new)
     // Features - Lexicon
     ..registerLazySingleton<LexiconLocalDataSource>(
         () => LexiconLocalDataSourceImpl(sl(), sl()))
+    ..registerLazySingleton<CategoryLocalDataSource>(
+        () => CategoryLocalDataSourceImpl(sl()))
     ..registerLazySingleton<LexiconRepository>(
         () => LexiconRepositoryImpl(sl()))
+    ..registerLazySingleton<CategoryRepository>(
+        () => CategoryRepositoryImpl(sl()))
     ..registerLazySingleton(() => GetWords(sl()))
     ..registerLazySingleton(() => ToggleWordStatus(sl()))
     ..registerLazySingleton(() => DeleteWord(sl()))
@@ -81,6 +94,7 @@ Future<void> initDI() async {
     ..registerLazySingleton<LexiconPreferences>(() => LexiconCache(sl()))
     ..registerFactory(() => LexiconBloc(
           getWords: sl(),
+          watchWords: sl(),
           toggleWordStatus: sl(),
           deleteWord: sl(),
           addWordManually: sl(),
@@ -88,8 +102,8 @@ Future<void> initDI() async {
           watchStats: sl(),
           cache: sl(),
           restoreWord: sl(),
-          getWordByText: sl(),
         ))
+    ..registerFactory(() => CategoryCubit(categoryRepository: sl()))
 
     // Features - Text Analyzer
     ..registerLazySingleton<AnalyzerLocalDataSource>(
@@ -97,11 +111,11 @@ Future<void> initDI() async {
     ..registerLazySingleton<AnalyzerRepository>(
         () => AnalyzerRepositoryImpl(sl()))
     ..registerLazySingleton(() => AnalyzeText(sl()))
-    ..registerLazySingleton(() => GetAnalysisResult(sl()))
+    ..registerLazySingleton(() => WatchAnalysisResult(sl()))
     ..registerLazySingleton(() => UpdateAnalysisCounts(sl()))
     ..registerFactory(() => AnalyzerBloc(
           analyzeText: sl(),
-          getAnalysisResult: sl(),
+          watchAnalysisResult: sl(),
           updateAnalysisCounts: sl(),
           toggleWordStatus: sl(),
         ))
@@ -126,11 +140,14 @@ Future<void> initDI() async {
     ..registerLazySingleton<BackupRepository>(() => BackupRepositoryImpl(sl()))
     ..registerFactory(() => BackupBloc(sl()))
 
+    // Features - Review
+    ..registerFactory(() => ReviewBloc(
+          watchWords: sl(),
+          updateWord: sl(),
+          notificationService: sl(),
+        ))
+
     // Features - Excluded Words
-    ..registerLazySingleton<ExcludedWordsLocalDataSource>(
-        () => ExcludedWordsLocalDataSourceImpl(sl()))
-    ..registerLazySingleton<ExcludedWordsRepository>(
-        () => ExcludedWordsRepositoryImpl(localDataSource: sl()))
     ..registerLazySingleton(() => GetExcludedWordsUseCase(sl()))
     ..registerLazySingleton(() => AddExcludedWordUseCase(sl()))
     ..registerLazySingleton(() => UpdateExcludedWordUseCase(sl()))
