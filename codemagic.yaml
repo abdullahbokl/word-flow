@@ -21,6 +21,15 @@ workflows:
         script: flutter packages pub run build_runner build --delete-conflicting-outputs
       - name: Unit Tests
         script: flutter test
+      - name: Android Signing Setup
+        script: |
+          echo "$ANDROID_KEYSTORE" | base64 --decode > android/upload-keystore.jks
+          cat <<EOF > android/key.properties
+          storePassword=$ANDROID_KEYSTORE_PASSWORD
+          keyPassword=$ANDROID_KEY_PASSWORD
+          keyAlias=$ANDROID_KEY_ALIAS
+          storeFile=../upload-keystore.jks
+          EOF
       - name: Build Android AAB
         script: |
           flutter build appbundle \
