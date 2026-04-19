@@ -59,7 +59,7 @@ word_flow.db*
 # IDE / Build Artifacts
 wordflow.iml
 
-.github/
+# .github/ (removed to enable workflows)
 .sisyphus
 .opencode
 .claude
