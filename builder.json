@@ -1,0 +1,17 @@
+{
+  "project": "word-flow",
+  "platform": "ios",
+  "github": {
+    "owner": "abdullahbokl",
+    "repo": "word-flow"
+  },
+  "ios": {
+    "path": "ios"
+  },
+  "flutter": {
+    "version": "3.38.2",
+    "watch": {}
+  },
+  "reactNative": {},
+  "mobai": {}
+}
