@@ -39,4 +39,8 @@ workflows:
     publishing:
       email:
         recipients:
-          - abdullah@word-flow.com # Updated placeholder
+          - abdullah@word-flow.com
+      google_play:
+        credentials: $GPLAY_SERVICE_ACCOUNT_KEY
+        track: internal # Options: internal, alpha, beta, production
+        submit_as_draft: true # Safe for first automated run
